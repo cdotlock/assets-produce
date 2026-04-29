@@ -30,6 +30,7 @@ import { DbCommand } from "./cli/cmd/db"
 import { OssCommand } from "./cli/cmd/oss"
 import { ToolsCommand } from "./cli/cmd/tools"
 import { SkillsCommand } from "./cli/cmd/skills"
+import { UsersCommand } from "./cli/cmd/users"
 import path from "path"
 import { Global } from "@opencode-ai/core/global"
 import { JsonMigration } from "@/storage/json-migration"
@@ -182,6 +183,7 @@ const cli = yargs(args)
   .command(OssCommand)
   .command(ToolsCommand)
   .command(SkillsCommand)
+  .command(UsersCommand)
   .fail((msg, err) => {
     if (
       msg?.startsWith("Unknown argument") ||
