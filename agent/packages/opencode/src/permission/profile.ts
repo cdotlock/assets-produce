@@ -4,30 +4,30 @@ import type { Ruleset } from "./index"
 // run as "creator"; CLI / external agents run as "developer".
 export type Profile = "creator" | "developer"
 
-// creator: cannot edit code, cannot manage skills/config/shell, but can
-// invoke atomic asset tools, the skill loader, read-only tools, and
-// chat-helpers (todowrite / glob / grep / webfetch).
+// creator: cannot edit code, cannot run shell, no debug. Can invoke atomic
+// asset tools, the skill loader, read-only tools, chat helpers.
+//
+// Rule ordering: Permission.evaluate / Permission.disabled both use
+// findLast (last-match-wins). The catch-all `allow * *` must come FIRST
+// so the specific deny rules below it override it.
+//
+// Permission keys are bare tool/op names (e.g. `bash`, `edit`) — NOT
+// prefixed with `tool:`. Runtime call sites (tool/bash.ts, llm.ts via
+// Permission.disabled, skill.ts) pass bare names; a `tool:` prefix would
+// never match and the rule would be dead.
 export const creatorRuleset: Ruleset = [
-  { permission: "tool:bash", pattern: "*", action: "deny" },
-  { permission: "tool:edit", pattern: "*", action: "deny" },
-  { permission: "tool:write", pattern: "*", action: "deny" },
-  { permission: "tool:apply_patch", pattern: "*", action: "deny" },
-  { permission: "tool:lsp_*", pattern: "*", action: "deny" },
-  { permission: "tool:ast_grep_*", pattern: "*", action: "deny" },
-  { permission: "tool:debug", pattern: "*", action: "deny" },
-  { permission: "skills:add", pattern: "*", action: "deny" },
-  { permission: "skills:update", pattern: "*", action: "deny" },
-  { permission: "skills:delete", pattern: "*", action: "deny" },
-  { permission: "config:*", pattern: "*", action: "deny" },
-  { permission: "shell:*", pattern: "*", action: "deny" },
-  // catch-all allow ensures Permission.evaluate doesn't fall through to
-  // "ask" for anything unmentioned (chat / skill-load / generate-* /
-  // read / glob / grep / todowrite / webfetch / asset queries).
   { permission: "*", pattern: "*", action: "allow" },
+  { permission: "bash", pattern: "*", action: "deny" },
+  { permission: "edit", pattern: "*", action: "deny" },
+  { permission: "write", pattern: "*", action: "deny" },
+  { permission: "apply_patch", pattern: "*", action: "deny" },
+  { permission: "lsp_*", pattern: "*", action: "deny" },
+  { permission: "ast_grep_*", pattern: "*", action: "deny" },
+  { permission: "debug", pattern: "*", action: "deny" },
 ]
 
-// developer: trusted CLI users. Allow everything; specific deny rules
-// can still be added via per-project config.
+// developer: trusted CLI users. Allow everything; specific deny rules can
+// still be added via per-project config.
 export const developerRuleset: Ruleset = [
   { permission: "*", pattern: "*", action: "allow" },
 ]

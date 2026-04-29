@@ -161,27 +161,24 @@ web/
 
 ### 3.1 `creator`
 
+> **修订 (2026-04-30)**: 原稿规则顺序 + 命名空间均与 codebase 中 `Permission.evaluate` / `Permission.disabled` 的 `findLast` 语义不兼容。修正：(a) catch-all `allow * *` 必须在最前（一般规则在前，具体 deny 在后，因为 last-match-wins）；(b) tool permission key 是裸名，不带 `tool:` 前缀（runtime 调用点确认：`tool/bash.ts` 传 `permission: "bash"`，`Permission.disabled` 用裸 tool 名）。`skills:add/update/delete` / `config:*` / `shell:*` 在当前 runtime 没有调用点（HTTP-level admin gate 已通过 JWT 中间件实现），从 ruleset 中移除避免死代码。
+
 ```ts
 [
-  // 砍掉的工具
-  { permission: "tool:bash", pattern: "*", action: "deny" },
-  { permission: "tool:edit", pattern: "*", action: "deny" },
-  { permission: "tool:write", pattern: "*", action: "deny" },
-  { permission: "tool:apply_patch", pattern: "*", action: "deny" },
-  { permission: "tool:lsp_*", pattern: "*", action: "deny" },
-  { permission: "tool:ast_grep_*", pattern: "*", action: "deny" },
-  { permission: "tool:debug", pattern: "*", action: "deny" },
-  // skill 管理（CLI / HTTP-side）禁用 —— skill tool（load）保留
-  { permission: "skills:add", pattern: "*", action: "deny" },
-  { permission: "skills:update", pattern: "*", action: "deny" },
-  { permission: "skills:delete", pattern: "*", action: "deny" },
-  // shell / config / debug
-  { permission: "config:*", pattern: "*", action: "deny" },
-  { permission: "shell:*", pattern: "*", action: "deny" },
-  // 默认 allow（chat / skill load / generate-* / read / glob / grep / todowrite / webfetch / asset 查询）
+  // catch-all allow（评估顺序在前；下面具体 deny 因 last-match-wins 覆盖之）
   { permission: "*", pattern: "*", action: "allow" },
+  // 砍掉的工具（裸名，无 tool: 前缀）
+  { permission: "bash", pattern: "*", action: "deny" },
+  { permission: "edit", pattern: "*", action: "deny" },
+  { permission: "write", pattern: "*", action: "deny" },
+  { permission: "apply_patch", pattern: "*", action: "deny" },
+  { permission: "lsp_*", pattern: "*", action: "deny" },
+  { permission: "ast_grep_*", pattern: "*", action: "deny" },
+  { permission: "debug", pattern: "*", action: "deny" },
 ]
 ```
+
+skills 管理 / config / shell 的隔离由 HTTP 层 JWT admin gate（step 10 已实现）负责，不依赖 ruleset。
 
 ### 3.2 `developer`
 

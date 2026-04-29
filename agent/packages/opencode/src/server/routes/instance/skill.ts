@@ -1,5 +1,4 @@
 import { Hono } from "hono"
-import type { MiddlewareHandler } from "hono"
 import { describeRoute, validator, resolver } from "hono-openapi"
 import z from "zod"
 import { Effect, Layer } from "effect"
@@ -9,27 +8,7 @@ import { jsonRequest, runRequest } from "./trace"
 import { SkillCli, type ContentSource } from "@/business/skill/cli"
 import { defaultLayer as skillBusinessLayer } from "@/business/skill/skill"
 import { defaultLayer as langfuseLayer } from "@/langfuse/langfuse"
-
-// Middleware guards — placed before body validators so auth runs first.
-const requireAuth: MiddlewareHandler = async (c, next) => {
-  if (!c.var.user) {
-    c.status(401)
-    return c.json({ error: "unauthorized" })
-  }
-  return next()
-}
-
-const requireAdmin: MiddlewareHandler = async (c, next) => {
-  if (!c.var.user) {
-    c.status(401)
-    return c.json({ error: "unauthorized" })
-  }
-  if (c.var.user.role !== "admin") {
-    c.status(403)
-    return c.json({ error: "admin role required" })
-  }
-  return next()
-}
+import { requireAuth, requireAdmin } from "@/server/guards"
 
 const ScopeEnum = z.enum(["system", "creator"])
 
