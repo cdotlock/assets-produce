@@ -3,7 +3,7 @@ import * as Tool from "../tool"
 import { callFc, extractUrlFromResult, FcCallError, formatToolError, readEndpoint } from "./fc-client"
 import DESCRIPTION from "./generate-image-gpt.txt"
 
-const HttpsUrl = Schema.String.check(Schema.isPattern(/^https?:\/\/.+/i)).annotate({
+const HttpsUrl = Schema.String.check(Schema.isPattern(/^https:\/\/.+/i)).annotate({
   description: "https URL",
 })
 
@@ -14,8 +14,8 @@ export const Parameters = Schema.Struct({
   model: Schema.optional(Schema.String).annotate({
     description: 'Model id (default "gpt-image-1", OpenAI GPT-Image)',
   }),
-  referenceImageUrls: Schema.optional(Schema.Array(HttpsUrl)).annotate({
-    description: "Optional reference image URLs the model should condition on",
+  referenceImageUrls: Schema.optional(Schema.Array(HttpsUrl).check(Schema.isMaxLength(8))).annotate({
+    description: "Optional reference image URLs (max 8) the model should condition on",
   }),
   dryRun: Schema.optional(Schema.Boolean).annotate({
     description: "Return resolved request without invoking FC. Testing only.",
@@ -35,7 +35,7 @@ export const GenerateImageGptTool = Tool.define(
           referenceImageUrls?: readonly string[]
           dryRun?: boolean
         },
-        _ctx: Tool.Context,
+        ctx: Tool.Context,
       ) =>
         Effect.gen(function* () {
           const model = params.model?.trim() || "gpt-image-1"
@@ -60,8 +60,9 @@ export const GenerateImageGptTool = Tool.define(
             endpoint,
             body,
             timeoutMs: 60_000,
+            signal: ctx.abort,
           })
-          const ossUrl = extractUrlFromResult("generate-image-gpt", result, ["result", "imageUrl", "url"])
+          const ossUrl = yield* extractUrlFromResult("generate-image-gpt", result, ["imageUrl", "url", "result"])
           return {
             title: `generate-image-gpt (${model})`,
             output: ossUrl,

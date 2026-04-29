@@ -5,4 +5,4 @@ Crop a video to a time window (FFmpeg-style trim) via the FC endpoint.
 - Output: permanent OSS URL of trimmed video
 - Constraint: `endTime > startTime`, both `>= 0`
 - Use this to trim hallucinated tails / pre-roll, or extract a specific clip from a longer source
-- Set `dryRun: true` to preview the resolved request without invoking the FC backend (testing only)
+- Set `dryRun: true` to preview the resolved request without invoking the FC backend (testing only — never set in production)

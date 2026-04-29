@@ -3,7 +3,7 @@ import * as Tool from "../tool"
 import { callFc, extractUrlFromResult, FcCallError, formatToolError, readEndpoint } from "./fc-client"
 import DESCRIPTION from "./concat-clips.txt"
 
-const HttpsUrl = Schema.String.check(Schema.isPattern(/^https?:\/\/.+/i)).annotate({
+const HttpsUrl = Schema.String.check(Schema.isPattern(/^https:\/\/.+/i)).annotate({
   description: "https URL",
 })
 
@@ -23,7 +23,7 @@ export const ConcatClipsTool = Tool.define(
     return {
       description: DESCRIPTION,
       parameters: Parameters,
-      execute: (params: { clipUrls: readonly string[]; dryRun?: boolean }, _ctx: Tool.Context) =>
+      execute: (params: { clipUrls: readonly string[]; dryRun?: boolean }, ctx: Tool.Context) =>
         Effect.gen(function* () {
           const body: Record<string, unknown> = { clipUrls: params.clipUrls }
 
@@ -44,8 +44,9 @@ export const ConcatClipsTool = Tool.define(
             endpoint,
             body,
             timeoutMs: 120_000,
+            signal: ctx.abort,
           })
-          const ossUrl = extractUrlFromResult("concat-clips", result, ["result", "videoUrl", "url"])
+          const ossUrl = yield* extractUrlFromResult("concat-clips", result, ["videoUrl", "url", "result"])
           return {
             title: `concat-clips (${params.clipUrls.length} clips)`,
             output: ossUrl,

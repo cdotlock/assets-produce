@@ -3,7 +3,7 @@ import * as Tool from "../tool"
 import { callFc, extractUrlFromResult, FcCallError, formatToolError, readEndpoint } from "./fc-client"
 import DESCRIPTION from "./crop-video.txt"
 
-const HttpsUrl = Schema.String.check(Schema.isPattern(/^https?:\/\/.+/i)).annotate({
+const HttpsUrl = Schema.String.check(Schema.isPattern(/^https:\/\/.+/i)).annotate({
   description: "https URL",
 })
 
@@ -28,7 +28,7 @@ export const CropVideoTool = Tool.define(
       parameters: Parameters,
       execute: (
         params: { videoUrl: string; startTime: number; endTime: number; dryRun?: boolean },
-        _ctx: Tool.Context,
+        ctx: Tool.Context,
       ) =>
         Effect.gen(function* () {
           if (params.endTime <= params.startTime) {
@@ -61,8 +61,9 @@ export const CropVideoTool = Tool.define(
             endpoint,
             body,
             timeoutMs: 120_000,
+            signal: ctx.abort,
           })
-          const ossUrl = extractUrlFromResult("crop-video", result, ["result", "videoUrl", "url"])
+          const ossUrl = yield* extractUrlFromResult("crop-video", result, ["videoUrl", "url", "result"])
           return {
             title: "crop-video",
             output: ossUrl,

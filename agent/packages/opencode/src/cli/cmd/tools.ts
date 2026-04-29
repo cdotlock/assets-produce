@@ -1,5 +1,5 @@
 import type { Argv } from "yargs"
-import { Effect } from "effect"
+import { Cause, Effect, Exit } from "effect"
 import * as fs from "fs/promises"
 import { Instance } from "../../project/instance"
 import { ToolRegistry } from "@/tool/registry"
@@ -9,6 +9,12 @@ import type * as Tool from "@/tool/tool"
 import { cmd } from "./cmd"
 import { UI } from "../ui"
 import * as EffectZod from "@/util/effect-zod"
+
+const MAX_PARAMS_FILE_BYTES = 1_000_000
+
+function writeOut(text: string): void {
+  process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
+}
 
 export const ToolsCommand = cmd({
   command: "tools <command>",
@@ -23,12 +29,12 @@ export const ToolsCommand = cmd({
   async handler() {},
 })
 
-async function withToolRegistry<A>(fn: (svc: ToolRegistry.Interface) => Effect.Effect<A>): Promise<A> {
-  let result!: A
+async function withToolRegistry<A>(fn: (svc: ToolRegistry.Interface) => Effect.Effect<A>): Promise<Exit.Exit<A>> {
+  let result!: Exit.Exit<A>
   await Instance.provide({
     directory: process.cwd(),
     async fn() {
-      result = await AppRuntime.runPromise(
+      result = await AppRuntime.runPromiseExit(
         Effect.gen(function* () {
           const svc = yield* ToolRegistry.Service
           return yield* fn(svc)
@@ -39,16 +45,61 @@ async function withToolRegistry<A>(fn: (svc: ToolRegistry.Interface) => Effect.E
   return result
 }
 
+function unwrap<A>(exit: Exit.Exit<A>): A {
+  if (Exit.isSuccess(exit)) return exit.value
+  const failure = Cause.failureOption(exit.cause)
+  if (failure._tag === "Some") {
+    const err = failure.value
+    throw err instanceof Error ? err : new Error(String(err))
+  }
+  throw new Error(Cause.pretty(exit.cause))
+}
+
+function exitToolError(exit: Exit.Exit<unknown>): { title: string; output: string; metadata: Record<string, unknown> } {
+  let message = "unexpected error"
+  if (Exit.isFailure(exit)) {
+    const failure = Cause.failureOption(exit.cause)
+    if (failure._tag === "Some") {
+      const e: unknown = failure.value
+      if (e && typeof e === "object" && "data" in e) {
+        const data = (e as { data?: unknown }).data
+        if (data && typeof data === "object") {
+          const { op, status, message: m } = data as { op?: unknown; status?: unknown; message?: unknown }
+          const opStr = typeof op === "string" ? op : "error"
+          const msgStr = typeof m === "string" ? m : JSON.stringify(data).slice(0, 256)
+          message = typeof status === "number" ? `[${opStr}/${status}] ${msgStr}` : `[${opStr}] ${msgStr}`
+        }
+      } else if (e instanceof Error) {
+        message = e.name === e.message ? e.name : e.message
+      } else {
+        message = String(e)
+      }
+    } else {
+      message = Cause.pretty(exit.cause).split("\n")[0] ?? "unexpected error"
+    }
+  }
+  return {
+    title: "tool failed",
+    output: `tool error: ${message}`,
+    metadata: { error: true, message },
+  }
+}
+
 export const ToolsListCommand = cmd({
   command: "list",
   describe: "list all built-in tool ids (one per line)",
   builder: (yargs: Argv) => yargs.option("verbose", { type: "boolean", describe: "include description" }),
   async handler(args) {
     const verbose = Boolean(args.verbose)
-    const all = await withToolRegistry((svc) => svc.all())
+    const exit = await withToolRegistry((svc) => svc.all())
+    const all = unwrap(exit)
     for (const tool of all) {
-      if (verbose) UI.println(`${tool.id}\t${(tool.description ?? "").split("\n")[0]?.slice(0, 80) ?? ""}`)
-      else UI.println(tool.id)
+      if (verbose) {
+        const desc = (tool.description ?? "").replace(/\s+/g, " ").trim().slice(0, 80)
+        writeOut(`${tool.id}\t${desc}`)
+      } else {
+        writeOut(tool.id)
+      }
     }
   },
 })
@@ -60,7 +111,8 @@ export const ToolsShowCommand = cmd({
     yargs.positional("id", { type: "string", describe: "tool id (e.g. generate-image)", demandOption: true }),
   async handler(args) {
     const id = String(args.id)
-    const all = await withToolRegistry((svc) => svc.all())
+    const exit = await withToolRegistry((svc) => svc.all())
+    const all = unwrap(exit)
     const tool = all.find((t) => t.id === id)
     if (!tool) {
       UI.error(`tool not found: ${id}`)
@@ -68,20 +120,19 @@ export const ToolsShowCommand = cmd({
       return
     }
     const schema = EffectZod.toJsonSchema(tool.parameters)
-    UI.println(`# ${tool.id}\n`)
-    UI.println(tool.description ?? "")
-    UI.println(`\n## Parameters\n`)
-    UI.println(JSON.stringify(schema, null, 2))
+    writeOut(`# ${tool.id}\n`)
+    writeOut(tool.description ?? "")
+    writeOut(`\n## Parameters\n`)
+    writeOut(JSON.stringify(schema, null, 2))
   },
 })
 
-function makeStubContext(): Tool.Context {
-  const ts = Date.now().toString(36)
+function makeStubContext(abort: AbortSignal): Tool.Context {
   return {
-    sessionID: SessionID.make(`ses_cli_${ts}`),
-    messageID: MessageID.make(`msg_cli_${ts}`),
+    sessionID: SessionID.descending(),
+    messageID: MessageID.ascending(),
     agent: "cli",
-    abort: new AbortController().signal,
+    abort,
     messages: [],
     metadata: () => Effect.void,
     ask: () => Effect.void,
@@ -106,15 +157,40 @@ export const ToolsCallCommand = cmd({
     const id = String(args.id)
     let paramsRaw: string | undefined
     if (args.json) paramsRaw = String(args.json)
-    else if (args["params-file"]) paramsRaw = await fs.readFile(String(args["params-file"]), "utf8")
-    else {
+    else if (args["params-file"]) {
+      const path = String(args["params-file"])
+      const stat = await fs.stat(path).catch(() => null)
+      if (stat && stat.size > MAX_PARAMS_FILE_BYTES) {
+        UI.error(`params file too large: ${stat.size} bytes (max ${MAX_PARAMS_FILE_BYTES})`)
+        process.exitCode = 2
+        return
+      }
+      paramsRaw = await fs.readFile(path, "utf8")
+    } else if (process.stdin.isTTY) {
+      UI.error("provide --json '<obj>' or --params-file <path>; pipe JSON via stdin only when non-TTY")
+      process.exitCode = 2
+      return
+    } else {
       paramsRaw = await new Promise<string>((resolve, reject) => {
         let data = ""
+        let bytes = 0
         process.stdin.setEncoding("utf8")
-        process.stdin.on("data", (chunk) => (data += chunk))
+        process.stdin.on("data", (chunk) => {
+          bytes += Buffer.byteLength(chunk, "utf8")
+          if (bytes > MAX_PARAMS_FILE_BYTES) {
+            reject(new Error(`stdin payload too large (max ${MAX_PARAMS_FILE_BYTES} bytes)`))
+            return
+          }
+          data += chunk
+        })
         process.stdin.on("end", () => resolve(data))
         process.stdin.on("error", reject)
+      }).catch((e) => {
+        UI.error(e instanceof Error ? e.message : String(e))
+        process.exitCode = 2
+        return ""
       })
+      if (process.exitCode === 2) return
     }
     let params: Record<string, unknown>
     try {
@@ -125,28 +201,42 @@ export const ToolsCallCommand = cmd({
       return
     }
 
-    const result = await withToolRegistry((svc) =>
+    const ctl = new AbortController()
+    process.once("SIGINT", () => ctl.abort())
+    const exit = await withToolRegistry((svc) =>
       Effect.gen(function* () {
         const all = yield* svc.all()
         const tool = all.find((t) => t.id === id)
         if (!tool) return null
-        return yield* tool.execute(params, makeStubContext())
+        return yield* tool.execute(params, makeStubContext(ctl.signal))
       }),
     )
+
+    let result: { title: string; output: string; metadata: Record<string, unknown> } | null
+    if (Exit.isSuccess(exit)) {
+      result = exit.value
+    } else {
+      result = exitToolError(exit)
+    }
     if (result === null) {
       UI.error(`tool not found: ${id}`)
       process.exitCode = 1
       return
     }
+    const isError = Boolean((result.metadata as Record<string, unknown> | undefined)?.error)
     const mode = String(args.output)
     if (mode === "json") {
-      UI.println(JSON.stringify({ output: result.output, metadata: result.metadata, title: result.title }, null, 2))
+      writeOut(JSON.stringify({ output: result.output, metadata: result.metadata, title: result.title }, null, 2))
     } else if (mode === "url") {
-      UI.println(result.output.trim())
+      if (isError) {
+        UI.error(result.output)
+      } else {
+        writeOut(result.output.trim())
+      }
     } else {
-      UI.println(result.output)
+      writeOut(result.output)
     }
-    if (result.metadata && (result.metadata as Record<string, unknown>).error) process.exitCode = 1
+    if (isError) process.exitCode = 1
   },
 })
 
@@ -157,7 +247,8 @@ export const ToolsExportSchemaCommand = cmd({
     yargs.positional("id", { type: "string", describe: "optional tool id; omit to export all" }),
   async handler(args) {
     const id = args.id ? String(args.id) : undefined
-    const all = await withToolRegistry((svc) => svc.all())
+    const exit = await withToolRegistry((svc) => svc.all())
+    const all = unwrap(exit)
     const filtered = id ? all.filter((t) => t.id === id) : all
     if (id && filtered.length === 0) {
       UI.error(`tool not found: ${id}`)
@@ -169,6 +260,6 @@ export const ToolsExportSchemaCommand = cmd({
       description: tool.description ?? "",
       input_schema: EffectZod.toJsonSchema(tool.parameters),
     }))
-    UI.println(JSON.stringify(id ? out[0] : out, null, 2))
+    writeOut(JSON.stringify(id ? out[0] : out, null, 2))
   },
 })

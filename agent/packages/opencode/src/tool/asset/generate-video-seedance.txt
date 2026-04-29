@@ -6,6 +6,6 @@ Generate a video clip with the **SeedDance 2 pro** model via the FC endpoint.
 - Optional `referenceImageUrls` and `sourceVideoUrls` provide style/content references
 - Optional `styleName` selects a preset style defined by the FC backend
 - For Kling-style outputs / multimodal control with reference media, use `generate-video-happyhorse` instead
-- Set `dryRun: true` to preview the resolved request without invoking the FC backend (testing only)
+- Set `dryRun: true` to preview the resolved request without invoking the FC backend (testing only — never set in production)
 - This call may take several minutes; the underlying FC handles polling internally
 - Failures surface as the tool output text

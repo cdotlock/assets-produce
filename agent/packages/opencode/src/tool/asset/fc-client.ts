@@ -84,21 +84,36 @@ export function formatToolError(err: unknown): string {
     const { op, status, message } = err.data
     return status !== undefined ? `[${op}/${status}] ${message}` : `[${op}] ${message}`
   }
-  if (err instanceof Error) return err.message
+  if (err && typeof err === "object" && "data" in err) {
+    const data = (err as { data?: unknown }).data
+    if (data && typeof data === "object") {
+      const { op, status, message } = data as { op?: unknown; status?: unknown; message?: unknown }
+      const opStr = typeof op === "string" ? op : "error"
+      const msgStr = typeof message === "string" ? message : JSON.stringify(data).slice(0, 256)
+      return typeof status === "number" ? `[${opStr}/${status}] ${msgStr}` : `[${opStr}] ${msgStr}`
+    }
+  }
+  if (err instanceof Error) return err.name === err.message ? err.name : err.message
   return String(err)
 }
 
-export function extractUrlFromResult(tool: string, raw: unknown, fields: readonly string[]): string {
+export function extractUrlFromResult(
+  tool: string,
+  raw: unknown,
+  fields: readonly string[],
+): Effect.Effect<string, FcCallError> {
   if (raw && typeof raw === "object") {
     const obj = raw as Record<string, unknown>
     for (const field of fields) {
       const value = obj[field]
-      if (typeof value === "string" && value.length > 0) return value
+      if (typeof value === "string" && /^https?:\/\//i.test(value)) return Effect.succeed(value)
     }
   }
-  throw new FcCallError({
-    tool,
-    op: "parse",
-    message: `expected one of [${fields.join(", ")}] in response, got: ${JSON.stringify(raw).slice(0, 256)}`,
-  })
+  return Effect.fail(
+    new FcCallError({
+      tool,
+      op: "parse",
+      message: `expected one of [${fields.join(", ")}] in response, got: ${JSON.stringify(raw).slice(0, 256)}`,
+    }),
+  )
 }

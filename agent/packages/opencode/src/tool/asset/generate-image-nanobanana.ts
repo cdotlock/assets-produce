@@ -6,7 +6,7 @@ import DESCRIPTION from "./generate-image-nanobanana.txt"
 const TOOL_ID = "generate-image-nanobanana"
 const DEFAULT_MODEL = "gemini-3.1-flash-image-preview"
 
-const HttpsUrl = Schema.String.check(Schema.isPattern(/^https?:\/\/.+/i)).annotate({
+const HttpsUrl = Schema.String.check(Schema.isPattern(/^https:\/\/.+/i)).annotate({
   description: "https URL",
 })
 
@@ -17,7 +17,7 @@ export const Parameters = Schema.Struct({
   model: Schema.optional(Schema.String).annotate({
     description: `Model id (default "${DEFAULT_MODEL}", a.k.a. nanobanana 2)`,
   }),
-  referenceImageUrls: Schema.optional(Schema.Array(HttpsUrl)).annotate({
+  referenceImageUrls: Schema.optional(Schema.Array(HttpsUrl).check(Schema.isMaxLength(8))).annotate({
     description: "Optional reference image URLs (max 8) the model should condition on",
   }),
   dryRun: Schema.optional(Schema.Boolean).annotate({
@@ -38,7 +38,7 @@ export const GenerateImageNanobananaTool = Tool.define(
           referenceImageUrls?: readonly string[]
           dryRun?: boolean
         },
-        _ctx: Tool.Context,
+        ctx: Tool.Context,
       ) =>
         Effect.gen(function* () {
           const model = params.model?.trim() || DEFAULT_MODEL
@@ -64,8 +64,9 @@ export const GenerateImageNanobananaTool = Tool.define(
             endpoint,
             body,
             timeoutMs: 60_000,
+            signal: ctx.abort,
           })
-          const ossUrl = extractUrlFromResult(TOOL_ID, result, ["result", "imageUrl", "url"])
+          const ossUrl = yield* extractUrlFromResult(TOOL_ID, result, ["imageUrl", "url", "result"])
           return {
             title: `${TOOL_ID} (${model})`,
             output: ossUrl,

@@ -5,7 +5,7 @@ import DESCRIPTION from "./generate-video-happyhorse.txt"
 
 const TOOL_ID = "generate-video-happyhorse"
 
-const HttpsUrl = Schema.String.check(Schema.isPattern(/^https?:\/\/.+/i)).annotate({
+const HttpsUrl = Schema.String.check(Schema.isPattern(/^https:\/\/.+/i)).annotate({
   description: "https URL",
 })
 
@@ -64,7 +64,7 @@ export const GenerateVideoHappyHorseTool = Tool.define(
           model?: string
           dryRun?: boolean
         },
-        _ctx: Tool.Context,
+        ctx: Tool.Context,
       ) =>
         Effect.gen(function* () {
           const body: Record<string, unknown> = {
@@ -95,13 +95,16 @@ export const GenerateVideoHappyHorseTool = Tool.define(
             endpoint,
             body,
             timeoutMs: 300_000,
+            signal: ctx.abort,
           })
-          if (!result?.videoUrl) {
-            throw new FcCallError({
-              tool: TOOL_ID,
-              op: "parse",
-              message: `expected videoUrl in response, got ${JSON.stringify(result).slice(0, 256)}`,
-            })
+          if (!result?.videoUrl || !/^https?:\/\//i.test(result.videoUrl)) {
+            return yield* Effect.fail(
+              new FcCallError({
+                tool: TOOL_ID,
+                op: "parse",
+                message: `expected videoUrl URL in response, got ${JSON.stringify(result).slice(0, 256)}`,
+              }),
+            )
           }
           return {
             title: TOOL_ID,

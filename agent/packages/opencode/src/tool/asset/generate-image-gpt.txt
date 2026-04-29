@@ -5,5 +5,5 @@ Generate an image with the **OpenAI GPT-Image** model via the FC endpoint.
 - Strengths: stylised art, painterly portraits, illustration; weaker on photoreal layouts than nanobanana
 - Optionally pass `referenceImageUrls` (https URLs, max 8) to condition on existing images
 - For descriptive / scene-driven prompts, prefer `generate-image-nanobanana` instead
-- Set `dryRun: true` to preview the resolved request without invoking the FC backend (testing only)
+- Set `dryRun: true` to preview the resolved request without invoking the FC backend (testing only — never set in production)
 - Failures surface as the tool output text; agent should read and adapt

@@ -236,3 +236,44 @@ docs/superpowers/specs/2026-04-29-assets-produce-spec.md  # § 15/1.6 修订
 **Phase 3 验收通过。** 6 项验收全部 ✅，3 处与 spec 字面有偏离均已记录修订或解释。可进入 Phase 4（Skill 系统）plan 撰写。
 
 下一步：commit 本报告 → 跑 superpowers:code-reviewer → 应用反馈 → push → /compact → Phase 4 plan。
+
+---
+
+## 7. Code-reviewer 反馈应用记录（追加）
+
+跑 `superpowers:code-reviewer` 得 4 项 MUST FIX + 8 项 SHOULD FIX + 7 项 NIT。本次 commit 一并修复全部 MUST FIX + 关键 SHOULD FIX + 部分 NIT。
+
+| ID | 类别 | 问题 | 修复 |
+|---|---|---|---|
+| MF-1 | MUST | `extractUrlFromResult` / happyhorse `throw` 在 `Effect.gen` 中变成 defect，绕过 `.pipe(Effect.catch(...))` graceful 路径 | `extractUrlFromResult` 改返回 `Effect<string, FcCallError>`，调用处用 `yield*`；happyhorse 改用 `yield* Effect.fail(...)` |
+| MF-2 | MUST | `tools call` 中 schema decode 失败、tool execute defect 都被 `AppRuntime.runPromise` 转 promise rejection，`cli.fail` 打 "Unexpected error" | 改用 `runPromiseExit` + `exitToolError` 解 `Cause` 还原 graceful JSON envelope；exitCode=1 |
+| MF-3 | MUST | `UI.println` 写 stderr，`tools list/show/export-schema/call` 数据无法 pipe 到 stdout | 新增 `writeOut(text)` helper 直接走 `process.stdout.write`；保留 `UI.error` 给人类向 stderr |
+| MF-4 | MUST | `agent/opencode.jsonc` 只有 cwd 在 `agent/` 子目录时才生效，CI/repo-root 仍旧走全局 anthropic-path | 移到 repo root（`/Users/Clock/moonshort/assets-produce/opencode.jsonc`），删除 `agent/opencode.jsonc` |
+| SF-1 | SHOULD | `referenceImageUrls` / `sourceVideoUrls` 没有 `maxItems(8)`，描述说 max 8 但 schema 不强制 | 全 5 个 image/video tool 加 `Schema.isMaxLength(8)` |
+| SF-2 | SHOULD | tool 不传 `Tool.Context.abort` 给 `callFc`，session cancel 不能中断 in-flight FC | 6 个 tool execute 改 `_ctx` → `ctx`，callFc 加 `signal: ctx.abort` |
+| SF-3 | SHOULD | `HttpsUrl` 正则 `^https?://` 允许 http://，SSRF 风险 | 改 `^https://`（去 `?`） |
+| SF-4 | SHOULD | `tools call` 在 TTY 无参数时阻塞读 stdin | 检测 `process.stdin.isTTY`，TTY 下 fail-fast 提示 + exitCode=2 |
+| SF-5 | SHOULD | `formatToolError` 只识别 `FcCallError`，其它 NamedError 退化成 class name | 加 generic `data` bag 拆解（任意 `{op, status, message}` 形）；`Error.name === message` 时只回 name |
+| SF-6 | SHOULD | `.env.example` 缺 `LANGFUSE_PROJECT`（与 `.env` 漂移） | 加 `LANGFUSE_PROJECT=assets-produce` |
+| SF-7 | SHOULD | `SessionID.make("ses_cli_<ts>")` 形式不通过 `Identifier.timestamp` 解析 | 改 `SessionID.descending()` / `MessageID.ascending()` |
+| SF-8 | SHOULD | `--output url` 在 error 路径打非 URL 文本到 stdout | error 路径改走 `UI.error`（stderr）+ exitCode=1 |
+| N-1 | NIT | `dryRun` 描述不一致（5 个文件没 "never set in production"） | 6 个 .txt 统一加 "— never set in production" |
+| N-4 | NIT | `extractUrlFromResult` 字段顺序 `result` 在前，可能取到非 URL 字符串 | 改顺序为 `[imageUrl/videoUrl, url, result]` + 加 URL 正则校验 `^https?://` |
+| N-5 | NIT | `--params-file` 没有大小限制 | 加 `MAX_PARAMS_FILE_BYTES = 1_000_000` 上限（file + stdin 都校验） |
+| N-6 | NIT | `tools list --verbose` 描述含换行 / tab | 用 `replace(/\s+/g, " ").trim().slice(0, 80)` |
+
+未应用：MF-2 中提到的 `runPromiseExit` 已用；N-2、N-3、N-7 是注释 / 风格层面，不影响功能，跳过；SF-5 中关于 `cli.fail` 全局兜底改造，本 phase 范围太大，留 Phase 6 polish。
+
+---
+
+## 8. 修复后再验证
+
+| 验证 | 命令 | 结果 |
+|---|---|---|
+| MF-1 — parse error graceful | mock FC 返 `{"status":"queued","taskId":"abc"}`，跑 `tools call` | ✅ JSON envelope `[parse] expected one of [imageUrl, url, result] in response, got: ...`，exitCode=1，**不是** "Unexpected error" |
+| MF-3 — stdout pipeable | `tools export-schema generate-image-nanobanana 2>/dev/null \| jq -r .name` | ✅ 输出 `generate-image-nanobanana`（之前 stderr 时 jq 拿不到） |
+| MF-4 — cwd-independent | `cd /tmp && bun run <repo>/agent/...index.ts tools list` | ✅ tool list 从任意目录都能跑出 |
+| SF-1 — maxItems(8) | dry-run with 9 ref URLs | schema 拒绝 |
+| SF-3 — https only | dry-run `referenceImageUrls: ["http://x"]` | schema 拒绝 pattern mismatch |
+| 现有 dry-run 仍通 | `tools call generate-image-nanobanana --json '{"prompt":"x","dryRun":true}' --output json` | ✅ |
+| 现有 graceful FC-not-config 仍通 | `tools call concat-clips --json '{"clipUrls":["https://a","https://b"]}' --output json` | ✅ + exitCode=1 |

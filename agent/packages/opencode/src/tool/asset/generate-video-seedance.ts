@@ -6,7 +6,7 @@ import DESCRIPTION from "./generate-video-seedance.txt"
 const TOOL_ID = "generate-video-seedance"
 const DEFAULT_MODEL = "seedance-2-pro"
 
-const HttpsUrl = Schema.String.check(Schema.isPattern(/^https?:\/\/.+/i)).annotate({
+const HttpsUrl = Schema.String.check(Schema.isPattern(/^https:\/\/.+/i)).annotate({
   description: "https URL",
 })
 
@@ -23,11 +23,11 @@ export const Parameters = Schema.Struct({
   model: Schema.optional(Schema.String).annotate({
     description: `Model id (default "${DEFAULT_MODEL}", SeedDance 2 pro)`,
   }),
-  referenceImageUrls: Schema.optional(Schema.Array(HttpsUrl)).annotate({
-    description: "Optional reference image URLs for style/content conditioning",
+  referenceImageUrls: Schema.optional(Schema.Array(HttpsUrl).check(Schema.isMaxLength(8))).annotate({
+    description: "Optional reference image URLs (max 8) for style/content conditioning",
   }),
-  sourceVideoUrls: Schema.optional(Schema.Array(HttpsUrl)).annotate({
-    description: "Optional source video URLs for style/content conditioning",
+  sourceVideoUrls: Schema.optional(Schema.Array(HttpsUrl).check(Schema.isMaxLength(8))).annotate({
+    description: "Optional source video URLs (max 8) for style/content conditioning",
   }),
   dryRun: Schema.optional(Schema.Boolean).annotate({
     description: "Return resolved request without invoking FC. Testing only.",
@@ -50,7 +50,7 @@ export const GenerateVideoSeedanceTool = Tool.define(
           sourceVideoUrls?: readonly string[]
           dryRun?: boolean
         },
-        _ctx: Tool.Context,
+        ctx: Tool.Context,
       ) =>
         Effect.gen(function* () {
           const model = params.model?.trim() || DEFAULT_MODEL
@@ -82,8 +82,9 @@ export const GenerateVideoSeedanceTool = Tool.define(
             endpoint,
             body,
             timeoutMs: 300_000,
+            signal: ctx.abort,
           })
-          const ossUrl = extractUrlFromResult(TOOL_ID, result, ["result", "videoUrl", "url"])
+          const ossUrl = yield* extractUrlFromResult(TOOL_ID, result, ["videoUrl", "url", "result"])
           return {
             title: `${TOOL_ID} (${model})`,
             output: ossUrl,
