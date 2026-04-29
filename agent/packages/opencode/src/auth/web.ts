@@ -30,7 +30,8 @@ export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12)
 }
 
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+export async function verifyPassword(password: string, hash: string | null | undefined): Promise<boolean> {
+  if (!hash) return false
   return bcrypt.compare(password, hash)
 }
 
@@ -49,8 +50,6 @@ export async function signJwt(
     username: payload.username,
     role: payload.role,
     profile: payload.profile,
-    iat: now,
-    exp: now + expiresInSeconds,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(payload.sub)

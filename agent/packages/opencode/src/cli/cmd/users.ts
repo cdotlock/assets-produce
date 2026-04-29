@@ -1,5 +1,5 @@
 import type { Argv } from "yargs"
-import { Cause, Effect, Exit, Layer } from "effect"
+import { Cause, Effect, Exit } from "effect"
 import { Instance } from "../../project/instance"
 import { AppRuntime } from "@/effect/app-runtime"
 import { UserCli } from "@/business/user/cli"
