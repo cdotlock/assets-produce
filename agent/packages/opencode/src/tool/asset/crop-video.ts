@@ -1,6 +1,6 @@
 import { Effect, Schema } from "effect"
 import * as Tool from "../tool"
-import { callFc, extractUrlFromResult, FcCallError, readEndpoint } from "./fc-client"
+import { callFc, extractUrlFromResult, FcCallError, formatToolError, readEndpoint } from "./fc-client"
 import DESCRIPTION from "./crop-video.txt"
 
 const HttpsUrl = Schema.String.check(Schema.isPattern(/^https?:\/\/.+/i)).annotate({
@@ -72,8 +72,8 @@ export const CropVideoTool = Tool.define(
           Effect.catch((err) =>
             Effect.succeed({
               title: "crop-video failed",
-              output: `crop-video error: ${err instanceof Error ? err.message : String(err)}`,
-              metadata: { error: true, message: err instanceof Error ? err.message : String(err) },
+              output: `crop-video error: ${formatToolError(err)}`,
+              metadata: { error: true, message: formatToolError(err) },
             }),
           ),
         ),

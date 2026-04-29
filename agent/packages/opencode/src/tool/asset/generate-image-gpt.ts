@@ -1,6 +1,6 @@
 import { Effect, Schema } from "effect"
 import * as Tool from "../tool"
-import { callFc, extractUrlFromResult, FcCallError, readEndpoint } from "./fc-client"
+import { callFc, extractUrlFromResult, FcCallError, formatToolError, readEndpoint } from "./fc-client"
 import DESCRIPTION from "./generate-image-gpt.txt"
 
 const HttpsUrl = Schema.String.check(Schema.isPattern(/^https?:\/\/.+/i)).annotate({
@@ -71,8 +71,8 @@ export const GenerateImageGptTool = Tool.define(
           Effect.catch((err) =>
             Effect.succeed({
               title: "generate-image-gpt failed",
-              output: `generate-image-gpt error: ${err instanceof Error ? err.message : String(err)}`,
-              metadata: { error: true, message: err instanceof Error ? err.message : String(err) },
+              output: `generate-image-gpt error: ${formatToolError(err)}`,
+              metadata: { error: true, message: formatToolError(err) },
             }),
           ),
         ),

@@ -1,6 +1,6 @@
 import { Effect, Schema } from "effect"
 import * as Tool from "../tool"
-import { callFc, extractUrlFromResult, FcCallError, readEndpoint } from "./fc-client"
+import { callFc, extractUrlFromResult, FcCallError, formatToolError, readEndpoint } from "./fc-client"
 import DESCRIPTION from "./concat-clips.txt"
 
 const HttpsUrl = Schema.String.check(Schema.isPattern(/^https?:\/\/.+/i)).annotate({
@@ -55,8 +55,8 @@ export const ConcatClipsTool = Tool.define(
           Effect.catch((err) =>
             Effect.succeed({
               title: "concat-clips failed",
-              output: `concat-clips error: ${err instanceof Error ? err.message : String(err)}`,
-              metadata: { error: true, message: err instanceof Error ? err.message : String(err) },
+              output: `concat-clips error: ${formatToolError(err)}`,
+              metadata: { error: true, message: formatToolError(err) },
             }),
           ),
         ),

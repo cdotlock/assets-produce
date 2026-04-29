@@ -79,6 +79,15 @@ export const callFc = <T>(opts: CallOpts) =>
     },
   })
 
+export function formatToolError(err: unknown): string {
+  if (err instanceof FcCallError) {
+    const { op, status, message } = err.data
+    return status !== undefined ? `[${op}/${status}] ${message}` : `[${op}] ${message}`
+  }
+  if (err instanceof Error) return err.message
+  return String(err)
+}
+
 export function extractUrlFromResult(tool: string, raw: unknown, fields: readonly string[]): string {
   if (raw && typeof raw === "object") {
     const obj = raw as Record<string, unknown>

@@ -1,17 +1,25 @@
 import type { Argv } from "yargs"
 import { Effect } from "effect"
+import * as fs from "fs/promises"
 import { Instance } from "../../project/instance"
 import { ToolRegistry } from "@/tool/registry"
 import { AppRuntime } from "@/effect/app-runtime"
+import { SessionID, MessageID } from "@/session/schema"
+import type * as Tool from "@/tool/tool"
 import { cmd } from "./cmd"
 import { UI } from "../ui"
 import * as EffectZod from "@/util/effect-zod"
 
 export const ToolsCommand = cmd({
   command: "tools <command>",
-  describe: "inspect built-in tools (list / show / export-schema)",
+  describe: "inspect / call built-in tools (list / show / export-schema / call)",
   builder: (yargs: Argv) =>
-    yargs.command(ToolsListCommand).command(ToolsShowCommand).command(ToolsExportSchemaCommand).demandCommand(),
+    yargs
+      .command(ToolsListCommand)
+      .command(ToolsShowCommand)
+      .command(ToolsExportSchemaCommand)
+      .command(ToolsCallCommand)
+      .demandCommand(),
   async handler() {},
 })
 
@@ -64,6 +72,81 @@ export const ToolsShowCommand = cmd({
     UI.println(tool.description ?? "")
     UI.println(`\n## Parameters\n`)
     UI.println(JSON.stringify(schema, null, 2))
+  },
+})
+
+function makeStubContext(): Tool.Context {
+  const ts = Date.now().toString(36)
+  return {
+    sessionID: SessionID.make(`ses_cli_${ts}`),
+    messageID: MessageID.make(`msg_cli_${ts}`),
+    agent: "cli",
+    abort: new AbortController().signal,
+    messages: [],
+    metadata: () => Effect.void,
+    ask: () => Effect.void,
+  }
+}
+
+export const ToolsCallCommand = cmd({
+  command: "call <id>",
+  describe: "invoke a single tool directly with JSON params (--json or --params-file)",
+  builder: (yargs: Argv) =>
+    yargs
+      .positional("id", { type: "string", describe: "tool id (e.g. generate-image-nanobanana)", demandOption: true })
+      .option("json", { type: "string", describe: "JSON params object as string" })
+      .option("params-file", { type: "string", describe: "path to JSON file with params" })
+      .option("output", {
+        type: "string",
+        choices: ["raw", "url", "json"] as const,
+        default: "raw",
+        describe: "raw=tool output text; url=output as a URL line; json=full result {output, metadata}",
+      }),
+  async handler(args) {
+    const id = String(args.id)
+    let paramsRaw: string | undefined
+    if (args.json) paramsRaw = String(args.json)
+    else if (args["params-file"]) paramsRaw = await fs.readFile(String(args["params-file"]), "utf8")
+    else {
+      paramsRaw = await new Promise<string>((resolve, reject) => {
+        let data = ""
+        process.stdin.setEncoding("utf8")
+        process.stdin.on("data", (chunk) => (data += chunk))
+        process.stdin.on("end", () => resolve(data))
+        process.stdin.on("error", reject)
+      })
+    }
+    let params: Record<string, unknown>
+    try {
+      params = JSON.parse(paramsRaw || "{}")
+    } catch (e) {
+      UI.error(`invalid JSON params: ${e instanceof Error ? e.message : String(e)}`)
+      process.exitCode = 2
+      return
+    }
+
+    const result = await withToolRegistry((svc) =>
+      Effect.gen(function* () {
+        const all = yield* svc.all()
+        const tool = all.find((t) => t.id === id)
+        if (!tool) return null
+        return yield* tool.execute(params, makeStubContext())
+      }),
+    )
+    if (result === null) {
+      UI.error(`tool not found: ${id}`)
+      process.exitCode = 1
+      return
+    }
+    const mode = String(args.output)
+    if (mode === "json") {
+      UI.println(JSON.stringify({ output: result.output, metadata: result.metadata, title: result.title }, null, 2))
+    } else if (mode === "url") {
+      UI.println(result.output.trim())
+    } else {
+      UI.println(result.output)
+    }
+    if (result.metadata && (result.metadata as Record<string, unknown>).error) process.exitCode = 1
   },
 })
 

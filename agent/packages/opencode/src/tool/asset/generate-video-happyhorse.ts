@@ -1,6 +1,6 @@
 import { Effect, Schema } from "effect"
 import * as Tool from "../tool"
-import { callFc, FcCallError, readEndpoint } from "./fc-client"
+import { callFc, FcCallError, formatToolError, readEndpoint } from "./fc-client"
 import DESCRIPTION from "./generate-video-happyhorse.txt"
 
 const TOOL_ID = "generate-video-happyhorse"
@@ -117,8 +117,8 @@ export const GenerateVideoHappyHorseTool = Tool.define(
           Effect.catch((err) =>
             Effect.succeed({
               title: `${TOOL_ID} failed`,
-              output: `${TOOL_ID} error: ${err instanceof Error ? err.message : String(err)}`,
-              metadata: { error: true, message: err instanceof Error ? err.message : String(err) },
+              output: `${TOOL_ID} error: ${formatToolError(err)}`,
+              metadata: { error: true, message: formatToolError(err) },
             }),
           ),
         ),
