@@ -199,10 +199,11 @@ grep -rln "@opentui\|opentui-spinner\|cli-sound\|@solid-primitives" agent/packag
 3. 即使保留这些目录,最终 binary 不依赖它们(没人用 share / sync / control-plane 的 npm/cloud 服务时,代码路径不会跑到)
 
 **影响**:
-- spec § 10 Phase 1 字面要求"share / acp 协议层 砍",我们只砍了 `acp`(连 cli/cmd/acp.ts + acp/ 目录),`share` 没砍,记入 § 11.3 spec 偏差。
-- **本 verification report 已是修订记录**:Phase 2 / 3 视实际依赖再决定 share/sync/control-plane 何时砍。如果 Phase 2 LLM/DB 接通后发现 share 仍然有副作用,届时单独走 § 15 修订流程。
+- spec § 10 Phase 1 字面要求"share / acp 协议层 砍",我们只砍了 `acp`(连 cli/cmd/acp.ts + acp/ 目录),`share` 没砍。
+- **已加 spec § 15 / 1.3 修订记录条目**(commit `ee...` 跟 code-reviewer SHOULD FIX S1 同包),并在 spec § 10 Phase 1 该 bullet 加了 ⚠ 标记引用本行。
+- Phase 2 / 3 视实际依赖再决定 share/sync/control-plane 何时砍。
 
-**判断**:**结构性偏差**,但属于"砍法的选择",不改 spec § 2 任何核心架构原则。
+**判断**:**结构性偏差**,按 spec § 11.3 走了 § 15 流程;不改 spec § 2 任何核心架构原则。
 
 ### 3.3 dev/postinstall 期间的 bunfig 副作用
 
@@ -234,9 +235,11 @@ grep -rln "@opentui\|opentui-spinner\|cli-sound\|@solid-primitives" agent/packag
 
 ---
 
-## 4. commit 历史(11 个 atomic commits)
+## 4. commit 历史(13 个 atomic commits)
 
 ```
+d1a014c refactor(agent): apply code-reviewer SHOULD FIX (S1/S3/S4/N2)
+0b7bd06 docs(phase-1): add base trim verification report
 0c642fc chore(agent): drop dead build script reference
 7647c5f refactor(agent): cut gitlab + cloudflare-ai-gateway provider integration
 027a94e test(agent): adapt remaining test suites post-trim
@@ -253,6 +256,8 @@ e57455c docs(phase-1): add base trim plan
 
 每个 commit 独立可 revert、消息描述了 why 而非 what。
 
+**code-reviewer 反馈处理**(commit `d1a014c`):4 个 SHOULD FIX(S1: spec § 15 / 1.3 + § 10 ⚠ 标记;S3: 删 provider.ts 死 gitlab discovery loop;S4: 删 plugin/src/tui.ts + ./tui export + opentui peerDeps + tui-plugins.md;N2: 修 turbo.json 死 build dep)全部修复。剩余 NIT (N1/N3/N4/N5/N6) 留 Phase 6 命名/cleanup pass。
+
 ---
 
 ## 5. 已知遗留(留给后续 phase)
@@ -263,10 +268,13 @@ e57455c docs(phase-1): add base trim plan
 - `agent/AGENTS.md`、`agent/SECURITY.md`、`agent/STATS.md`、`agent/CONTRIBUTING.md`、`agent/LICENSE`(upstream 痕迹,Phase 6 写自己的)
 - 多语言 README(`agent/README.??.md` × 24)Phase 6 整理
 - `agent/specs/`、`agent/sdks/`、`agent/script/`、`agent/github/`、`agent/nix/`、`agent/flake.{lock,nix}`(upstream 留下,不影响验收)
-- `agent/turbo.json` 残留 `opencode#test:ci` task(`build` script 已删,`dependsOn: ^build` 现是死引用 —— 不报错但 noise)
 - `cli/cmd/web.ts`(详 § 3.1)与 Phase 5 自己的 Next.js WebUI 关系
 - `cli/cmd/github.ts` / `pr.ts`(暂留,Phase 3 决定是否包装成 atomic tool)
 - `bin/agent` 内的"opencode-platform-arch" lookup names + `OPENCODE_BIN_PATH` env(Phase 6 整理)
+- `agent/package.json` 还有 `name: "opencode"` + `repository.url: github.com/anomalyco/opencode`(Phase 6 命名 pass 一并)
+- `agent/package.json` `workspaces.catalog` 残留 ~15 个 cut UI/desktop pkg 用过的 entries(`@kobalte/core`、`@solid-primitives/storage`、`@tailwindcss/vite`、`@solidjs/*`、`vite-plugin-solid`、`dompurify`、`marked`、`shiki`、`solid-list`、`tailwindcss`、`vite`、`virtua` 等)—— 不安装无副作用,Phase 6 cleanup
+- `agent/packages/plugin/example*.ts`(upstream skeleton,Phase 6)
+- `agent/packages/opencode/specs/*.md` 上游设计文档(`tui-plugins.md` 已删,其他保留 - Phase 6)
 
 ---
 
@@ -274,8 +282,8 @@ e57455c docs(phase-1): add base trim plan
 
 - [x] 跑通所有 5 个验收项(全过)
 - [x] 写 verification report(本文)
-- [x] commit + push 到 main(11 commits 推到 `origin/main`,push 在 verification commit 之后一并)
-- [ ] 跑 `superpowers:code-reviewer`(下一步)
+- [x] 跑 `superpowers:code-reviewer`(返回 4 个 SHOULD FIX:S1 spec § 15 / 1.3 缺、S2 push 没做、S3 死 gitlab discovery、S4 plugin/tui.ts 残留;以及 6 个 NIT。SHOULD FIX 全修,详 § 4 末段)
+- [x] commit + push 到 main(13 commits 推到 `origin/main` `5f07a0a..d1a014c`)
 - [ ] 通知用户 `/compact`
 
 下一阶段:Phase 2 — Foundation(drizzle schema、ali-oss、Langfuse SDK、LLM provider 接通)。
