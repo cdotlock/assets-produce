@@ -2,9 +2,10 @@ import { Hono } from "hono"
 import { describeRoute, validator, resolver } from "hono-openapi"
 import z from "zod"
 import { Effect, Layer } from "effect"
-import { randomBytes } from "crypto"
+import { randomBytes, createHash } from "crypto"
+import { setCookie } from "hono/cookie"
 import { lazy } from "@/util/lazy"
-import { verifyPassword, signJwt, hashPassword } from "@/auth/web"
+import { verifyPassword, signJwt } from "@/auth/web"
 import { defaultLayer as userBusinessLayer } from "@/business/user/user"
 import { defaultLayer as sessionTokenBusinessLayer } from "@/business/session-token/session-token"
 import { Service as UserService } from "@/business/user/user"
@@ -19,7 +20,6 @@ const LoginBody = z.object({
 const LoginResponse = z.object({
   token: z.string(),
   expires_at: z.number(),
-  refresh_token: z.string(),
   user: z.object({
     id: z.string(),
     username: z.string(),
@@ -76,6 +76,10 @@ export const AuthRoutes = lazy(() =>
               return { error: "invalid credentials" } as const
             }
 
+            // WebUI logins always run under the creator profile. Developer
+            // profile is reserved for CLI/external-agent contexts (plan § 0.9
+            // / § 4) — admins on the WebUI still get the creator ruleset.
+            const jwtExpiresAt = Date.now() + JWT_TTL_SECONDS * 1000
             const token = yield* Effect.promise(() =>
               signJwt(
                 { sub: user.id, username: user.username, role: user.role, profile: "creator" },
@@ -84,19 +88,25 @@ export const AuthRoutes = lazy(() =>
             )
 
             const rawRefresh = randomBytes(32).toString("hex")
-            const refreshHash = yield* Effect.promise(() => hashPassword(rawRefresh))
-            const expiresAt = Date.now() + REFRESH_TTL_MS
+            const refreshHash = createHash("sha256").update(rawRefresh).digest("hex")
 
             yield* tokens.create({
               userId: user.id,
               tokenHash: refreshHash,
-              expiresAt,
+              expiresAt: Date.now() + REFRESH_TTL_MS,
+            })
+
+            setCookie(c, "refresh_token", rawRefresh, {
+              httpOnly: true,
+              sameSite: "Lax",
+              path: "/auth",
+              maxAge: REFRESH_TTL_MS / 1000,
+              secure: c.req.url.startsWith("https://"),
             })
 
             return {
               token,
-              expires_at: Date.now() + JWT_TTL_SECONDS * 1000,
-              refresh_token: rawRefresh,
+              expires_at: jwtExpiresAt,
               user: {
                 id: user.id,
                 username: user.username,

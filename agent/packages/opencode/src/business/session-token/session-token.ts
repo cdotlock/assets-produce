@@ -1,5 +1,5 @@
 import { Effect, Layer, Context } from "effect"
-import { eq } from "drizzle-orm"
+import { and, eq } from "drizzle-orm"
 import { ulid } from "ulid"
 import { Database, Client } from "@/storage/db"
 import { SessionTokenTable, type SessionTokenRow } from "./session-token.sql"
@@ -84,7 +84,7 @@ export const layer = Layer.succeed(
             db
               .update(SessionTokenTable)
               .set({ revoked: true })
-              .where(eq(SessionTokenTable.user_id, userId))
+              .where(and(eq(SessionTokenTable.user_id, userId), eq(SessionTokenTable.revoked, false)))
               .run(),
           )
         },

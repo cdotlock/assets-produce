@@ -101,7 +101,13 @@ export const WebAuthMiddleware: MiddlewareHandler = async (c, next) => {
   try {
     const payload = await verifyJwt(match[1])
     c.set("user", payload)
-  } catch {
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    if (message.startsWith("JWT_SECRET")) {
+      log.error("WebAuthMiddleware misconfigured", { message })
+      c.status(500)
+      return c.json({ error: "server misconfigured: JWT_SECRET" })
+    }
     c.status(401)
     return c.json({ error: "invalid token" })
   }
