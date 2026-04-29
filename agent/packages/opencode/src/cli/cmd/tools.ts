@@ -45,35 +45,39 @@ async function withToolRegistry<A>(fn: (svc: ToolRegistry.Interface) => Effect.E
   return result
 }
 
+function firstFailure<E>(cause: Cause.Cause<E>): unknown {
+  for (const reason of cause.reasons) {
+    if (reason._tag === "Fail") return reason.error
+    if (reason._tag === "Die") return reason.defect
+  }
+  return undefined
+}
+
 function unwrap<A>(exit: Exit.Exit<A>): A {
   if (Exit.isSuccess(exit)) return exit.value
-  const failure = Cause.failureOption(exit.cause)
-  if (failure._tag === "Some") {
-    const err = failure.value
-    throw err instanceof Error ? err : new Error(String(err))
-  }
+  const err = firstFailure(exit.cause)
+  if (err !== undefined) throw err instanceof Error ? err : new Error(String(err))
   throw new Error(Cause.pretty(exit.cause))
 }
 
 function exitToolError(exit: Exit.Exit<unknown>): { title: string; output: string; metadata: Record<string, unknown> } {
   let message = "unexpected error"
   if (Exit.isFailure(exit)) {
-    const failure = Cause.failureOption(exit.cause)
-    if (failure._tag === "Some") {
-      const e: unknown = failure.value
-      if (e && typeof e === "object" && "data" in e) {
-        const data = (e as { data?: unknown }).data
-        if (data && typeof data === "object") {
-          const { op, status, message: m } = data as { op?: unknown; status?: unknown; message?: unknown }
-          const opStr = typeof op === "string" ? op : "error"
-          const msgStr = typeof m === "string" ? m : JSON.stringify(data).slice(0, 256)
-          message = typeof status === "number" ? `[${opStr}/${status}] ${msgStr}` : `[${opStr}] ${msgStr}`
-        }
-      } else if (e instanceof Error) {
-        message = e.name === e.message ? e.name : e.message
+    const e = firstFailure(exit.cause)
+    if (e && typeof e === "object" && "data" in e) {
+      const data = (e as { data?: unknown }).data
+      if (data && typeof data === "object") {
+        const { op, status, message: m } = data as { op?: unknown; status?: unknown; message?: unknown }
+        const opStr = typeof op === "string" ? op : "error"
+        const msgStr = typeof m === "string" ? m : JSON.stringify(data).slice(0, 256)
+        message = typeof status === "number" ? `[${opStr}/${status}] ${msgStr}` : `[${opStr}] ${msgStr}`
       } else {
-        message = String(e)
+        message = JSON.stringify(data).slice(0, 256)
       }
+    } else if (e instanceof Error) {
+      message = e.name === e.message ? e.name : e.message
+    } else if (e !== undefined) {
+      message = String(e)
     } else {
       message = Cause.pretty(exit.cause).split("\n")[0] ?? "unexpected error"
     }

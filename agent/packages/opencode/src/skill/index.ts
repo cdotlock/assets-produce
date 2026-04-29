@@ -18,6 +18,7 @@ import { ConfigMarkdown } from "@/config/markdown"
 import { Glob } from "@opencode-ai/core/util/glob"
 import * as Log from "@opencode-ai/core/util/log"
 import { Discovery } from "./discovery"
+import { SkillManaged } from "@/business/skill/managed"
 
 const log = Log.create({ service: "skill" })
 const EXTERNAL_DIRS = [".claude", ".agents"]
@@ -71,6 +72,7 @@ export interface Interface {
   readonly all: () => Effect.Effect<Info[]>
   readonly dirs: () => Effect.Effect<string[]>
   readonly available: (agent?: Agent.Info) => Effect.Effect<Info[]>
+  readonly loadBody: (name: string) => Effect.Effect<string | undefined>
 }
 
 const add = Effect.fnUntraced(function* (state: State, match: string, bus: Bus.Interface) {
@@ -229,14 +231,44 @@ export const layer = Layer.effect(
       }),
     )
 
-    const get = Effect.fn("Skill.get")(function* (name: string) {
+    const managed = yield* SkillManaged.Service
+
+    const managedToInfo = (m: {
+      name: string
+      description: string
+      langfusePromptKey: string
+    }): Info => ({
+      name: m.name,
+      description: m.description,
+      location: `langfuse://prompt/${m.langfusePromptKey}`,
+      content: "",
+    })
+
+    const merged = Effect.fn("Skill.merged")(function* () {
       const s = yield* InstanceState.get(state)
-      return s.skills[name]
+      const managedList = yield* managed.list({ enabledOnly: true })
+      const out = new Map<string, Info>()
+      for (const fsSkill of Object.values(s.skills)) out.set(fsSkill.name, fsSkill)
+      for (const m of managedList) {
+        if (out.has(m.name)) {
+          log.warn("managed skill overrides fs skill", {
+            name: m.name,
+            fsLocation: out.get(m.name)?.location,
+          })
+        }
+        out.set(m.name, managedToInfo(m))
+      }
+      return out
+    })
+
+    const get = Effect.fn("Skill.get")(function* (name: string) {
+      const map = yield* merged()
+      return map.get(name)
     })
 
     const all = Effect.fn("Skill.all")(function* () {
-      const s = yield* InstanceState.get(state)
-      return Object.values(s.skills)
+      const map = yield* merged()
+      return [...map.values()]
     })
 
     const dirs = Effect.fn("Skill.dirs")(function* () {
@@ -244,17 +276,28 @@ export const layer = Layer.effect(
     })
 
     const available = Effect.fn("Skill.available")(function* (agent?: Agent.Info) {
-      const s = yield* InstanceState.get(state)
-      const list = Object.values(s.skills).toSorted((a, b) => a.name.localeCompare(b.name))
+      const map = yield* merged()
+      const list = [...map.values()].toSorted((a, b) => a.name.localeCompare(b.name))
       if (!agent) return list
       return list.filter((skill) => Permission.evaluate("skill", skill.name, agent.permission).action !== "deny")
     })
 
-    return Service.of({ get, all, dirs, available })
+    const loadBody = Effect.fn("Skill.loadBody")(function* (name: string) {
+      const map = yield* merged()
+      const info = map.get(name)
+      if (!info) return undefined
+      if (info.location.startsWith("langfuse://")) {
+        return yield* managed.loadBody(name)
+      }
+      return info.content
+    })
+
+    return Service.of({ get, all, dirs, available, loadBody })
   }),
 )
 
 export const defaultLayer = layer.pipe(
+  Layer.provide(SkillManaged.defaultLayer),
   Layer.provide(Discovery.defaultLayer),
   Layer.provide(Config.defaultLayer),
   Layer.provide(Bus.layer),

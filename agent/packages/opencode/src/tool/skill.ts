@@ -26,7 +26,9 @@ export const SkillTool = Tool.define(
           if (!info) {
             const all = yield* skill.all()
             const available = all.map((item) => item.name).join(", ")
-            throw new Error(`Skill "${params.name}" not found. Available skills: ${available || "none"}`)
+            return yield* Effect.fail(
+              new Error(`Skill "${params.name}" not found. Available skills: ${available || "none"}`),
+            )
           }
 
           yield* ctx.ask({
@@ -35,6 +37,35 @@ export const SkillTool = Tool.define(
             always: [params.name],
             metadata: {},
           })
+
+          const isManaged = info.location.startsWith("langfuse://")
+          if (isManaged) {
+            const body = yield* skill.loadBody(info.name)
+            if (!body) {
+              return yield* Effect.fail(
+                new Error(
+                  `Skill "${info.name}" body is unavailable from Langfuse (check ${info.location} or LANGFUSE_* env vars)`,
+                ),
+              )
+            }
+            return {
+              title: `Loaded skill: ${info.name}`,
+              output: [
+                `<skill_content name="${info.name}">`,
+                `# Skill: ${info.name}`,
+                "",
+                body.trim(),
+                "",
+                `Source: ${info.location}`,
+                "</skill_content>",
+              ].join("\n"),
+              metadata: {
+                name: info.name,
+                source: info.location,
+                managed: true,
+              },
+            }
+          }
 
           const dir = path.dirname(info.location)
           const base = pathToFileURL(dir).href

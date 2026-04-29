@@ -24,8 +24,19 @@ export interface PromptInfo {
   type: "text" | "chat"
 }
 
+export interface CreatePromptOpts {
+  label?: string
+  tags?: readonly string[]
+  commitMessage?: string
+}
+
 export interface Interface {
   readonly getPrompt: (name: string, opts?: { label?: string; version?: number }) => Effect.Effect<PromptInfo, LangfuseError>
+  readonly createPrompt: (
+    name: string,
+    body: string,
+    opts?: CreatePromptOpts,
+  ) => Effect.Effect<PromptInfo, LangfuseError>
 }
 
 export class Service extends Context.Service<Service, Interface>()("@assets-produce/Langfuse") {}
@@ -78,6 +89,33 @@ export const layer = Layer.effect(
           catch: (cause) =>
             new LangfuseError({
               op: "getPrompt",
+              target: name,
+              message: cause instanceof Error ? cause.message : String(cause),
+            }),
+        }),
+      createPrompt: (name, body, opts) =>
+        Effect.tryPromise({
+          try: async () => {
+            const created = await client.createPrompt({
+              name,
+              prompt: body,
+              type: "text",
+              labels: opts?.label ? [opts.label] : undefined,
+              tags: opts?.tags ? [...opts.tags] : undefined,
+              commitMessage: opts?.commitMessage,
+            })
+            const text = typeof created.prompt === "string" ? created.prompt : JSON.stringify(created.prompt)
+            return {
+              name: created.name,
+              version: created.version,
+              label: opts?.label ?? "production",
+              body: text,
+              type: "text" as const,
+            }
+          },
+          catch: (cause) =>
+            new LangfuseError({
+              op: "createPrompt",
               target: name,
               message: cause instanceof Error ? cause.message : String(cause),
             }),
