@@ -1,8 +1,9 @@
 import { Effect, Layer, Context } from "effect"
-import { and, desc, eq } from "drizzle-orm"
+import { and, desc, eq, sql } from "drizzle-orm"
 import { ulid } from "ulid"
 import { Database } from "@/storage/db"
 import { AssetTable, type AssetRow } from "./asset.sql"
+import { BusinessProjectTable } from "@/business/project/project.sql"
 import { NamedError } from "@opencode-ai/core/util/error"
 import { z } from "zod"
 
@@ -29,9 +30,28 @@ export interface CreateInput {
   refUrls?: unknown
 }
 
+export interface ListOpts {
+  projectId?: string
+  type?: AssetType
+  /** When set, filters to assets belonging to projects owned by this user id */
+  ownerId?: string
+  /** Default 50, max 200 */
+  limit?: number
+  /** Default 0 */
+  offset?: number
+  /** Default true — only return is_current=true rows */
+  currentOnly?: boolean
+}
+
+export interface ListResult {
+  rows: AssetRow[]
+  total: number
+}
+
 export interface Interface {
   readonly create: (input: CreateInput) => Effect.Effect<AssetRow, AssetError>
   readonly get: (id: string) => Effect.Effect<AssetRow | undefined, AssetError>
+  readonly list: (opts?: ListOpts) => Effect.Effect<ListResult, AssetError>
   readonly listByProject: (projectId: string) => Effect.Effect<AssetRow[], AssetError>
   readonly current: (projectId: string, key: string) => Effect.Effect<AssetRow | undefined, AssetError>
   readonly versions: (projectId: string, key: string) => Effect.Effect<AssetRow[], AssetError>
@@ -93,6 +113,82 @@ export const layer = Layer.succeed(
         try: () => Database.use((db) => db.select().from(AssetTable).where(eq(AssetTable.id, id)).get()),
         catch: (cause) =>
           new AssetError({ op: "get", message: cause instanceof Error ? cause.message : String(cause) }),
+      }),
+    list: (opts) =>
+      Effect.try({
+        try: () => {
+          const currentOnly = opts?.currentOnly ?? true
+          const limit = Math.min(opts?.limit ?? 50, 200)
+          const offset = opts?.offset ?? 0
+
+          return Database.use((db) => {
+            // Build WHERE conditions
+            const conds: ReturnType<typeof eq>[] = []
+            if (currentOnly) conds.push(eq(AssetTable.is_current, true))
+            if (opts?.type) conds.push(eq(AssetTable.type, opts.type))
+            if (opts?.projectId) conds.push(eq(AssetTable.project_id, opts.projectId))
+
+            if (opts?.ownerId) {
+              // Join with business_project to filter by owner
+              if (opts.projectId) {
+                // also filter by projectId — add owner constraint via join
+                const ownerCond = eq(BusinessProjectTable.owner_id, opts.ownerId)
+                const where = and(...conds, ownerCond)
+                const rows = db
+                  .select({ asset: AssetTable })
+                  .from(AssetTable)
+                  .innerJoin(BusinessProjectTable, eq(AssetTable.project_id, BusinessProjectTable.id))
+                  .where(where)
+                  .orderBy(desc(AssetTable.time_created))
+                  .limit(limit)
+                  .offset(offset)
+                  .all()
+                  .map((r) => r.asset)
+                const countRow = db
+                  .select({ count: sql<number>`count(*)` })
+                  .from(AssetTable)
+                  .innerJoin(BusinessProjectTable, eq(AssetTable.project_id, BusinessProjectTable.id))
+                  .where(where)
+                  .get()
+                return { rows, total: countRow?.count ?? 0 }
+              } else {
+                const ownerCond = eq(BusinessProjectTable.owner_id, opts.ownerId)
+                const where = conds.length > 0 ? and(...conds, ownerCond) : ownerCond
+                const rows = db
+                  .select({ asset: AssetTable })
+                  .from(AssetTable)
+                  .innerJoin(BusinessProjectTable, eq(AssetTable.project_id, BusinessProjectTable.id))
+                  .where(where)
+                  .orderBy(desc(AssetTable.time_created))
+                  .limit(limit)
+                  .offset(offset)
+                  .all()
+                  .map((r) => r.asset)
+                const countRow = db
+                  .select({ count: sql<number>`count(*)` })
+                  .from(AssetTable)
+                  .innerJoin(BusinessProjectTable, eq(AssetTable.project_id, BusinessProjectTable.id))
+                  .where(where)
+                  .get()
+                return { rows, total: countRow?.count ?? 0 }
+              }
+            }
+
+            // No ownerId — simpler query without join
+            const where = conds.length > 0 ? and(...conds) : undefined
+            const q = db.select().from(AssetTable)
+            const rows = (where ? q.where(where) : q)
+              .orderBy(desc(AssetTable.time_created))
+              .limit(limit)
+              .offset(offset)
+              .all()
+            const countQ = db.select({ count: sql<number>`count(*)` }).from(AssetTable)
+            const countRow = (where ? countQ.where(where) : countQ).get()
+            return { rows, total: countRow?.count ?? 0 }
+          })
+        },
+        catch: (cause) =>
+          new AssetError({ op: "list", message: cause instanceof Error ? cause.message : String(cause) }),
       }),
     listByProject: (projectId) =>
       Effect.try({
