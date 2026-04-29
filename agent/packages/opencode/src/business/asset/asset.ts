@@ -129,49 +129,25 @@ export const layer = Layer.succeed(
             if (opts?.projectId) conds.push(eq(AssetTable.project_id, opts.projectId))
 
             if (opts?.ownerId) {
-              // Join with business_project to filter by owner
-              if (opts.projectId) {
-                // also filter by projectId — add owner constraint via join
-                const ownerCond = eq(BusinessProjectTable.owner_id, opts.ownerId)
-                const where = and(...conds, ownerCond)
-                const rows = db
-                  .select({ asset: AssetTable })
-                  .from(AssetTable)
-                  .innerJoin(BusinessProjectTable, eq(AssetTable.project_id, BusinessProjectTable.id))
-                  .where(where)
-                  .orderBy(desc(AssetTable.time_created))
-                  .limit(limit)
-                  .offset(offset)
-                  .all()
-                  .map((r) => r.asset)
-                const countRow = db
-                  .select({ count: sql<number>`count(*)` })
-                  .from(AssetTable)
-                  .innerJoin(BusinessProjectTable, eq(AssetTable.project_id, BusinessProjectTable.id))
-                  .where(where)
-                  .get()
-                return { rows, total: countRow?.count ?? 0 }
-              } else {
-                const ownerCond = eq(BusinessProjectTable.owner_id, opts.ownerId)
-                const where = conds.length > 0 ? and(...conds, ownerCond) : ownerCond
-                const rows = db
-                  .select({ asset: AssetTable })
-                  .from(AssetTable)
-                  .innerJoin(BusinessProjectTable, eq(AssetTable.project_id, BusinessProjectTable.id))
-                  .where(where)
-                  .orderBy(desc(AssetTable.time_created))
-                  .limit(limit)
-                  .offset(offset)
-                  .all()
-                  .map((r) => r.asset)
-                const countRow = db
-                  .select({ count: sql<number>`count(*)` })
-                  .from(AssetTable)
-                  .innerJoin(BusinessProjectTable, eq(AssetTable.project_id, BusinessProjectTable.id))
-                  .where(where)
-                  .get()
-                return { rows, total: countRow?.count ?? 0 }
-              }
+              conds.push(eq(BusinessProjectTable.owner_id, opts.ownerId))
+              const where = and(...conds)!
+              const rows = db
+                .select({ asset: AssetTable })
+                .from(AssetTable)
+                .innerJoin(BusinessProjectTable, eq(AssetTable.project_id, BusinessProjectTable.id))
+                .where(where)
+                .orderBy(desc(AssetTable.time_created))
+                .limit(limit)
+                .offset(offset)
+                .all()
+                .map((r) => r.asset)
+              const countRow = db
+                .select({ count: sql<number>`count(*)` })
+                .from(AssetTable)
+                .innerJoin(BusinessProjectTable, eq(AssetTable.project_id, BusinessProjectTable.id))
+                .where(where)
+                .get()
+              return { rows, total: countRow?.count ?? 0 }
             }
 
             // No ownerId — simpler query without join
