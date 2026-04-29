@@ -121,14 +121,14 @@ export const layer = Layer.effect(
         }),
       list: (opts) =>
         wrap("list", undefined, async () => {
-          const res = await client.list(
-            {
-              prefix: opts?.prefix,
-              marker: opts?.marker,
-              "max-keys": opts?.maxKeys ?? 100,
-            },
-            {},
-          )
+          // ali-oss SDK rejects an explicit `undefined` for `marker` even
+          // though TS marks it optional; build the query without undefined keys.
+          const query = {
+            "max-keys": opts?.maxKeys ?? 100,
+            ...(opts?.prefix !== undefined && { prefix: opts.prefix }),
+            ...(opts?.marker !== undefined && { marker: opts.marker }),
+          }
+          const res = await client.list(query, {})
           return {
             keys: (res.objects ?? []).map((o) => o.name),
             prefix: opts?.prefix,
