@@ -93,7 +93,7 @@ export const WebAuthMiddleware: MiddlewareHandler = async (c, next) => {
   if (c.req.method === "OPTIONS") return next()
   const authHeader = c.req.header("authorization")
   if (!authHeader) return next()
-  const match = /^[Bb]earer\s+(.+)$/.exec(authHeader)
+  const match = /^bearer\s+(.+)$/i.exec(authHeader)
   if (!match) {
     c.status(401)
     return c.json({ error: "invalid token" })

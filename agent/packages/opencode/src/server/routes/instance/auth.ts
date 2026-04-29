@@ -4,12 +4,12 @@ import z from "zod"
 import { Effect, Layer } from "effect"
 import { randomBytes } from "crypto"
 import { lazy } from "@/util/lazy"
-import { AppRuntime } from "@/effect/app-runtime"
 import { verifyPassword, signJwt, hashPassword } from "@/auth/web"
 import { defaultLayer as userBusinessLayer } from "@/business/user/user"
 import { defaultLayer as sessionTokenBusinessLayer } from "@/business/session-token/session-token"
 import { Service as UserService } from "@/business/user/user"
 import { Service as SessionTokenService } from "@/business/session-token/session-token"
+import { jsonRequest, runRequest } from "./trace"
 
 const LoginBody = z.object({
   username: z.string(),
@@ -59,17 +59,22 @@ export const AuthRoutes = lazy(() =>
       validator("json", LoginBody),
       async (c) => {
         const { username, password } = c.req.valid("json")
-
-        const result = await AppRuntime.runPromise(
-          Effect.gen(function* () {
+        return jsonRequest("AuthRoutes.login", c, function* () {
+          return yield* Effect.gen(function* () {
             const users = yield* UserService
             const tokens = yield* SessionTokenService
 
             const user = yield* users.getByUsername(username)
-            if (!user || !user.password_hash) return null
+            if (!user || !user.password_hash) {
+              c.status(401)
+              return { error: "invalid credentials" } as const
+            }
 
             const valid = yield* Effect.promise(() => verifyPassword(password, user.password_hash!))
-            if (!valid) return null
+            if (!valid) {
+              c.status(401)
+              return { error: "invalid credentials" } as const
+            }
 
             const token = yield* Effect.promise(() =>
               signJwt(
@@ -88,26 +93,17 @@ export const AuthRoutes = lazy(() =>
               expiresAt,
             })
 
-            return { token, refreshToken: rawRefresh, user }
-          }).pipe(Effect.provide(authLayer)),
-        )
-
-        if (!result) {
-          c.status(401)
-          return c.json({ error: "invalid credentials" })
-        }
-
-        const jwtExpiresAt = Date.now() + JWT_TTL_SECONDS * 1000
-
-        return c.json({
-          token: result.token,
-          expires_at: jwtExpiresAt,
-          refresh_token: result.refreshToken,
-          user: {
-            id: result.user.id,
-            username: result.user.username,
-            role: result.user.role,
-          },
+            return {
+              token,
+              expires_at: Date.now() + JWT_TTL_SECONDS * 1000,
+              refresh_token: rawRefresh,
+              user: {
+                id: user.id,
+                username: user.username,
+                role: user.role,
+              },
+            } as const
+          }).pipe(Effect.provide(authLayer))
         })
       },
     )
@@ -122,21 +118,20 @@ export const AuthRoutes = lazy(() =>
         },
       }),
       async (c) => {
-        const user = c.var.user
-        if (!user) {
+        if (!c.var.user) {
           c.status(401)
           return c.json({ error: "unauthorized" })
         }
-
-        await AppRuntime.runPromise(
+        const user = c.var.user
+        await runRequest(
+          "AuthRoutes.logout",
+          c,
           Effect.gen(function* () {
             const tokens = yield* SessionTokenService
             yield* tokens.revokeAllForUser(user.sub)
           }).pipe(Effect.provide(sessionTokenBusinessLayer)),
         )
-
-        c.status(204)
-        return c.body(null)
+        return new Response(null, { status: 204 })
       },
     )
     .get(
@@ -153,19 +148,20 @@ export const AuthRoutes = lazy(() =>
         },
       }),
       async (c) => {
-        const user = c.var.user
-        if (!user) {
+        if (!c.var.user) {
           c.status(401)
           return c.json({ error: "unauthorized" })
         }
-
-        return c.json({
-          user: {
-            id: user.sub,
-            username: user.username,
-            role: user.role,
-            profile: user.profile,
-          },
+        const user = c.var.user
+        return jsonRequest("AuthRoutes.me", c, function* () {
+          return {
+            user: {
+              id: user.sub,
+              username: user.username,
+              role: user.role,
+              profile: user.profile,
+            },
+          }
         })
       },
     ),
