@@ -1,4 +1,5 @@
 import { Hono } from "hono"
+import type { MiddlewareHandler } from "hono"
 import { describeRoute, validator, resolver } from "hono-openapi"
 import z from "zod"
 import { Effect, Layer } from "effect"
@@ -8,6 +9,27 @@ import { jsonRequest, runRequest } from "./trace"
 import { SkillCli, type ContentSource } from "@/business/skill/cli"
 import { defaultLayer as skillBusinessLayer } from "@/business/skill/skill"
 import { defaultLayer as langfuseLayer } from "@/langfuse/langfuse"
+
+// Middleware guards — placed before body validators so auth runs first.
+const requireAuth: MiddlewareHandler = async (c, next) => {
+  if (!c.var.user) {
+    c.status(401)
+    return c.json({ error: "unauthorized" })
+  }
+  return next()
+}
+
+const requireAdmin: MiddlewareHandler = async (c, next) => {
+  if (!c.var.user) {
+    c.status(401)
+    return c.json({ error: "unauthorized" })
+  }
+  if (c.var.user.role !== "admin") {
+    c.status(403)
+    return c.json({ error: "admin role required" })
+  }
+  return next()
+}
 
 const ScopeEnum = z.enum(["system", "creator"])
 
@@ -75,6 +97,7 @@ export const SkillRoutes = lazy(() =>
   new Hono()
     .get(
       "/",
+      requireAuth,
       describeRoute({
         summary: "List skills",
         operationId: "skill.list",
@@ -102,6 +125,7 @@ export const SkillRoutes = lazy(() =>
     )
     .get(
       "/:name",
+      requireAuth,
       describeRoute({
         summary: "Get a skill by name",
         operationId: "skill.get",
@@ -130,6 +154,7 @@ export const SkillRoutes = lazy(() =>
     )
     .post(
       "/",
+      requireAdmin,
       describeRoute({
         summary: "Create a skill",
         operationId: "skill.create",
@@ -168,6 +193,7 @@ export const SkillRoutes = lazy(() =>
     )
     .patch(
       "/:name",
+      requireAdmin,
       describeRoute({
         summary: "Update a skill",
         operationId: "skill.update",
@@ -202,6 +228,7 @@ export const SkillRoutes = lazy(() =>
     )
     .delete(
       "/:name",
+      requireAdmin,
       describeRoute({
         summary: "Delete a skill (DB row only; Langfuse prompt is preserved)",
         operationId: "skill.delete",
