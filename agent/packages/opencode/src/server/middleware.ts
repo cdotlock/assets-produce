@@ -10,6 +10,13 @@ import { Flag } from "@opencode-ai/core/flag/flag"
 import { basicAuth } from "hono/basic-auth"
 import { cors } from "hono/cors"
 import { compress } from "hono/compress"
+import { verifyJwt, type JwtPayload } from "@/auth/web"
+
+declare module "hono" {
+  interface ContextVariableMap {
+    user?: JwtPayload
+  }
+}
 
 const log = Log.create({ service: "server" })
 
@@ -80,6 +87,25 @@ export function CorsMiddleware(opts?: { cors?: string[] }): MiddlewareHandler {
       if (opts?.cors?.includes(input)) return input
     },
   })
+}
+
+export const WebAuthMiddleware: MiddlewareHandler = async (c, next) => {
+  if (c.req.method === "OPTIONS") return next()
+  const authHeader = c.req.header("authorization")
+  if (!authHeader) return next()
+  const match = /^[Bb]earer\s+(.+)$/.exec(authHeader)
+  if (!match) {
+    c.status(401)
+    return c.json({ error: "invalid token" })
+  }
+  try {
+    const payload = await verifyJwt(match[1])
+    c.set("user", payload)
+  } catch {
+    c.status(401)
+    return c.json({ error: "invalid token" })
+  }
+  return next()
 }
 
 const zipped = compress()

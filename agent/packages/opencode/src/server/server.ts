@@ -6,7 +6,7 @@ import * as Log from "@opencode-ai/core/util/log"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import { WorkspaceID } from "@/control-plane/schema"
 import { MDNS } from "./mdns"
-import { AuthMiddleware, CompressionMiddleware, CorsMiddleware, ErrorMiddleware, LoggerMiddleware } from "./middleware"
+import { AuthMiddleware, CompressionMiddleware, CorsMiddleware, ErrorMiddleware, LoggerMiddleware, WebAuthMiddleware } from "./middleware"
 import { FenceMiddleware } from "./fence"
 import { initProjectors } from "./projectors"
 import { InstanceRoutes } from "./routes/instance"
@@ -64,6 +64,7 @@ function createHono(opts: { cors?: string[] }) {
   const app = new Hono()
     .onError(ErrorMiddleware)
     .use(AuthMiddleware)
+    .use(WebAuthMiddleware)
     .use(LoggerMiddleware)
     .use(CompressionMiddleware)
     .use(CorsMiddleware(opts))
