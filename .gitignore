@@ -55,3 +55,4 @@ legacy/prisma/backups/
 legacy/dev.pid
 agent/packages/opencode/db/
 .claude/
+db/
