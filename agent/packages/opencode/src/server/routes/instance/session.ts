@@ -18,7 +18,7 @@ import { Agent } from "@/agent/agent"
 import { Snapshot } from "@/snapshot"
 import { Command } from "@/command"
 import * as Log from "@opencode-ai/core/util/log"
-import { Permission } from "@/permission"
+import { Permission, Profile as ProfileNS } from "@/permission"
 import { PermissionID } from "@/permission/schema"
 import { ModelID, ProviderID } from "@/provider/schema"
 import { errors } from "../../error"
@@ -235,7 +235,14 @@ export const SessionRoutes = lazy(() =>
       validator("json", Session.CreateInput.zod),
       async (c) =>
         jsonRequest("SessionRoutes.create", c, function* () {
-          const body = c.req.valid("json") ?? {}
+          const validated = c.req.valid("json") ?? {}
+          // Web-authenticated creator sessions get the creator ruleset
+          // injected unconditionally — the client cannot override or escalate.
+          // CLI sessions (no JWT) keep the default open behavior.
+          const body: Session.CreateInput = { ...validated }
+          if (c.var.user?.profile === "creator") {
+            body.permission = ProfileNS.applyProfile("creator")
+          }
           const svc = yield* SessionShare.Service
           return yield* svc.create(body)
         }),
