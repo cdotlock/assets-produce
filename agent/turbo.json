@@ -4,17 +4,11 @@
   "globalPassThroughEnv": ["CI", "OPENCODE_DISABLE_SHARE"],
   "tasks": {
     "typecheck": {},
-    "build": {
-      "dependsOn": [],
-      "outputs": ["dist/**"]
-    },
     "opencode#test": {
-      "dependsOn": ["^build"],
       "outputs": [],
       "passThroughEnv": ["*"]
     },
     "opencode#test:ci": {
-      "dependsOn": ["^build"],
       "outputs": [".artifacts/unit/junit.xml"],
       "passThroughEnv": ["*"]
     }
