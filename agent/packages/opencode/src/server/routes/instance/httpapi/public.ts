@@ -14,7 +14,6 @@ import { PtyApi, PtyConnectApi } from "./pty"
 import { QuestionApi } from "./question"
 import { SessionApi } from "./session"
 import { SyncApi } from "./sync"
-import { TuiApi } from "./tui"
 import { WorkspaceApi } from "./workspace"
 
 type OpenApiParameter = {
@@ -103,24 +102,6 @@ function matchLegacyOpenApi(input: Record<string, unknown>) {
           const properties = operation.requestBody.content?.["application/json"]?.schema?.properties
           if (properties?.branch) properties.branch = { anyOf: [properties.branch, { type: "null" }] }
           if (properties?.extra) properties.extra = { anyOf: [properties.extra, { type: "null" }] }
-        }
-        if (path === "/tui/publish" && method === "post" && spec.components?.schemas) {
-          const schema = operation.requestBody.content?.["application/json"]?.schema
-          const anyOf = schema?.anyOf
-          if (anyOf?.length === 4) {
-            spec.components.schemas.EventTuiPromptAppend = anyOf[0]
-            spec.components.schemas.EventTuiCommandExecute = anyOf[1]
-            spec.components.schemas.EventTuiToastShow = anyOf[2]
-            spec.components.schemas.EventTuiSessionSelect = anyOf[3]
-            operation.requestBody.content!["application/json"]!.schema = {
-              anyOf: [
-                { $ref: "#/components/schemas/EventTuiPromptAppend" },
-                { $ref: "#/components/schemas/EventTuiCommandExecute" },
-                { $ref: "#/components/schemas/EventTuiToastShow" },
-                { $ref: "#/components/schemas/EventTuiSessionSelect" },
-              ],
-            }
-          }
         }
         if (path === "/sync/replay" && method === "post" && spec.components?.schemas?.SyncReplayEvent) {
           const events = operation.requestBody.content?.["application/json"]?.schema?.properties?.events
@@ -225,7 +206,6 @@ export const PublicApi = HttpApi.make("opencode")
   .addHttpApi(QuestionApi)
   .addHttpApi(SessionApi)
   .addHttpApi(SyncApi)
-  .addHttpApi(TuiApi)
   .addHttpApi(WorkspaceApi)
   .annotateMerge(
     OpenApi.annotations({
