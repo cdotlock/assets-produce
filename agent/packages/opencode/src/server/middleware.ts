@@ -91,7 +91,8 @@ export function CorsMiddleware(opts?: { cors?: string[] }): MiddlewareHandler {
 
 export const WebAuthMiddleware: MiddlewareHandler = async (c, next) => {
   if (c.req.method === "OPTIONS") return next()
-  const authHeader = c.req.header("authorization")
+  const queryToken = c.req.query("token")
+  const authHeader = c.req.header("authorization") ?? (queryToken ? `Bearer ${queryToken}` : null)
   if (!authHeader) return next()
   const match = /^bearer\s+(.+)$/i.exec(authHeader)
   if (!match) {

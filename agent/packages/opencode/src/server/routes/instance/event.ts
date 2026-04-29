@@ -6,12 +6,14 @@ import * as Log from "@opencode-ai/core/util/log"
 import { BusEvent } from "@/bus/bus-event"
 import { Bus } from "@/bus"
 import { AsyncQueue } from "@/util/queue"
+import { requireAuth } from "@/server/guards"
 
 const log = Log.create({ service: "server" })
 
 export const EventRoutes = () =>
   new Hono().get(
     "/event",
+    requireAuth,
     describeRoute({
       summary: "Subscribe to events",
       description: "Get events",
