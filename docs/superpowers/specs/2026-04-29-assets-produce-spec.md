@@ -59,18 +59,19 @@
 ```
 cdotlock/assets-produce
 ├── legacy/                       旧 Agent Forge 全量（参考用，不维护、不部署、不测试）
-├── agent/                        opencode 改造的 agent + CLI 基座
+├── agent/                        opencode 改造的 agent + CLI 基座（自成 Bun monorepo）
 ├── web/                          创作者工作台（Next.js + shadcn/ui）
 ├── cli-example/                  MiniMax-AI/cli（设计参考，不维护）
 ├── docs/superpowers/specs/       本 spec + phase plans + verification reports
 ├── CLAUDE.md                     项目级指令
 ├── README.md
-├── package.json                  monorepo 根（pnpm workspace）
-└── pnpm-workspace.yaml
+├── package.json                  monorepo 根（Bun workspace, § 15 / 1.1, 1.2）
+└── bun.lock
 ```
 
-工作区配置：
-- `pnpm-workspace.yaml`：声明 `agent/`、`web/` 为 workspace
+工作区配置（⚠ [§ 15 / 1.2](#15-修订记录)）：
+- 根 `package.json` `workspaces: ["web"]`：仅 `web/` 是 root workspace 成员
+- `agent/` 是独立 Bun monorepo（自带 catalog / patches / `bun.lock`），通过根脚本 `install:agent` / `install:all` 桥接
 - `legacy/`、`cli-example/` 不在 workspace（不参与 install / build / test）
 
 ---
@@ -540,6 +541,7 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 |---|---|---|---|
 | 1.0 | 2026-04-29 | 初版（brainstorming session 产出） | cdotlock + Claude |
 | 1.1 | 2026-04-29 | Phase 0 落地时确认 opencode upstream 是 Bun-only（`packageManager: bun@1.3.13`、`bun.lock`、用 `workspaces.catalog` 特性、19 个 packages 全 `bun run --cwd` 入口）。根改用 Bun workspace（`package.json` 内 `workspaces`），废弃 `pnpm-workspace.yaml`。Phase 0 验收命令 `pnpm install` → `bun install`。影响范围：仅 build/install 工具链；不动 § 2 任何核心架构原则、不影响后续 phase 设计。 | cdotlock + Claude |
+| 1.2 | 2026-04-29 | Phase 0 落地时进一步确认：把 `agent/` 列为根 workspace 成员会触发 Bun 嵌套 workspace + catalog 解析失败（实测 `error: @tsconfig/bun@catalog: failed to resolve` 等）。opencode 上游用 `workspaces.catalog` + `patchedDependencies` + `overrides`，把这些抬到根需要长期同步上游 churn，维护代价大。决策：根 workspace 只含 `web/`，`agent/` 是独立 Bun monorepo，通过根 `package.json` 内两个脚本 `install:agent` / `install:all` 桥接。spec § 3 物理结构与工作区配置已同步更新。`legacy/`、`cli-example/` 仍不在 workspace。影响范围：仅工作区拓扑；不影响 § 2 任何核心架构原则、不影响后续 phase。 | cdotlock + Claude |
 
 > 后续修订请在此追加新行，并在受影响的 phase 章节加 ⚠ 标记 + 引用本表行号。
 

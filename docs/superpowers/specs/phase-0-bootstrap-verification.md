@@ -45,15 +45,13 @@
 
 **用户确认**:同意,并补一条永久 feedback —— 类似的"显然解"小问题以后自己决,不打断 user。
 
-### 3.2 agent/ 不并入 root workspace
+### 3.2 agent/ 不并入 root workspace(spec § 15 / 1.2 已记录)
 
 **事实**:opencode 的 monorepo 内部已经是完整 Bun workspace(packages/* + console/* + sdk/js + slack)且带 catalog/patches/overrides。
 
 **问题**:把 agent/ 作为根 workspace 成员会触发 Bun 的嵌套 workspace + 跨 catalog 解析失败(实测 `error: @tsconfig/bun@catalog: failed to resolve` 等)。如果把 catalog 抬到根,每次 opencode 升级都要同步 catalog,长期维护负担大。
 
-**决策**:根 workspace 只含 `web`。`agent/` 自成 Bun monorepo,通过两个根脚本 `install:agent` / `install:all` 联动。这跟 spec § 3 所列"`agent/`、`web/` 为 workspace"略有偏差,但保留同一意图——agent 与 web 都在仓库内,各有独立 install 入口。
-
-**判断**:操作细节,不触红线;不专门加修订记录。
+**决策**:根 workspace 只含 `web`。`agent/` 自成 Bun monorepo,通过两个根脚本 `install:agent` / `install:all` 联动。**这是结构性偏差(不仅是操作细节),已按 § 11.3 加入修订记录 § 15 / 1.2,且 spec § 3 物理结构 / 工作区配置已同步更新**(初版 verification 误判为"操作细节,不专门加修订记录" — code-reviewer 指出后修正)。
 
 ### 3.3 Electron 二进制跳过下载
 
@@ -63,11 +61,11 @@
 
 **判断**:操作细节。不触红线。验收是"`bun install` 成功",这里改成等价的"跳过非必需 postinstall 后成功"。
 
-### 3.4 5 个 legacy 候选未进 `legacy/`(被 .gitignore 排除)
+### 3.4 5 个 runtime artifact 不进 git(但本地 `legacy/` 目录仍保留)
 
-`dev.pid`、`prisma/dev.db`、`prisma/backups/agent_forge.backup.*.sql`、`prisma/backups/dev.db.backup.*`、`temp/.gitignore`(5 个)在 commit 2 时被新根 `.gitignore` 的 `legacy/dev.pid` / `legacy/prisma/dev.db` / `legacy/prisma/backups/` 规则挡掉,git 显示为 `D`(从仓库删除),没出现在 legacy 目录。
+`dev.pid`、`prisma/dev.db`、`prisma/backups/agent_forge.backup.*.sql`、`prisma/backups/dev.db.backup.*`、`temp/.gitignore`(5 个)在 commit 2 时被新根 `.gitignore` 的 `legacy/dev.pid` / `legacy/prisma/dev.db` / `legacy/prisma/backups/` / `legacy/temp/` 规则挡掉,从 git 中删除(commit 显示为 `D`)。**`legacy/dev.pid`、`legacy/prisma/dev.db`、`legacy/prisma/backups/*.sql` 等文件本身仍保留在本地磁盘 `legacy/` 目录下供本地参考,只是不进 git 历史**;只有 `temp/.gitignore` 整体随 `temp/` 目录被规则覆盖。
 
-**理由**:这些是 runtime 状态(PID、DB 文件、binary backup)。spec § 10 Phase 0 的 legacy 概念是"参考用",runtime artifacts 没参考价值。dropping 等价于"不污染 git 历史",符合 § 12 红线之外的合理整理。
+**理由**:这些是 runtime 状态(PID、DB 文件、binary backup)。spec § 10 Phase 0 的 legacy 概念是"参考用",runtime artifacts 没参考价值,不污染 git 历史也合理。
 
 **判断**:不影响 spec 结构;不需要修订记录。
 
@@ -106,8 +104,8 @@ c7b812b chore: park old Agent Forge in legacy/
 
 - [x] 跑通所有验收项
 - [x] 写 verification report
-- [ ] commit + push 到 main(verification.md 这个文件 + Phase 0 已 push;最后还要再 push 一次带 verification)
-- [ ] 跑 `superpowers:code-reviewer`
+- [x] commit + push 到 main(7 commits 推到 `origin/main` `62ece6c..8251797`;之后又加 verification commit 和 § 15 / 1.2 修订 commit,合计 9-10 个 commits)
+- [x] 跑 `superpowers:code-reviewer`(返回 1 个 SHOULD FIX:spec § 15 / 1.2 + § 3 同步;以及 verification 措辞收紧。已修正)
 - [ ] 通知用户 `/compact`
 
 下一阶段:Phase 1 — Base Trim(砍 opencode 不要的包,binary 重命名 `opencode` → `agent`)。
