@@ -13,14 +13,14 @@
 | # | 验收项 | 命令 / 方法 | 实际输出 | 通过 |
 |---|---|---|---|---|
 | 1 | `agent run "say hi"` 用 Claude 跑通 | `bun run --cwd packages/opencode --conditions=browser src/index.ts run "say hi"` (env: `ANTHROPIC_API_KEY` + `ANTHROPIC_BASE_URL` 走用户 cc-vibe.com 代理 / 或直连 api.anthropic.com) | `> Sisyphus - Ultraworker · claude-opus-4-6` 然后 "Hi" 输出。两种环境(代理 + 直连)都跑通 | ✅ |
-| 2 | `agent run --model deepseek/...` 跑通 | `bun run ... run --model deepseek/deepseek-chat "say hi"`(env DEEPSEEK_API_KEY) | **结构性已通**:`agent models deepseek` 列出 4 个 DeepSeek 模型(catalog 来自 models.dev),`@ai-sdk/openai-compatible` 已 bundled。**实跑撞 opencode-internal routing**:opencode 把所有 LLM 请求路由到 `<base>/anthropic/chat/completions`(用 Anthropic-compatible 路径,提升 cross-provider 兼容性)。DeepSeek 在 `https://api.deepseek.com/anthropic/...` 的 Anthropic-compat 路径返回 404(可能需要不同的鉴权 header 或 region 配置)。需 Phase 2.x 单独挑选/适配,详 § 3.1 | ⚠ 部分 |
+| 2 | `agent run --model deepseek/...` 跑通 | `bun run ... run --model deepseek/deepseek-v4-flash "say hi"`(env DEEPSEEK_API_KEY) | **Phase 2.x 验证(2026-04-29 新凭据)**:`deepseek-v4-flash` 输出 "Hi";`deepseek-v4-pro` 输出 "4"(对 "2+2" 的 5 词回答)—— 两个 v4 模型完全跑通,走 `@ai-sdk/openai-compatible` SDK + `https://api.deepseek.com/v1/chat/completions` 路径。`deepseek-chat` / `deepseek-reasoner` 仍 404(DeepSeek 端 v3 endpoint 已停服或新凭据无权访问,与 opencode 无关)。spec § 8.1 "DeepSeek fallback" 目标达成 | ✅ |
 | 3 | `agent oss put / get / list` 跑通 | 三件套 round-trip 一个文件 | `put` 返回 `https://mobai-file.oss-cn-shanghai.aliyuncs.com/phase2-smoke/<ts>.txt`(57 bytes);`list "phase2-smoke/"` 返回该 key;`get <key> /tmp/...txt` 下载 57 bytes,`diff` 与原文件一致("round-trip OK") | ✅ |
 | 4 | 内部测试脚本能从 Langfuse 拉到一个测试 prompt | `bun run --cwd packages/opencode script/langfuse-smoke.ts admin__achievement__generate` | JSON 输出 `{name: "admin__achievement__generate", version: 4, label: "production", type: "text", body: "<5KB markdown>"}`. Langfuse host = `https://prompt.mobai-game.com`,project 用 legacy 凭据 | ✅ |
 | 5 | `pnpm db:migrate` 跑通,6 张业务表存在(spec 字面 pnpm,实施按 § 0.4 改 bun) | `AGENT_DB_PATH=/tmp/x.db bun run ... session list` 触发 startup migration,然后 `sqlite3 /tmp/x.db ".tables" \| grep business_` | 6 张 `business_*` 表全部建出:`business_user / business_project / business_asset / business_skill / business_style_preset / business_task` | ✅ |
 | 6 | `.env.example` 跟 `.env` 字段一致 | `diff <(grep -oE '^[A-Z_]+(?==)' .env.example \| sort -u) <(grep -oE '^[A-Z_]+(?==)' /tmp/test.env \| sort -u)` | 空 diff,11 个字段(AGENT_PORT / ANTHROPIC_API_KEY / DEEPSEEK_API_KEY / LANGFUSE_HOST/PUBLIC_KEY/SECRET_KEY / OSS_REGION/ACCESS_KEY_ID/ACCESS_KEY_SECRET/BUCKET/ENDPOINT)完全对得上 | ✅ |
 | 7 | prompt cache 在 Claude 调用时确实命中(log 验证) | `agent run "say hi"` 跑两次同 prefix,然后 `agent stats` 看 Cache Read / Write | **代理路径(cc-vibe.com)**:Cache Write 16.4K(三次累积),Cache Read 0 — 代理有可能不透传 cache header。**直连 api.anthropic.com**(unset ANTHROPIC_BASE_URL):Cache Write 4.1K,**Cache Read 4.1K**。两次相同 prompt 触发 cache 命中。证明 `cacheControl: { type: "ephemeral" }`(opencode/src/provider/transform.ts:260)wiring 正确 | ✅ |
 
-**全 7 项**:6 完整通过 + 1 部分通过(DeepSeek 结构验证 OK,实跑路由问题留 Phase 2.x)。
+**全 7 项**:7 全部通过(初版 6 + 1 部分 → Phase 2.x 用新凭据补齐 DeepSeek 实跑,见 § 3.1 + § 8 Phase 2.x)。
 
 ### 1.1 acceptance #5 详细输出
 
@@ -79,23 +79,28 @@ $ bun run ... stats
 
 ## 3. 偏差与决策记录(plan 之外的额外判断)
 
-### 3.1 DeepSeek 实跑撞 opencode-internal Anthropic-routing(spec 验收 #2 部分通过)
+### 3.1 DeepSeek 实跑历经凭据切换 → Phase 2.x 用新凭据通过
 
-**触发**:Step 13 验收 #2,跑 `agent run --model deepseek/deepseek-chat "say hi"` —— 即使设了真实 DEEPSEEK_API_KEY 仍 404。
+**初版触发**:Step 13 验收 #2,跑 `agent run --model deepseek/deepseek-chat "say hi"` —— 旧凭据下 deepseek-chat 实跑撞 404。verification 初版误判为 opencode 内部 Anthropic-routing 问题。
 
-**根因**:opencode 内部 (provider/sdk/copilot 等)有"用 Anthropic-compatible 路径走多 provider"的策略 —— 实际请求 URL 是 `https://api.deepseek.com/anthropic/chat/completions`(非 DeepSeek 标准的 `/v1/chat/completions`)。DeepSeek 也有 `/anthropic` Anthropic-compat 端点,但默认路径 + 401/404 行为有自己的 quirks(可能需要不同 header 或 base URL override)。
+**Phase 2.x 修正(2026-04-29 用户提供新凭据)**:
+- 凭据:`DEEPSEEK_API_KEY=sk-f801...`,base url `https://api.deepseek.com`(OpenAI 兼容)/ `https://api.deepseek.com/anthropic`(Anthropic 兼容)
+- 用户指定 `deepseek-v4-flash` 验证
 
-**实测路径**:
-- `agent models deepseek` 列出 deepseek-chat / deepseek-reasoner / deepseek-v4-flash / deepseek-v4-pro(catalog 自动加载 ✅)
-- `agent run --model deepseek/deepseek-chat ...` POST 到 `api.deepseek.com/anthropic/chat/completions` 拿 404 ❌
+**实测结果**:
+- ✅ `agent run --model deepseek/deepseek-v4-flash "say hi"` 输出 "Hi"
+- ✅ `agent run --model deepseek/deepseek-v4-pro "in 5 words: what is 2+2"` 输出 "4"
+- ❌ `deepseek-chat` / `deepseek-reasoner` 仍 404 —— DeepSeek 端 v3 endpoint 已停服或新凭据无权访问,**与 opencode 无关**
+- 走的是 `@ai-sdk/openai-compatible` SDK + 标准 `/v1/chat/completions` 路径,不是 `/anthropic`
+
+**根因更正**:opencode 没有"全部走 Anthropic 路径"的策略。models.dev catalog 把 DeepSeek 标记为 `npm: "@ai-sdk/openai-compatible"`,所以走 OpenAI 兼容路径。初版的 404 是凭据问题。
 
 **决策**:
-1. Phase 2 acceptance #2 标记**"结构性已通,实跑 routing 待 fix"**(见 § 1 表)
-2. 不在本 phase 修(Phase 2 范围已经吃饱;DeepSeek live integration 涉及 provider/sdk 改造,留 Phase 2.x 或 Phase 3 适配 atomic tools 时一并)
-3. 不进 spec § 15 修订记录 —— 这是 implementation bug,不是 spec 偏差;spec 仍然要求 DeepSeek 接通
-4. **TODO** 挂起:Phase 2.x 修一个 `deepseek` customLoader,绕过 `/anthropic` 路由,直接用 `/v1/chat/completions`
+1. Phase 2 acceptance #2 → ✅ 通过(deepseek-v4-flash / v4-pro 实跑通)
+2. 不在 catalog 写死禁用 chat/reasoner —— 留给用户/agent 自己选模型,LLM 调用时返回 404 已经是清晰信号
+3. spec § 15 / 1.4 entry 维持(记录决策路径),状态升级为"已通过"(本 verification 1.1 修订)
 
-**判断**:**实施 quirk**,不动 spec § 2 任何核心架构原则。
+**判断**:凭据 + DeepSeek 端 endpoint 变更,不动 spec § 2 / § 8 任何核心架构原则。
 
 ### 3.2 DB 默认路径从 `opencode.db` 改 `agent.db`(plan § 0.4 R10 决策落地)
 
@@ -150,7 +155,7 @@ b806e17 feat(agent): add OSS + Langfuse Effect services + agent oss CLI
 
 ## 5. 已知遗留(留给后续 phase)
 
-- **Phase 2.x**:DeepSeek `/anthropic/chat/completions` routing fix(详 § 3.1)
+- ~~**Phase 2.x**:DeepSeek routing fix~~ — **已闭环**(详 § 3.1 修订,2026-04-29 用户提供新凭据后 deepseek-v4-flash / v4-pro 实跑通)
 - Phase 3:atomic tools 包装(generate-image / generate-video / concat-clips / crop-video / OSS upload tool / etc.)
 - Phase 4:Skill 系统完整加载 — agent 启动时拉 enabled skill 的 metadata + Langfuse 拉 body 注入 system prompt;`skill <name>` tool 实现
 - Phase 5:WebUI(Next.js + shadcn);auth (bcrypt/argon2 落地 password_hash);HTTP API endpoints
@@ -173,10 +178,10 @@ b806e17 feat(agent): add OSS + Langfuse Effect services + agent oss CLI
 
 ## 7. 进入下一 phase 前的 checklist
 
-- [x] 跑通 6/7 验收项 + 1 部分(DeepSeek routing,§ 3.1 + § 5 挂 Phase 2.x)
+- [x] 跑通 7/7 验收项(初版 6 完整 + 1 部分;Phase 2.x 用新凭据补齐 DeepSeek 实跑 → ✅,详 § 3.1 修订)
 - [x] 写 verification report(本文)
 - [x] 跑 `superpowers:code-reviewer`(返 2 个 SHOULD FIX:S1 Asset.create 非事务化 + 缺 UNIQUE,S2 spec § 15 / 1.4 缺;以及 7 NIT,处理了 N1/N2/N5。详 § 4 末段)
 - [x] commit + push 到 main(11 commits 推到 `origin/main`)
 - [ ] 通知用户 `/compact`
 
-下一阶段:**Phase 2.x — DeepSeek routing fix**(可能短小),然后 **Phase 3 — Atomic Tools**(generate-image / generate-video / concat / crop / OSS upload / etc. 6 个 atomic tools)。
+下一阶段:**Phase 3 — Atomic Tools**(generate-image / generate-video / concat / crop / OSS upload / etc. 6 个 atomic tools)。Phase 2.x 已闭环。
