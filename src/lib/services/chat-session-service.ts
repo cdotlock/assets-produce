@@ -1,0 +1,269 @@
+import { prisma } from "@/lib/db";
+import type { Prisma } from "@/generated/prisma";
+import type { ChatMessage, ProviderMetadata } from "@/lib/agent/types";
+
+/* ------------------------------------------------------------------ */
+/*  User                                                               */
+/* ------------------------------------------------------------------ */
+
+const DEFAULT_USER = "default";
+
+/** Get or auto-create a user by name. */
+async function resolveUser(name?: string): Promise<string> {
+  const userName = name?.trim() || DEFAULT_USER;
+  const user = await prisma.user.upsert({
+    where: { name: userName },
+    update: {},
+    create: { name: userName },
+  });
+  return user.id;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Session CRUD                                                       */
+/* ------------------------------------------------------------------ */
+
+export interface SessionSummary {
+  id: string;
+  title: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Get an existing session or create a new one.
+ * Returns the session id and its historical messages.
+ */
+export async function getOrCreateSession(
+  sessionId?: string,
+  userName?: string,
+): Promise<{ id: string; messages: ChatMessage[] }> {
+  if (sessionId) {
+    const existing = await prisma.chatSession.findUnique({
+      where: { id: sessionId },
+      include: {
+        messages: { orderBy: [{ createdAt: "asc" }, { id: "asc" }] },
+      },
+    });
+    if (existing) {
+      const messages = existing.messages.map(dbMsgToChat);
+      stripDanglingToolCalls(messages);
+      return { id: existing.id, messages };
+    }
+  }
+
+  const userId = await resolveUser(userName);
+  const created = await prisma.chatSession.create({
+    data: { userId },
+  });
+  return { id: created.id, messages: [] };
+}
+
+/** List sessions for a user (most recent first, metadata only). */
+export async function listSessions(
+  userName?: string,
+): Promise<SessionSummary[]> {
+  const userId = await resolveUser(userName);
+  const rows = await prisma.chatSession.findMany({
+    where: { userId },
+    orderBy: { updatedAt: "desc" },
+    select: { id: true, title: true, createdAt: true, updatedAt: true },
+  });
+  return rows;
+}
+
+/** Get a single session with its messages. */
+export async function getSession(
+  sessionId: string,
+): Promise<{
+  id: string;
+  title: string | null;
+  messages: ChatMessage[];
+} | null> {
+  const session = await prisma.chatSession.findUnique({
+    where: { id: sessionId },
+    include: {
+      messages: { orderBy: [{ createdAt: "asc" }, { id: "asc" }] },
+    },
+  });
+  if (!session) return null;
+  return {
+    id: session.id,
+    title: session.title,
+    messages: session.messages.map(dbMsgToChat),
+  };
+}
+
+/** Delete a session and all its messages. */
+export async function deleteSession(sessionId: string): Promise<void> {
+  await prisma.chatSession.delete({ where: { id: sessionId } });
+}
+
+/** Set / update session title. */
+export async function updateSessionTitle(
+  sessionId: string,
+  title: string,
+): Promise<void> {
+  await prisma.chatSession.update({
+    where: { id: sessionId },
+    data: { title },
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/*  Messages                                                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Persist new messages to DB in a single transaction.
+ */
+export async function pushMessages(
+  sessionId: string,
+  msgs: ChatMessage[],
+): Promise<void> {
+  if (msgs.length === 0) return;
+
+  const data: Prisma.ChatMessageCreateManyInput[] = msgs.map((m) => ({
+    sessionId,
+    role: m.role,
+    content: m.content ?? null,
+    images: m.images?.length ? m.images : [],
+    toolCalls: m.tool_calls ? (m.tool_calls as unknown as Prisma.InputJsonValue) : undefined,
+    toolCallId: m.tool_call_id ?? null,
+    providerMetadata: providerMetadataToJson(m.providerMetadata),
+    hidden: m.hidden ?? false,
+  }));
+
+  await prisma.chatMessage.createMany({ data });
+}
+
+/**
+ * Get all messages for a session (ordered by createdAt + id).
+ * Using id as tiebreaker because createMany assigns the same createdAt
+ * to all rows in a batch; CUID ids are monotonically sortable.
+ */
+export async function getMessages(
+  sessionId: string,
+): Promise<ChatMessage[]> {
+  const rows = await prisma.chatMessage.findMany({
+    where: { sessionId },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+  });
+  return rows.map(dbMsgToChat);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Recall — retrieve original tool result from DB                     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Recall the original content of a tool call result by its tool_call_id.
+ * Returns null if no matching tool message is found.
+ */
+export async function recallToolResult(
+  sessionId: string,
+  toolCallId: string,
+): Promise<string | null> {
+  const row = await prisma.chatMessage.findFirst({
+    where: {
+      sessionId,
+      role: "tool",
+      toolCallId,
+    },
+    select: { content: true },
+  });
+  return row?.content ?? null;
+}
+
+/* ------------------------------------------------------------------ */
+/*  DB row → ChatMessage conversion                                   */
+/* ------------------------------------------------------------------ */
+
+interface DbMessageRow {
+  role: string;
+  content: string | null;
+  images: string[];
+  toolCalls: Prisma.JsonValue;
+  toolCallId: string | null;
+  providerMetadata: Prisma.JsonValue;
+  hidden: boolean;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function providerMetadataToJson(metadata: ProviderMetadata | undefined): Prisma.InputJsonValue | undefined {
+  if (!metadata) return undefined;
+  const out: Record<string, string> = {};
+  if (metadata.reasoning_content && metadata.reasoning_content.trim().length > 0) {
+    out.reasoning_content = metadata.reasoning_content;
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
+function providerMetadataFromJson(value: Prisma.JsonValue): ProviderMetadata | undefined {
+  if (!isRecord(value)) return undefined;
+  const reasoningContent = value.reasoning_content;
+  if (typeof reasoningContent !== "string" || reasoningContent.trim().length === 0) {
+    return undefined;
+  }
+  return { reasoning_content: reasoningContent };
+}
+
+function dbMsgToChat(row: DbMessageRow): ChatMessage {
+  const msg: ChatMessage = {
+    role: row.role as ChatMessage["role"],
+    content: row.content,
+  };
+  if (row.images.length > 0) {
+    msg.images = row.images;
+  }
+  if (row.toolCalls) {
+    msg.tool_calls = row.toolCalls as unknown as ChatMessage["tool_calls"];
+  }
+  if (row.toolCallId) {
+    msg.tool_call_id = row.toolCallId;
+  }
+  const providerMetadata = providerMetadataFromJson(row.providerMetadata);
+  if (providerMetadata) {
+    msg.providerMetadata = providerMetadata;
+  }
+  if (row.hidden) {
+    msg.hidden = true;
+  }
+  return msg;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Dangling tool_calls cleanup                                        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Strip tool_calls from assistant messages that have no matching tool
+ * response.  This happens when the agent is aborted mid-execution —
+ * the assistant message is persisted with tool_calls but the
+ * corresponding tool responses are never created.  OpenAI API rejects
+ * conversations with unmatched tool_calls, so we clean them on load
+ * and before flush on abort.
+ *
+ * Mutates in-place for efficiency.
+ */
+export function stripDanglingToolCalls(messages: ChatMessage[]): void {
+  const respondedIds = new Set<string>();
+  for (const m of messages) {
+    if (m.role === "tool" && m.tool_call_id) {
+      respondedIds.add(m.tool_call_id);
+    }
+  }
+  for (const msg of messages) {
+    if (msg.role !== "assistant" || !msg.tool_calls?.length) continue;
+    const matched = msg.tool_calls.filter((tc) => respondedIds.has(tc.id));
+    if (matched.length === msg.tool_calls.length) continue; // all matched
+    if (matched.length === 0) {
+      delete msg.tool_calls;
+    } else {
+      msg.tool_calls = matched;
+    }
+  }
+}
