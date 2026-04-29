@@ -15,6 +15,8 @@ import { QuestionRoutes } from "./question"
 import { PermissionRoutes } from "./permission"
 import { SkillRoutes } from "./skill"
 import { AuthRoutes } from "./auth"
+import { AssetRoutes } from "./asset"
+import { BusinessProjectRoutes } from "./business-project"
 import { ProjectRoutes } from "./project"
 import { SessionRoutes } from "./session"
 import { PtyRoutes } from "./pty"
@@ -40,6 +42,8 @@ export const InstanceRoutes = (upgrade: UpgradeWebSocket): Hono => {
     .route("/permission", PermissionRoutes())
     .route("/skills", SkillRoutes())
     .route("/auth", AuthRoutes())
+    .route("/assets", AssetRoutes())
+    .route("/projects", BusinessProjectRoutes())
     .route("/question", QuestionRoutes())
     .route("/provider", ProviderRoutes())
     .route("/sync", SyncRoutes())
