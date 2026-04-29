@@ -12,6 +12,12 @@ import { WebFetchTool } from "./webfetch"
 import { WriteTool } from "./write"
 import { InvalidTool } from "./invalid"
 import { SkillTool } from "./skill"
+import { GenerateImageNanobananaTool } from "./asset/generate-image-nanobanana"
+import { GenerateImageGptTool } from "./asset/generate-image-gpt"
+import { GenerateVideoSeedanceTool } from "./asset/generate-video-seedance"
+import { ConcatClipsTool } from "./asset/concat-clips"
+import { CropVideoTool } from "./asset/crop-video"
+import { GenerateVideoHappyHorseTool } from "./asset/generate-video-happyhorse"
 import * as Tool from "./tool"
 import { Config } from "@/config/config"
 import { type ToolContext as PluginToolContext, type ToolDefinition } from "@opencode-ai/plugin"
@@ -115,6 +121,12 @@ export const layer: Layer.Layer<
     const greptool = yield* GrepTool
     const patchtool = yield* ApplyPatchTool
     const skilltool = yield* SkillTool
+    const generateImageNanobanana = yield* GenerateImageNanobananaTool
+    const generateImageGpt = yield* GenerateImageGptTool
+    const generateVideoSeedance = yield* GenerateVideoSeedanceTool
+    const concatClips = yield* ConcatClipsTool
+    const cropVideo = yield* CropVideoTool
+    const generateVideoHappyHorse = yield* GenerateVideoHappyHorseTool
     const agent = yield* Agent.Service
 
     const state = yield* InstanceState.make<State>(
@@ -204,6 +216,12 @@ export const layer: Layer.Layer<
           question: Tool.init(question),
           lsp: Tool.init(lsptool),
           plan: Tool.init(plan),
+          generateImageNanobanana: Tool.init(generateImageNanobanana),
+          generateImageGpt: Tool.init(generateImageGpt),
+          generateVideoSeedance: Tool.init(generateVideoSeedance),
+          concatClips: Tool.init(concatClips),
+          cropVideo: Tool.init(cropVideo),
+          generateVideoHappyHorse: Tool.init(generateVideoHappyHorse),
         })
 
         return {
@@ -224,6 +242,12 @@ export const layer: Layer.Layer<
             tool.code,
             tool.skill,
             tool.patch,
+            tool.generateImageNanobanana,
+            tool.generateImageGpt,
+            tool.generateVideoSeedance,
+            tool.concatClips,
+            tool.cropVideo,
+            tool.generateVideoHappyHorse,
             ...(Flag.OPENCODE_EXPERIMENTAL_LSP_TOOL ? [tool.lsp] : []),
             ...(Flag.OPENCODE_EXPERIMENTAL_PLAN_MODE && Flag.OPENCODE_CLIENT === "cli" ? [tool.plan] : []),
           ],

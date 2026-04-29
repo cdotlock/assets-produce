@@ -28,6 +28,7 @@ import { PrCommand } from "./cli/cmd/pr"
 import { SessionCommand } from "./cli/cmd/session"
 import { DbCommand } from "./cli/cmd/db"
 import { OssCommand } from "./cli/cmd/oss"
+import { ToolsCommand } from "./cli/cmd/tools"
 import path from "path"
 import { Global } from "@opencode-ai/core/global"
 import { JsonMigration } from "@/storage/json-migration"
@@ -178,6 +179,7 @@ const cli = yargs(args)
   .command(PluginCommand)
   .command(DbCommand)
   .command(OssCommand)
+  .command(ToolsCommand)
   .fail((msg, err) => {
     if (
       msg?.startsWith("Unknown argument") ||

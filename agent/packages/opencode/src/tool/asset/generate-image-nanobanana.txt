@@ -1,0 +1,8 @@
+Generate an image with the **Nanobanana 2 / gemini-3.1-flash-image-preview** model via the FC endpoint.
+
+- Returns a permanent OSS URL of the generated image
+- Model: nanobanana 2 (a.k.a. `gemini-3.1-flash-image-preview`) — fast, photoreal, good at layouts & typography
+- Optionally pass `referenceImageUrls` (https URLs, max 8) to condition on existing images
+- Use this when prompt is descriptive / scene-driven; for portraits or stylised work consider `generate-image-gpt` instead
+- Set `dryRun: true` to preview the resolved request without invoking the FC backend (testing only — never set in production)
+- Failures surface as the tool output text; the agent should read the error and retry / change strategy rather than giving up

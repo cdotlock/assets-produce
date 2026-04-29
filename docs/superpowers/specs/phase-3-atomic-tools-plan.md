@@ -12,7 +12,7 @@
 |---|---|---|---|
 | 0.1 | 工具实现位置 | `agent/packages/opencode/src/tool/asset/<verb>.ts` | 与内置 tool 共目录,`registry.ts` 注册入 builtin。spec § 10 不要求外部 plugin loader |
 | 0.2 | 参数 schema | `effect/Schema`（不用 zod） | opencode 内置 tool 全部用 effect/Schema;混用会导致 tool 工厂 wrap 异常 |
-| 0.3 | tool ID 命名 | kebab-case:`generate-image` / `generate-image-gpt` / `generate-video` / `concat-clips` / `crop-video` / `happyhorse` | spec § 10 字面命名 |
+| 0.3 | tool ID 命名 | kebab-case + 模型名后缀(便于 LLM 选 tool):`generate-image-nanobanana` / `generate-image-gpt` / `generate-video-seedance` / `generate-video-happyhorse` / `concat-clips` / `crop-video`。**spec § 10 偏离**(spec 原写 `generate-image` / `generate-video` / `happyhorse`),走 § 15 修订记录(1.6 项)记下:命名加模型后缀方便 LLM 区分能力 | spec § 10 字面命名是占位,加模型后缀更自描述,方便 LLM 选 tool |
 | 0.4 | 错误返回 | `Effect.try / Effect.tryPromise` 失败时 `Effect.die` —— opencode `wrap()` 会捕获并转 `assistant` message,不中断 session | registry.ts:124 `Effect.orDie` 已是规范,不需改 |
 | 0.5 | OSS URL 输出 | 每 tool 返回 `output: <oss-url>` 字符串 + `metadata: { ossUrl, sourceParams, ... }` | spec § 10 "输出统一为 OSS URL" |
 | 0.6 | dry-run | 在 schema 加 `dryRun?: boolean`(默认 false);为 true 时 Effect.gen 直接返回 resolved request 不调 FC | spec § 10 "支持 --dry-run 打印 resolved request"。注:opencode 的 `--dry-run` global flag 是 cli 级,这里加 tool 参数 dryRun 是 LLM 可访问的;两者不冲突 |
@@ -36,18 +36,13 @@
 | 路径 | 职责 |
 |---|---|
 | `agent/packages/opencode/src/tool/asset/fc-client.ts` | shared FC POST 客户端(超时、错误、URL 解析) |
-| `agent/packages/opencode/src/tool/asset/generate-image.ts` | Tool.define `generate-image`(DashScope/Gemini) |
-| `agent/packages/opencode/src/tool/asset/generate-image-gpt.ts` | Tool.define `generate-image-gpt`(OpenAI) |
-| `agent/packages/opencode/src/tool/asset/generate-video.ts` | Tool.define `generate-video`(Wan) |
-| `agent/packages/opencode/src/tool/asset/concat-clips.ts` | Tool.define `concat-clips` |
-| `agent/packages/opencode/src/tool/asset/crop-video.ts` | Tool.define `crop-video` |
-| `agent/packages/opencode/src/tool/asset/happyhorse.ts` | Tool.define `happyhorse`(Kling-style) |
-| `agent/packages/opencode/src/tool/asset/generate-image.txt` | description for LLM(类似 `webfetch.txt`) |
-| `agent/packages/opencode/src/tool/asset/generate-image-gpt.txt` | description |
-| `agent/packages/opencode/src/tool/asset/generate-video.txt` | description |
-| `agent/packages/opencode/src/tool/asset/concat-clips.txt` | description |
-| `agent/packages/opencode/src/tool/asset/crop-video.txt` | description |
-| `agent/packages/opencode/src/tool/asset/happyhorse.txt` | description |
+| `agent/packages/opencode/src/tool/asset/generate-image-nanobanana.ts` | Tool.define `generate-image-nanobanana`(nanobanana 2 / gemini-3.1-flash-image-preview) |
+| `agent/packages/opencode/src/tool/asset/generate-image-gpt.ts` | Tool.define `generate-image-gpt`(OpenAI GPT-Image) |
+| `agent/packages/opencode/src/tool/asset/generate-video-seedance.ts` | Tool.define `generate-video-seedance`(SeedDance 2 pro) |
+| `agent/packages/opencode/src/tool/asset/generate-video-happyhorse.ts` | Tool.define `generate-video-happyhorse`(HappyHorse / Kling-style) |
+| `agent/packages/opencode/src/tool/asset/concat-clips.ts` | Tool.define `concat-clips`(FFmpeg-style stream concat,无 AI 模型) |
+| `agent/packages/opencode/src/tool/asset/crop-video.ts` | Tool.define `crop-video`(FFmpeg-style trim,无 AI 模型) |
+| `agent/packages/opencode/src/tool/asset/<tool>.txt` × 6 | LLM-facing description for each tool |
 | `agent/packages/opencode/src/cli/cmd/tools.ts` | `agent tools list / show / export-schema` yargs subcmd |
 
 ### 1.2 修改
@@ -92,73 +87,53 @@
 
 ## 3. tool schema 设计
 
-### 3.1 generate-image
+### 3.1 generate-image-nanobanana (model: nanobanana 2 / gemini-3.1-flash-image-preview)
 
 ```
 {
   prompt: string (required, 1..4000 chars)
-  model?: "gemini" | "gemini-3-pro-image-preview" | "google/gemini-*"  (default "gemini")
+  model?: string  (default "gemini-3.1-flash-image-preview")
   referenceImageUrls?: string[]  (https? URLs, 0..8)
   dryRun?: boolean  (default false)
 }
 
 → output: <oss-url>
   metadata: { ossUrl, model, refCount, dryRun? }
+env: FC_GENERATE_IMAGE_NANOBANANA_URL / FC_GENERATE_IMAGE_NANOBANANA_TOKEN
 ```
 
-### 3.2 generate-image-gpt
+### 3.2 generate-image-gpt (model: OpenAI GPT-Image 1)
 
 ```
 {
   prompt: string (required, 1..4000)
-  model?: "gpt" | "gpt-image-1" | "openai/*"  (default "gpt")
+  model?: string  (default "gpt-image-1")
   referenceImageUrls?: string[]
   dryRun?: boolean
 }
 
 → output: <oss-url>
+env: FC_GENERATE_IMAGE_GPT_URL / FC_GENERATE_IMAGE_GPT_TOKEN
 ```
 
-### 3.3 generate-video
+### 3.3 generate-video-seedance (model: SeedDance 2 pro)
 
 ```
 {
   prompt: string (required)
   sourceImageUrl?: string (https?)
   styleName?: string
+  model?: string  (default "seedance-2-pro")
   referenceImageUrls?: string[]
   sourceVideoUrls?: string[]
   dryRun?: boolean
 }
 
 → output: <oss-url> (5-min timeout)
+env: FC_GENERATE_VIDEO_SEEDANCE_URL / FC_GENERATE_VIDEO_SEEDANCE_TOKEN
 ```
 
-### 3.4 concat-clips
-
-```
-{
-  clipUrls: string[] (2..16, https?)
-  dryRun?: boolean
-}
-
-→ output: <oss-url>
-```
-
-### 3.5 crop-video
-
-```
-{
-  videoUrl: string (https?, required)
-  startTime: number (>= 0)
-  endTime: number (> startTime)
-  dryRun?: boolean
-}
-
-→ output: <oss-url>
-```
-
-### 3.6 happyhorse
+### 3.4 generate-video-happyhorse (model: HappyHorse / Kling-style multimodal)
 
 ```
 {
@@ -171,7 +146,34 @@
   dryRun?: boolean
 }
 
-→ output: <oss-url> (内部 metadata 含 taskId / status)
+→ output: <oss-url> (5-min timeout, metadata 含 taskId / status)
+env: FC_GENERATE_VIDEO_HAPPYHORSE_URL / FC_GENERATE_VIDEO_HAPPYHORSE_TOKEN
+```
+
+### 3.5 concat-clips (FFmpeg-style concat, 无 AI 模型)
+
+```
+{
+  clipUrls: string[] (2..16, https?)
+  dryRun?: boolean
+}
+
+→ output: <oss-url>
+env: FC_CONCAT_CLIPS_URL / FC_CONCAT_CLIPS_TOKEN
+```
+
+### 3.6 crop-video (FFmpeg-style trim, 无 AI 模型)
+
+```
+{
+  videoUrl: string (https?, required)
+  startTime: number (>= 0)
+  endTime: number (> startTime)
+  dryRun?: boolean
+}
+
+→ output: <oss-url>
+env: FC_CROP_VIDEO_URL / FC_CROP_VIDEO_TOKEN
 ```
 
 ---
@@ -180,21 +182,27 @@
 
 ```
 # Phase 3 — Atomic Tool FC endpoints (6 tools × URL+TOKEN)
-FC_GENERATE_IMAGE_URL=
-FC_GENERATE_IMAGE_TOKEN=
+# Tool ↔ env mapping (model name encoded in env to ease ops grep):
+#   generate-image-nanobanana  → nanobanana 2 / gemini-3.1-flash-image-preview
+#   generate-image-gpt         → OpenAI GPT-Image
+#   generate-video-seedance    → SeedDance 2 pro
+#   generate-video-happyhorse  → HappyHorse (Kling-style multimodal)
+#   concat-clips / crop-video  → FFmpeg-style ops, no AI model
+FC_GENERATE_IMAGE_NANOBANANA_URL=
+FC_GENERATE_IMAGE_NANOBANANA_TOKEN=
 FC_GENERATE_IMAGE_GPT_URL=
 FC_GENERATE_IMAGE_GPT_TOKEN=
-FC_GENERATE_VIDEO_URL=
-FC_GENERATE_VIDEO_TOKEN=
+FC_GENERATE_VIDEO_SEEDANCE_URL=
+FC_GENERATE_VIDEO_SEEDANCE_TOKEN=
+FC_GENERATE_VIDEO_HAPPYHORSE_URL=
+FC_GENERATE_VIDEO_HAPPYHORSE_TOKEN=
 FC_CONCAT_CLIPS_URL=
 FC_CONCAT_CLIPS_TOKEN=
 FC_CROP_VIDEO_URL=
 FC_CROP_VIDEO_TOKEN=
-FC_HAPPYHORSE_URL=
-FC_HAPPYHORSE_TOKEN=
 ```
 
-12 个新字段,沿用 legacy 命名。
+12 个新字段,env name 与 tool id 一致(对照 § 3 schema 表)。
 
 ---
 
@@ -202,7 +210,7 @@ FC_HAPPYHORSE_TOKEN=
 
 | # | 验收项 | 验证方法 |
 |---|---|---|
-| 1 | `agent tools list` 显示 6 个 tool | grep 输出 |
+| 1 | `agent tools list` 显示 6 个 tool(`generate-image-nanobanana` / `generate-image-gpt` / `generate-video-seedance` / `generate-video-happyhorse` / `concat-clips` / `crop-video`) | grep 输出 |
 | 2 | 每个 tool 单独可调用、可 `--dry-run` | 6 次 dryRun=true 调用 |
 | 3 | `agent config export-schema --command "tools generate-image"`(spec 字面) → 我们走 `agent tools export-schema generate-image`(更直接) | JSON 输出含 `inputSchema` / `description` |
 | 4 | 在 chat 里 LLM 能成功调用每个 tool,结果是 OSS URL | env 真实配置后跑(未配置时会 surface error,不中断) |

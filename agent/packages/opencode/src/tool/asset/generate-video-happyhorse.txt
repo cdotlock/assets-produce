@@ -1,0 +1,10 @@
+Generate a video with the **HappyHorse** model (Kling-style multimodal video) via the FC endpoint.
+
+- Model: HappyHorse — accepts prompt + 1-8 media items (videos or reference images) for multimodal control
+- Each media item: `{ type: "video" | "reference_image", url: <https> }` — `video` is a source clip to extend / restyle; `reference_image` provides style or character reference
+- Configurable: `resolution` (1080P|720P), `ratio` (16:9|9:16|1:1|4:3|3:4), `duration` (1-30s)
+- Returns OSS URL of generated video plus task metadata (taskId, status)
+- For text-to-video without reference media, prefer `generate-video-seedance` (SeedDance 2 pro)
+- Set `dryRun: true` to preview the resolved request without invoking the FC backend (testing only)
+- The FC backend handles polling internally; this call may take several minutes
+- Failures surface as the tool output text

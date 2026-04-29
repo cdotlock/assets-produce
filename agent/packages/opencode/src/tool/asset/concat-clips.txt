@@ -1,0 +1,8 @@
+Concatenate 2-16 video clips into a single video (FFmpeg-style stream concat) via the FC endpoint.
+
+- Pure deterministic operation — no AI model involved
+- Input: ordered array of clip URLs (https) — order matters in the output
+- Output: permanent OSS URL of concatenated video
+- All clips should share resolution / framerate / codec; otherwise the FC backend may error out
+- Use this after `generate-video-seedance` / `generate-video-happyhorse` produces multiple clips you want to stitch
+- Set `dryRun: true` to preview the resolved request without invoking the FC backend (testing only)

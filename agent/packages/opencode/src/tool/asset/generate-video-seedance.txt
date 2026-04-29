@@ -1,0 +1,11 @@
+Generate a video clip with the **SeedDance 2 pro** model via the FC endpoint.
+
+- Returns a permanent OSS URL of the generated video (typical 5-12s clip)
+- Model: SeedDance 2 pro — text-to-video / image-to-video, strong on motion coherence
+- Optional `sourceImageUrl` seeds animation from a still image (image-to-video mode)
+- Optional `referenceImageUrls` and `sourceVideoUrls` provide style/content references
+- Optional `styleName` selects a preset style defined by the FC backend
+- For Kling-style outputs / multimodal control with reference media, use `generate-video-happyhorse` instead
+- Set `dryRun: true` to preview the resolved request without invoking the FC backend (testing only)
+- This call may take several minutes; the underlying FC handles polling internally
+- Failures surface as the tool output text
