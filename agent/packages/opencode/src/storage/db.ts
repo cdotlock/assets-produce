@@ -29,15 +29,16 @@ const log = Log.create({ service: "db" })
 
 export function getChannelPath() {
   if (["latest", "beta", "prod"].includes(InstallationChannel) || Flag.OPENCODE_DISABLE_CHANNEL_DB)
-    return path.join(Global.Path.data, "opencode.db")
+    return path.join(Global.Path.data, "agent.db")
   const safe = InstallationChannel.replace(/[^a-zA-Z0-9._-]/g, "-")
-  return path.join(Global.Path.data, `opencode-${safe}.db`)
+  return path.join(Global.Path.data, `agent-${safe}.db`)
 }
 
 export const Path = iife(() => {
-  if (Flag.OPENCODE_DB) {
-    if (Flag.OPENCODE_DB === ":memory:" || path.isAbsolute(Flag.OPENCODE_DB)) return Flag.OPENCODE_DB
-    return path.join(Global.Path.data, Flag.OPENCODE_DB)
+  const explicit = process.env["AGENT_DB_PATH"] ?? Flag.OPENCODE_DB
+  if (explicit) {
+    if (explicit === ":memory:" || path.isAbsolute(explicit)) return explicit
+    return path.join(Global.Path.data, explicit)
   }
   return getChannelPath()
 })
