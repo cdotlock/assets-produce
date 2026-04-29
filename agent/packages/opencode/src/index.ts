@@ -113,6 +113,11 @@ const cli = yargs(args)
       run_id: processMetadata.runID,
     })
 
+    // Phase 6 cleanup: this marker is hardcoded to the upstream "opencode.db"
+    // filename even though we renamed the actual DB to agent.db in storage/db.ts.
+    // For new installs the file never exists, so JsonMigration.run fires every
+    // boot (idempotent but ~1-2s overhead). Rename to "agent.db" once the broader
+    // OPENCODE_* -> AGENT_* env / path rename pass lands.
     const marker = path.join(Global.Path.data, "opencode.db")
     if (!(await Filesystem.exists(marker))) {
       const tty = process.stderr.isTTY

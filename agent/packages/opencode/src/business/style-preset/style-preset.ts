@@ -1,5 +1,5 @@
 import { Effect, Layer, Context } from "effect"
-import { eq, isNull, or } from "drizzle-orm"
+import { and, eq, isNull, or } from "drizzle-orm"
 import { ulid } from "ulid"
 import { Database } from "@/storage/db"
 import { StylePresetTable, type StylePresetRow } from "./style-preset.sql"
@@ -75,18 +75,19 @@ export const layer = Layer.succeed(
       Effect.try({
         try: () =>
           Database.use((db) => {
-            const q = db.select().from(StylePresetTable)
+            const conds = []
             if (opts?.ownerId !== undefined) {
-              return q
-                .where(
-                  opts.ownerId === null
-                    ? isNull(StylePresetTable.owner_id)
-                    : or(isNull(StylePresetTable.owner_id), eq(StylePresetTable.owner_id, opts.ownerId)),
-                )
-                .all()
+              conds.push(
+                opts.ownerId === null
+                  ? isNull(StylePresetTable.owner_id)
+                  : or(isNull(StylePresetTable.owner_id), eq(StylePresetTable.owner_id, opts.ownerId))!,
+              )
             }
-            if (opts?.type) return q.where(eq(StylePresetTable.type, opts.type)).all()
-            return q.all()
+            if (opts?.type) conds.push(eq(StylePresetTable.type, opts.type))
+            const q = db.select().from(StylePresetTable)
+            if (conds.length === 0) return q.all()
+            if (conds.length === 1) return q.where(conds[0]).all()
+            return q.where(and(...conds)).all()
           }),
         catch: (cause) =>
           new StylePresetError({ op: "list", message: cause instanceof Error ? cause.message : String(cause) }),
@@ -97,6 +98,13 @@ export const layer = Layer.succeed(
           const values: Record<string, unknown> = {}
           if (patch.name !== undefined) values.name = patch.name
           if (patch.data !== undefined) values.data = patch.data
+          if (Object.keys(values).length === 0) {
+            const existing = Database.use((db) =>
+              db.select().from(StylePresetTable).where(eq(StylePresetTable.id, id)).get(),
+            )
+            if (!existing) throw new Error(`style preset ${id} not found`)
+            return existing
+          }
           const row = Database.use((db) =>
             db.update(StylePresetTable).set(values).where(eq(StylePresetTable.id, id)).returning().get(),
           )

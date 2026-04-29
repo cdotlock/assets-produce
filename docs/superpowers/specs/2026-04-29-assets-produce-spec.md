@@ -327,7 +327,7 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 **不做**：atomic tools、skill 系统、UI
 
 **验收**：
-- `agent run "say hi"` 用 Claude 跑通；`--model deepseek` 跑通
+- `agent run "say hi"` 用 Claude 跑通；`--model deepseek` 跑通 ⚠ § 15 / 1.4：DeepSeek live request 撞 opencode `/anthropic/chat/completions` routing,实跑 404,推迟到 Phase 2.x(catalog + SDK 结构性已通)
 - `agent oss put foo.txt` / `get` / `list` 跑通
 - 内部测试脚本能从 Langfuse 拉到一个测试 prompt
 - `pnpm db:migrate` 跑通，6 张表存在
@@ -543,6 +543,7 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 | 1.1 | 2026-04-29 | Phase 0 落地时确认 opencode upstream 是 Bun-only（`packageManager: bun@1.3.13`、`bun.lock`、用 `workspaces.catalog` 特性、19 个 packages 全 `bun run --cwd` 入口）。根改用 Bun workspace（`package.json` 内 `workspaces`），废弃 `pnpm-workspace.yaml`。Phase 0 验收命令 `pnpm install` → `bun install`。影响范围：仅 build/install 工具链；不动 § 2 任何核心架构原则、不影响后续 phase 设计。 | cdotlock + Claude |
 | 1.2 | 2026-04-29 | Phase 0 落地时进一步确认：把 `agent/` 列为根 workspace 成员会触发 Bun 嵌套 workspace + catalog 解析失败（实测 `error: @tsconfig/bun@catalog: failed to resolve` 等）。opencode 上游用 `workspaces.catalog` + `patchedDependencies` + `overrides`，把这些抬到根需要长期同步上游 churn，维护代价大。决策：根 workspace 只含 `web/`，`agent/` 是独立 Bun monorepo，通过根 `package.json` 内两个脚本 `install:agent` / `install:all` 桥接。spec § 3 物理结构与工作区配置已同步更新。`legacy/`、`cli-example/` 仍不在 workspace。影响范围：仅工作区拓扑；不影响 § 2 任何核心架构原则、不影响后续 phase。 | cdotlock + Claude |
 | 1.3 | 2026-04-29 | Phase 1 落地时确认：opencode/src 的 `share/`、`sync/`、`control-plane/` 三个子目录在 `storage/schema`、`effect/bootstrap-runtime`、`effect/app-runtime`、`project/bootstrap`、`server/routes/instance/{session,sync,control}`、`session/{session,projectors,revert,message-v2}` 等十几处深度耦合（share 8 inbound、sync 15+ inbound、control-plane 15+ inbound）。Phase 1 砍这些会牵动启动链 + storage schema + session 生命周期；此外 `sync` / `control-plane` 不在 spec § 10 字面 cut 列表内（§ 10 Phase 1 只列 share / acp）。决策：Phase 1 只砍 acp（`acp/` 目录 + `cli/cmd/acp.ts` + `index.ts` 注册），保留 share / sync / control-plane。Phase 2 LLM/DB 接通后视实际 runtime 副作用再决定何时砍。spec § 10 Phase 1 字面要求"share 砍"未落地（acp 已落地）；§ 10 Phase 1 加 ⚠ 标记引用本行。影响范围：trim 时序；不动 § 2 任何核心架构原则，不影响后续 phase 接口设计。 | cdotlock + Claude |
+| 1.4 | 2026-04-29 | Phase 2 落地时确认：`agent run --model deepseek/deepseek-chat` 实跑撞 opencode-internal Anthropic-routing 策略 —— 所有 LLM 请求被路由到 `<base>/anthropic/chat/completions`，而 DeepSeek 的 `/anthropic` Anthropic-compat 端点返回 404（可能需要不同 header / region 配置）。结构性已通（catalog 自动加载、`@ai-sdk/openai-compatible` SDK 已 bundled、`agent models deepseek` 列出 4 个模型）；live integration 推迟到 **Phase 2.x**（单独 sub-phase 修 routing，可能加 `deepseek` customLoader 走 `/v1/chat/completions`）。spec § 10 Phase 2 acceptance #2 加 ⚠ 标记引用本行。影响范围：DeepSeek live fallback 时序；不动 § 2 / § 8 任何核心 LLM provider 设计。 | cdotlock + Claude |
 
 > 后续修订请在此追加新行，并在受影响的 phase 章节加 ⚠ 标记 + 引用本表行号。
 

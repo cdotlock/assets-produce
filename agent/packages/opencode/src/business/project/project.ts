@@ -89,6 +89,13 @@ export const layer = Layer.succeed(
           if (patch.title !== undefined) values.title = patch.title
           if (patch.description !== undefined) values.description = patch.description
           if (patch.metadata !== undefined) values.metadata = patch.metadata
+          if (Object.keys(values).length === 0) {
+            const existing = Database.use((db) =>
+              db.select().from(BusinessProjectTable).where(eq(BusinessProjectTable.id, id)).get(),
+            )
+            if (!existing) throw new Error(`project ${id} not found`)
+            return existing
+          }
           const row = Database.use((db) =>
             db.update(BusinessProjectTable).set(values).where(eq(BusinessProjectTable.id, id)).returning().get(),
           )

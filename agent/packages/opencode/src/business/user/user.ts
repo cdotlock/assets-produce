@@ -85,6 +85,11 @@ export const layer = Layer.succeed(
           if (patch.username !== undefined) values.username = patch.username
           if (patch.role !== undefined) values.role = patch.role
           if (patch.passwordHash !== undefined) values.password_hash = patch.passwordHash
+          if (Object.keys(values).length === 0) {
+            const existing = Database.use((db) => db.select().from(UserTable).where(eq(UserTable.id, id)).get())
+            if (!existing) throw new Error(`user ${id} not found`)
+            return existing
+          }
           const row = Database.use((db) =>
             db.update(UserTable).set(values).where(eq(UserTable.id, id)).returning().get(),
           )

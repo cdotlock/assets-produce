@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "4dcdab8d-5388-4a59-bdcf-eb4881703460",
+  "id": "de13de95-e62d-4a65-b7ca-b10f51a5d76f",
   "prevIds": [
     "aaa2ebeb-caa4-478d-8365-4fc595d16856"
   ],
@@ -2083,10 +2083,10 @@
           "isExpression": false
         }
       ],
-      "isUnique": false,
+      "isUnique": true,
       "where": null,
       "origin": "manual",
-      "name": "idx_business_asset_project_key_version",
+      "name": "uq_business_asset_project_key_version",
       "entityType": "indexes",
       "table": "business_asset"
     },

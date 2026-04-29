@@ -46,8 +46,12 @@ export const layer = Layer.succeed(
     create: (input) =>
       Effect.try({
         try: () =>
-          Database.use((db) => {
-            // Find current version of (projectId, key) and bump
+          // SELECT max(version) + UPDATE prior is_current + INSERT new row
+          // must run atomically so two concurrent create()s for the same
+          // (project_id, key) don't race. The UNIQUE index in
+          // asset.sql.ts (uq_business_asset_project_key_version) is the
+          // backstop, but the transaction is the primary correctness barrier.
+          Database.transaction((db) => {
             const prev = db
               .select({ version: AssetTable.version })
               .from(AssetTable)
@@ -56,7 +60,6 @@ export const layer = Layer.succeed(
               .limit(1)
               .get()
             const nextVersion = prev ? prev.version + 1 : 1
-            // Mark previous current=false
             if (prev) {
               db.update(AssetTable)
                 .set({ is_current: false })

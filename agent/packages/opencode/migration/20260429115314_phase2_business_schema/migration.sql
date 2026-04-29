@@ -79,7 +79,7 @@ CREATE TABLE `business_user` (
 	`time_updated` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE INDEX `idx_business_asset_project_key_version` ON `business_asset` (`project_id`,`key`,`version`);--> statement-breakpoint
+CREATE UNIQUE INDEX `uq_business_asset_project_key_version` ON `business_asset` (`project_id`,`key`,`version`);--> statement-breakpoint
 CREATE INDEX `idx_business_asset_project_key_current` ON `business_asset` (`project_id`,`key`) WHERE "business_asset"."is_current" = 1;--> statement-breakpoint
 CREATE INDEX `idx_business_style_preset_type` ON `business_style_preset` (`type`);--> statement-breakpoint
 CREATE INDEX `idx_business_style_preset_owner` ON `business_style_preset` (`owner_id`);--> statement-breakpoint

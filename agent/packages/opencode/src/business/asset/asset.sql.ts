@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, index, type AnySQLiteColumn } from "drizzle-orm/sqlite-core"
+import { sqliteTable, text, integer, index, uniqueIndex, type AnySQLiteColumn } from "drizzle-orm/sqlite-core"
 import { sql } from "drizzle-orm"
 import { BusinessProjectTable } from "@/business/project/project.sql"
 
@@ -24,7 +24,7 @@ export const AssetTable = sqliteTable(
       .$default(() => Date.now()),
   },
   (t) => [
-    index("idx_business_asset_project_key_version").on(t.project_id, t.key, t.version),
+    uniqueIndex("uq_business_asset_project_key_version").on(t.project_id, t.key, t.version),
     index("idx_business_asset_project_key_current")
       .on(t.project_id, t.key)
       .where(sql`${t.is_current} = 1`),

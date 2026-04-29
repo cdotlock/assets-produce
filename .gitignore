@@ -53,3 +53,4 @@ legacy/.env.*.local
 legacy/prisma/dev.db
 legacy/prisma/backups/
 legacy/dev.pid
+agent/packages/opencode/db/

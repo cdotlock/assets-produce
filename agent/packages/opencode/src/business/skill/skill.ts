@@ -113,6 +113,11 @@ export const layer = Layer.succeed(
           if (patch.scope !== undefined) values.scope = patch.scope
           if (patch.enabled !== undefined) values.enabled = patch.enabled
           if (patch.attachments !== undefined) values.attachments = patch.attachments
+          if (Object.keys(values).length === 0) {
+            const existing = Database.use((db) => db.select().from(SkillTable).where(eq(SkillTable.id, id)).get())
+            if (!existing) throw new Error(`skill ${id} not found`)
+            return existing
+          }
           const row = Database.use((db) =>
             db.update(SkillTable).set(values).where(eq(SkillTable.id, id)).returning().get(),
           )

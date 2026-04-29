@@ -96,6 +96,11 @@ export const layer = Layer.succeed(
           if (patch.progress !== undefined) values.progress = patch.progress
           if (patch.startedAt !== undefined) values.started_at = patch.startedAt
           if (patch.completedAt !== undefined) values.completed_at = patch.completedAt
+          if (Object.keys(values).length === 0) {
+            const existing = Database.use((db) => db.select().from(TaskTable).where(eq(TaskTable.id, id)).get())
+            if (!existing) throw new Error(`task ${id} not found`)
+            return existing
+          }
           const row = Database.use((db) =>
             db.update(TaskTable).set(values).where(eq(TaskTable.id, id)).returning().get(),
           )
