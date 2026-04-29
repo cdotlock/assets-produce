@@ -127,9 +127,11 @@ $ bun run ... stats
 
 ---
 
-## 4. commit 历史(7 个 atomic commits + 1 plan)
+## 4. commit 历史(9 个 atomic commits + 1 plan + 1 verification)
 
 ```
+<reviewer fix> refactor(agent/business): apply code-reviewer SHOULD FIX (S1/S2) + select NIT
+f37cc72 docs(phase-2): add foundation verification report
 30b8104 fix(agent/oss): drop undefined marker key from list query
 ed0cd37 docs(env): add complete .env.example for Phase 2 foundation
 660b477 feat(agent/business): add CRUD service skeletons for 6 entities
@@ -141,6 +143,8 @@ b806e17 feat(agent): add OSS + Langfuse Effect services + agent oss CLI
 ```
 
 每个 commit 独立可 revert、消息描述了 why 而非 what。
+
+**code-reviewer 反馈处理**:2 个 SHOULD FIX(S1: Asset.create 包 transaction + 加 uniqueIndex,migration regenerate;S2: spec § 15 / 1.4 entry + § 10 Phase 2 ⚠ 标记)+ 3 NIT(N1: 5 service update() empty-patch guard;N2: style-preset.list 复合过滤;N5: index.ts:116 marker rename comment 给 Phase 6)。N3 / N4 / N6 / N7 留 Phase 6 / Phase 3。
 
 ---
 
@@ -171,8 +175,8 @@ b806e17 feat(agent): add OSS + Langfuse Effect services + agent oss CLI
 
 - [x] 跑通 6/7 验收项 + 1 部分(DeepSeek routing,§ 3.1 + § 5 挂 Phase 2.x)
 - [x] 写 verification report(本文)
-- [ ] 跑 `superpowers:code-reviewer`(下一步)
-- [ ] commit + push 到 main(verification commit + 任何 reviewer fix)
+- [x] 跑 `superpowers:code-reviewer`(返 2 个 SHOULD FIX:S1 Asset.create 非事务化 + 缺 UNIQUE,S2 spec § 15 / 1.4 缺;以及 7 NIT,处理了 N1/N2/N5。详 § 4 末段)
+- [x] commit + push 到 main(11 commits 推到 `origin/main`)
 - [ ] 通知用户 `/compact`
 
 下一阶段:**Phase 2.x — DeepSeek routing fix**(可能短小),然后 **Phase 3 — Atomic Tools**(generate-image / generate-video / concat / crop / OSS upload / etc. 6 个 atomic tools)。
