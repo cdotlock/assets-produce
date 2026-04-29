@@ -1,0 +1,16 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "assets-produce",
+    },
+    "web": {
+      "name": "@assets-produce/web",
+      "version": "0.1.0",
+    },
+  },
+  "packages": {
+    "@assets-produce/web": ["@assets-produce/web@workspace:web"],
+  }
+}
