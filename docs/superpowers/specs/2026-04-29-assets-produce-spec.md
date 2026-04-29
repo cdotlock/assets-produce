@@ -272,8 +272,8 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 
 **验收**：
 - `cd agent && bun run dev --help`（或等价命令）能跑通原生 opencode
-- 根 `pnpm install` 成功
-- `legacy/` 不在 workspace（确认 `pnpm install` 不进 legacy）
+- 根 `bun install` 成功 ⚠ ([§ 15 修订 1.1](#15-修订记录))
+- `legacy/` 不在 workspace（确认 `bun install` 不进 legacy）
 - `cli-example/` 不在 workspace
 - `git status` 干净
 
@@ -539,6 +539,7 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 | 版本 | 日期 | 修订 | 作者 |
 |---|---|---|---|
 | 1.0 | 2026-04-29 | 初版（brainstorming session 产出） | cdotlock + Claude |
+| 1.1 | 2026-04-29 | Phase 0 落地时确认 opencode upstream 是 Bun-only（`packageManager: bun@1.3.13`、`bun.lock`、用 `workspaces.catalog` 特性、19 个 packages 全 `bun run --cwd` 入口）。根改用 Bun workspace（`package.json` 内 `workspaces`），废弃 `pnpm-workspace.yaml`。Phase 0 验收命令 `pnpm install` → `bun install`。影响范围：仅 build/install 工具链；不动 § 2 任何核心架构原则、不影响后续 phase 设计。 | cdotlock + Claude |
 
 > 后续修订请在此追加新行，并在受影响的 phase 章节加 ⚠ 标记 + 引用本表行号。
 
