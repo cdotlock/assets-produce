@@ -76,6 +76,7 @@ export const layer = Layer.effect(
           try: async () => {
             const prompt = await client.getPrompt(name, opts?.version, {
               label: opts?.label,
+              cacheTtlSeconds: 0,
             })
             const body = typeof prompt.prompt === "string" ? prompt.prompt : JSON.stringify(prompt.prompt)
             return {

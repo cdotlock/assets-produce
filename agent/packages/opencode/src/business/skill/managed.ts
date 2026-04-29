@@ -14,10 +14,13 @@ export interface ManagedInfo {
   langfuseLabel: string
 }
 
+import type { SkillError } from "./skill"
+import type { LangfuseError } from "@/langfuse/langfuse"
+
 export interface Interface {
-  readonly list: (filter?: { scope?: Scope; enabledOnly?: boolean }) => Effect.Effect<ManagedInfo[]>
-  readonly getInfo: (name: string) => Effect.Effect<ManagedInfo | undefined>
-  readonly loadBody: (name: string) => Effect.Effect<string | undefined>
+  readonly list: (filter?: { scope?: Scope; enabledOnly?: boolean }) => Effect.Effect<ManagedInfo[], SkillError>
+  readonly getInfo: (name: string) => Effect.Effect<ManagedInfo | undefined, SkillError>
+  readonly loadBody: (name: string) => Effect.Effect<string | undefined, SkillError | LangfuseError>
 }
 
 export class Service extends Context.Service<Service, Interface>()("@assets-produce/SkillManaged") {}
@@ -37,43 +40,26 @@ const dbOnlyLayer = Layer.effect(
     const skillSvc = yield* SkillService
     const langfuseOpt = yield* Effect.serviceOption(LangfuseService)
 
-    const list: Interface["list"] = (filter) =>
-      skillSvc.list(filter).pipe(
-        Effect.map((rows) =>
-          rows.map((r) => ({
-            name: r.name,
-            description: r.description,
-            scope: r.scope,
-            enabled: r.enabled,
-            langfusePromptKey: r.langfuse_prompt_key,
-            langfuseLabel: r.langfuse_label,
-          })),
-        ),
-        Effect.catch((err) => {
-          log.error("managed.list failed", { err })
-          return Effect.succeed([] as ManagedInfo[])
-        }),
-      )
+    const rowToInfo = (r: {
+      name: string
+      description: string
+      scope: Scope
+      enabled: boolean
+      langfuse_prompt_key: string
+      langfuse_label: string
+    }): ManagedInfo => ({
+      name: r.name,
+      description: r.description,
+      scope: r.scope,
+      enabled: r.enabled,
+      langfusePromptKey: r.langfuse_prompt_key,
+      langfuseLabel: r.langfuse_label,
+    })
+
+    const list: Interface["list"] = (filter) => skillSvc.list(filter).pipe(Effect.map((rows) => rows.map(rowToInfo)))
 
     const getInfo: Interface["getInfo"] = (name) =>
-      skillSvc.getByName(name).pipe(
-        Effect.map((row) =>
-          row
-            ? {
-                name: row.name,
-                description: row.description,
-                scope: row.scope,
-                enabled: row.enabled,
-                langfusePromptKey: row.langfuse_prompt_key,
-                langfuseLabel: row.langfuse_label,
-              }
-            : undefined,
-        ),
-        Effect.catch((err) => {
-          log.error("managed.getInfo failed", { err, name })
-          return Effect.succeed(undefined)
-        }),
-      )
+      skillSvc.getByName(name).pipe(Effect.map((row) => (row ? rowToInfo(row) : undefined)))
 
     const loadBody: Interface["loadBody"] = (name) =>
       Effect.gen(function* () {
@@ -85,12 +71,7 @@ const dbOnlyLayer = Layer.effect(
         if (!info) return undefined
         const prompt = yield* langfuseOpt.value.getPrompt(info.langfusePromptKey, { label: info.langfuseLabel })
         return prompt.body
-      }).pipe(
-        Effect.catch((err) => {
-          log.error("managed.loadBody failed", { err, name })
-          return Effect.succeed(undefined)
-        }),
-      )
+      })
 
     return Service.of({ list, getInfo, loadBody })
   }),

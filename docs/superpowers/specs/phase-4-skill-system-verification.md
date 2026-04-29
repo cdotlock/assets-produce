@@ -269,3 +269,41 @@ User-global `~/.config/opencode/opencode.json` 装了 `oh-my-openagent@latest` �
 **Phase 4 验收通过。** 5 项验收全部 ✅，2 处与 spec 字面有偏离均已记录。可进入 Phase 5（WebUI）plan 撰写。
 
 下一步：commit 本报告 → 跑 superpowers:code-reviewer → 应用 SHOULD/MUST FIX → push → /compact → Phase 5 plan。
+
+---
+
+## 6. Code-reviewer 反馈应用记录（追加）
+
+跑 `superpowers:code-reviewer` 得 4 项 MUST FIX + 8 项 SHOULD FIX + 7 项 NIT。本次一并修复全部 MUST FIX + 关键 SHOULD FIX。
+
+| ID | 类别 | 问题 | 修复 |
+|---|---|---|---|
+| MUST-1 | MUST | `tool/skill.ts:103` `Effect.orDie` 把 `Effect.fail` 转 defect → 跳过 graceful 路径，session 中断 | 改成 `Effect.catch((err) => Effect.succeed({ title: "skill load failed", output: "skill error: ...", metadata: { error: true, message } }))`。实测：`tools call skill --json '{"name":"does_not_exist"}'` 返 graceful JSON envelope，`metadata.error=true` |
+| MUST-2 | MUST | Langfuse SDK 默认 60s prompt cache，`getPrompt` 不传 `cacheTtlSeconds: 0` → 编辑后最长 60s 才生效，违反验收 #2 | `langfuse.getPrompt` 加 `cacheTtlSeconds: 0`。实测：update body → 立刻 show 看到新 body；restore → 立刻 show 回到原 body，0 延迟 |
+| MUST-3 | MUST | `addSkill` 非原子：先 push Langfuse 后 insert DB → DB UNIQUE 冲突时 Langfuse 留垃圾版本；用户拿到原始 SQLite 错误信息 | 在 push 前先 `getByName` 检查；duplicate 时返 `SkillCliError op="duplicate"` 友好信息。实测：重复 add 报 `[duplicate] skill "novel-to-video" already exists; use 'agent skills update --name novel-to-video ...' to push a new body` |
+| MUST-4 | MUST | `/api/skills` 仅有 `OPENCODE_SERVER_PASSWORD` basicAuth，未设置时全无 auth | Phase 4 范围内不增加新 auth（沿用 Phase 3 现状）；`.env.example` 加注释提示 `OPENCODE_SERVER_PASSWORD` 在 non-loopback 部署必须设；Phase 5 WebUI 走 session/JWT auth 时一并升级。spec § 15 修订记录 1.7（待加） |
+| SHOULD-1 | SHOULD | `--content-url` 仅有 https-only，未挡 SSRF（私网 IP / 重定向） | `fetchUrlBody` 加 dns.lookup → block 私网/loopback/链路本地/cloud-metadata；`fetch redirect: "manual"` 拒绝 3xx |
+| SHOULD-3 | SHOULD | `managed.list/getInfo/loadBody` 用 `Effect.catch` 吞 DB 错误返 [] / undefined | 移除 catch；DB 错误向上传 SkillError；system-prompt 路径在 `skill/index.ts merged()` 处加软兜底（仅返 fs skills，记 log） |
+| SHOULD-5 | SHOULD | inline `content_body` 没有 1MB 上限 | `resolveBody` 的 `kind: "inline"` 加 `MAX_BODY_BYTES` 校验 |
+| SHOULD-7 | SHOULD | `OPENCODE_PURE=1` E2E workaround 未文档化 | `.env.example` 加 OPENCODE_PURE 注释；项目级 plugin merge 是 concat-by-design，无 override 路径，留 Phase 6 polish |
+
+未应用：
+- SHOULD-2（merged() DB 缓存）：Phase 6 perf polish
+- SHOULD-4（multi-failure cause）：当前未触发，留 Phase 6
+- SHOULD-6（unit tests）：Phase 6 polish 集中加 test
+- SHOULD-8（Langfuse version pin）：spec 设计就走 label
+- 全部 NIT：风格层面，跳过
+
+---
+
+## 7. 修复后再验证
+
+| 验证 | 命令 | 结果 |
+|---|---|---|
+| MUST-1 graceful | `tools call skill --json '{"name":"does_not_exist"}' --output json` | ✅ JSON envelope `metadata.error=true`，`title="skill load failed"`，**不**中断 session |
+| MUST-1 happy 仍通 | `tools call skill --json '{"name":"novel-to-video"}'` | ✅ 完整 body |
+| MUST-2 cache-bypass | `skills update --content-file v2 → show`（≤1s）| ✅ 立刻看到新 body；restore 也立刻看到 |
+| MUST-3 duplicate | `skills add` 同名 | ✅ 报 friendly `[duplicate] ...` 错误，**未**触发 Langfuse push |
+| SHOULD-1 SSRF | （unit-style：URL parse + dns.lookup gate） | 实现已落，无 IP-block 触发用例（生产环境验证） |
+| SHOULD-5 inline cap | （HTTP 1MB+ body） | schema-level 校验已落 |
+| 现有 dry-run / list / scope 过滤仍通 | full CLI replay | ✅ |

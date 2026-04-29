@@ -100,7 +100,16 @@ export const SkillTool = Tool.define(
               dir,
             },
           }
-        }).pipe(Effect.orDie),
+        }).pipe(
+          Effect.catch((err) => {
+            const message = err instanceof Error ? err.message : String(err)
+            return Effect.succeed({
+              title: "skill load failed",
+              output: `skill error: ${message}`,
+              metadata: { error: true, message },
+            })
+          }),
+        ),
     }
   }),
 )

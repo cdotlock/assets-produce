@@ -246,7 +246,12 @@ export const layer = Layer.effect(
 
     const merged = Effect.fn("Skill.merged")(function* () {
       const s = yield* InstanceState.get(state)
-      const managedList = yield* managed.list({ enabledOnly: true })
+      const managedList = yield* managed.list({ enabledOnly: true }).pipe(
+        Effect.catch((err) => {
+          log.error("managed.list failed; skipping managed skills for this read", { err })
+          return Effect.succeed([] as Array<{ name: string; description: string; langfusePromptKey: string }>)
+        }),
+      )
       const out = new Map<string, Info>()
       for (const fsSkill of Object.values(s.skills)) out.set(fsSkill.name, fsSkill)
       for (const m of managedList) {
