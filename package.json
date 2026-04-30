@@ -8,7 +8,9 @@
     "web"
   ],
   "scripts": {
-    "install:agent": "bun --cwd agent install",
-    "install:all": "bun install && bun --cwd agent install"
+    "install:agent": "bun --cwd=agent install",
+    "install:all": "bun install && bun --cwd=agent install",
+    "agent:build": "bun --cwd=agent run build",
+    "agent:size": "du -h agent/dist/agent.mjs agent/packages/opencode/dist/agent.mjs"
   }
 }

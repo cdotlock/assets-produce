@@ -14,8 +14,12 @@ Agent-native multi-format asset production platform — based on opencode.
 
 ## Read Next
 
+- [`SKILL.md`](SKILL.md) — agent-facing CLI entry-point (how to invoke, output modes, error codes)
 - [`CLAUDE.md`](CLAUDE.md) — project rules for any Claude Code session working in this repo
 - [`docs/superpowers/specs/2026-04-29-assets-produce-spec.md`](docs/superpowers/specs/2026-04-29-assets-produce-spec.md) — master spec (architecture, phases, red lines)
+
+Single-binary build: `bun run agent:build` writes `agent/dist/agent.mjs`.
+Run with `bun agent/dist/agent.mjs <cmd>` (or `agent/bin/agent <cmd>`).
 
 ## Tooling
 
