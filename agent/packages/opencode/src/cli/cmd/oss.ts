@@ -4,6 +4,7 @@ import * as fs from "fs/promises"
 import * as path from "path"
 import * as OSSService from "@/oss/oss"
 import { UI } from "../ui"
+import { type OptionDef, toYargsBuilder } from "../option-def"
 
 function runWithOSS<A>(eff: Effect.Effect<A, unknown, OSSService.Service>): Promise<A> {
   return Effect.runPromise(eff.pipe(Effect.provide(OSSService.defaultLayer)) as Effect.Effect<A, unknown, never>)
@@ -60,14 +61,21 @@ export const OssGetCommand = cmd({
   },
 })
 
+const ossListOptions: OptionDef[] = [
+  {
+    flag: "--max-keys",
+    description: "max keys to return",
+    type: "number",
+    extra: { default: 100 },
+  },
+]
+
 export const OssListCommand = cmd({
   command: "list [prefix]",
   describe: "list OSS keys, optionally filtered by prefix",
   aliases: ["ls"],
   builder: (yargs) =>
-    yargs
-      .positional("prefix", { type: "string", describe: "optional key prefix" })
-      .option("max-keys", { type: "number", default: 100, describe: "max keys to return" }),
+    toYargsBuilder(yargs.positional("prefix", { type: "string", describe: "optional key prefix" }), ossListOptions),
   async handler(args) {
     const prefix = args.prefix ? String(args.prefix) : undefined
     const maxKeys = Number(args["max-keys"] ?? 100)
