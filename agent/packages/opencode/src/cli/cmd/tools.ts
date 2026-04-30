@@ -10,6 +10,8 @@ import { cmd } from "./cmd"
 import { UI } from "../ui"
 import * as EffectZod from "@/util/effect-zod"
 import { type OptionDef, toYargsBuilder } from "../option-def"
+import { getGlobalContext } from "../global-context"
+import { warnDryRunIgnored } from "../output/dry-run-guard"
 
 const MAX_PARAMS_FILE_BYTES = 1_000_000
 
@@ -103,9 +105,20 @@ export const ToolsListCommand = cmd({
   describe: "list all built-in tool ids (one per line)",
   builder: (yargs: Argv) => toYargsBuilder(yargs, toolsListOptions),
   async handler(args) {
+    if (getGlobalContext().dryRun) warnDryRunIgnored("tools list")
     const verbose = Boolean(args.verbose)
     const exit = await withToolRegistry((svc) => svc.all())
     const all = unwrap(exit)
+    if (getGlobalContext().output === "json") {
+      writeOut(
+        JSON.stringify(
+          all.map((t) => ({ id: t.id, description: t.description ?? "" })),
+          null,
+          2,
+        ),
+      )
+      return
+    }
     for (const tool of all) {
       if (verbose) {
         const desc = (tool.description ?? "").replace(/\s+/g, " ").trim().slice(0, 80)
@@ -123,6 +136,7 @@ export const ToolsShowCommand = cmd({
   builder: (yargs: Argv) =>
     yargs.positional("id", { type: "string", describe: "tool id (e.g. generate-image)", demandOption: true }),
   async handler(args) {
+    if (getGlobalContext().dryRun) warnDryRunIgnored("tools show")
     const id = String(args.id)
     const exit = await withToolRegistry((svc) => svc.all())
     const all = unwrap(exit)
@@ -273,6 +287,7 @@ export const ToolsExportSchemaCommand = cmd({
   builder: (yargs: Argv) =>
     yargs.positional("id", { type: "string", describe: "optional tool id; omit to export all" }),
   async handler(args) {
+    if (getGlobalContext().dryRun) warnDryRunIgnored("tools export-schema")
     const id = args.id ? String(args.id) : undefined
     const exit = await withToolRegistry((svc) => svc.all())
     const all = unwrap(exit)

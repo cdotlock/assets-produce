@@ -15,6 +15,8 @@ import { Layer } from "effect"
 import { cmd } from "./cmd"
 import { UI } from "../ui"
 import { type OptionDef, toYargsBuilder } from "../option-def"
+import { getGlobalContext } from "../global-context"
+import { warnDryRunIgnored } from "../output/dry-run-guard"
 
 function writeOut(text: string): void {
   process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
@@ -324,6 +326,7 @@ export const SkillsListCommand = cmd({
   describe: "list skills",
   builder: (yargs: Argv) => toYargsBuilder(yargs, skillsListOptions),
   async handler(args) {
+    if (getGlobalContext().dryRun) warnDryRunIgnored("skills list")
     const exit = await runWithLayers(
       SkillCli.listSkills({
         scope: typeof args.scope === "string" ? (args.scope as Scope) : undefined,
@@ -336,7 +339,11 @@ export const SkillsListCommand = cmd({
       return
     }
     const rows = exit.value
-    if (String(args.output) === "json") {
+    // Local --output flag wins; otherwise honor global (set by middleware in
+    // index.ts: piped stdout / CI=true → "json").
+    const local = typeof args.output === "string" ? args.output : undefined
+    const wantJson = local === "json" || (local === undefined && getGlobalContext().output === "json")
+    if (wantJson) {
       writeOut(JSON.stringify(rows, null, 2))
     } else {
       for (const r of rows) {
@@ -407,6 +414,7 @@ export const SkillsShowCommand = cmd({
   builder: (yargs: Argv) =>
     toYargsBuilder(yargs.positional("name", { type: "string", demandOption: true }), skillsShowOptions),
   async handler(args) {
+    if (getGlobalContext().dryRun) warnDryRunIgnored("skills show")
     const exit = await runWithLayers(SkillCli.showSkill(String(args.name)))
     if (Exit.isFailure(exit)) {
       UI.error(formatErrorFromCause(exit.cause))
@@ -440,6 +448,7 @@ export const SkillsExportSchemaCommand = cmd({
   describe: "emit Anthropic-compatible tool schema for the skill loader (with available skills inlined in description)",
   builder: (yargs: Argv) => yargs,
   async handler() {
+    if (getGlobalContext().dryRun) warnDryRunIgnored("skills export-schema")
     const eff = Effect.gen(function* () {
       const skill = yield* SkillIndex.Service
       const list = yield* skill.available()

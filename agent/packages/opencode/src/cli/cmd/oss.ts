@@ -5,6 +5,8 @@ import * as path from "path"
 import * as OSSService from "@/oss/oss"
 import { UI } from "../ui"
 import { type OptionDef, toYargsBuilder } from "../option-def"
+import { getGlobalContext } from "../global-context"
+import { warnDryRunIgnored } from "../output/dry-run-guard"
 
 function runWithOSS<A>(eff: Effect.Effect<A, unknown, OSSService.Service>): Promise<A> {
   return Effect.runPromise(eff.pipe(Effect.provide(OSSService.defaultLayer)) as Effect.Effect<A, unknown, never>)
@@ -47,6 +49,7 @@ export const OssGetCommand = cmd({
       .positional("key", { type: "string", describe: "OSS object key", demandOption: true })
       .positional("local", { type: "string", describe: "local destination path", demandOption: true }),
   async handler(args) {
+    if (getGlobalContext().dryRun) warnDryRunIgnored("oss get")
     const key = String(args.key)
     const localPath = path.resolve(String(args.local))
     const buf = await runWithOSS(
@@ -77,6 +80,7 @@ export const OssListCommand = cmd({
   builder: (yargs) =>
     toYargsBuilder(yargs.positional("prefix", { type: "string", describe: "optional key prefix" }), ossListOptions),
   async handler(args) {
+    if (getGlobalContext().dryRun) warnDryRunIgnored("oss list")
     const prefix = args.prefix ? String(args.prefix) : undefined
     const maxKeys = Number(args["max-keys"] ?? 100)
     const result = await runWithOSS(

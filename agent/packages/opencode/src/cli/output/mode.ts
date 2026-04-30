@@ -24,7 +24,9 @@ function envTrue(value: string | undefined): boolean {
  * Resolve the desired output format. First match wins:
  *   1. Explicit `--output json` / `--output text` (text → tty).
  *   2. `process.env.CI === "true" | "1"` → json (CI runners pipe).
- *   3. `process.stdout.isTTY === false` → json (output is being piped).
+ *   3. `process.stdout.isTTY` is not strictly `true` → json. Node sets
+ *      `isTTY` to `true` only when stdout is a real terminal; piped /
+ *      redirected stdout leaves it `undefined` (or `false` in some hosts).
  *   4. Default → tty (interactive shell).
  */
 export function outputMode(flags?: { output?: string }): OutputFormat {
@@ -32,7 +34,7 @@ export function outputMode(flags?: { output?: string }): OutputFormat {
   if (explicit === "json") return "json"
   if (explicit === "text") return "tty"
   if (envTrue(process.env.CI)) return "json"
-  if (process.stdout.isTTY === false) return "json"
+  if (process.stdout.isTTY !== true) return "json"
   return "tty"
 }
 

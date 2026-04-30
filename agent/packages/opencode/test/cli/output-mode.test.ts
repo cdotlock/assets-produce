@@ -60,8 +60,13 @@ describe("outputMode", () => {
     expect(outputMode()).toBe("json")
   })
 
-  test("non-TTY stdout → json", () => {
+  test("non-TTY stdout (false) → json", () => {
     Object.defineProperty(process.stdout, "isTTY", { configurable: true, value: false })
+    expect(outputMode()).toBe("json")
+  })
+
+  test("non-TTY stdout (undefined / piped) → json", () => {
+    Object.defineProperty(process.stdout, "isTTY", { configurable: true, value: undefined })
     expect(outputMode()).toBe("json")
   })
 

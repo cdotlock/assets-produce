@@ -6,6 +6,8 @@ import { cmd } from "./cmd"
 import { UI } from "../ui"
 import { networkOptionDefs } from "../network"
 import { GLOBAL_OPTIONS, type OptionDef, toJsonSchema, toYargsBuilder } from "../option-def"
+import { getGlobalContext } from "../global-context"
+import { warnDryRunIgnored } from "../output/dry-run-guard"
 
 /**
  * Phase 6 Task 3 — `agent config` command group.
@@ -430,6 +432,7 @@ export const ConfigExportSchemaCommand = cmd({
   describe: "emit JSON schema describing how to invoke each agent CLI command",
   builder: (yargs: Argv) => toYargsBuilder<unknown, ExportSchemaArgs>(yargs, exportSchemaOptions),
   async handler(args) {
+    if (getGlobalContext().dryRun) warnDryRunIgnored("config export-schema")
     const filter = typeof args.command === "string" ? args.command : undefined
     const format = args.format === "openai" ? "openai" : "anthropic"
     emitJson(getCatalog({ filter, format }))
@@ -534,6 +537,7 @@ export const ConfigShowCommand = cmd({
   describe: "print effective config (env + defaults), with secrets redacted",
   builder: (yargs: Argv) => yargs,
   async handler() {
+    if (getGlobalContext().dryRun) warnDryRunIgnored("config show")
     const fileEnv = await loadProjectDotenv()
     emitJson({ env: envSnapshot(fileEnv), defaults: defaultsSnapshot() })
   },
@@ -631,6 +635,7 @@ export const ConfigValidateCommand = cmd({
   describe: "verify all required env vars (per .env.example) are set in the current process",
   builder: (yargs: Argv) => yargs,
   async handler() {
+    if (getGlobalContext().dryRun) warnDryRunIgnored("config validate")
     const envExamplePath = await findEnvExample(process.cwd())
     if (!envExamplePath) {
       UI.error(`could not find .env.example by walking up from ${process.cwd()}`)

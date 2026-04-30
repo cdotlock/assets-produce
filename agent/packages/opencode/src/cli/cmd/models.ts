@@ -9,6 +9,8 @@ import { EOL } from "os"
 import { AppRuntime } from "@/effect/app-runtime"
 import { Effect } from "effect"
 import { type OptionDef, toYargsBuilder } from "../option-def"
+import { getGlobalContext } from "../global-context"
+import { warnDryRunIgnored } from "../output/dry-run-guard"
 
 const modelsOptions: OptionDef[] = [
   {
@@ -42,10 +44,13 @@ export const ModelsCommand = cmd({
       modelsOptions,
     ),
   handler: async (args) => {
+    if (getGlobalContext().dryRun) warnDryRunIgnored("models")
     if (args.refresh) {
       await ModelsDev.refresh(true)
       UI.println(UI.Style.TEXT_SUCCESS_BOLD + "Models cache refreshed" + UI.Style.TEXT_NORMAL)
     }
+
+    const wantJson = getGlobalContext().output === "json"
 
     await Instance.provide({
       directory: process.cwd(),
@@ -54,6 +59,15 @@ export const ModelsCommand = cmd({
           Effect.gen(function* () {
             const svc = yield* Provider.Service
             const providers = yield* svc.list()
+
+            const collectJson = (providerID: ProviderID, verbose?: boolean) => {
+              const provider = providers[providerID]
+              const sorted = Object.entries(provider.models).sort(([a], [b]) => a.localeCompare(b))
+              return sorted.map(([modelID, model]) => ({
+                id: `${providerID}/${modelID}`,
+                ...(verbose ? { model } : {}),
+              }))
+            }
 
             const print = (providerID: ProviderID, verbose?: boolean) => {
               const provider = providers[providerID]
@@ -76,6 +90,12 @@ export const ModelsCommand = cmd({
                 return
               }
 
+              if (wantJson) {
+                yield* Effect.sync(() =>
+                  process.stdout.write(JSON.stringify(collectJson(providerID, args.verbose), null, 2) + EOL),
+                )
+                return
+              }
               yield* Effect.sync(() => print(providerID, args.verbose))
               return
             }
@@ -88,6 +108,11 @@ export const ModelsCommand = cmd({
               return a.localeCompare(b)
             })
 
+            if (wantJson) {
+              const all = ids.flatMap((p) => collectJson(ProviderID.make(p), args.verbose))
+              yield* Effect.sync(() => process.stdout.write(JSON.stringify(all, null, 2) + EOL))
+              return
+            }
             yield* Effect.sync(() => {
               for (const providerID of ids) {
                 print(ProviderID.make(providerID), args.verbose)

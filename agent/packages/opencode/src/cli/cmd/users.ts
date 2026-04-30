@@ -8,6 +8,8 @@ import { defaultLayer as userDefaultLayer } from "@/business/user/user"
 import { cmd } from "./cmd"
 import { UI } from "../ui"
 import { type OptionDef, toYargsBuilder } from "../option-def"
+import { getGlobalContext } from "../global-context"
+import { warnDryRunIgnored } from "../output/dry-run-guard"
 
 function writeOut(text: string): void {
   process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
@@ -125,6 +127,7 @@ export const UsersListCommand = cmd({
   describe: "list all users",
   builder: (yargs: Argv) => yargs,
   async handler() {
+    if (getGlobalContext().dryRun) warnDryRunIgnored("users list")
     const exit = await runWithLayers(UserCli.listUsers())
     if (Exit.isFailure(exit)) {
       UI.error(formatErrorFromCause(exit.cause))
@@ -132,6 +135,10 @@ export const UsersListCommand = cmd({
       return
     }
     const rows = exit.value
+    if (getGlobalContext().output === "json") {
+      writeOut(JSON.stringify(rows, null, 2))
+      return
+    }
     const ID_W = 28
     const USER_W = 20
     const ROLE_W = 8
