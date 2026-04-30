@@ -211,6 +211,32 @@ function normalizePath(input?: string) {
   return input
 }
 
+interface RunArgs {
+  message: string[]
+  command?: string
+  continue?: boolean
+  c?: boolean
+  session?: string
+  s?: string
+  fork?: boolean
+  share?: boolean
+  model?: string
+  m?: string
+  agent?: string
+  format: string
+  file?: string[]
+  f?: string[]
+  title?: string
+  attach?: string
+  password?: string
+  p?: string
+  dir?: string
+  port?: number
+  variant?: string
+  thinking: boolean
+  "dangerously-skip-permissions": boolean
+}
+
 const runOptions: OptionDef[] = [
   {
     flag: "--command",
@@ -301,7 +327,7 @@ export const RunCommand = cmd({
   command: "run [message..]",
   describe: "run opencode with a message",
   builder: (yargs: Argv) =>
-    toYargsBuilder(
+    toYargsBuilder<unknown, RunArgs>(
       yargs.positional("message", {
         describe: "message to send",
         type: "string",

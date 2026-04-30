@@ -143,10 +143,22 @@ const skillsAddOptions: OptionDef[] = [
   },
 ]
 
+interface SkillsAddArgs {
+  name: string
+  description: string
+  "content-file"?: string
+  "content-url"?: string
+  "langfuse-prompt-key"?: string
+  label: string
+  scope: string
+  enabled: boolean
+  "dry-run": boolean
+}
+
 export const SkillsAddCommand = cmd({
   command: "add",
   describe: "add a skill (from file / url / existing langfuse prompt)",
-  builder: (yargs: Argv) => toYargsBuilder(yargs, skillsAddOptions),
+  builder: (yargs: Argv) => toYargsBuilder<unknown, SkillsAddArgs>(yargs, skillsAddOptions),
   async handler(args) {
     let source: ContentSource | undefined
     try {
@@ -221,10 +233,21 @@ const skillsUpdateOptions: OptionDef[] = [
   },
 ]
 
+interface SkillsUpdateArgs {
+  name: string
+  description?: string
+  "content-file"?: string
+  "content-url"?: string
+  label?: string
+  scope?: string
+  enabled?: boolean
+  "dry-run": boolean
+}
+
 export const SkillsUpdateCommand = cmd({
   command: "update",
   describe: "update a skill's metadata or content",
-  builder: (yargs: Argv) => toYargsBuilder(yargs, skillsUpdateOptions),
+  builder: (yargs: Argv) => toYargsBuilder<unknown, SkillsUpdateArgs>(yargs, skillsUpdateOptions),
   async handler(args) {
     let source: ContentSource | undefined
     try {

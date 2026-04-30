@@ -72,8 +72,8 @@ const options = {
 
 export type NetworkOptions = InferredOptionTypes<typeof options>
 
-export function withNetworkOptions<T>(yargs: Argv<T>) {
-  return toYargsBuilder(yargs, networkOptionDefs)
+export function withNetworkOptions<T>(yargs: Argv<T>): Argv<T & NetworkOptions> {
+  return toYargsBuilder<T, NetworkOptions>(yargs, networkOptionDefs)
 }
 export async function resolveNetworkOptions(args: NetworkOptions) {
   const config = await AppRuntime.runPromise(Config.Service.use((cfg) => cfg.getGlobal()))

@@ -23,11 +23,17 @@ const modelsOptions: OptionDef[] = [
   },
 ]
 
+interface ModelsArgs {
+  provider?: string
+  verbose?: boolean
+  refresh?: boolean
+}
+
 export const ModelsCommand = cmd({
   command: "models [provider]",
   describe: "list all available models",
   builder: (yargs: Argv) =>
-    toYargsBuilder(
+    toYargsBuilder<unknown, ModelsArgs>(
       yargs.positional("provider", {
         describe: "provider ID to filter models by",
         type: "string",
