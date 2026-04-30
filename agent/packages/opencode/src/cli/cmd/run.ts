@@ -3,6 +3,7 @@ import path from "path"
 import { pathToFileURL } from "url"
 import { UI } from "../ui"
 import { cmd } from "./cmd"
+import { type OptionDef, toYargsBuilder } from "../option-def"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import { bootstrap } from "../bootstrap"
 import { EOL } from "os"
@@ -210,96 +211,105 @@ function normalizePath(input?: string) {
   return input
 }
 
+const runOptions: OptionDef[] = [
+  {
+    flag: "--command",
+    description: "the command to run, use message for args",
+  },
+  {
+    flag: "--continue",
+    description: "continue the last session",
+    type: "boolean",
+    extra: { alias: ["c"] },
+  },
+  {
+    flag: "--session",
+    description: "session id to continue",
+    extra: { alias: ["s"] },
+  },
+  {
+    flag: "--fork",
+    description: "fork the session before continuing (requires --continue or --session)",
+    type: "boolean",
+  },
+  {
+    flag: "--share",
+    description: "share the session",
+    type: "boolean",
+  },
+  {
+    flag: "--model",
+    description: "model to use in the format of provider/model",
+    extra: { alias: ["m"] },
+  },
+  {
+    flag: "--agent",
+    description: "agent to use",
+  },
+  {
+    flag: "--format",
+    description: "format: default (formatted) or json (raw JSON events)",
+    extra: { choices: ["default", "json"], default: "default" },
+  },
+  {
+    flag: "--file",
+    description: "file(s) to attach to message",
+    type: "array",
+    extra: { alias: ["f"] },
+  },
+  {
+    flag: "--title",
+    description: "title for the session (uses truncated prompt if no value provided)",
+  },
+  {
+    flag: "--attach",
+    description: "attach to a running opencode server (e.g., http://localhost:4096)",
+  },
+  {
+    flag: "--password",
+    description: "basic auth password (defaults to OPENCODE_SERVER_PASSWORD)",
+    extra: { alias: ["p"] },
+  },
+  {
+    flag: "--dir",
+    description: "directory to run in, path on remote server if attaching",
+  },
+  {
+    flag: "--port",
+    description: "port for the local server (defaults to random port if no value provided)",
+    type: "number",
+  },
+  {
+    flag: "--variant",
+    description: "model variant (provider-specific reasoning effort, e.g., high, max, minimal)",
+  },
+  {
+    flag: "--thinking",
+    description: "show thinking blocks",
+    type: "boolean",
+    extra: { default: false },
+  },
+  {
+    flag: "--dangerously-skip-permissions",
+    description: "auto-approve permissions that are not explicitly denied (dangerous!)",
+    type: "boolean",
+    extra: { default: false },
+  },
+]
+
 export const RunCommand = cmd({
   command: "run [message..]",
   describe: "run opencode with a message",
-  builder: (yargs: Argv) => {
-    return yargs
-      .positional("message", {
+  builder: (yargs: Argv) =>
+    toYargsBuilder(
+      yargs.positional("message", {
         describe: "message to send",
         type: "string",
         array: true,
         default: [],
-      })
-      .option("command", {
-        describe: "the command to run, use message for args",
-        type: "string",
-      })
-      .option("continue", {
-        alias: ["c"],
-        describe: "continue the last session",
-        type: "boolean",
-      })
-      .option("session", {
-        alias: ["s"],
-        describe: "session id to continue",
-        type: "string",
-      })
-      .option("fork", {
-        describe: "fork the session before continuing (requires --continue or --session)",
-        type: "boolean",
-      })
-      .option("share", {
-        type: "boolean",
-        describe: "share the session",
-      })
-      .option("model", {
-        type: "string",
-        alias: ["m"],
-        describe: "model to use in the format of provider/model",
-      })
-      .option("agent", {
-        type: "string",
-        describe: "agent to use",
-      })
-      .option("format", {
-        type: "string",
-        choices: ["default", "json"],
-        default: "default",
-        describe: "format: default (formatted) or json (raw JSON events)",
-      })
-      .option("file", {
-        alias: ["f"],
-        type: "string",
-        array: true,
-        describe: "file(s) to attach to message",
-      })
-      .option("title", {
-        type: "string",
-        describe: "title for the session (uses truncated prompt if no value provided)",
-      })
-      .option("attach", {
-        type: "string",
-        describe: "attach to a running opencode server (e.g., http://localhost:4096)",
-      })
-      .option("password", {
-        alias: ["p"],
-        type: "string",
-        describe: "basic auth password (defaults to OPENCODE_SERVER_PASSWORD)",
-      })
-      .option("dir", {
-        type: "string",
-        describe: "directory to run in, path on remote server if attaching",
-      })
-      .option("port", {
-        type: "number",
-        describe: "port for the local server (defaults to random port if no value provided)",
-      })
-      .option("variant", {
-        type: "string",
-        describe: "model variant (provider-specific reasoning effort, e.g., high, max, minimal)",
-      })
-      .option("thinking", {
-        type: "boolean",
-        describe: "show thinking blocks",
-        default: false,
-      })
-      .option("dangerously-skip-permissions", {
-        type: "boolean",
-        describe: "auto-approve permissions that are not explicitly denied (dangerous!)",
-        default: false,
-      })
-  },
+      }),
+      runOptions,
+    ),
   handler: async (args) => {
     let message = [...args.message, ...(args["--"] || [])]
       .map((arg) => (arg.includes(" ") ? `"${arg.replace(/"/g, '\\"')}"` : arg))
