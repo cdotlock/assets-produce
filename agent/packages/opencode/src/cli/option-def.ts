@@ -58,9 +58,21 @@ function typeFragment(type: OptionDef["type"]): YargsOptions {
 /**
  * Apply each OptionDef to the yargs instance via `.option()`. Returns the
  * (chained) yargs instance for further composition.
+ *
+ * Type parameters:
+ * - `T` is the existing yargs arg shape (carried in from the caller).
+ * - `Shape` is an optional caller-declared shape merged into the returned
+ *   `Argv` so command handlers see typed `args.<flag>` access. Callers pass
+ *   `Shape` via an inline interface (one per command) — see e.g.
+ *   `cli/cmd/run.ts`. The OptionDef shape itself does not synthesize this
+ *   automatically because `flag` strings would need to be `as const` literals
+ *   to derive precise field names, which would noisy up call sites.
  */
-export function toYargsBuilder<T = Record<string, unknown>>(yargs: Argv<T>, options: OptionDef[]): Argv<T> {
-  let acc = yargs
+export function toYargsBuilder<T = Record<string, unknown>, Shape = Record<string, unknown>>(
+  yargs: Argv<T>,
+  options: OptionDef[],
+): Argv<T & Shape> {
+  let acc = yargs as Argv<T & Shape>
   for (const opt of options) {
     const name = flagToName(opt.flag)
     const config: YargsOptions = {
@@ -69,7 +81,7 @@ export function toYargsBuilder<T = Record<string, unknown>>(yargs: Argv<T>, opti
       ...(opt.required ? { demandOption: true } : {}),
       ...(opt.extra ?? {}),
     }
-    acc = acc.option(name, config) as Argv<T>
+    acc = acc.option(name, config) as Argv<T & Shape>
   }
   return acc
 }
