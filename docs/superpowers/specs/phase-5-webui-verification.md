@@ -3,7 +3,7 @@
 > **Spec ref**: [§ 7 + § 9 + § 10 Phase 5](2026-04-29-assets-produce-spec.md#phase-5--webui-workspace) ·
 > **Plan**: [phase-5-webui-plan.md](phase-5-webui-plan.md)
 > **Date**: 2026-04-30
-> **HEAD**: a2a8ea1
+> **HEAD (impl)**: a2a8ea1 · **HEAD (closing review fixes)**: 30a4a69
 > **Author**: Claude Opus 4.7 (1M)
 
 ---
@@ -299,13 +299,14 @@ abort 不丢失 message、不死锁后续 prompt。✅
 ## 6. 已知遗留 / Phase 6 候选
 
 1. **Atomic tools auto-populate `business_asset`** — chat 跑完资产页自动看到（spec 验收 #2 隐含）
-2. **JWT in query param 替换为 Next.js SSE proxy** — 移除 access-log 泄露隐患
-3. **WebUI session reload re-auth** — 当前 memory token 在 reload 后丢失，直接跳 /login。可加"reload 时用 refresh_token cookie 自动续 JWT"
-4. **Skill loader scope-guard** — 创作者通过 chat 仍可加载 `system` scope skill（R3）
-5. **TLS / 反向代理** — 生产部署时 Next 与 agent 走 HTTPS + 同 origin
-6. **Mobile / responsive polish** — desktop-first 已成型；mobile 未测
-7. **资产页 1000+ 行性能** — 当前 limit=50 默认；分页 UI 控件未做（只支持 query param）
-8. **WebUI 内 skill 编辑器** — 当前 row 跳 Langfuse；未来可内嵌 markdown 编辑器
+2. **JWT in query param 替换为 Next.js SSE proxy** — 移除 access-log 泄露隐患（§ 8 已通过 referrer policy 缓解外链 Referer 泄露，但 access log 仍记录 path；proxy 是更彻底的方案）
+3. **`/auth/refresh` 端点 + WebUI session reload 续 JWT** — 当前 memory token 在 reload 后丢失，直接跳 /login。Phase 5 closing review 把半实现的 refresh-token 表 / cookie 全部清掉（§ 8 MUST FIX 1），refresh flow 推迟到本期实现
+4. **Session 路由 ownership check** — `/session/:id/*` 当前仅靠 ULID 不可猜实现 defense-in-depth；多租户场景需在 Session 表加 owner_id 并加 ownership middleware（§ 8 SHOULD FIX 3）
+5. **Skill loader scope-guard** — 创作者通过 chat 仍可加载 `system` scope skill（R3）
+6. **TLS / 反向代理** — 生产部署时 Next 与 agent 走 HTTPS + 同 origin
+7. **Mobile / responsive polish** — desktop-first 已成型；mobile 未测
+8. **资产页 1000+ 行性能** — 当前 limit=50 默认；分页 UI 控件未做（只支持 query param）
+9. **WebUI 内 skill 编辑器** — 当前 row 跳 Langfuse；未来可内嵌 markdown 编辑器
 
 ---
 
@@ -315,7 +316,41 @@ Phase 5 — WebUI Workspace **完成**。
 
 ✅ 5/5 acceptance items pass with live E2E evidence.
 ✅ All implementation tasks (1-7) reviewed (spec + code-quality) and applicable MUST FIX + key SHOULD FIX applied.
-✅ Backend + frontend 在 trunk-based 模式下一路 push 到 origin/main，约 25 个 atomic commits。
-✅ 红线全过：原子能力 + skill 编排（无硬编码视频流水线 service）；skill body 仍在 Langfuse；WebUI 是 agent server 的薄受限包装；creator/developer profile 严格分隔；plan 先行；本报告 + /compact + code-review 全部走完。
+✅ Backend + frontend 在 trunk-based 模式下一路 push 到 origin/main，约 25 个 atomic commits + 1 个 closing-review fix commit。
+✅ 红线全过：原子能力 + skill 编排（无硬编码视频流水线 service）；skill body 仍在 Langfuse；WebUI 是 agent server 的薄受限包装；creator/developer profile 严格分隔；plan 先行；本报告 + /compact + 全 phase code-review（§ 8）全部走完。
 
 可进入 Phase 6（CLI polish + remove legacy/）。
+
+---
+
+## 8. Closing whole-phase code review（2026-04-30）
+
+`superpowers:code-reviewer` 跑全 phase（commit range `f8d6aa3..1c11b7e`）后给出 2 MUST FIX + 3 SHOULD FIX + 1 NICE TO HAVE。处置：
+
+### MUST FIX
+
+1. **Dead refresh-token plumbing — REMOVED**
+   - 现象：`/auth/login` 写 `business_session_token` 行 + setCookie(refresh_token, Path=/auth)，但仓库内**没有 `/auth/refresh` 端点**也没有任何 `token_hash` 读路径。`getToken()` 在内存里，hard refresh 后返回 null，cookie 无人消费 — half-built crypto plumbing 容易在未来引入比较时序 bug。
+   - 处置：删除 `agent/packages/opencode/src/business/session-token/`（service + sql.ts）；`/auth/login` 取消 setCookie + tokens.create；`/auth/logout` 改为客户端弃 JWT 的 no-op；新 drizzle 迁移 `20260430050013_drop_session_token` drop 表 + 两个 index。
+   - 文件：[auth.ts](agent/packages/opencode/src/server/routes/instance/auth.ts) · 迁移 [migration.sql](agent/packages/opencode/migration/20260430050013_drop_session_token/migration.sql)
+   - 后果：hard refresh 重新登录是已知 trade-off，refresh flow 留作 Phase 6（§ 6.3）。
+
+2. **JWT-in-URL referrer leak — MITIGATED**
+   - 现象：SSE 用 `?token=<jwt>` query param（EventSource 不支持 Authorization header）。如果用户在 chat 页点外链，浏览器 `Referer` 头会把整段 JWT 漏给第三方。
+   - 处置：`web/src/app/layout.tsx` 的 `metadata.referrer = "no-referrer"`，浏览器对所有出站请求都不发 Referer 头。LoggerMiddleware 用 Hono `c.req.path`（已验证 = pathname only，不含 query），access log 不会记录 token。
+   - 文件：[layout.tsx](web/src/app/layout.tsx) · [middleware.ts](agent/packages/opencode/src/server/middleware.ts)
+   - 后续：Phase 6 用 Next.js SSE proxy 彻底消除 token 进 URL 的需要（§ 6.2）。
+
+### SHOULD FIX（推迟 Phase 6，verification 留底）
+
+3. **Session 路由 ownership check** — `DELETE /:sessionID`、`PATCH /:sessionID`、`POST /:sessionID/*` 等当前仅 `requireAuth`，无 ownership 检查。当前防御靠 ULID 128-bit 不可猜（defense-in-depth）。多租户启用前在 Session 表加 owner_id + ownership middleware。列 § 6.4。
+4. **`(creator)/layout.tsx` 冷启动 token bootstrap** — 当前 `useEffect → getToken()` 模型在 hard refresh 时直接跳 /login。彻底解法是 Phase 6 实现 `/auth/refresh` + cookie-based JWT bootstrap（§ 6.3）。
+5. **`purgeExpired` 用裸 SQL 而非 drizzle** — MOOT。整个 session-token service 已随 MUST FIX 1 删除。
+
+### NICE TO HAVE
+
+6. **`auth/web.ts` 的 `secretCacheRaw` 留 secret 副本** — 接受。secret 已在 process env，cache 副本不增加额外暴露面。
+
+### 关闭
+
+closing-fix commits `885a4b6`（auth）+ `30a4a69`（referrer）后 `git diff f8d6aa3..HEAD` 净增：删除 2 个 session-token 文件（118 行 src）、新增 1 个 drop migration（3 行 SQL + snapshot）、auth.ts 净减 ~30 行（imports + setCookie/tokens.create + logout 改 no-op）、layout.tsx 调整 ~5 行（metadata.referrer + title）。Phase 5 正式关闭。
