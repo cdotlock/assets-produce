@@ -3,7 +3,7 @@
 > **Spec ref**: [§ 6 + § 10 Phase 6](2026-04-29-assets-produce-spec.md#phase-6--cli-polish) ·
 > **Plan**: [phase-6-cli-polish-plan.md](phase-6-cli-polish-plan.md)
 > **Date**: 2026-04-30
-> **HEAD**: 774aa96
+> **HEAD (impl + § 15 amend)**: 774aa96 · **HEAD (closing review fixes)**: 918ef4d
 > **Author**: Claude Opus 4.7 (1M)
 
 ---
@@ -278,3 +278,40 @@ Phase 6 — CLI Polish **完成**（含两项 § 15 amended acceptance）：
 ✅ 本报告 + spec § 15 row 1.7 amend + plan Task 8 DEFERRED 标记 + final code-review（接续完成）+ `/compact` 走完即关 phase.
 
 至此 spec § 10 字面定义的 Phase 0 → Phase 6 全 phase 闭环。后续如要 lower cold start、真删 legacy/、清 P2 命令的 stdin prompt、补 Phase 5 polish，走 spec § 15 修订流程开新 phase。
+
+---
+
+## 8. Closing whole-phase code review（2026-04-30）
+
+`superpowers:code-reviewer` 跑全 phase（commit range `4dfc00a..0e04f71`）后给出 3 MUST FIX + 5 SHOULD FIX + 4 NICE TO HAVE。处置：
+
+### MUST FIX（全部应用）
+
+1. **mutating handlers 没有 fall-through global `--dry-run`** — `users add` / `users passwd` / `skills add` / `skills update` 直接读 `Boolean(args["dry-run"])`，忽略 `agent --dry-run users add ...`（global flag, 无 local flag）。修复：每个 mutating handler 改用 `applyGlobalDryRun(Boolean(args["dry-run"]))`。
+2. **`users delete` / `skills delete/enable/disable` / `tools call` 完全没有 dry-run gating** — 修复：在每个 handler 顶部 `if (applyGlobalDryRun()) { writeOut(JSON.stringify({dryRun:true, action, ...resolvedArgs})); return }`。
+3. **`oss put` schema mirror 缺 `--dry-run`** — 让外部 LLM 通过 `agent config export-schema --command oss-put` 看不到该 flag。修复：(a) 给 `oss put` 加 local `--dry-run` OptionDef，(b) handler 走 `applyGlobalDryRun(Boolean(args["dry-run"]))`，(c) config.ts 镜像同步。
+
+### SHOULD FIX
+
+4. **drift test 只覆盖 `serve`** — 应用：扩展为 minimum-coverage 测试，断言所有 10 个 mutating 命令的 schema 中 `--dry-run` 必须存在；测试在 fix 应用过程中真发现了 users-delete / skills-delete/enable/disable / tools-call 的 schema 漏 flag，全部补上.
+5. **`oss list` 没有 JSON branch** — 应用：`if (getGlobalContext().output === "json") writeOut(JSON.stringify({keys:..., nextMarker:...}))`，保留 truncation marker.
+7. **EADDRINUSE 分类** — 经实测 EADDRINUSE 已经不在 `NETWORK_ERRNOS` / `NETWORK_MSG_FRAGMENTS` 集合，本就 fall through GENERAL=1，ERRORS.md 也已写 exit 1。应用为 doc-only：在 router.ts 加注释钉牢这个意图，并加一条 regression test pin EADDRINUSE / EACCES → GENERAL。
+
+### 推迟（NICE TO HAVE 全部 + SHOULD FIX 6, 8）
+
+- SKILL.md 把 "shipped after Phase 6 Task 7" 改成 "available now"（NICE TO HAVE 9）— task 7 之前文案已写明 alias 用法和 dist 路径，agent 仍可正确使用，下次更新批 SKILL.md 时再调
+- ERRORS.md ↔ EXIT_CODE_DESCRIPTIONS 单 source 化（SHOULD FIX 6 / NICE TO HAVE 10）— 确实有重复但当前文字一致；自动派生留作未来 phase
+- `firstFailure` / `firstReasonError` 去重（SHOULD FIX 8）— 已加 cross-reference 注释，函数体 6 行，去重收益不抵 churn
+- `output-mode.test.ts` 加 `resetGlobalContext` 辅助（NICE TO HAVE 12）— 测试当前未受 singleton 污染，文件内只有一处读默认值；future test 加时再补
+
+### 关闭
+
+closing-fix commits `dc82c34`（MUST 1-3）+ `918ef4d`（SHOULD 4/5/7）后 `git diff 4dfc00a..HEAD` 净增：
+- 7 个 cli/cmd/*.ts 文件改动（dry-run gating 沿用 + 补全），
+- `cli/cmd/config.ts` schema 镜像加 `--dry-run` 行（5 处），
+- `cli/cmd/oss.ts` 加 `--dry-run` OptionDef + JSON list branch，
+- `cli/errors/router.ts` 加文档注释 + regression test，
+- `test/cli/cmd-config.test.ts` 扩展 minimum-coverage drift test，
+- `test/cli/errors-router.test.ts` 加 EADDRINUSE pin。
+
+CLI test 总数 101 → 103，全部 PASS。Phase 6 正式关闭。
