@@ -28,9 +28,7 @@ import { getGlobalContext } from "../global-context"
  * read a local flag, or `applyGlobalDryRun()` in commands that do not.
  */
 export function applyGlobalDryRun(localDryRun?: boolean): boolean {
-  if (localDryRun === true) return true
-  if (localDryRun === false) return getGlobalContext().dryRun
-  return getGlobalContext().dryRun
+  return localDryRun === true ? true : getGlobalContext().dryRun
 }
 
 /**

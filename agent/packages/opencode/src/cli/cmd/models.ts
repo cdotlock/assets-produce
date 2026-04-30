@@ -12,6 +12,10 @@ import { type OptionDef, toYargsBuilder } from "../option-def"
 import { getGlobalContext } from "../global-context"
 import { warnDryRunIgnored } from "../output/dry-run-guard"
 
+function writeOut(text: string): void {
+  process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
+}
+
 const modelsOptions: OptionDef[] = [
   {
     flag: "--verbose",
@@ -92,7 +96,7 @@ export const ModelsCommand = cmd({
 
               if (wantJson) {
                 yield* Effect.sync(() =>
-                  process.stdout.write(JSON.stringify(collectJson(providerID, args.verbose), null, 2) + EOL),
+                  writeOut(JSON.stringify(collectJson(providerID, args.verbose), null, 2)),
                 )
                 return
               }
@@ -110,7 +114,7 @@ export const ModelsCommand = cmd({
 
             if (wantJson) {
               const all = ids.flatMap((p) => collectJson(ProviderID.make(p), args.verbose))
-              yield* Effect.sync(() => process.stdout.write(JSON.stringify(all, null, 2) + EOL))
+              yield* Effect.sync(() => writeOut(JSON.stringify(all, null, 2)))
               return
             }
             yield* Effect.sync(() => {

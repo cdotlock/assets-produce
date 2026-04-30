@@ -104,7 +104,7 @@ const cli = toYargsBuilder(
     describe: "run without external plugins",
     type: "boolean",
   })
-  .middleware((opts) => {
+  .middleware((opts: Record<string, unknown>) => {
     // Phase 6 Task 4.3 — resolve global flags into a singleton context that
     // leaf handlers read via getGlobalContext(). Runs before the deeper
     // bootstrap middleware below so context is in place by the time any
@@ -122,7 +122,7 @@ const cli = toYargsBuilder(
     // args so any code path that consults `args["non-interactive"]` directly
     // sees the inferred value.
     if (ctx.nonInteractive && opts["non-interactive"] !== true) {
-      ;(opts as Record<string, unknown>)["non-interactive"] = true
+      opts["non-interactive"] = true
     }
   })
   .middleware(async (opts) => {

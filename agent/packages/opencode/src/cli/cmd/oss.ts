@@ -6,7 +6,11 @@ import * as OSSService from "@/oss/oss"
 import { UI } from "../ui"
 import { type OptionDef, toYargsBuilder } from "../option-def"
 import { getGlobalContext } from "../global-context"
-import { warnDryRunIgnored } from "../output/dry-run-guard"
+import { applyGlobalDryRun, warnDryRunIgnored } from "../output/dry-run-guard"
+
+function writeOut(text: string): void {
+  process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
+}
 
 function runWithOSS<A>(eff: Effect.Effect<A, unknown, OSSService.Service>): Promise<A> {
   return Effect.runPromise(eff.pipe(Effect.provide(OSSService.defaultLayer)) as Effect.Effect<A, unknown, never>)
@@ -30,6 +34,10 @@ export const OssPutCommand = cmd({
   async handler(args) {
     const localPath = path.resolve(String(args.local))
     const key = String(args.key)
+    if (applyGlobalDryRun()) {
+      writeOut(JSON.stringify({ dryRun: true, action: "put", key, local: localPath }, null, 2))
+      return
+    }
     const buf = await fs.readFile(localPath)
     const result = await runWithOSS(
       Effect.gen(function* () {
