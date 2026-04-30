@@ -1,0 +1,15 @@
+#!/usr/bin/env bun
+// Phase 6 Task 7.4 — bin alias for `bunx agent`. Resolves the bundled CLI
+// emitted by `bun --cwd agent run build`. Falls back to the dev entry if
+// the bundle is missing so checked-out workspaces work without a build.
+
+import { existsSync } from "node:fs"
+import { fileURLToPath, pathToFileURL } from "node:url"
+import { dirname, resolve } from "node:path"
+
+const here = dirname(fileURLToPath(import.meta.url))
+const bundle = resolve(here, "../dist/agent.mjs")
+const dev = resolve(here, "../packages/opencode/src/index.ts")
+
+const target = existsSync(bundle) ? bundle : dev
+await import(pathToFileURL(target).href)
