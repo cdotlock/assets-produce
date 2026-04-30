@@ -330,3 +330,76 @@
 - [ ] `/compact`
 
 到此 spec § 10 字面定义的 Phase 0 → Phase 6 全 phase 闭环。后续 polish 走 spec § 15 修订流程。
+
+---
+
+## 8. Audit results — CLI surface (Task 1.1 output)
+
+> Source: `agent/packages/opencode/src/cli/cmd/*.ts` walk on 2026-04-30. Classified per § 0.18.
+>
+> Format per row: subcommand · option flag → yargs type (R = required) · note. Parent commands (e.g. `users <command>`) only do `.command(...).demandCommand()` — no own options — so they're omitted. Only leaf cmd options listed.
+
+### P1 — agent-facing, must adopt OptionDef in Task 2
+
+| Cmd | Subcmd | Options | Notes |
+|---|---|---|---|
+| `users` | `add` | `--username` string R · `--role` enum(admin,creator) R · `--password` string · `--dry-run` boolean | canonical reference; uses `choices` (extra escape hatch) |
+| `users` | `list` | (none) | read-only |
+| `users` | `passwd` | `--username` string R · `--password` string R · `--dry-run` boolean | |
+| `users` | `delete` | `--username` string R | |
+| `tools` | `list` | `--verbose` boolean | read-only |
+| `tools` | `show <id>` | positional `id` string R | read-only |
+| `tools` | `call <id>` | positional `id` R · `--json` string · `--params-file` string · `--output` enum(raw,url,json) default `raw` | mutating-ish; reads stdin |
+| `tools` | `export-schema [id]` | positional `id` string | read-only |
+| `skills` | `add` | `--name` R · `--description` R · `--content-file` · `--content-url` · `--langfuse-prompt-key` · `--label` default `production` · `--scope` enum(system,creator) default `system` · `--enabled` boolean default true · `--dry-run` boolean | content source mutually-exclusive enforced in handler |
+| `skills` | `update` | `--name` R · plus optionals: `--description` `--content-file` `--content-url` `--label` `--scope` `--enabled` `--dry-run` | |
+| `skills` | `delete` | `--name` R | |
+| `skills` | `list` | `--scope` enum · `--enabled-only` boolean default false · `--output` enum(text,json) default text | read-only |
+| `skills` | `enable` | `--name` R | |
+| `skills` | `disable` | `--name` R | |
+| `skills` | `show <name>` | positional `name` R · `--output` enum(text,json) default text | |
+| `skills` | `export-schema` | (none) | |
+| `oss` | `put <local> <key>` | both positional R | |
+| `oss` | `get <key> <local>` | both positional R | |
+| `oss` | `list [prefix]` | positional `prefix` · `--max-keys` number default 100 · alias `ls` | |
+| `run` | `[message..]` | 16 options: `--command` `--continue/-c` `--session/-s` `--fork` `--share` `--model/-m` `--agent` `--format` enum default · `--file/-f` array · `--title` · `--attach` · `--password/-p` · `--dir` · `--port` number · `--variant` · `--thinking` boolean default false · `--dangerously-skip-permissions` boolean default false | largest surface; aliases via `extra.alias` in OptionDef |
+| `serve` |  | `withNetworkOptions(...)` (`cli/network.ts`) | shared helper — keep as group |
+| `models` | `[provider]` | positional `provider` · `--verbose` boolean · `--refresh` boolean | |
+
+**P1 count: 7 cmd groups** — `users` `tools` `skills` `oss` `run` `serve` `models` (matches plan § 0.18).
+
+### P2 — keep yargs native, no OptionDef migration
+
+| Cmd | Reason |
+|---|---|
+| `account` (login/logout/switch/orgs/open/console) | upstream auth flow, dev-time |
+| `agent` (create) | upstream agent scaffold |
+| `cmd` (helper, not exposed) | internal `cmd()` factory at `cli/cmd/cmd.ts` |
+| `db` (`$0` query / `path`) | dev-time SQL shell |
+| `export [sessionID]` | session export |
+| `generate` | code-gen helper |
+| `github` (install/run) | CI agent |
+| `import <file>` | session import |
+| `mcp` (list/auth/auth list/logout/add/debug) | MCP transport mgmt |
+| `pr <number>` | PR checkout |
+| `providers` (list/login/logout) | upstream auth |
+| `session` (delete/list) | session admin |
+| `stats` | usage report |
+| `uninstall` | installer |
+| `upgrade [target]` | installer |
+| `web` | dev server |
+| `plug` (`plugin <module>`) | plugin install |
+
+**P2 count: 17 commands.**
+
+### P3 — hidden / internal
+
+- `debug` (sub-tools at `cmd/debug/*.ts`: `agent`, `config`, `file`, `lsp`, `ripgrep`, `scrap`, `skill`, `snapshot`, `startup`) — diagnostics; not exported in agent schema.
+
+**P3 count: 1 (with 9 sub-debug commands).**
+
+### Globals already present at root (`src/index.ts`)
+
+`--print-logs` boolean · `--log-level` enum(DEBUG,INFO,WARN,ERROR) · `--pure` boolean · `--help`/`-h` · `--version`/`-v`.
+
+Task 4 will add `--api-key` `--base-url` `--output` `--timeout` `--quiet` `--verbose` `--no-color` `--dry-run` `--non-interactive` per § 0.18 GLOBAL_OPTIONS — deferred until then to avoid touching root entry in Task 1.
