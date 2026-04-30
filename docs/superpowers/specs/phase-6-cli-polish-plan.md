@@ -244,7 +244,11 @@
 
 ---
 
-### Task 8 — 移除 `legacy/`（用户 gate）
+### Task 8 — 移除 `legacy/`（用户 gate） ⚠ DEFERRED 2026-04-30
+
+> **用户 2026-04-30 决议**：暂不删 `legacy/`，保留 25 MB 旧 Agent Forge 作参考。
+> 同步 spec § 15 row 1.7 + § 10 Phase 6 acceptance #5 改为「推迟移除」。
+> 下次 spec 修订时再决议是否真删。
 
 **目标**：spec § 10 字面 — 删除 legacy/ 目录。
 

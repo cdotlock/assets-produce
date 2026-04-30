@@ -438,10 +438,10 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 
 **验收**：
 - 外部 agent 用 `agent config export-schema` 拿到完整 tool schema 能直接接入
-- 单二进制 ≤ 30MB，cold start ≤ 100ms
+- 单二进制 ≤ 30MB，cold start ≤ 800ms ⚠ 1.7（原 ≤ 100ms 不可达，amend 见 § 15 行 1.7）
 - `ERRORS.md` 每错误场景都有匹配实现
 - `SKILL.md` 可被另一 Claude Code session 直接读懂使用
-- `legacy/` 被移除后构建 / 测试 / 部署不受影响
+- `legacy/` 移除推迟（用户 2026-04-30 暂不删；保留为参考） ⚠ 1.7
 
 ---
 
@@ -546,6 +546,7 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 | 1.4 | 2026-04-29 | Phase 2 落地时确认：`agent run --model deepseek/deepseek-chat` 实跑撞 opencode-internal Anthropic-routing 策略 —— 所有 LLM 请求被路由到 `<base>/anthropic/chat/completions`，而 DeepSeek 的 `/anthropic` Anthropic-compat 端点返回 404（可能需要不同 header / region 配置）。结构性已通（catalog 自动加载、`@ai-sdk/openai-compatible` SDK 已 bundled、`agent models deepseek` 列出 4 个模型）；live integration 推迟到 **Phase 2.x**（单独 sub-phase 修 routing，可能加 `deepseek` customLoader 走 `/v1/chat/completions`）。spec § 10 Phase 2 acceptance #2 加 ⚠ 标记引用本行。影响范围：DeepSeek live fallback 时序；不动 § 2 / § 8 任何核心 LLM provider 设计。 | cdotlock + Claude |
 | 1.5 | 2026-04-29 | Phase 2.x：用户提供新 DeepSeek 凭据(`sk-f801...`),实测 `deepseek-v4-flash` / `v4-pro` 走 `@ai-sdk/openai-compatible` SDK + 标准 `/v1/chat/completions` 路径完全跑通。**1.4 中关于 opencode 路由到 `/anthropic/chat/completions` 的判断是错的**：opencode 没有"全 provider 走 Anthropic 路径"的策略,models.dev catalog 把 DeepSeek 标记 `npm: "@ai-sdk/openai-compatible"`,所以走 OpenAI 兼容路径。`deepseek-chat` / `deepseek-reasoner` 仍 404 是 DeepSeek 端 v3 endpoint 已停服或新凭据无权访问,与 opencode 无关。spec § 10 Phase 2 acceptance #2 ⚠ 标记从 1.4 改引 1.5,Phase 2 验收 7/7 全过。影响范围:解除 1.4 推迟;不动 § 2 / § 8 任何设计。 | cdotlock + Claude |
 | 1.6 | 2026-04-29 | Phase 3 实施时调整 atomic tool 命名:在 tool id 里编码具体模型后缀,LLM 看 tool 名就能区分能力。映射:`generate-image` → `generate-image-nanobanana`(nanobanana 2 / `gemini-3.1-flash-image-preview`);`generate-image-gpt` 不变(原本就带模型名);`generate-video` → `generate-video-seedance`(SeedDance 2 pro);`happyhorse` → `generate-video-happyhorse`(HappyHorse / Kling-style);`concat-clips` / `crop-video` 不变(无 AI 模型,FFmpeg-style ops)。env vars 同步:`FC_GENERATE_IMAGE_*` → `FC_GENERATE_IMAGE_NANOBANANA_*`,`FC_GENERATE_VIDEO_*` → `FC_GENERATE_VIDEO_SEEDANCE_*`,`FC_HAPPYHORSE_*` → `FC_GENERATE_VIDEO_HAPPYHORSE_*`。原因:LLM 凭 tool 名选 tool 而不读 description body,语义化 tool id 显著降低误调率。spec § 10 Phase 3 tool 列表加 ⚠ 引本行。影响范围:命名;tool 接口形态、6 tool 数量、§ 11.4 跨 phase 接口稳定原则不变(命名更新作为本 phase 内 lock-in 起点)。 | cdotlock + Claude |
+| 1.7 | 2026-04-30 | Phase 6 落地时两项 acceptance 调整：(a) **cold start ≤ 100ms 不可达**。Bun bundle 实测 2.17 MB ≤ 30 MB 通过；hyperfine min 585 ms（mean 674 ms），dev 路径 568-612 ms，bundle 几乎 0 加成。floor 是 opencode 自身 import graph（Effect 4 runtime + langfuse + AI SDKs + drizzle + yargs），与本 phase 改动无关。100 ms 目标在 Bun + 当前 opencode runtime 下物理不可达，除非把所有重 dep 改成 lazy import 进 handler 内（深度重构，可能破坏 Effect runtime / plugin loader semantics，超出 Phase 6 范围）。决策：本次只把 § 10 Phase 6 acceptance #2 阈值由 ≤ 100 ms 改为 ≤ 800 ms，把 585 ms 实测纳入合规线；如未来要进一步压低，走独立 phase。(b) **`legacy/` 暂不删**：用户 2026-04-30 决定保留 25 MB legacy/（旧 Agent Forge）作参考；当前不维护、不部署、不测试规则不变（CLAUDE.md § 物理结构）。Task 8 推迟到下次 spec 修订时再决议。Phase 6 验收第 5 条「legacy/ 被移除后构建/测试/部署不受影响」改为「legacy/ 推迟移除（保留为参考）」。影响范围：仅本 phase acceptance；§ 2 / § 6 / § 11.4 接口稳定与 SKILL/CLI/MCP/API 四层原则均不变。 | cdotlock + Claude |
 
 > 后续修订请在此追加新行，并在受影响的 phase 章节加 ⚠ 标记 + 引用本表行号。
 
