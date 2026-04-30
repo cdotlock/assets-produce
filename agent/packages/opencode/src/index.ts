@@ -31,6 +31,7 @@ import { OssCommand } from "./cli/cmd/oss"
 import { ToolsCommand } from "./cli/cmd/tools"
 import { SkillsCommand } from "./cli/cmd/skills"
 import { UsersCommand } from "./cli/cmd/users"
+import { ConfigCommand } from "./cli/cmd/config"
 import path from "path"
 import { Global } from "@opencode-ai/core/global"
 import { JsonMigration } from "@/storage/json-migration"
@@ -184,6 +185,7 @@ const cli = yargs(args)
   .command(ToolsCommand)
   .command(SkillsCommand)
   .command(UsersCommand)
+  .command(ConfigCommand)
   .fail((msg, err) => {
     if (
       msg?.startsWith("Unknown argument") ||
