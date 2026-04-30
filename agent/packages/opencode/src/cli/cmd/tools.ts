@@ -9,6 +9,7 @@ import type * as Tool from "@/tool/tool"
 import { cmd } from "./cmd"
 import { UI } from "../ui"
 import * as EffectZod from "@/util/effect-zod"
+import { type OptionDef, toYargsBuilder } from "../option-def"
 
 const MAX_PARAMS_FILE_BYTES = 1_000_000
 
@@ -89,10 +90,18 @@ function exitToolError(exit: Exit.Exit<unknown>): { title: string; output: strin
   }
 }
 
+const toolsListOptions: OptionDef[] = [
+  {
+    flag: "--verbose",
+    description: "include description",
+    type: "boolean",
+  },
+]
+
 export const ToolsListCommand = cmd({
   command: "list",
   describe: "list all built-in tool ids (one per line)",
-  builder: (yargs: Argv) => yargs.option("verbose", { type: "boolean", describe: "include description" }),
+  builder: (yargs: Argv) => toYargsBuilder(yargs, toolsListOptions),
   async handler(args) {
     const verbose = Boolean(args.verbose)
     const exit = await withToolRegistry((svc) => svc.all())
@@ -143,20 +152,34 @@ function makeStubContext(abort: AbortSignal): Tool.Context {
   }
 }
 
+const toolsCallOptions: OptionDef[] = [
+  {
+    flag: "--json",
+    description: "JSON params object as string",
+  },
+  {
+    flag: "--params-file",
+    description: "path to JSON file with params",
+  },
+  {
+    flag: "--output",
+    description: "raw=tool output text; url=output as a URL line; json=full result {output, metadata}",
+    extra: { choices: ["raw", "url", "json"] as const, default: "raw" },
+  },
+]
+
 export const ToolsCallCommand = cmd({
   command: "call <id>",
   describe: "invoke a single tool directly with JSON params (--json or --params-file)",
   builder: (yargs: Argv) =>
-    yargs
-      .positional("id", { type: "string", describe: "tool id (e.g. generate-image-nanobanana)", demandOption: true })
-      .option("json", { type: "string", describe: "JSON params object as string" })
-      .option("params-file", { type: "string", describe: "path to JSON file with params" })
-      .option("output", {
+    toYargsBuilder(
+      yargs.positional("id", {
         type: "string",
-        choices: ["raw", "url", "json"] as const,
-        default: "raw",
-        describe: "raw=tool output text; url=output as a URL line; json=full result {output, metadata}",
+        describe: "tool id (e.g. generate-image-nanobanana)",
+        demandOption: true,
       }),
+      toolsCallOptions,
+    ),
   async handler(args) {
     const id = String(args.id)
     let paramsRaw: string | undefined
