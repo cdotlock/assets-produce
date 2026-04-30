@@ -8,26 +8,33 @@ import { UI } from "../ui"
 import { EOL } from "os"
 import { AppRuntime } from "@/effect/app-runtime"
 import { Effect } from "effect"
+import { type OptionDef, toYargsBuilder } from "../option-def"
+
+const modelsOptions: OptionDef[] = [
+  {
+    flag: "--verbose",
+    description: "use more verbose model output (includes metadata like costs)",
+    type: "boolean",
+  },
+  {
+    flag: "--refresh",
+    description: "refresh the models cache from models.dev",
+    type: "boolean",
+  },
+]
 
 export const ModelsCommand = cmd({
   command: "models [provider]",
   describe: "list all available models",
-  builder: (yargs: Argv) => {
-    return yargs
-      .positional("provider", {
+  builder: (yargs: Argv) =>
+    toYargsBuilder(
+      yargs.positional("provider", {
         describe: "provider ID to filter models by",
         type: "string",
         array: false,
-      })
-      .option("verbose", {
-        describe: "use more verbose model output (includes metadata like costs)",
-        type: "boolean",
-      })
-      .option("refresh", {
-        describe: "refresh the models cache from models.dev",
-        type: "boolean",
-      })
-  },
+      }),
+      modelsOptions,
+    ),
   handler: async (args) => {
     if (args.refresh) {
       await ModelsDev.refresh(true)
