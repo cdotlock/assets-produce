@@ -7,6 +7,7 @@ import { Service as User } from "@/business/user/user"
 import { defaultLayer as userDefaultLayer } from "@/business/user/user"
 import { cmd } from "./cmd"
 import { UI } from "../ui"
+import { type OptionDef, toYargsBuilder } from "../option-def"
 
 function writeOut(text: string): void {
   process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
@@ -66,20 +67,34 @@ export const UsersCommand = cmd({
   async handler() {},
 })
 
+const usersAddOptions: OptionDef[] = [
+  {
+    flag: "--username",
+    description: "username (3-32 chars, lowercase start)",
+    required: true,
+  },
+  {
+    flag: "--role",
+    description: "user role",
+    required: true,
+    extra: { choices: ["admin", "creator"] as const },
+  },
+  {
+    flag: "--password",
+    description: "initial password (≥8 chars); omit to disable login",
+  },
+  {
+    flag: "--dry-run",
+    description: "",
+    type: "boolean",
+    extra: { default: false },
+  },
+]
+
 export const UsersAddCommand = cmd({
   command: "add",
   describe: "create a user",
-  builder: (yargs: Argv) =>
-    yargs
-      .option("username", { type: "string", demandOption: true, describe: "username (3-32 chars, lowercase start)" })
-      .option("role", {
-        type: "string",
-        choices: ["admin", "creator"] as const,
-        demandOption: true,
-        describe: "user role",
-      })
-      .option("password", { type: "string", describe: "initial password (≥8 chars); omit to disable login" })
-      .option("dry-run", { type: "boolean", default: false }),
+  builder: (yargs: Argv) => toYargsBuilder(yargs, usersAddOptions),
   async handler(args) {
     const exit = await runWithLayers(
       UserCli.addUser({
@@ -144,14 +159,29 @@ export const UsersListCommand = cmd({
   },
 })
 
+const usersPasswdOptions: OptionDef[] = [
+  {
+    flag: "--username",
+    description: "",
+    required: true,
+  },
+  {
+    flag: "--password",
+    description: "new password (≥8 chars)",
+    required: true,
+  },
+  {
+    flag: "--dry-run",
+    description: "",
+    type: "boolean",
+    extra: { default: false },
+  },
+]
+
 export const UsersPasswdCommand = cmd({
   command: "passwd",
   describe: "set or update a user's password",
-  builder: (yargs: Argv) =>
-    yargs
-      .option("username", { type: "string", demandOption: true })
-      .option("password", { type: "string", demandOption: true, describe: "new password (≥8 chars)" })
-      .option("dry-run", { type: "boolean", default: false }),
+  builder: (yargs: Argv) => toYargsBuilder(yargs, usersPasswdOptions),
   async handler(args) {
     const exit = await runWithLayers(
       UserCli.setPassword({
@@ -170,10 +200,18 @@ export const UsersPasswdCommand = cmd({
   },
 })
 
+const usersDeleteOptions: OptionDef[] = [
+  {
+    flag: "--username",
+    description: "",
+    required: true,
+  },
+]
+
 export const UsersDeleteCommand = cmd({
   command: "delete",
   describe: "delete a user",
-  builder: (yargs: Argv) => yargs.option("username", { type: "string", demandOption: true }),
+  builder: (yargs: Argv) => toYargsBuilder(yargs, usersDeleteOptions),
   async handler(args) {
     const exit = await runWithLayers(UserCli.deleteUser(String(args.username)))
     if (Exit.isFailure(exit)) {
