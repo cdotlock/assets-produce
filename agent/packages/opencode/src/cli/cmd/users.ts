@@ -9,7 +9,7 @@ import { cmd } from "./cmd"
 import { UI } from "../ui"
 import { type OptionDef, toYargsBuilder } from "../option-def"
 import { getGlobalContext } from "../global-context"
-import { warnDryRunIgnored } from "../output/dry-run-guard"
+import { applyGlobalDryRun, warnDryRunIgnored } from "../output/dry-run-guard"
 import { formatError } from "../errors/router"
 
 function writeOut(text: string): void {
@@ -78,7 +78,7 @@ export const UsersAddCommand = cmd({
         username: String(args.username),
         role: String(args.role) as "admin" | "creator",
         password: typeof args.password === "string" ? args.password : undefined,
-        dryRun: Boolean(args["dry-run"]),
+        dryRun: applyGlobalDryRun(Boolean(args["dry-run"])),
       }),
     )
     if (Exit.isFailure(exit)) {
@@ -169,7 +169,7 @@ export const UsersPasswdCommand = cmd({
       UserCli.setPassword({
         username: String(args.username),
         password: String(args.password),
-        dryRun: Boolean(args["dry-run"]),
+        dryRun: applyGlobalDryRun(Boolean(args["dry-run"])),
       }),
     )
     if (Exit.isFailure(exit)) {
@@ -195,12 +195,17 @@ export const UsersDeleteCommand = cmd({
   describe: "delete a user",
   builder: (yargs: Argv) => toYargsBuilder(yargs, usersDeleteOptions),
   async handler(args) {
-    const exit = await runWithLayers(UserCli.deleteUser(String(args.username)))
+    const username = String(args.username)
+    if (applyGlobalDryRun()) {
+      writeOut(JSON.stringify({ dryRun: true, action: "delete", username }, null, 2))
+      return
+    }
+    const exit = await runWithLayers(UserCli.deleteUser(username))
     if (Exit.isFailure(exit)) {
       const { exitCode, message } = formatError(exit.cause)
       UI.error(message)
       process.exit(exitCode)
     }
-    writeOut(`deleted user ${String(args.username)}`)
+    writeOut(`deleted user ${username}`)
   },
 })

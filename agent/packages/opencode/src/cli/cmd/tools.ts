@@ -11,7 +11,7 @@ import { UI } from "../ui"
 import * as EffectZod from "@/util/effect-zod"
 import { type OptionDef, toYargsBuilder } from "../option-def"
 import { getGlobalContext } from "../global-context"
-import { warnDryRunIgnored } from "../output/dry-run-guard"
+import { applyGlobalDryRun, warnDryRunIgnored } from "../output/dry-run-guard"
 import { ExitCode } from "../errors/codes"
 import { formatError } from "../errors/router"
 
@@ -201,6 +201,21 @@ export const ToolsCallCommand = cmd({
     ),
   async handler(args) {
     const id = String(args.id)
+    if (applyGlobalDryRun()) {
+      writeOut(
+        JSON.stringify(
+          {
+            dryRun: true,
+            action: "call",
+            id,
+            paramsSource: args.json ? "json" : args["params-file"] ? "params-file" : "stdin",
+          },
+          null,
+          2,
+        ),
+      )
+      return
+    }
     let paramsRaw: string | undefined
     if (args.json) paramsRaw = String(args.json)
     else if (args["params-file"]) {

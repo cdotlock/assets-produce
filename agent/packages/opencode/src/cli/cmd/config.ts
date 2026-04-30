@@ -181,6 +181,13 @@ const skillsShowOptions: OptionDef[] = [
 ]
 
 // oss
+const ossPutOptions: OptionDef[] = [
+  {
+    flag: "--dry-run",
+    description: "plan the upload; do not write to OSS",
+    type: "boolean",
+  },
+]
 const ossListOptions: OptionDef[] = [
   { flag: "--max-keys", description: "max keys to return", type: "number" },
 ]
@@ -299,7 +306,7 @@ export const CLI_COMMAND_DESCRIPTORS: CliCommandDescriptor[] = [
   {
     name: "oss-put",
     description: "upload a local file to OSS at <key>",
-    options: [],
+    options: ossPutOptions,
     positionals: [
       { name: "local", description: "path of local file", required: true },
       { name: "key", description: "OSS object key", required: true },

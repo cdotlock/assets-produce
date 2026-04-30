@@ -16,7 +16,7 @@ import { cmd } from "./cmd"
 import { UI } from "../ui"
 import { type OptionDef, toYargsBuilder } from "../option-def"
 import { getGlobalContext } from "../global-context"
-import { warnDryRunIgnored } from "../output/dry-run-guard"
+import { applyGlobalDryRun, warnDryRunIgnored } from "../output/dry-run-guard"
 import { ExitCode } from "../errors/codes"
 import { formatError } from "../errors/router"
 
@@ -157,7 +157,7 @@ export const SkillsAddCommand = cmd({
         label: String(args.label),
         scope: String(args.scope) as Scope,
         enabled: Boolean(args.enabled),
-        dryRun: Boolean(args["dry-run"]),
+        dryRun: applyGlobalDryRun(Boolean(args["dry-run"])),
       }),
     )
     if (Exit.isFailure(exit)) {
@@ -240,7 +240,7 @@ export const SkillsUpdateCommand = cmd({
         label: typeof args.label === "string" ? args.label : undefined,
         scope: typeof args.scope === "string" ? (args.scope as Scope) : undefined,
         enabled: typeof args.enabled === "boolean" ? args.enabled : undefined,
-        dryRun: Boolean(args["dry-run"]),
+        dryRun: applyGlobalDryRun(Boolean(args["dry-run"])),
       }),
     )
     if (Exit.isFailure(exit)) {
@@ -265,13 +265,18 @@ export const SkillsDeleteCommand = cmd({
   describe: "delete a skill (DB row only; Langfuse prompt is preserved)",
   builder: (yargs: Argv) => toYargsBuilder(yargs, skillsDeleteOptions),
   async handler(args) {
-    const exit = await runWithLayers(SkillCli.deleteSkill(String(args.name)))
+    const name = String(args.name)
+    if (applyGlobalDryRun()) {
+      writeOut(JSON.stringify({ dryRun: true, action: "delete", name }, null, 2))
+      return
+    }
+    const exit = await runWithLayers(SkillCli.deleteSkill(name))
     if (Exit.isFailure(exit)) {
       const { exitCode, message } = formatError(exit.cause)
       UI.error(message)
       process.exit(exitCode)
     }
-    writeOut(`deleted: ${String(args.name)}`)
+    writeOut(`deleted: ${name}`)
   },
 })
 
@@ -340,13 +345,18 @@ export const SkillsEnableCommand = cmd({
   describe: "enable a skill",
   builder: (yargs: Argv) => toYargsBuilder(yargs, skillsEnableOptions),
   async handler(args) {
-    const exit = await runWithLayers(SkillCli.setEnabled(String(args.name), true))
+    const name = String(args.name)
+    if (applyGlobalDryRun()) {
+      writeOut(JSON.stringify({ dryRun: true, action: "enable", name }, null, 2))
+      return
+    }
+    const exit = await runWithLayers(SkillCli.setEnabled(name, true))
     if (Exit.isFailure(exit)) {
       const { exitCode, message } = formatError(exit.cause)
       UI.error(message)
       process.exit(exitCode)
     }
-    writeOut(`enabled: ${String(args.name)}`)
+    writeOut(`enabled: ${name}`)
   },
 })
 
@@ -363,13 +373,18 @@ export const SkillsDisableCommand = cmd({
   describe: "disable a skill",
   builder: (yargs: Argv) => toYargsBuilder(yargs, skillsDisableOptions),
   async handler(args) {
-    const exit = await runWithLayers(SkillCli.setEnabled(String(args.name), false))
+    const name = String(args.name)
+    if (applyGlobalDryRun()) {
+      writeOut(JSON.stringify({ dryRun: true, action: "disable", name }, null, 2))
+      return
+    }
+    const exit = await runWithLayers(SkillCli.setEnabled(name, false))
     if (Exit.isFailure(exit)) {
       const { exitCode, message } = formatError(exit.cause)
       UI.error(message)
       process.exit(exitCode)
     }
-    writeOut(`disabled: ${String(args.name)}`)
+    writeOut(`disabled: ${name}`)
   },
 })
 

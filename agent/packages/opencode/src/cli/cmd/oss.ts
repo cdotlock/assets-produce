@@ -33,17 +33,29 @@ export const OssCommand = cmd({
   async handler() {},
 })
 
+const ossPutOptions: OptionDef[] = [
+  {
+    flag: "--dry-run",
+    description: "plan the upload; do not write to OSS",
+    type: "boolean",
+    extra: { default: false },
+  },
+]
+
 export const OssPutCommand = cmd({
   command: "put <local> <key>",
   describe: "upload a local file to OSS at <key>",
   builder: (yargs) =>
-    yargs
-      .positional("local", { type: "string", describe: "path of local file", demandOption: true })
-      .positional("key", { type: "string", describe: "OSS object key", demandOption: true }),
+    toYargsBuilder(
+      yargs
+        .positional("local", { type: "string", describe: "path of local file", demandOption: true })
+        .positional("key", { type: "string", describe: "OSS object key", demandOption: true }),
+      ossPutOptions,
+    ),
   async handler(args) {
     const localPath = path.resolve(String(args.local))
     const key = String(args.key)
-    if (applyGlobalDryRun()) {
+    if (applyGlobalDryRun(Boolean(args["dry-run"]))) {
       writeOut(JSON.stringify({ dryRun: true, action: "put", key, local: localPath }, null, 2))
       return
     }
