@@ -1,16 +1,12 @@
 import { Hono } from "hono"
 import { describeRoute, validator, resolver } from "hono-openapi"
 import z from "zod"
-import { Effect, Layer } from "effect"
-import { randomBytes, createHash } from "crypto"
-import { setCookie } from "hono/cookie"
+import { Effect } from "effect"
 import { lazy } from "@/util/lazy"
 import { verifyPassword, signJwt } from "@/auth/web"
 import { defaultLayer as userBusinessLayer } from "@/business/user/user"
-import { defaultLayer as sessionTokenBusinessLayer } from "@/business/session-token/session-token"
 import { Service as UserService } from "@/business/user/user"
-import { Service as SessionTokenService } from "@/business/session-token/session-token"
-import { jsonRequest, runRequest } from "./trace"
+import { jsonRequest } from "./trace"
 
 const LoginBody = z.object({
   username: z.string(),
@@ -36,9 +32,6 @@ const MeResponse = z.object({
   }),
 })
 
-const authLayer = Layer.mergeAll(userBusinessLayer, sessionTokenBusinessLayer)
-
-const REFRESH_TTL_MS = 30 * 24 * 60 * 60 * 1000
 const JWT_TTL_SECONDS = 43200
 
 export const AuthRoutes = lazy(() =>
@@ -62,7 +55,6 @@ export const AuthRoutes = lazy(() =>
         return jsonRequest("AuthRoutes.login", c, function* () {
           return yield* Effect.gen(function* () {
             const users = yield* UserService
-            const tokens = yield* SessionTokenService
 
             const user = yield* users.getByUsername(username)
             if (!user || !user.password_hash) {
@@ -87,23 +79,6 @@ export const AuthRoutes = lazy(() =>
               ),
             )
 
-            const rawRefresh = randomBytes(32).toString("hex")
-            const refreshHash = createHash("sha256").update(rawRefresh).digest("hex")
-
-            yield* tokens.create({
-              userId: user.id,
-              tokenHash: refreshHash,
-              expiresAt: Date.now() + REFRESH_TTL_MS,
-            })
-
-            setCookie(c, "refresh_token", rawRefresh, {
-              httpOnly: true,
-              sameSite: "Lax",
-              path: "/auth",
-              maxAge: REFRESH_TTL_MS / 1000,
-              secure: c.req.url.startsWith("https://"),
-            })
-
             return {
               token,
               expires_at: jwtExpiresAt,
@@ -113,14 +88,14 @@ export const AuthRoutes = lazy(() =>
                 role: user.role,
               },
             } as const
-          }).pipe(Effect.provide(authLayer))
+          }).pipe(Effect.provide(userBusinessLayer))
         })
       },
     )
     .post(
       "/logout",
       describeRoute({
-        summary: "Revoke all active tokens for the authenticated user",
+        summary: "Logout (client discards JWT)",
         operationId: "auth.logout",
         responses: {
           204: { description: "Logged out" },
@@ -132,15 +107,9 @@ export const AuthRoutes = lazy(() =>
           c.status(401)
           return c.json({ error: "unauthorized" })
         }
-        const user = c.var.user
-        await runRequest(
-          "AuthRoutes.logout",
-          c,
-          Effect.gen(function* () {
-            const tokens = yield* SessionTokenService
-            yield* tokens.revokeAllForUser(user.sub)
-          }).pipe(Effect.provide(sessionTokenBusinessLayer)),
-        )
+        // No server-side session state to revoke yet — JWT lifetime is the
+        // sole gate. Refresh-token rotation is deferred to Phase 6 (see
+        // phase-5-webui-verification.md § 5).
         return new Response(null, { status: 204 })
       },
     )
