@@ -17,15 +17,15 @@ There are two ways to run the CLI today:
 | `bun --conditions=browser ./agent/packages/opencode/src/index.ts <cmd>` | works at HEAD | development, agents driving the repo in place |
 | `bunx agent <cmd>` (resolves `agent/dist/agent.mjs`) | shipped after Phase 6 Task 7 | unattended / production |
 
-For brevity below, `agent` is shorthand for the dev invocation:
+For brevity below, `agent` is shorthand for the dev invocation. Anchor the
+alias to the repo root so it works from any sub-directory:
 
 ```bash
-alias agent='bun --conditions=browser ./agent/packages/opencode/src/index.ts'
+alias agent="bun --conditions=browser \"$(git rev-parse --show-toplevel)/agent/packages/opencode/src/index.ts\""
 ```
 
-Run from the repo root (`/Users/Clock/moonshort/assets-produce` or wherever the
-checkout lives). The CLI walks up to find `.env.example`, so commands work from
-sub-directories too.
+The CLI itself walks up to find `.env.example`, so it doesn't care which
+sub-directory you `cd` to once the alias is set.
 
 ---
 
@@ -81,7 +81,7 @@ Exit codes are stable and machine-friendly:
 | 5 | `TIMEOUT` | timeout |
 | 6 | `NETWORK` | network error (ECONNREFUSED / ENOTFOUND / ...) |
 | 10 | `CONTENT_FILTER` | content blocked |
-| 130 | (SIGINT) | interrupted by Ctrl-C |
+| 130 | `SIGINT` | interrupted by Ctrl-C (auto-emitted by Node) |
 
 For per-command × per-scenario error messages, see [`ERRORS.md`](ERRORS.md).
 
@@ -100,8 +100,10 @@ agent config export-schema --format openai > /tmp/tools.json
 ```
 
 Every entry in `tools[]` has a kebab-case `name` (e.g. `users-add`,
-`tools-call`, `oss-put`). Map it to a CLI invocation by splitting on the first
-`-`:
+`tools-call`, `oss-put`). Map it back to a CLI invocation by replacing each `-`
+with a space — the leading group name (`users`, `tools`, `oss`, `skills`,
+`config`) consumes the first `-`, and any remaining `-`s separate the
+sub-command's own words. Examples:
 
 | schema name | CLI invocation |
 |---|---|
@@ -110,6 +112,9 @@ Every entry in `tools[]` has a kebab-case `name` (e.g. `users-add`,
 | `oss-put` | `agent oss put <local> <key>` |
 | `skills-export-schema` | `agent skills export-schema` |
 | `run` | `agent run "..."` |
+
+Top-level single-word entries like `run`, `serve`, `models` invoke directly
+without a sub-command split.
 
 Pass each property in the LLM's tool call as a `--<flag>` value (positionals
 like `id`, `local`, `key`, `prefix` go before flags, in the order documented in
