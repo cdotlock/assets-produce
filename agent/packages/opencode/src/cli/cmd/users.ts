@@ -1,5 +1,5 @@
 import type { Argv } from "yargs"
-import { Cause, Effect, Exit } from "effect"
+import { Effect, Exit } from "effect"
 import { Instance } from "../../project/instance"
 import { AppRuntime } from "@/effect/app-runtime"
 import { UserCli } from "@/business/user/cli"
@@ -10,6 +10,7 @@ import { UI } from "../ui"
 import { type OptionDef, toYargsBuilder } from "../option-def"
 import { getGlobalContext } from "../global-context"
 import { warnDryRunIgnored } from "../output/dry-run-guard"
+import { formatError } from "../errors/router"
 
 function writeOut(text: string): void {
   process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
@@ -28,32 +29,6 @@ async function runWithLayers<A, E>(eff: Effect.Effect<A, E, User>): Promise<Exit
     },
   })
   return result
-}
-
-function formatErrorFromCause<E>(cause: Cause.Cause<E>): string {
-  let e: unknown = undefined
-  for (const reason of cause.reasons) {
-    if (reason._tag === "Fail") {
-      e = reason.error
-      break
-    }
-    if (reason._tag === "Die") {
-      e = reason.defect
-      break
-    }
-  }
-  if (e && typeof e === "object" && "data" in e) {
-    const data = (e as { data?: { op?: unknown; message?: unknown } }).data
-    if (data && typeof data === "object") {
-      const { op, message } = data as { op?: unknown; message?: unknown }
-      const opStr = typeof op === "string" ? op : "error"
-      const msgStr = typeof message === "string" ? message : JSON.stringify(data)
-      return `[${opStr}] ${msgStr}`
-    }
-  }
-  if (e instanceof Error) return e.name === e.message ? e.name : e.message
-  if (e !== undefined) return String(e)
-  return Cause.pretty(cause).split("\n")[0] ?? "unexpected error"
 }
 
 export const UsersCommand = cmd({
@@ -107,9 +82,9 @@ export const UsersAddCommand = cmd({
       }),
     )
     if (Exit.isFailure(exit)) {
-      UI.error(formatErrorFromCause(exit.cause))
-      process.exitCode = 1
-      return
+      const { exitCode, message } = formatError(exit.cause)
+      UI.error(message)
+      process.exit(exitCode)
     }
     const { resolved, dryRun } = exit.value
     if (dryRun) {
@@ -130,9 +105,9 @@ export const UsersListCommand = cmd({
     if (getGlobalContext().dryRun) warnDryRunIgnored("users list")
     const exit = await runWithLayers(UserCli.listUsers())
     if (Exit.isFailure(exit)) {
-      UI.error(formatErrorFromCause(exit.cause))
-      process.exitCode = 1
-      return
+      const { exitCode, message } = formatError(exit.cause)
+      UI.error(message)
+      process.exit(exitCode)
     }
     const rows = exit.value
     if (getGlobalContext().output === "json") {
@@ -198,9 +173,9 @@ export const UsersPasswdCommand = cmd({
       }),
     )
     if (Exit.isFailure(exit)) {
-      UI.error(formatErrorFromCause(exit.cause))
-      process.exitCode = 1
-      return
+      const { exitCode, message } = formatError(exit.cause)
+      UI.error(message)
+      process.exit(exitCode)
     }
     const { id, username } = exit.value
     writeOut(`password updated for ${username} (id=${id})`)
@@ -222,9 +197,9 @@ export const UsersDeleteCommand = cmd({
   async handler(args) {
     const exit = await runWithLayers(UserCli.deleteUser(String(args.username)))
     if (Exit.isFailure(exit)) {
-      UI.error(formatErrorFromCause(exit.cause))
-      process.exitCode = 1
-      return
+      const { exitCode, message } = formatError(exit.cause)
+      UI.error(message)
+      process.exit(exitCode)
     }
     writeOut(`deleted user ${String(args.username)}`)
   },

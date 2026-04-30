@@ -1,5 +1,5 @@
 import type { Argv } from "yargs"
-import { Cause, Effect, Exit } from "effect"
+import { Effect, Exit } from "effect"
 import { Instance } from "../../project/instance"
 import { AppRuntime } from "@/effect/app-runtime"
 import {
@@ -17,6 +17,8 @@ import { UI } from "../ui"
 import { type OptionDef, toYargsBuilder } from "../option-def"
 import { getGlobalContext } from "../global-context"
 import { warnDryRunIgnored } from "../output/dry-run-guard"
+import { ExitCode } from "../errors/codes"
+import { formatError } from "../errors/router"
 
 function writeOut(text: string): void {
   process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
@@ -37,32 +39,6 @@ async function runWithLayers<A, E>(eff: Effect.Effect<A, E, SkillService | Langf
     },
   })
   return result
-}
-
-function formatErrorFromCause<E>(cause: Cause.Cause<E>): string {
-  let e: unknown = undefined
-  for (const reason of cause.reasons) {
-    if (reason._tag === "Fail") {
-      e = reason.error
-      break
-    }
-    if (reason._tag === "Die") {
-      e = reason.defect
-      break
-    }
-  }
-  if (e && typeof e === "object" && "data" in e) {
-    const data = (e as { data?: { op?: unknown; message?: unknown } }).data
-    if (data && typeof data === "object") {
-      const { op, message } = data as { op?: unknown; message?: unknown }
-      const opStr = typeof op === "string" ? op : "error"
-      const msgStr = typeof message === "string" ? message : JSON.stringify(data)
-      return `[${opStr}] ${msgStr}`
-    }
-  }
-  if (e instanceof Error) return e.name === e.message ? e.name : e.message
-  if (e !== undefined) return String(e)
-  return Cause.pretty(cause).split("\n")[0] ?? "unexpected error"
 }
 
 function pickSource(args: {
@@ -167,13 +143,11 @@ export const SkillsAddCommand = cmd({
       source = pickSource(args)
     } catch (e) {
       UI.error(e instanceof Error ? e.message : String(e))
-      process.exitCode = 2
-      return
+      process.exit(ExitCode.USAGE)
     }
     if (!source) {
       UI.error("must provide one of --content-file / --content-url / --langfuse-prompt-key")
-      process.exitCode = 2
-      return
+      process.exit(ExitCode.USAGE)
     }
     const exit = await runWithLayers(
       SkillCli.addSkill({
@@ -187,9 +161,9 @@ export const SkillsAddCommand = cmd({
       }),
     )
     if (Exit.isFailure(exit)) {
-      UI.error(formatErrorFromCause(exit.cause))
-      process.exitCode = 1
-      return
+      const { exitCode, message } = formatError(exit.cause)
+      UI.error(message)
+      process.exit(exitCode)
     }
     writeOut(JSON.stringify(exit.value, null, 2))
   },
@@ -256,8 +230,7 @@ export const SkillsUpdateCommand = cmd({
       source = pickSource(args)
     } catch (e) {
       UI.error(e instanceof Error ? e.message : String(e))
-      process.exitCode = 2
-      return
+      process.exit(ExitCode.USAGE)
     }
     const exit = await runWithLayers(
       SkillCli.updateSkill({
@@ -271,9 +244,9 @@ export const SkillsUpdateCommand = cmd({
       }),
     )
     if (Exit.isFailure(exit)) {
-      UI.error(formatErrorFromCause(exit.cause))
-      process.exitCode = 1
-      return
+      const { exitCode, message } = formatError(exit.cause)
+      UI.error(message)
+      process.exit(exitCode)
     }
     writeOut(JSON.stringify(exit.value, null, 2))
   },
@@ -294,9 +267,9 @@ export const SkillsDeleteCommand = cmd({
   async handler(args) {
     const exit = await runWithLayers(SkillCli.deleteSkill(String(args.name)))
     if (Exit.isFailure(exit)) {
-      UI.error(formatErrorFromCause(exit.cause))
-      process.exitCode = 1
-      return
+      const { exitCode, message } = formatError(exit.cause)
+      UI.error(message)
+      process.exit(exitCode)
     }
     writeOut(`deleted: ${String(args.name)}`)
   },
@@ -334,9 +307,9 @@ export const SkillsListCommand = cmd({
       }),
     )
     if (Exit.isFailure(exit)) {
-      UI.error(formatErrorFromCause(exit.cause))
-      process.exitCode = 1
-      return
+      const { exitCode, message } = formatError(exit.cause)
+      UI.error(message)
+      process.exit(exitCode)
     }
     const rows = exit.value
     // Local --output flag wins; otherwise honor global (set by middleware in
@@ -369,9 +342,9 @@ export const SkillsEnableCommand = cmd({
   async handler(args) {
     const exit = await runWithLayers(SkillCli.setEnabled(String(args.name), true))
     if (Exit.isFailure(exit)) {
-      UI.error(formatErrorFromCause(exit.cause))
-      process.exitCode = 1
-      return
+      const { exitCode, message } = formatError(exit.cause)
+      UI.error(message)
+      process.exit(exitCode)
     }
     writeOut(`enabled: ${String(args.name)}`)
   },
@@ -392,9 +365,9 @@ export const SkillsDisableCommand = cmd({
   async handler(args) {
     const exit = await runWithLayers(SkillCli.setEnabled(String(args.name), false))
     if (Exit.isFailure(exit)) {
-      UI.error(formatErrorFromCause(exit.cause))
-      process.exitCode = 1
-      return
+      const { exitCode, message } = formatError(exit.cause)
+      UI.error(message)
+      process.exit(exitCode)
     }
     writeOut(`disabled: ${String(args.name)}`)
   },
@@ -417,14 +390,13 @@ export const SkillsShowCommand = cmd({
     if (getGlobalContext().dryRun) warnDryRunIgnored("skills show")
     const exit = await runWithLayers(SkillCli.showSkill(String(args.name)))
     if (Exit.isFailure(exit)) {
-      UI.error(formatErrorFromCause(exit.cause))
-      process.exitCode = 1
-      return
+      const { exitCode, message } = formatError(exit.cause)
+      UI.error(message)
+      process.exit(exitCode)
     }
     if (!exit.value) {
       UI.error(`skill not found: ${String(args.name)}`)
-      process.exitCode = 1
-      return
+      process.exit(ExitCode.GENERAL)
     }
     const { row, body } = exit.value
     if (String(args.output) === "json") {
@@ -460,9 +432,9 @@ export const SkillsExportSchemaCommand = cmd({
       async fn() {
         const exit = await AppRuntime.runPromiseExit(eff)
         if (Exit.isFailure(exit)) {
-          UI.error(formatErrorFromCause(exit.cause))
-          process.exitCode = 1
-          return
+          const { exitCode, message } = formatError(exit.cause)
+          UI.error(message)
+          process.exit(exitCode)
         }
         allSkills = exit.value.map((s) => ({ name: s.name, description: s.description }))
       },

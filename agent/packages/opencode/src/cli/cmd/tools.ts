@@ -12,6 +12,8 @@ import * as EffectZod from "@/util/effect-zod"
 import { type OptionDef, toYargsBuilder } from "../option-def"
 import { getGlobalContext } from "../global-context"
 import { warnDryRunIgnored } from "../output/dry-run-guard"
+import { ExitCode } from "../errors/codes"
+import { formatError } from "../errors/router"
 
 const MAX_PARAMS_FILE_BYTES = 1_000_000
 
@@ -58,9 +60,9 @@ function firstFailure<E>(cause: Cause.Cause<E>): unknown {
 
 function unwrap<A>(exit: Exit.Exit<A>): A {
   if (Exit.isSuccess(exit)) return exit.value
-  const err = firstFailure(exit.cause)
-  if (err !== undefined) throw err instanceof Error ? err : new Error(String(err))
-  throw new Error(Cause.pretty(exit.cause))
+  const { exitCode, message } = formatError(exit.cause)
+  UI.error(message || Cause.pretty(exit.cause).split("\n")[0] || "unexpected error")
+  process.exit(exitCode)
 }
 
 function exitToolError(exit: Exit.Exit<unknown>): { title: string; output: string; metadata: Record<string, unknown> } {
@@ -143,8 +145,7 @@ export const ToolsShowCommand = cmd({
     const tool = all.find((t) => t.id === id)
     if (!tool) {
       UI.error(`tool not found: ${id}`)
-      process.exitCode = 1
-      return
+      process.exit(ExitCode.GENERAL)
     }
     const schema = EffectZod.toJsonSchema(tool.parameters)
     writeOut(`# ${tool.id}\n`)
@@ -203,14 +204,12 @@ export const ToolsCallCommand = cmd({
       const stat = await fs.stat(path).catch(() => null)
       if (stat && stat.size > MAX_PARAMS_FILE_BYTES) {
         UI.error(`params file too large: ${stat.size} bytes (max ${MAX_PARAMS_FILE_BYTES})`)
-        process.exitCode = 2
-        return
+        process.exit(ExitCode.USAGE)
       }
       paramsRaw = await fs.readFile(path, "utf8")
     } else if (process.stdin.isTTY) {
       UI.error("provide --json '<obj>' or --params-file <path>; pipe JSON via stdin only when non-TTY")
-      process.exitCode = 2
-      return
+      process.exit(ExitCode.USAGE)
     } else {
       paramsRaw = await new Promise<string>((resolve, reject) => {
         let data = ""
@@ -228,18 +227,15 @@ export const ToolsCallCommand = cmd({
         process.stdin.on("error", reject)
       }).catch((e) => {
         UI.error(e instanceof Error ? e.message : String(e))
-        process.exitCode = 2
-        return ""
+        process.exit(ExitCode.USAGE)
       })
-      if (process.exitCode === 2) return
     }
     let params: Record<string, unknown>
     try {
       params = JSON.parse(paramsRaw || "{}")
     } catch (e) {
       UI.error(`invalid JSON params: ${e instanceof Error ? e.message : String(e)}`)
-      process.exitCode = 2
-      return
+      process.exit(ExitCode.USAGE)
     }
 
     const ctl = new AbortController()
@@ -261,8 +257,7 @@ export const ToolsCallCommand = cmd({
     }
     if (result === null) {
       UI.error(`tool not found: ${id}`)
-      process.exitCode = 1
-      return
+      process.exit(ExitCode.GENERAL)
     }
     const isError = Boolean((result.metadata as Record<string, unknown> | undefined)?.error)
     const mode = String(args.output)
@@ -277,7 +272,7 @@ export const ToolsCallCommand = cmd({
     } else {
       writeOut(result.output)
     }
-    if (isError) process.exitCode = 1
+    if (isError) process.exit(ExitCode.GENERAL)
   },
 })
 
@@ -294,8 +289,7 @@ export const ToolsExportSchemaCommand = cmd({
     const filtered = id ? all.filter((t) => t.id === id) : all
     if (id && filtered.length === 0) {
       UI.error(`tool not found: ${id}`)
-      process.exitCode = 1
-      return
+      process.exit(ExitCode.GENERAL)
     }
     const out = filtered.map((tool) => ({
       name: tool.id,

@@ -28,6 +28,7 @@ import { BashTool } from "../../tool/bash"
 import { TodoWriteTool } from "../../tool/todo"
 import { Locale } from "@/util/locale"
 import { AppRuntime } from "@/effect/app-runtime"
+import { ExitCode } from "../errors/codes"
 
 type ToolProps<T> = {
   input: Tool.InferParameters<T>
@@ -349,7 +350,7 @@ export const RunCommand = cmd({
         return process.cwd()
       } catch {
         UI.error("Failed to change directory to " + args.dir)
-        process.exit(1)
+        process.exit(ExitCode.USAGE)
       }
     })()
 
@@ -361,7 +362,7 @@ export const RunCommand = cmd({
         const resolvedPath = path.resolve(process.cwd(), filePath)
         if (!(await Filesystem.exists(resolvedPath))) {
           UI.error(`File not found: ${filePath}`)
-          process.exit(1)
+          process.exit(ExitCode.GENERAL)
         }
 
         const mime = (await Filesystem.isDir(resolvedPath)) ? "application/x-directory" : "text/plain"
@@ -379,12 +380,12 @@ export const RunCommand = cmd({
 
     if (message.trim().length === 0 && !args.command) {
       UI.error("You must provide a message or a command")
-      process.exit(1)
+      process.exit(ExitCode.USAGE)
     }
 
     if (args.fork && !args.continue && !args.session) {
       UI.error("--fork requires --continue or --session")
-      process.exit(1)
+      process.exit(ExitCode.USAGE)
     }
 
     const rules: Permission.Ruleset = [
@@ -663,13 +664,13 @@ export const RunCommand = cmd({
       const sessionID = await session(sdk)
       if (!sessionID) {
         UI.error("Session not found")
-        process.exit(1)
+        process.exit(ExitCode.GENERAL)
       }
       await share(sdk, sessionID)
 
       loop().catch((e) => {
         console.error(e)
-        process.exit(1)
+        process.exit(ExitCode.GENERAL)
       })
 
       if (args.command) {

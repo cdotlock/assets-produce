@@ -44,6 +44,8 @@ import { ensureProcessMetadata } from "@opencode-ai/core/util/opencode-process"
 import { GLOBAL_OPTIONS, toYargsBuilder } from "./cli/option-def"
 import { isNoColor, isNonInteractive, outputMode } from "./cli/output/mode"
 import { setGlobalContext } from "./cli/global-context"
+import { ExitCode } from "./cli/errors/codes"
+import { router } from "./cli/errors/router"
 
 const processMetadata = ensureProcessMetadata("main")
 
@@ -223,16 +225,21 @@ const cli = toYargsBuilder(
   .command(UsersCommand)
   .command(ConfigCommand)
   .fail((msg, err) => {
+    // Phase 6 Task 5 — yargs-detected usage failures (missing required arg,
+    // unknown flag, invalid value) map to ExitCode.USAGE (2). Anything else
+    // bubbles to the top-level catch and gets routed by `cli/errors/router`.
     if (
       msg?.startsWith("Unknown argument") ||
       msg?.startsWith("Not enough non-option arguments") ||
-      msg?.startsWith("Invalid values:")
+      msg?.startsWith("Invalid values:") ||
+      msg?.startsWith("Missing required argument")
     ) {
-      if (err) throw err
+      if (msg) process.stderr.write(`${msg}${EOL}`)
       cli.showHelp(show)
+      process.exit(ExitCode.USAGE)
     }
     if (err) throw err
-    process.exit(1)
+    process.exit(ExitCode.GENERAL)
   })
   .strict()
 
@@ -282,7 +289,10 @@ try {
     UI.error("Unexpected error, check log file at " + Log.file() + " for more details" + EOL)
     process.stderr.write(errorMessage(e) + EOL)
   }
-  process.exitCode = 1
+  // Phase 6 Task 5 — route the caught error through the central router so
+  // exit codes line up with ERRORS.md. The `process.exit()` in the finally
+  // block consumes process.exitCode.
+  process.exitCode = router(e)
 } finally {
   // Some subprocesses don't react properly to SIGTERM and similar signals.
   // Most notably, some docker-container-based MCP servers don't handle such signals unless

@@ -11,6 +11,7 @@ import { Effect } from "effect"
 import { type OptionDef, toYargsBuilder } from "../option-def"
 import { getGlobalContext } from "../global-context"
 import { warnDryRunIgnored } from "../output/dry-run-guard"
+import { ExitCode } from "../errors/codes"
 
 function writeOut(text: string): void {
   process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
@@ -90,7 +91,10 @@ export const ModelsCommand = cmd({
               const providerID = ProviderID.make(args.provider)
               const provider = providers[providerID]
               if (!provider) {
-                yield* Effect.sync(() => UI.error(`Provider not found: ${args.provider}`))
+                yield* Effect.sync(() => {
+                  UI.error(`Provider not found: ${args.provider}`)
+                  process.exit(ExitCode.GENERAL)
+                })
                 return
               }
 

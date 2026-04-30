@@ -8,6 +8,7 @@ import { networkOptionDefs } from "../network"
 import { GLOBAL_OPTIONS, type OptionDef, toJsonSchema, toYargsBuilder } from "../option-def"
 import { getGlobalContext } from "../global-context"
 import { warnDryRunIgnored } from "../output/dry-run-guard"
+import { ExitCode } from "../errors/codes"
 
 /**
  * Phase 6 Task 3 — `agent config` command group.
@@ -640,7 +641,7 @@ export const ConfigValidateCommand = cmd({
     if (!envExamplePath) {
       UI.error(`could not find .env.example by walking up from ${process.cwd()}`)
       emitJson({ ok: false, missing: [], error: "env-example-not-found" })
-      process.exit(3)
+      process.exit(ExitCode.AUTH)
     }
     let text: string
     try {
@@ -648,7 +649,7 @@ export const ConfigValidateCommand = cmd({
     } catch (e) {
       UI.error(`failed to read ${envExamplePath}: ${e instanceof Error ? e.message : String(e)}`)
       emitJson({ ok: false, missing: [], error: "env-example-unreadable" })
-      process.exit(3)
+      process.exit(ExitCode.AUTH)
     }
     const { required } = parseEnvExample(text)
     // Bun auto-loads `.env` from cwd at process start. When the CLI is
@@ -676,8 +677,7 @@ export const ConfigValidateCommand = cmd({
       return
     }
     emitJson({ ok: false, missing })
-    // Task 5 will refactor to router(...) — for now, hardcode AUTH (3).
-    process.exit(3)
+    process.exit(ExitCode.AUTH)
   },
 })
 

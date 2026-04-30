@@ -7,13 +7,22 @@ import { UI } from "../ui"
 import { type OptionDef, toYargsBuilder } from "../option-def"
 import { getGlobalContext } from "../global-context"
 import { applyGlobalDryRun, warnDryRunIgnored } from "../output/dry-run-guard"
+import { formatError } from "../errors/router"
 
 function writeOut(text: string): void {
   process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
 }
 
-function runWithOSS<A>(eff: Effect.Effect<A, unknown, OSSService.Service>): Promise<A> {
-  return Effect.runPromise(eff.pipe(Effect.provide(OSSService.defaultLayer)) as Effect.Effect<A, unknown, never>)
+async function runWithOSS<A>(eff: Effect.Effect<A, unknown, OSSService.Service>): Promise<A> {
+  try {
+    return await Effect.runPromise(
+      eff.pipe(Effect.provide(OSSService.defaultLayer)) as Effect.Effect<A, unknown, never>,
+    )
+  } catch (e) {
+    const { exitCode, message } = formatError(e)
+    UI.error(message || "OSS error")
+    process.exit(exitCode)
+  }
 }
 
 export const OssCommand = cmd({
