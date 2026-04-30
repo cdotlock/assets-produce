@@ -4,6 +4,7 @@ import * as path from "path"
 import { Global } from "@opencode-ai/core/global"
 import { cmd } from "./cmd"
 import { UI } from "../ui"
+import { networkOptionDefs } from "../network"
 import { GLOBAL_OPTIONS, type OptionDef, toJsonSchema, toYargsBuilder } from "../option-def"
 
 /**
@@ -221,21 +222,8 @@ const runOptions: OptionDef[] = [
   },
 ]
 
-// serve (mirrors networkOptionDefs in cli/network.ts)
-const serveOptions: OptionDef[] = [
-  { flag: "--port", description: "port to listen on", type: "number" },
-  { flag: "--hostname", description: "hostname to listen on" },
-  {
-    flag: "--mdns",
-    description: "enable mDNS service discovery (defaults hostname to 0.0.0.0)",
-    type: "boolean",
-  },
-  {
-    flag: "--mdns-domain",
-    description: "custom domain name for mDNS service (default: opencode.local)",
-  },
-  { flag: "--cors", description: "additional domains to allow for CORS", type: "array" },
-]
+// serve options come from `networkOptionDefs` (canonical source in cli/network.ts).
+// Imported above; no local mirror.
 
 // models
 const modelsOptions: OptionDef[] = [
@@ -337,7 +325,7 @@ export const CLI_COMMAND_DESCRIPTORS: CliCommandDescriptor[] = [
     positionals: [{ name: "message", description: "message to send", required: false }],
   },
   // serve
-  { name: "serve", description: "starts a headless opencode server", options: serveOptions },
+  { name: "serve", description: "starts a headless opencode server", options: networkOptionDefs },
   // models
   {
     name: "models",
@@ -417,19 +405,34 @@ interface ExportSchemaArgs {
   format: "anthropic" | "openai"
 }
 
+/**
+ * Build the schema catalog emitted by `config export-schema`.
+ * Exported for unit tests (drift detection between CLI options + schema output).
+ */
+export function getCatalog(opts?: {
+  filter?: string
+  format?: "anthropic" | "openai"
+}): {
+  tools: Array<ReturnType<typeof toAnthropicTool> | ReturnType<typeof toOpenAiTool>>
+  global_flags: ReturnType<typeof toJsonSchema>
+} {
+  const filter = opts?.filter
+  const descriptors = filter
+    ? CLI_COMMAND_DESCRIPTORS.filter((d) => d.name === filter)
+    : CLI_COMMAND_DESCRIPTORS
+  const format = opts?.format === "openai" ? "openai" : "anthropic"
+  const tools = descriptors.map((d) => (format === "openai" ? toOpenAiTool(d) : toAnthropicTool(d)))
+  return { tools, global_flags: toJsonSchema(GLOBAL_OPTIONS) }
+}
+
 export const ConfigExportSchemaCommand = cmd({
   command: "export-schema",
   describe: "emit JSON schema describing how to invoke each agent CLI command",
   builder: (yargs: Argv) => toYargsBuilder<unknown, ExportSchemaArgs>(yargs, exportSchemaOptions),
   async handler(args) {
     const filter = typeof args.command === "string" ? args.command : undefined
-    const descriptors = filter
-      ? CLI_COMMAND_DESCRIPTORS.filter((d) => d.name === filter)
-      : CLI_COMMAND_DESCRIPTORS
     const format = args.format === "openai" ? "openai" : "anthropic"
-    const tools = descriptors.map((d) => (format === "openai" ? toOpenAiTool(d) : toAnthropicTool(d)))
-    const globalFlags = toJsonSchema(GLOBAL_OPTIONS)
-    emitJson({ tools, global_flags: globalFlags })
+    emitJson(getCatalog({ filter, format }))
   },
 })
 

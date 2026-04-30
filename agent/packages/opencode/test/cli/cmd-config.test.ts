@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test"
-import { CLI_COMMAND_DESCRIPTORS, parseEnvExample } from "../../src/cli/cmd/config"
+import { CLI_COMMAND_DESCRIPTORS, getCatalog, parseEnvExample } from "../../src/cli/cmd/config"
+import { networkOptionDefs } from "../../src/cli/network"
 
 describe("config: CLI_COMMAND_DESCRIPTORS", () => {
   test("includes all 22 P1 leaf commands", () => {
@@ -58,6 +59,33 @@ describe("config: CLI_COMMAND_DESCRIPTORS", () => {
       for (const opt of desc.options) {
         expect(opt.description.length).toBeGreaterThan(0)
       }
+    }
+  })
+
+  test("schema catalog's `serve` entry stays in sync with networkOptionDefs", () => {
+    // Mirror flagToName from option-def.ts: strip `--` prefix and any
+    // `<placeholder>` value form so `--port <port>` → `port`.
+    const flagToName = (flag: string): string =>
+      (flag.split(/\s+/)[0] ?? flag).replace(/^--?/, "")
+    const expectedNames = networkOptionDefs.map((o) => flagToName(o.flag))
+    const { tools } = getCatalog({ filter: "serve" })
+    expect(tools.length).toBe(1)
+    const serve = tools[0] as {
+      name: string
+      input_schema: { properties: Record<string, unknown>; required?: string[] }
+    }
+    expect(serve.name).toBe("serve")
+    const propNames = Object.keys(serve.input_schema.properties)
+    // All networkOptionDefs flags must appear in the catalog (superset check).
+    for (const name of expectedNames) {
+      expect(propNames).toContain(name)
+    }
+    // Required flags from networkOptionDefs (if any) must appear in `required`.
+    const requiredExpected = networkOptionDefs
+      .filter((o) => o.required === true)
+      .map((o) => flagToName(o.flag))
+    for (const name of requiredExpected) {
+      expect(serve.input_schema.required ?? []).toContain(name)
     }
   })
 })
