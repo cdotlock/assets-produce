@@ -14,6 +14,7 @@ import { defaultLayer as langfuseLayer } from "@/langfuse/langfuse"
 import { Layer } from "effect"
 import { cmd } from "./cmd"
 import { UI } from "../ui"
+import { type OptionDef, toYargsBuilder } from "../option-def"
 
 function writeOut(text: string): void {
   process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
@@ -95,20 +96,57 @@ export const SkillsCommand = cmd({
   async handler() {},
 })
 
+const skillsAddOptions: OptionDef[] = [
+  {
+    flag: "--name",
+    description: "skill name (snake_case)",
+    required: true,
+  },
+  {
+    flag: "--description",
+    description: "1-line description",
+    required: true,
+  },
+  {
+    flag: "--content-file",
+    description: "read body from local file",
+  },
+  {
+    flag: "--content-url",
+    description: "fetch body from https URL",
+  },
+  {
+    flag: "--langfuse-prompt-key",
+    description: "link to existing Langfuse prompt key",
+  },
+  {
+    flag: "--label",
+    description: "Langfuse label (default 'production')",
+    extra: { default: "production" },
+  },
+  {
+    flag: "--scope",
+    description: "",
+    extra: { choices: [...ScopeChoices], default: "system" },
+  },
+  {
+    flag: "--enabled",
+    description: "",
+    type: "boolean",
+    extra: { default: true },
+  },
+  {
+    flag: "--dry-run",
+    description: "",
+    type: "boolean",
+    extra: { default: false },
+  },
+]
+
 export const SkillsAddCommand = cmd({
   command: "add",
   describe: "add a skill (from file / url / existing langfuse prompt)",
-  builder: (yargs: Argv) =>
-    yargs
-      .option("name", { type: "string", describe: "skill name (snake_case)", demandOption: true })
-      .option("description", { type: "string", describe: "1-line description", demandOption: true })
-      .option("content-file", { type: "string", describe: "read body from local file" })
-      .option("content-url", { type: "string", describe: "fetch body from https URL" })
-      .option("langfuse-prompt-key", { type: "string", describe: "link to existing Langfuse prompt key" })
-      .option("label", { type: "string", default: "production", describe: "Langfuse label (default 'production')" })
-      .option("scope", { type: "string", choices: [...ScopeChoices], default: "system" })
-      .option("enabled", { type: "boolean", default: true })
-      .option("dry-run", { type: "boolean", default: false }),
+  builder: (yargs: Argv) => toYargsBuilder(yargs, skillsAddOptions),
   async handler(args) {
     let source: ContentSource | undefined
     try {
@@ -143,19 +181,50 @@ export const SkillsAddCommand = cmd({
   },
 })
 
+const skillsUpdateOptions: OptionDef[] = [
+  {
+    flag: "--name",
+    description: "",
+    required: true,
+  },
+  {
+    flag: "--description",
+    description: "",
+  },
+  {
+    flag: "--content-file",
+    description: "",
+  },
+  {
+    flag: "--content-url",
+    description: "",
+  },
+  {
+    flag: "--label",
+    description: "",
+  },
+  {
+    flag: "--scope",
+    description: "",
+    extra: { choices: [...ScopeChoices] },
+  },
+  {
+    flag: "--enabled",
+    description: "",
+    type: "boolean",
+  },
+  {
+    flag: "--dry-run",
+    description: "",
+    type: "boolean",
+    extra: { default: false },
+  },
+]
+
 export const SkillsUpdateCommand = cmd({
   command: "update",
   describe: "update a skill's metadata or content",
-  builder: (yargs: Argv) =>
-    yargs
-      .option("name", { type: "string", demandOption: true })
-      .option("description", { type: "string" })
-      .option("content-file", { type: "string" })
-      .option("content-url", { type: "string" })
-      .option("label", { type: "string" })
-      .option("scope", { type: "string", choices: [...ScopeChoices] })
-      .option("enabled", { type: "boolean" })
-      .option("dry-run", { type: "boolean", default: false }),
+  builder: (yargs: Argv) => toYargsBuilder(yargs, skillsUpdateOptions),
   async handler(args) {
     let source: ContentSource | undefined
     try {
@@ -185,10 +254,18 @@ export const SkillsUpdateCommand = cmd({
   },
 })
 
+const skillsDeleteOptions: OptionDef[] = [
+  {
+    flag: "--name",
+    description: "",
+    required: true,
+  },
+]
+
 export const SkillsDeleteCommand = cmd({
   command: "delete",
   describe: "delete a skill (DB row only; Langfuse prompt is preserved)",
-  builder: (yargs: Argv) => yargs.option("name", { type: "string", demandOption: true }),
+  builder: (yargs: Argv) => toYargsBuilder(yargs, skillsDeleteOptions),
   async handler(args) {
     const exit = await runWithLayers(SkillCli.deleteSkill(String(args.name)))
     if (Exit.isFailure(exit)) {
@@ -200,14 +277,29 @@ export const SkillsDeleteCommand = cmd({
   },
 })
 
+const skillsListOptions: OptionDef[] = [
+  {
+    flag: "--scope",
+    description: "",
+    extra: { choices: [...ScopeChoices] },
+  },
+  {
+    flag: "--enabled-only",
+    description: "",
+    type: "boolean",
+    extra: { default: false },
+  },
+  {
+    flag: "--output",
+    description: "",
+    extra: { choices: ["text", "json"] as const, default: "text" },
+  },
+]
+
 export const SkillsListCommand = cmd({
   command: "list",
   describe: "list skills",
-  builder: (yargs: Argv) =>
-    yargs
-      .option("scope", { type: "string", choices: [...ScopeChoices] })
-      .option("enabled-only", { type: "boolean", default: false })
-      .option("output", { type: "string", choices: ["text", "json"] as const, default: "text" }),
+  builder: (yargs: Argv) => toYargsBuilder(yargs, skillsListOptions),
   async handler(args) {
     const exit = await runWithLayers(
       SkillCli.listSkills({
@@ -232,10 +324,18 @@ export const SkillsListCommand = cmd({
   },
 })
 
+const skillsEnableOptions: OptionDef[] = [
+  {
+    flag: "--name",
+    description: "",
+    required: true,
+  },
+]
+
 export const SkillsEnableCommand = cmd({
   command: "enable",
   describe: "enable a skill",
-  builder: (yargs: Argv) => yargs.option("name", { type: "string", demandOption: true }),
+  builder: (yargs: Argv) => toYargsBuilder(yargs, skillsEnableOptions),
   async handler(args) {
     const exit = await runWithLayers(SkillCli.setEnabled(String(args.name), true))
     if (Exit.isFailure(exit)) {
@@ -247,10 +347,18 @@ export const SkillsEnableCommand = cmd({
   },
 })
 
+const skillsDisableOptions: OptionDef[] = [
+  {
+    flag: "--name",
+    description: "",
+    required: true,
+  },
+]
+
 export const SkillsDisableCommand = cmd({
   command: "disable",
   describe: "disable a skill",
-  builder: (yargs: Argv) => yargs.option("name", { type: "string", demandOption: true }),
+  builder: (yargs: Argv) => toYargsBuilder(yargs, skillsDisableOptions),
   async handler(args) {
     const exit = await runWithLayers(SkillCli.setEnabled(String(args.name), false))
     if (Exit.isFailure(exit)) {
@@ -262,13 +370,19 @@ export const SkillsDisableCommand = cmd({
   },
 })
 
+const skillsShowOptions: OptionDef[] = [
+  {
+    flag: "--output",
+    description: "",
+    extra: { choices: ["text", "json"] as const, default: "text" },
+  },
+]
+
 export const SkillsShowCommand = cmd({
   command: "show <name>",
   describe: "show skill metadata + Langfuse body",
   builder: (yargs: Argv) =>
-    yargs
-      .positional("name", { type: "string", demandOption: true })
-      .option("output", { type: "string", choices: ["text", "json"] as const, default: "text" }),
+    toYargsBuilder(yargs.positional("name", { type: "string", demandOption: true }), skillsShowOptions),
   async handler(args) {
     const exit = await runWithLayers(SkillCli.showSkill(String(args.name)))
     if (Exit.isFailure(exit)) {
