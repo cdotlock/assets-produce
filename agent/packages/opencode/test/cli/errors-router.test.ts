@@ -15,6 +15,21 @@ describe("cli/errors/router", () => {
     expect(router(errnoErr)).toBe(ExitCode.NETWORK)
   })
 
+  test("usage-level errnos (EADDRINUSE / EACCES) → GENERAL, not NETWORK", () => {
+    // `agent serve` port-bind failures: EADDRINUSE means "port already in use"
+    // and EACCES means "permission denied binding port". Both are runtime
+    // setup issues, not transport-level network failures. ERRORS.md "agent
+    // serve" section pins these to exit 1.
+    const inUse = Object.assign(new Error("listen EADDRINUSE: address already in use :::8001"), {
+      code: "EADDRINUSE",
+    })
+    expect(router(inUse)).toBe(ExitCode.GENERAL)
+    const denied = Object.assign(new Error("listen EACCES: permission denied 80"), {
+      code: "EACCES",
+    })
+    expect(router(denied)).toBe(ExitCode.GENERAL)
+  })
+
   test("ProviderAuthValidationFailed → AUTH", () => {
     expect(router({ name: "ProviderAuthValidationFailed", message: "no key" })).toBe(ExitCode.AUTH)
   })

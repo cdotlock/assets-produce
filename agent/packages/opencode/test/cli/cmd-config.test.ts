@@ -88,6 +88,38 @@ describe("config: CLI_COMMAND_DESCRIPTORS", () => {
       expect(serve.input_schema.required ?? []).toContain(name)
     }
   })
+
+  // Minimum-coverage drift test: each known mutating command MUST advertise
+  // `--dry-run` in its schema entry. Catches MUST FIX 3-style omissions (where
+  // a runtime helper honors --dry-run but the schema doesn't expose it) so
+  // schema-driven LLM agents can discover the flag.
+  test("every mutating command's schema entry advertises a `dry-run` flag", () => {
+    const MUTATING_COMMANDS = [
+      "users-add",
+      "users-passwd",
+      "users-delete",
+      "skills-add",
+      "skills-update",
+      "skills-delete",
+      "skills-enable",
+      "skills-disable",
+      "tools-call",
+      "oss-put",
+    ]
+    for (const name of MUTATING_COMMANDS) {
+      const { tools } = getCatalog({ filter: name })
+      expect(tools.length).toBe(1)
+      const tool = tools[0] as {
+        name: string
+        input_schema: { properties: Record<string, unknown> }
+      }
+      const propNames = Object.keys(tool.input_schema.properties)
+      expect({ command: name, has: propNames.includes("dry-run") }).toEqual({
+        command: name,
+        has: true,
+      })
+    }
+  })
 })
 
 describe("config: parseEnvExample", () => {

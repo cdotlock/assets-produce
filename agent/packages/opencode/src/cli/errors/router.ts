@@ -28,6 +28,10 @@ import { ExitCode } from "./codes"
  * then re-route the unwrapped value.
  */
 
+// Strictly transport-level errnos. Note `EADDRINUSE` / `EACCES` are NOT
+// included: they're usage/runtime issues (port already bound, permission to
+// bind <1024) and route to GENERAL so `agent serve` failure is exit 1, not 6.
+// See ERRORS.md "agent serve" section.
 const NETWORK_ERRNOS = new Set([
   "ECONNREFUSED",
   "ECONNRESET",

@@ -92,6 +92,11 @@ const usersPasswdOptions: OptionDef[] = [
 ]
 const usersDeleteOptions: OptionDef[] = [
   { flag: "--username", description: "username to delete", required: true },
+  {
+    flag: "--dry-run",
+    description: "plan the delete; do not write to the database",
+    type: "boolean",
+  },
 ]
 
 // tools
@@ -105,6 +110,11 @@ const toolsCallOptions: OptionDef[] = [
     flag: "--output",
     description: "raw=tool output text; url=output as a URL line; json=full result {output, metadata}",
     extra: { choices: ["raw", "url", "json"] as const, default: "raw" },
+  },
+  {
+    flag: "--dry-run",
+    description: "plan the tool invocation; do not call the tool",
+    type: "boolean",
   },
 ]
 
@@ -152,6 +162,11 @@ const skillsUpdateOptions: OptionDef[] = [
 ]
 const skillsDeleteOptions: OptionDef[] = [
   { flag: "--name", description: "skill name to delete (snake_case)", required: true },
+  {
+    flag: "--dry-run",
+    description: "plan the delete; do not write to DB",
+    type: "boolean",
+  },
 ]
 const skillsListOptions: OptionDef[] = [
   {
@@ -168,9 +183,19 @@ const skillsListOptions: OptionDef[] = [
 ]
 const skillsEnableOptions: OptionDef[] = [
   { flag: "--name", description: "skill name to enable (snake_case)", required: true },
+  {
+    flag: "--dry-run",
+    description: "plan the enable; do not write to DB",
+    type: "boolean",
+  },
 ]
 const skillsDisableOptions: OptionDef[] = [
   { flag: "--name", description: "skill name to disable (snake_case)", required: true },
+  {
+    flag: "--dry-run",
+    description: "plan the disable; do not write to DB",
+    type: "boolean",
+  },
 ]
 const skillsShowOptions: OptionDef[] = [
   {

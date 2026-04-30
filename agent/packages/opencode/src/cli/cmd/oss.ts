@@ -118,6 +118,16 @@ export const OssListCommand = cmd({
         return yield* svc.list({ prefix, maxKeys })
       }),
     )
+    if (getGlobalContext().output === "json") {
+      writeOut(
+        JSON.stringify(
+          { keys: result.keys, nextMarker: result.nextMarker ?? null },
+          null,
+          2,
+        ),
+      )
+      return
+    }
     if (result.keys.length === 0) {
       UI.println(prefix ? `no keys with prefix "${prefix}"` : "no keys")
       return
