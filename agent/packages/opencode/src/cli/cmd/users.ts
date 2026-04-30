@@ -85,7 +85,7 @@ const usersAddOptions: OptionDef[] = [
   },
   {
     flag: "--dry-run",
-    description: "",
+    description: "plan the user creation; do not write to the database",
     type: "boolean",
     extra: { default: false },
   },
@@ -162,7 +162,7 @@ export const UsersListCommand = cmd({
 const usersPasswdOptions: OptionDef[] = [
   {
     flag: "--username",
-    description: "",
+    description: "username whose password to update",
     required: true,
   },
   {
@@ -172,7 +172,7 @@ const usersPasswdOptions: OptionDef[] = [
   },
   {
     flag: "--dry-run",
-    description: "",
+    description: "plan the change; do not write the new password",
     type: "boolean",
     extra: { default: false },
   },
@@ -203,7 +203,7 @@ export const UsersPasswdCommand = cmd({
 const usersDeleteOptions: OptionDef[] = [
   {
     flag: "--username",
-    description: "",
+    description: "username to delete",
     required: true,
   },
 ]

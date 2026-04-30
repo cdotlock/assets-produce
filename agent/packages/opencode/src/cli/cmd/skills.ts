@@ -126,18 +126,18 @@ const skillsAddOptions: OptionDef[] = [
   },
   {
     flag: "--scope",
-    description: "",
+    description: "skill visibility: 'system' (CLI only) or 'creator' (WebUI)",
     extra: { choices: [...ScopeChoices], default: "system" },
   },
   {
     flag: "--enabled",
-    description: "",
+    description: "whether the skill is enabled at creation time",
     type: "boolean",
     extra: { default: true },
   },
   {
     flag: "--dry-run",
-    description: "",
+    description: "plan the skill add; do not write to DB or Langfuse",
     type: "boolean",
     extra: { default: false },
   },
@@ -196,38 +196,38 @@ export const SkillsAddCommand = cmd({
 const skillsUpdateOptions: OptionDef[] = [
   {
     flag: "--name",
-    description: "",
+    description: "skill name to update (snake_case)",
     required: true,
   },
   {
     flag: "--description",
-    description: "",
+    description: "new 1-line description",
   },
   {
     flag: "--content-file",
-    description: "",
+    description: "replace body with contents of local file",
   },
   {
     flag: "--content-url",
-    description: "",
+    description: "replace body by fetching from https URL",
   },
   {
     flag: "--label",
-    description: "",
+    description: "new Langfuse label",
   },
   {
     flag: "--scope",
-    description: "",
+    description: "new scope: 'system' or 'creator'",
     extra: { choices: [...ScopeChoices] },
   },
   {
     flag: "--enabled",
-    description: "",
+    description: "set enabled state",
     type: "boolean",
   },
   {
     flag: "--dry-run",
-    description: "",
+    description: "plan the update; do not write to DB or Langfuse",
     type: "boolean",
     extra: { default: false },
   },
@@ -280,7 +280,7 @@ export const SkillsUpdateCommand = cmd({
 const skillsDeleteOptions: OptionDef[] = [
   {
     flag: "--name",
-    description: "",
+    description: "skill name to delete (snake_case)",
     required: true,
   },
 ]
@@ -303,18 +303,18 @@ export const SkillsDeleteCommand = cmd({
 const skillsListOptions: OptionDef[] = [
   {
     flag: "--scope",
-    description: "",
+    description: "filter by scope: 'system' or 'creator'",
     extra: { choices: [...ScopeChoices] },
   },
   {
     flag: "--enabled-only",
-    description: "",
+    description: "only list enabled skills",
     type: "boolean",
     extra: { default: false },
   },
   {
     flag: "--output",
-    description: "",
+    description: "output format: 'text' (table) or 'json'",
     extra: { choices: ["text", "json"] as const, default: "text" },
   },
 ]
@@ -350,7 +350,7 @@ export const SkillsListCommand = cmd({
 const skillsEnableOptions: OptionDef[] = [
   {
     flag: "--name",
-    description: "",
+    description: "skill name to enable (snake_case)",
     required: true,
   },
 ]
@@ -373,7 +373,7 @@ export const SkillsEnableCommand = cmd({
 const skillsDisableOptions: OptionDef[] = [
   {
     flag: "--name",
-    description: "",
+    description: "skill name to disable (snake_case)",
     required: true,
   },
 ]
@@ -396,7 +396,7 @@ export const SkillsDisableCommand = cmd({
 const skillsShowOptions: OptionDef[] = [
   {
     flag: "--output",
-    description: "",
+    description: "output format: 'text' (markdown) or 'json'",
     extra: { choices: ["text", "json"] as const, default: "text" },
   },
 ]
