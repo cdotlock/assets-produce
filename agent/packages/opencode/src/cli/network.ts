@@ -1,6 +1,45 @@
 import type { Argv, InferredOptionTypes } from "yargs"
 import { Config } from "@/config/config"
 import { AppRuntime } from "@/effect/app-runtime"
+import { type OptionDef, toYargsBuilder } from "./option-def"
+
+/**
+ * Shared network options for `serve` (P1) and `web` (P2). Sourced from a
+ * single OptionDef[] so Phase 6 schema export tooling stays in sync with the
+ * yargs builder; the legacy `options` object below is kept (derived from the
+ * same defs) so `NetworkOptions` retains its precise type via
+ * `InferredOptionTypes`.
+ */
+export const networkOptionDefs: OptionDef[] = [
+  {
+    flag: "--port",
+    description: "port to listen on",
+    type: "number",
+    extra: { default: 0 },
+  },
+  {
+    flag: "--hostname",
+    description: "hostname to listen on",
+    extra: { default: "127.0.0.1" },
+  },
+  {
+    flag: "--mdns",
+    description: "enable mDNS service discovery (defaults hostname to 0.0.0.0)",
+    type: "boolean",
+    extra: { default: false },
+  },
+  {
+    flag: "--mdns-domain",
+    description: "custom domain name for mDNS service (default: opencode.local)",
+    extra: { default: "opencode.local" },
+  },
+  {
+    flag: "--cors",
+    description: "additional domains to allow for CORS",
+    type: "array",
+    extra: { default: [] as string[] },
+  },
+]
 
 const options = {
   port: {
@@ -34,7 +73,7 @@ const options = {
 export type NetworkOptions = InferredOptionTypes<typeof options>
 
 export function withNetworkOptions<T>(yargs: Argv<T>) {
-  return yargs.options(options)
+  return toYargsBuilder(yargs, networkOptionDefs)
 }
 export async function resolveNetworkOptions(args: NetworkOptions) {
   const config = await AppRuntime.runPromise(Config.Service.use((cfg) => cfg.getGlobal()))
