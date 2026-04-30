@@ -41,6 +41,9 @@ import { PluginCommand } from "./cli/cmd/plug"
 import { Heap } from "./cli/heap"
 import { drizzle } from "drizzle-orm/bun-sqlite"
 import { ensureProcessMetadata } from "@opencode-ai/core/util/opencode-process"
+import { GLOBAL_OPTIONS, toYargsBuilder } from "./cli/option-def"
+import { isNoColor, isNonInteractive, outputMode } from "./cli/output/mode"
+import { setGlobalContext } from "./cli/global-context"
 
 const processMetadata = ensureProcessMetadata("main")
 
@@ -68,14 +71,26 @@ function show(out: string) {
   process.stderr.write(out)
 }
 
-const cli = yargs(args)
-  .parserConfiguration({ "populate--": true })
-  .scriptName("opencode")
-  .wrap(100)
-  .help("help", "show help")
-  .alias("help", "h")
-  .version("version", "show version number", InstallationVersion)
-  .alias("version", "v")
+// Phase 6 Task 4.3 — attach GLOBAL_OPTIONS to root yargs. yargs already
+// registers `--help` / `--version` via .help() / .version() below, so filter
+// those two out of the toYargsBuilder call. The full GLOBAL_OPTIONS list is
+// kept canonical for `config export-schema` / SKILL.md docs.
+const ROOT_GLOBAL_OPTIONS = GLOBAL_OPTIONS.filter((o) => {
+  const name = o.flag.split(/\s+/)[0]
+  return name !== "--help" && name !== "--version"
+})
+
+const cli = toYargsBuilder(
+  yargs(args)
+    .parserConfiguration({ "populate--": true })
+    .scriptName("opencode")
+    .wrap(100)
+    .help("help", "show help")
+    .alias("help", "h")
+    .version("version", "show version number", InstallationVersion)
+    .alias("version", "v"),
+  ROOT_GLOBAL_OPTIONS,
+)
   .option("print-logs", {
     describe: "print logs to stderr",
     type: "boolean",
@@ -88,6 +103,27 @@ const cli = yargs(args)
   .option("pure", {
     describe: "run without external plugins",
     type: "boolean",
+  })
+  .middleware((opts) => {
+    // Phase 6 Task 4.3 — resolve global flags into a singleton context that
+    // leaf handlers read via getGlobalContext(). Runs before the deeper
+    // bootstrap middleware below so context is in place by the time any
+    // handler executes.
+    const ctx = {
+      output: outputMode({ output: typeof opts.output === "string" ? opts.output : undefined }),
+      dryRun: Boolean(opts["dry-run"]),
+      nonInteractive: isNonInteractive({ nonInteractive: Boolean(opts["non-interactive"]) }),
+      noColor: isNoColor({ noColor: Boolean(opts["no-color"]) }),
+      quiet: Boolean(opts.quiet),
+      verbose: Boolean(opts.verbose),
+    }
+    setGlobalContext(ctx)
+    // Propagate auto-resolved non-interactive (e.g. CI=true) onto the parsed
+    // args so any code path that consults `args["non-interactive"]` directly
+    // sees the inferred value.
+    if (ctx.nonInteractive && opts["non-interactive"] !== true) {
+      ;(opts as Record<string, unknown>)["non-interactive"] = true
+    }
   })
   .middleware(async (opts) => {
     if (opts.pure) {
