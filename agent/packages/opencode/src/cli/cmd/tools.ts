@@ -50,6 +50,10 @@ async function withToolRegistry<A>(fn: (svc: ToolRegistry.Interface) => Effect.E
   return result
 }
 
+// Kept local rather than importing router.ts's `firstReasonError`: `exitToolError`
+// emits a tool-level error envelope (title/output/metadata for the tool runner),
+// not an exit code. It uses the raw inner value to shape that envelope and
+// deliberately bypasses `formatError`'s ExitCode classification.
 function firstFailure<E>(cause: Cause.Cause<E>): unknown {
   for (const reason of cause.reasons) {
     if (reason._tag === "Fail") return reason.error

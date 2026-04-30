@@ -21,11 +21,24 @@ describe("cli/errors/router", () => {
 
   test("RateLimitError → QUOTA", () => {
     expect(router({ name: "RateLimitError", message: "429" })).toBe(ExitCode.QUOTA)
-    expect(router({ name: "QuotaExhausted", message: "..." })).toBe(ExitCode.QUOTA)
+    expect(router({ name: "ProviderRateLimitError", message: "429" })).toBe(ExitCode.QUOTA)
+    expect(router({ name: "QuotaError", message: "..." })).toBe(ExitCode.QUOTA)
+    expect(router({ name: "ProviderQuotaError", message: "..." })).toBe(ExitCode.QUOTA)
   })
 
-  test("RequestTimeout → TIMEOUT", () => {
+  test("RequestTimeout / *TimeoutError → TIMEOUT", () => {
     expect(router({ name: "RequestTimeout", message: "120s" })).toBe(ExitCode.TIMEOUT)
+    expect(router({ name: "TimeoutError", message: "120s" })).toBe(ExitCode.TIMEOUT)
+    expect(router({ name: "ProviderTimeoutError", message: "120s" })).toBe(ExitCode.TIMEOUT)
+  })
+
+  test("loose substring names no longer match (e.g. NoAuthRequired) → GENERAL", () => {
+    // Tightened classifier: `.includes("Auth")` would have wrongly bucketed these.
+    expect(router({ name: "NoAuthRequired", message: "skip" })).toBe(ExitCode.GENERAL)
+    expect(router({ name: "UnauthorizedAccess", message: "..." })).toBe(ExitCode.GENERAL)
+    // Same for old bare-substring buckets — no `.includes("Quota")` / `.includes("Timeout")`.
+    expect(router({ name: "QuotaExhausted", message: "..." })).toBe(ExitCode.GENERAL)
+    expect(router({ name: "TimeoutScheduler", message: "..." })).toBe(ExitCode.GENERAL)
   })
 
   test("Cause.fail wrapping NotFoundError → GENERAL", () => {
@@ -38,7 +51,8 @@ describe("cli/errors/router", () => {
   })
 
   test("ContentFilter / ContentBlocked → CONTENT_FILTER", () => {
-    expect(router({ name: "ContentFilterTriggered", message: "..." })).toBe(ExitCode.CONTENT_FILTER)
+    expect(router({ name: "ContentFilter", message: "..." })).toBe(ExitCode.CONTENT_FILTER)
+    expect(router({ name: "ProviderContentFilter", message: "..." })).toBe(ExitCode.CONTENT_FILTER)
     expect(router({ name: "ContentBlocked", message: "..." })).toBe(ExitCode.CONTENT_FILTER)
   })
 

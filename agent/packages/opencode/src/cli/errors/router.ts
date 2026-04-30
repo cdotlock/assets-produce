@@ -13,13 +13,13 @@ import { ExitCode } from "./codes"
  *   1. `null` / `undefined`                        → SUCCESS
  *   2. Effect `Cause` containing an Interrupt      → GENERAL (130 is OS-handled)
  *   3. Effect `Cause` — recurse into the first `Fail` / `Die` reason
- *   4. NamedError-like (`.name` matches a pattern):
- *        - `*Auth*` / `ProviderAuthValidationFailed` → AUTH
- *        - `*Quota*` / `*RateLimit*`                 → QUOTA
- *        - `*Timeout*`                               → TIMEOUT
- *        - `*Network*`                               → NETWORK
- *        - `*ContentFilter*` / `*ContentBlocked*`    → CONTENT_FILTER
- *        - else                                      → GENERAL
+ *   4. NamedError-like (`.name` matches an allow-list — see `classifyByName`):
+ *        - `ProviderAuthValidationFailed` / `*AuthError` / `*AuthFailed` → AUTH
+ *        - `*RateLimitError` / `*QuotaError`                            → QUOTA
+ *        - `*TimeoutError` / `RequestTimeout`                           → TIMEOUT
+ *        - `*NetworkError`                                              → NETWORK
+ *        - `*ContentFilter` / `*ContentBlocked`                         → CONTENT_FILTER
+ *        - else                                                         → GENERAL
  *   5. Plain `Error` with network-y errno or message → NETWORK
  *   6. Default                                      → GENERAL
  *
@@ -63,12 +63,35 @@ function asNamed(value: unknown): NamedErrorLike | null {
 }
 
 function classifyByName(name: string): ExitCode {
-  if (name === "ProviderAuthValidationFailed") return ExitCode.AUTH
-  if (name.includes("Auth")) return ExitCode.AUTH
-  if (name.includes("Quota") || name.includes("RateLimit")) return ExitCode.QUOTA
-  if (name.includes("Timeout")) return ExitCode.TIMEOUT
-  if (name.includes("Network")) return ExitCode.NETWORK
-  if (name.includes("ContentFilter") || name.includes("ContentBlocked")) return ExitCode.CONTENT_FILTER
+  // Tightened from `.includes(...)` substring tests to explicit allow-lists so
+  // names like `NoAuthRequired` or `UnauthorizedAccess` don't accidentally
+  // match the AUTH bucket. Each branch lists the exact suffix/equality patterns
+  // we want to recognize; everything else falls through to GENERAL.
+  if (
+    name === "ProviderAuthValidationFailed" ||
+    name === "AuthError" ||
+    name.endsWith("AuthError") ||
+    name.endsWith("AuthFailed")
+  ) {
+    return ExitCode.AUTH
+  }
+  if (
+    name === "RateLimitError" ||
+    name === "QuotaError" ||
+    name.endsWith("RateLimitError") ||
+    name.endsWith("QuotaError")
+  ) {
+    return ExitCode.QUOTA
+  }
+  if (name === "TimeoutError" || name === "RequestTimeout" || name.endsWith("TimeoutError")) {
+    return ExitCode.TIMEOUT
+  }
+  if (name === "NetworkError" || name.endsWith("NetworkError")) {
+    return ExitCode.NETWORK
+  }
+  if (name === "ContentFilter" || name.endsWith("ContentFilter") || name.endsWith("ContentBlocked")) {
+    return ExitCode.CONTENT_FILTER
+  }
   return ExitCode.GENERAL
 }
 
@@ -100,6 +123,11 @@ export function router(err: unknown): ExitCode {
   if (err === null || err === undefined) return ExitCode.SUCCESS
 
   if (Cause.isCause(err)) {
+    // Programmatic `Cause.Interrupt` (e.g. internal abort signals, fiber
+    // cancellation) maps to GENERAL — NOT 130. Node only emits 130 when the
+    // process itself receives SIGINT from the OS; we let that path fire
+    // naturally. Don't "fix" this to 130: a programmatic interrupt isn't a
+    // user-initiated Ctrl-C.
     if (hasInterrupt(err)) return ExitCode.GENERAL
     const inner = firstReasonError(err)
     if (inner === undefined) return ExitCode.GENERAL
