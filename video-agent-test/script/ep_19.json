@@ -1,0 +1,66 @@
+{
+  "ep_num": 19,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 19",
+    "episode_title": "月下",
+    "characters": [
+      "Sylvia",
+      "Huxley"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色收腰长外套，深灰针织高领毛衣，黑色修身长裤，深棕色系带短靴，左手腕一根细皮绳手环。",
+      "Huxley": "三十岁左右男性，厚实深橄榄绿军事风外套，黑色圆领内搭，深色直筒裤，黑色登山靴，外套内袋有明显折叠纸张轮廓。"
+    },
+    "scene_locations": {
+      "中立区 咖啡馆": {
+        "location_id": "neutral_zone_cafe",
+        "parent_location_id": "neutral_zone_cafe",
+        "visual_prompt": "中立区小型咖啡馆，砖墙裸露，木质吧台，吊灯暖黄，窗边卡座，桌面有陶瓷杯与蜡烛，整体氛围低调私密，色调暖棕米白。"
+      },
+      "中立区 草地": {
+        "location_id": "neutral_zone_meadow",
+        "parent_location_id": "neutral_zone_meadow",
+        "visual_prompt": "开阔草地，无遮挡满月高悬，月光均匀铺洒，草地银白与深绿交织，远处树线轮廓低缓，夜风轻动草浪，空旷宁静，无人工建筑物。地面碎石小路延伸至草地边缘，两人脚印清晰可见。"
+      }
+    },
+    "pre_choice_script": "（场景：中立区 咖啡馆 出口 → 草地小路 — 夜，满月）\n（两扇玻璃门从内推开。Sylvia先迈出去，Huxley跟在半步之后。碎石路在月光下发白，两人都没有说话。）\n（特写 — 两双脚，一前一后踩在碎石上，节奏各自独立，却没有一方催促另一方。）\n\n（场景：中立区 草地 — 夜，满月，连续）\n（草地边缘，Huxley停下。Sylvia继续往前走了两步，走到草地中央，停住，仰头看满月。）\n\nHuxley: Kael's been waiting three years. But if you just want to stand here — that's enough.\n\n（Sylvia没有回答。她闭上眼睛，双臂垂落，指尖微微松开。）\n（特写 — 她的喉结轻轻滚动一下。嘴角极细微地动了一下，像是在回应什么只有她自己听得见的东西。）\n（她睁开眼，转头看向Huxley，点了一下头。）\n（Huxley的下颌轻轻收紧，随即松开。他闭上眼睛，片刻后睁开，直视着她。月光在两人之间铺开，没有震颤，没有灼烧，只是一种安静的、不可撤回的到位感。）\n（特写 — Sylvia的手，手指缓缓收拢，攥成一个松松的拳，然后完全放开，悬在身侧，不动了。）\n\nHuxley: （轻，像在确认）How does it feel?\n\nSylvia: （停顿一秒，声音很平，却清晰）Right.\n\n（Huxley从外套内袋取出一张折叠地图，展开，单手递到Sylvia面前。月光打在纸面上，北方有一处手写标记。）\n\nHuxley: （手指点在标记上）Aurora Pack. Alpha Morgan's waiting. They need someone who knows how to run a territory.\n\n（Sylvia低头看地图。特写 — 她的眼睛在那个陌生坐标上停住，眼睫没有颤，表情没有收紧。）\n（她抬起头，直视Huxley。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Tell me more. What exactly do they need?",
+          "description": "地图还展开在Huxley手里，北方那个手写坐标在月光下清晰得像一道命令。你的眼睛停在那个陌生名字上，\"Aurora Pack\"——你连那片土地长什么样都不知道。你想把所有细节问清楚再开口，就像你一直以来的习惯：先确认安全，再迈步。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "When do we leave?",
+          "description": "地图纸边被夜风轻轻掀起一角，Huxley的手指还压在那个北方标记上。你十个月前连自己的名字都快不认识了，现在你站在满月下的草地中央，Lyra在你胸腔里安静而清醒。那个坐标你一个字都不认识，但你的嘴已经先你的脑子动了。",
+          "check": "WIL（意志）10"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "Reaction 1",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Huxley没有立刻回答。他低头看了一眼地图，食指在那个标记上停了一秒。）\n\nHuxley: Morgan runs the territory alone. Six months behind on admin. She needs someone who's done it before — and who won't flinch at the backlog.\n\n（Sylvia听着，视线没有离开那个坐标。她的手指轻轻碰了一下纸边，感受到折痕的厚度。）\n\nSylvia: And the Pack? How many?\n\nHuxley: Forty-three. Small. Loyal.\n\n（沉默了两秒。草地上的夜风把地图纸边再次掀起来，Sylvia用指腹压住。）\n\nSylvia: （声音平稳，没有迟疑）Okay. When do we leave?\n\n（Huxley把地图重新折好，递到她手里。两人并排站在月光下，满月高悬，草地银白，地图握在Sylvia掌心。）\n\n黑屏字幕：You folded the map and headed north.",
+        "butterfly_effect": "Sylvia gathers information before committing. Her caution is intact; WIL holds steady but registers no forward momentum."
+      },
+      {
+        "reaction_id": "Reaction 2",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（话出了口，但声音比她预想的低了一个刻度，像是被什么压住了尾音。）\n（Huxley没有立刻接话。他看了她一眼，眼神里有什么东西在等待。）\n\nHuxley: （平静）You sure? You haven't even asked what the job is.\n\n（Sylvia的手指收紧了一下，地图纸边在她指间发出轻微的摩擦声。她低头看了一眼那个北方坐标，喉咙里有什么东西卡了一下。）\n\nSylvia: （重新抬起头，声音稳住了）I'm sure. Tell me on the way.\n\n（Huxley沉默了一秒，然后把地图折好，递到她手里。）\n\nHuxley: （轻）Fair enough.\n\n（两人并排站在月光下，满月高悬，草地银白，地图握在Sylvia掌心，夜风轻动草浪。）\n\n黑屏字幕：You folded the map and headed north.",
+        "butterfly_effect": "Sylvia's resolve surfaces but wavers under scrutiny. WIL shows movement without full consolidation."
+      },
+      {
+        "reaction_id": "Reaction 3",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Huxley愣了一秒。他的手指还压在地图上，眼睛抬起来，认真看了她一眼。）\n\nHuxley: （嘴角极轻地动了一下）You didn't even ask what the job pays.\n\nSylvia: （眼神清醒，嘴角微动）Does it matter?\n\n（Huxley没有再说话。他把地图折好，两手递到她面前——不是单手，是郑重的两手。）\n（Sylvia接过来，握在掌心。纸张还带着他外套内袋的温度。）\n\nHuxley: （轻，像是说给自己听）Three years. Worth the wait.\n\n（两人并排站在月光下，满月高悬，草地银白，地图握在Sylvia掌心，夜风轻动草浪。）\n\n黑屏字幕：You folded the map and headed north.",
+        "butterfly_effect": "Sylvia's unguarded decisiveness registers as genuine agency. WIL and CHA both gain traction entering the new territory."
+      }
+    ]
+  }
+}

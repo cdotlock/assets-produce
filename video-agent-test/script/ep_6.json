@@ -1,0 +1,75 @@
+{
+  "ep_num": 6,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 6",
+    "episode_title": "棋子",
+    "characters": [
+      "Sylvia",
+      "Huxley",
+      "Elara Vance",
+      "Luna Miller"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色修身长裤，暗灰色高领针织衫，深色外套，黑色平底踝靴，左手腕细银手链。",
+      "Huxley": "三十岁左右男性，深色厚实卫衣，黑色直筒长裤，深棕色工装靴。",
+      "Elara Vance": "三十岁左右女性，白色医用工作服，内搭浅灰衬衫，深色长裤，白色软底鞋，听诊器挂于颈间。",
+      "Luna Miller": "五十岁左右女性，深酒红色修身长裙，黑色羊绒开衫，珍珠耳钉，黑色低跟皮鞋。"
+    },
+    "scene_locations": {
+      "银月领地 治疗师小屋": {
+        "location_id": "silver_moon_healer_cottage",
+        "parent_location_id": "silver_moon_healer_cottage",
+        "visual_prompt": "独立木制小屋，低矮屋檐，草药束悬挂于横梁，木质药柜排列，烛光与草药气息弥漫，窗台摆放干花与陶罐，诊床靠窗，整体色调暖棕昏黄，窗外日光已偏西。"
+      },
+      "银月领地 豪宅 Luna书房": {
+        "location_id": "silver_moon_manor_luna_study",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "私密书房，整面书架，深绿绒布窗帘拉合遮光，实木圆桌，皮质高背椅，台灯聚光，茶杯置于桌面，光线局促昏暗，空气沉静。"
+      },
+      "银月领地 豪宅 走廊": {
+        "location_id": "silver_moon_manor_corridor",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "长廊，深色实木护壁板，壁灯昏黄间距排列，地面深色地毯吸音，走廊尽头光线减弱，夜色已至，廊灯是唯一光源。"
+      }
+    },
+    "pre_choice_script": "（场景：银月领地 治疗师小屋 — 日）\n（Sylvia坐在诊床边沿，手里攥着一张纸，视线钉在纸上，一动不动。Elara站在一侧，听诊器还挂在手里，没有开口。）\n（门开了。Huxley推门进来，目光先落在Elara脸上，再转向Sylvia。两人对视，谁都没有先说话。）\n（Elara把听诊器放回药柜，拿起外套，往门口走。经过Huxley时，她停了一步，声音压得极低。）\n\nElara: Don't push her.\n\n（Elara出去，带上门。Huxley走到窗边，背对Sylvia站着，没有靠近。）\n（沉默。Sylvia把那张纸慢慢折起来，塞进外套口袋，手按在口袋外侧，没有移开。）\n（连结那一端，忽然涌来一阵清晰的温柔——不属于这里，不属于她。Sylvia的手指猛地收紧，把口袋里的纸攥皱了。）\n\nHuxley: （没有转身，声音沉）He's with her right now, isn't he.\n\n（不是问句。Sylvia没有否认，只是低下头，喉结滚动了一下。）\n\nHuxley: （转过身，直视她）I'm not going anywhere. That's all.\n\n（Sylvia抬头看他，嘴唇抿紧，点了一下头。）\n（这时，小屋门外传来敲门声。一位成员在门外开口。）\n\n成员A: Luna Miller wants to see you right now.\n\n（场景：银月领地 豪宅 Luna书房 — 傍晚）\n（台灯聚光，深绿窗帘遮住最后一线天色。Luna Miller坐在高背椅里，茶杯在手，姿态从容，像是等了很久。）\n（Sylvia推门进来，在圆桌对面坐下，没有等对方开口。）\n\nSylvia: You asked to see me.\n\nLuna Miller: （不急，慢慢放下茶杯）James was seventeen. He threatened to renounce his Alpha title. For her.\n\n（Sylvia没有动，听着。）\n\nLuna Miller: Kennedy carries a genetic defect. No offspring. Ever. I ended it.\n\nSylvia: （声音很平）And then the Moon Goddess gave him me.\n\nLuna Miller: （眼神平静，像在确认一件事实）A solution. At exactly the right time.\n\n（特写——Sylvia的下颌绷紧了一秒，随即松开。她没有站起来，把Luna Miller剩下的话全部听完。）\n（Luna Miller端起茶杯，视线移向别处，像是这场谈话已经结束。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Leave without a word.",
+          "description": "Luna Miller的茶杯轻轻落回碟子，那声瓷器相碰的声音像是一个句号。她的视线已经移开了，你坐在台灯的光圈边缘，那张折皱的纸在你口袋里硌着手。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "\"I'll remember every word you said tonight.\"",
+          "description": "Luna Miller把茶杯端起来，像是在等你起身离开。台灯把她半张脸照亮，另半张沉在阴影里。你口袋里那张纸被攥皱的折痕还没有散开。",
+          "check": "WIL（意志）10"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia站起身，没有看Luna Miller，推开书房门走出去。）\n（场景：银月领地 豪宅 走廊 — 傍晚）\n（走廊壁灯昏黄，Sylvia在书房门外停下来。她站了几秒，没有动。）\n（特写——她的手按在口袋外侧，把那张折皱的纸压了一下，又压了一下。她的手背绷着，指节没有松开。她转过身，往主卧方向走去。走廊尽头的灯光把她的影子拉得很长。）\n\n黑屏字幕：Luna Miller said there's a gathering tomorrow. You noted that.",
+        "butterfly_effect": "Sylvia absorbed the truth in silence without claiming it. Luna Miller registers no resistance. WIL gains no traction this round."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（Sylvia站起来，嘴唇动了一下——）\n\nSylvia: I'll remember every word—\n\n（声音在喉咙里断了一截，比她预想的低了一号。）\n（Luna Miller终于抬起眼睛，看了她一秒，眼神里有什么东西一闪而过，像是评估，又像是确认。她没有回答，只是慢慢端起茶杯。）\n\nLuna Miller: We will hold a meeting tomorrow. Good luck.\n\n（Sylvia走出书房。走廊里只有壁灯的昏黄。她在门外停下来，背靠着走廊墙壁站了几秒，闭上眼睛，再睁开。）\n（特写——她的手按在口袋外侧，把那张折皱的纸压了一下。她转过身，往主卧走去。）\n\n黑屏字幕：There's a gathering tomorrow. The way Luna Miller said it — it didn't sound like a notice. It sounded like a move.",
+        "butterfly_effect": "Sylvia attempted to claim her voice but faltered under Luna Miller's gaze. Luna Miller registers a crack, not a wall. WIL marginally strained."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Sylvia站起身，声音清晰。）\n\nSylvia: I'll remember every word you said tonight.\n\n（Luna Miller的茶杯停在半空，第一次，她真正看向Sylvia。）\n\nLuna Miller: We will hold a meeting tomorrow. Good luck.\n\n（Sylvia转身，推开书房门走出去。）\n（场景：银月领地 豪宅 走廊 — 傍晚）\n（走廊壁灯昏黄。Sylvia在书房门外停下来，特写——她的手按在口袋外侧，把那张折皱的纸压了一下。她转过身，往主卧走去。走廊尽头的灯光把她的影子拉得很长。）\n\n黑屏字幕：There's a gathering tomorrow. You already know what you're going to do.",
+        "butterfly_effect": "Sylvia named the truth back to Luna Miller on her feet. Luna Miller registers her as a variable, not a constant. WIL and CHA carry a measurable edge forward."
+      }
+    ]
+  }
+}

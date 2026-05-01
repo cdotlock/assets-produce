@@ -1,0 +1,91 @@
+{
+  "ep_num": 11,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 11",
+    "episode_title": "撤不回",
+    "characters": [
+      "Sylvia",
+      "James",
+      "Huxley",
+      "Cynthia"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色高领针织长裙，黑色细跟低靴，头发松散垂落，无配饰。",
+      "James": "三十岁左右男性，深灰色西装外套，黑色衬衫，深色西裤，黑色皮鞋，无领带。",
+      "Huxley": "三十岁左右男性，黑色战术夹克，深色长裤，军靴，腰间无武装。",
+      "Cynthia": "五十岁左右女性，藏蓝色正装外套，白色衬衫，深色直筒裤，低跟皮鞋，银色胸针。"
+    },
+    "scene_locations": {
+      "银月领地 豪宅 议事厅": {
+        "location_id": "silver_moon_manor_council_hall",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "宽阔石材厅堂，长形会议桌两侧长老就座，主位台阶空置，壁灯冷白，穹顶高挑，石材地面中央留有空旷站立区，整体色调冷灰庄严，光线硬而平。"
+      }
+    },
+    "pre_choice_script": "（字幕：次日清晨）\n\n（场景：银月领地 豪宅 议事厅 — 日）\n（长老议会成员已在长桌两侧就座。Cynthia 坐在左侧席位，神情平静。James 站在主位台阶上，没有落座。Huxley 靠墙站在侧席，视线落在厅中央。）\n\n（Sylvia 走进议事厅。脚步声在石材地面上清晰回响，她走到厅中央，停下来。全场安静。）\n\nSylvia: (声音清晰，整个厅都听得见) I, Sylvia, formally reject this bond. The holder chose another — repeatedly, openly. He used his Alpha command to silence me. The bond caused me physical harm. By Pack law, I exercise my right to reject. Unilaterally. In front of witnesses.\n\n（话音落下，厅内一片死寂。James 从主位猛地站起来。）\n\nJames: (Alpha 命令，声音带着强制压迫) I command you to withdraw those words. Now.\n\n（Alpha 命令砸下来。Sylvia 的双腿不受控制地弯折，双膝重重触地，石材地面的冷硬感透过裙料直抵膝骨。她的手攥住自己的膝盖，指节泛白，牙关咬紧，没有发出声音。）\n\n（席间有人倒吸一口气。没有人站起来。）\n\n（Sylvia 抬起头，慢慢撑直身体，一节一节站起来，站直，直视 James。）\n\nSylvia: (喘着气，声音没有抖) The words are said. I don't take them back.\n\n（Huxley 从侧席起身，大步走到 Sylvia 身前，背对她，正面朝向 James。）\n\nHuxley: (声音平稳，没有抬高，整个厅里听得一字不差) Alpha command governs Pack affairs. Not this. These are two different things.\n\n（James 的视线从 Huxley 身上移过去，两人对视。中间是站直了的 Sylvia。沉默维持了几秒。）\n\n（Cynthia 从左侧席位站起来。）\n\nCynthia: (语气平，像在宣读条文) A public rejection vow cannot be withdrawn by Alpha command. Pack law is clear. The council will rule within three days.\n\n（James 和 Huxley 同时转向她。Cynthia 的视线越过两人，落在 Sylvia 身上，停了一秒，没有表情。）\n\n（特写 — 议事厅正面。James 站在台阶上，Huxley 站在厅中，Sylvia 站在两人之间，身体直立，呼吸平稳。）",
+    "choice_node": {
+      "type": "分支型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Hold your ground. Stay standing where you are.",
+          "description": "你的膝盖还在发疼，石材地面的冷意还没散。Cynthia 说了\"三天\"——三天之内议会裁定，三天之内你仍是誓词宣读人，仍站在这个厅里。James 还在台阶上看着你，Huxley 还在你身前一步的位置。你没有动。",
+          "check": "WIL（意志）12"
+        },
+        {
+          "id": "B",
+          "content": "Cite the review protocol. Refuse to leave the hall.",
+          "description": "Cynthia 说完\"三天\"的那一刻，你脑子里某个东西咬住了那两个字。审议期。誓词宣读人。公开场合出席权。这些不是你发明的规则——是领地规程白纸黑字写着的。James 还没开口，但你看见他已经往你这边迈出了半步。",
+          "check": "INT（智慧）14"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "Reaction 1",
+        "trigger_condition": "选择选项A - 检定失败",
+        "is_bad_ending": true,
+        "story_content": "（Sylvia 站在原地，双腿却开始细微颤抖——Alpha 命令的余震还在神经里走。她咬住牙关，试图稳住，但身体已经先于意志开始弯折。）\n\n（James 从台阶上走下来，脚步声在石材地面上一下一下落地，每一声都清晰。他走到 Sylvia 面前，低头看她。）\n\nJames: (声音压低，只有她听得见) You're shaking.\n\n（Sylvia 没有回答。她的视线直视前方，但焦距已经开始涣散。）\n\nJames: (转向长老席，声音恢复平稳) The vow was spoken under physical duress. Council — she cannot stand on her own. The vow's validity is in question.\n\n（Cynthia 的眉头微微收紧，但没有立刻开口。另一名长老低声与旁边的人交换了什么。）\n\n（Sylvia 的腿彻底撑不住，她向侧面倾倒——Huxley 伸手，但 James 更快，一把扶住她的手臂，将她稳在自己身侧。）\n\nJames: (对长老席，语气平静而坚决) My Luna needs rest. We'll revisit this when she's recovered.\n\n（Sylvia 想开口，喉咙里发出的只是一声哑的气音。James 的手握住她的手臂，力道不重，却不容挣脱。）\n\n（Cynthia 站在原地，看着这一幕，没有说话。）\n\n（James 扶着 Sylvia 转身走向议事厅的门。Huxley 在原地没有动——他没有理由拦住一个扶着\"晕倒的Luna\"离开的Alpha。）\n\n（议事厅的大门在 Sylvia 身后关上。誓词悬在空中，没有裁定，没有见证，只剩下James的手还扣在她的手臂上，带她走回那个她以为已经离开的地方。）\n\n黑屏字幕：You stood up. You said the words. But your body fell before your will did — and he was waiting for exactly that. The vow hangs in the air. No one ruled on it. No one withdrew it. The door just closed, and you're back in that room again.\n\nGame Over.",
+        "bad_ending_details": {
+          "nature": "身体在Alpha命令余震下失控倒下，James以\"健康状况\"为由质疑誓词有效性，将Sylvia带离议事厅，誓词被悬置而非裁定",
+          "core_consequence": "Sylvia在全体长老面前失去站立能力，James利用她的身体失控将她带离议事厅，誓词的公开性与有效性被当场质疑，Cynthia未能及时介入，审议程序在未正式启动的状态下被James以「健康理由」搁置。",
+          "chain_reactions": "誓词既未被撤回，亦未获裁定，悬置在最对James有利的灰色地带。Sylvia被带回主卧，身体已因近拒绝状态持续恶化，而她唯一一次当众发声的机会已被James的手臂抹去。Huxley无法在程序之外强行介入，只能眼看议事厅的门关上。主线断绝。",
+          "ending_text": "You stood up. You said the words. But your body fell before your will did — and he was waiting for exactly that. The vow hangs in the air. No one ruled on it. No one withdrew it. The door just closed, and you're back in that room again.",
+          "status": "全剧中断：游戏结束。"
+        },
+        "butterfly_effect": "Sylvia's body failed her under Alpha command residue. James seized the moment to invalidate the vow on health grounds. The council did not intervene. Game over."
+      },
+      {
+        "reaction_id": "Reaction 2",
+        "trigger_condition": "选择选项A - 检定成功",
+        "is_bad_ending": false,
+        "target_path": "mainline",
+        "story_content": "（Sylvia 站在原地，没有动。她的膝盖还在发疼，但脚踩在石材地面上，稳的。）\n\n（James 从台阶上走下来，走到她面前，压低声音。）\n\nJames: (只有她听得见) You're coming with me. Now.\n\n（Sylvia 没有开口，也没有后退。她的视线直视他，等着。）\n\n（James 的手抬起来，朝她手臂的方向——）\n\n（Cynthia 的声音从左侧席位传来，不高，却在整个厅里落地有声。）\n\nCynthia: Alpha. The vow has been spoken in front of the council. The speaker's physical status from this point falls under council oversight. Any action taken against her person in this hall will be recorded.\n\n（James 的手停在半空。他转头看向 Cynthia，两人对视了三秒。Cynthia 没有移开视线。）\n\n（James 的手缓缓放下来。他转身，走回主位台阶，背对全场。）\n\n黑屏字幕：You didn't move. You didn't speak. You just stood there — and that was enough. The council is watching now. Three days. The clock starts.",
+        "butterfly_effect": "Sylvia held her ground under Alpha command without external rescue; her public act of standing is now formally on council record. WIL consolidates. The council's oversight of her physical status is established as a procedural fact."
+      },
+      {
+        "reaction_id": "Reaction 3",
+        "trigger_condition": "选择选项B - 检定成功",
+        "is_bad_ending": false,
+        "target_path": "branch",
+        "story_content": "（Cynthia 的\"三天\"还在厅里回响，James 已经从台阶上走下来，朝 Sylvia 的方向迈出半步。）\n\nSylvia: (声音平，不高，但整个厅都听得见) Under Pack review protocol, the vow speaker retains the right to be present in any public space within the territory during the three-day deliberation period. That's written procedure. Not subject to Alpha command.\n\n（James 停住了。他的表情收紧了一下，很快压平。）\n\nJames: (低声) Sylvia—\n\nSylvia: (没有看他，视线落在长老席) Cynthia. Is that correct?\n\n（短暂的沉默。Cynthia 从席位上微微抬起头，看了 Sylvia 一眼，然后看向 James。）\n\nCynthia: (语气平，像在宣读条文) That is correct.\n\n（James 没有再开口。Cynthia 和两名长老还未离席，他无法在此刻再发出 Alpha 命令而不让自己当场再落一次脸。）\n\n（沉默维持了几秒。议事厅侧门被推开，Kennedy 被引进来。她走进厅，抬起头，看见 Sylvia 还坐在自己的席位上——她的脚步停住了，停在原地，脸上的从容瞬间出了裂缝。）\n\n（全场没有人说话。Sylvia 没有站起来，也没有开口，只是坐在那里，等着。）\n\n黑屏字幕：You used his own rules against him. Kennedy froze at the door. James couldn't say a word. The council heard everything. Three days. The clock starts.",
+        "butterfly_effect": "Sylvia used procedural knowledge as a weapon in a public space, neutralizing James's Alpha authority without physical confrontation. INT sharply elevated; her capacity to hold ground through rules rather than force registers as a new mode of resistance."
+      },
+      {
+        "reaction_id": "Reaction 4",
+        "trigger_condition": "选择选项B - 检定失败",
+        "is_bad_ending": true,
+        "story_content": "（Sylvia 开口，声音比她预期的要低，带着一丝颤。）\n\nSylvia: Under review protocol — the vow speaker has the right to remain in public spaces during deliberation. It's written—\n\nJames: (打断，声音不高，却有明确的重量) There is no protocol that supersedes my authority in my own hall.\n\n（Sylvia 停了一下。她知道那条规程是真实存在的，但她说不出具体的条文编号，说不出它出自哪一份文件。她的话卡在喉咙里，像一把没有柄的刀。）\n\n（席间有人低声交谈。Cynthia 没有站起来。）\n\nJames: (转向长老席，语气平稳) The deliberation period begins when the council formally convenes. That has not happened yet. Tonight's proceedings are concluded.\n\n（他走向 Sylvia，声音压到只有她听得见。）\n\nJames: (低声) You had your moment. Now walk with me, or I will carry you.\n\n（Sylvia 看向 Cynthia。Cynthia 的视线落在桌面上的文件夹，没有抬起来。）\n\n（Huxley 在她身侧动了一下，但 James 的视线已经扫过去，两人对视，James 的 Alpha 气压无声漫开。）\n\n（Sylvia 站起来。她的腿是稳的。但她走向门口，是跟在 James 身后走的。）\n\n（议事厅的门在她身后关上。她说出了那些话，但她走出去的方式，让那些话的重量在这个厅里消散了一半。）\n\n（特写 — 走廊尽头的光。Sylvia 的脚步声在深色地毯上几乎听不见。James 走在她前面，没有回头。）\n\n黑屏字幕：The rule was real. You knew it existed. But you couldn't name it — and that was all he needed. Sometimes the truth isn't enough. You also need the words to prove it. And tonight, those words didn't come.\n\nGame Over.",
+        "bad_ending_details": {
+          "nature": "援引规程时无法给出具体条文，被James当场反驳，Cynthia未能介入，Sylvia在话语失据后被James带离议事厅",
+          "core_consequence": "Sylvia的规程援引因缺乏具体依据被James以\"议会尚未正式召集\"为由驳回，Cynthia保持沉默，Huxley被Alpha气压压制无法行动，Sylvia在话语失据后跟随James离开，誓词在最脆弱的状态下被搁置。",
+          "chain_reactions": "与选项A的失败截然不同——这次不是身体倒下，而是话语本身在最关键的一步断了链。她鼓起勇气用规则反击，却因说不出具体条文而让James把那条规则变成了他的武器。誓词悬置，审议程序未能正式启动，主线断绝。",
+          "ending_text": "The rule was real. You knew it existed. But you couldn't name it — and that was all he needed. Sometimes the truth isn't enough. You also need the words to prove it. And tonight, those words didn't come.",
+          "status": "全剧中断：游戏结束。"
+        },
+        "butterfly_effect": "Sylvia attempted to use procedural rules but failed to cite specifics. James countered decisively. The vow is suspended without formal review. Game over."
+      }
+    ]
+  }
+}

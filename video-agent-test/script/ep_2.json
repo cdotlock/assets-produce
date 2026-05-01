@@ -1,0 +1,74 @@
+{
+  "ep_num": 2,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 2",
+    "episode_title": "工具",
+    "characters": [
+      "Sylvia",
+      "James",
+      "Kennedy",
+      "Daisy",
+      "Luna Miller",
+      "Huxley"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色长发，穿着简洁深灰色长袖连衣裙，腰部因孕期微微隆起，黑色平底皮鞋，左手腕细银手链。",
+      "James": "三十岁左右男性，深色修身西装外套，白色衬衫未系领带，黑色皮鞋，整体利落但略显凌乱。",
+      "Kennedy": "二十多岁女性，新月领地休闲装束，米色针织上衣，深色修身长裤，棕色短靴，发丝散落。",
+      "Daisy": "二十多岁女性，私立领地日常便装，浅蓝色衬衫，米白色阔腿裤，白色运动鞋，头发简单扎起。",
+      "Luna Miller": "五十岁左右女性，深酒红色长款羊绒大衣，黑色高领毛衣，黑色直筒裤，深色低跟皮鞋，颈间细金项链。",
+      "Huxley": "三十岁左右男性，银月领地战士装束，深橄榄色战术夹克，黑色修身长裤，军靴，手腕皮革护腕。"
+    },
+    "scene_locations": {
+      "新月领地 公墓": {
+        "location_id": "new_moon_cemetery",
+        "parent_location_id": "new_moon_cemetery",
+        "visual_prompt": "户外公墓，灰色石碑排列于草地间，落叶覆盖土路，枯树枝桠交错，天空阴云低压，远处针叶林深暗，整体色调冷灰沉郁，无风，空气凝滞。"
+      },
+      "银月领地 豪宅 客厅": {
+        "location_id": "silver_moon_manor_living_room",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "高挑客厅，深色实木地板，落地壁炉火焰低燃，皮质厚重沙发组，墙面深灰石材，吊灯冷光，窗帘厚重拉合，一把单人椅椅背朝向壁炉，空间压迫感强烈。"
+      }
+    },
+    "pre_choice_script": "（场景：新月领地 公墓 — 日）\n（Sylvia 的手指在腹部收紧，然后松开。她抬起头，直视James。）\n\nSylvia:（声音极平，一字一顿）I need an answer, James.\n\n（James 的下颌绷紧。他没有开口，也没有松手。Kennedy 从 James 怀中抬起头，挑衅地看向 Sylvia。）\n（Sylvia 看了两人三秒，转身往停车场走。）\n\nJames: Sylvia. Stop.\n\n（她没有停。脚步稳，不快，没有回头。）\n\n（场景：银月领地 豪宅 客厅 — 日）\n（Sylvia 推开大门走进客厅。James 从她身后进来，带上门，在壁炉前站定，背对她。）\n\nSylvia: Our bond is almost gone. You feel it. Tell me who she is.\n\nJames: You followed me. You have no right.\n\nSylvia: Answer the question.\n\n（James 猛地转身，眼睛骤然变深。Alpha 命令砸下来——Sylvia 的双腿往下沉，她攥住椅背，指节泛白，硬撑着没有跪，全身在抖。）\n\n字幕：【Daisy: Sylvia's younger sister, ordinary Pack member】\n\n（Daisy 从走廊冲进来，挡在 Sylvia 前面。）\n\nDaisy: How could you suppress her using the Alpha command?\n\n（James 的视线扫过去。Daisy 的喉咙里发出一声哽住的声音，身体僵直，双手撑着空气，嘴唇动了动，一个字都出不来。她的眼睛睁大，死死盯着 Sylvia。）\n\n字幕：【Huxley: Elite Warrior of the Silver Moon Territory】\n\n（Huxley 站在客厅门口，视线落在 Sylvia 身上，停住。）\n\n字幕：【Luna Miller: Former Luna of the Silver Moon Territory, mother of James】\n\n（Luna Miller 从走廊推门进来，扫了一眼 Daisy 僵在原地的样子，又看了看 Sylvia 攥着椅背的手，神情没有变。）\n\nLuna Miller: Enough.\n\n（James 收回 Alpha 命令。Daisy 猛地吸了口气，膝盖软了一下，扶着墙站稳。Sylvia 的手没有松开椅背。）\n\nLuna Miller: Focus on your duties. Luna. Mother. That is all.\n\nSylvia: You knew Kennedy couldn't have children. You arranged this. Didn't you.\n\n（Luna Miller 没有否认。她的嘴角动了一下，像是某个答案终于被说出来让她满意。）\n\nLuna Miller: The Pack needed an heir. You were the solution.\n\n（客厅里没有人说话。Daisy 的手死死捏住墙边的壁灯架。James 看向地板，没有开口。）\n（Sylvia 站在原地，手从椅背上慢慢松开，垂在身侧。）\n（Luna Miller 转身走出客厅。James 跟着进了走廊，带上门。Alpha 命令的压力彻底散去。）\n（Daisy 猛地喘了口气，扑过来抓住 Sylvia 的手臂。两人对视。）\n（Huxley 向 Sylvia 走来，脚步刚迈出，走廊里传来 James 喊他名字的声音。他的脚步顿了一下，只好转身朝走廊走去。）\n（特写 — 客厅里只剩 Sylvia 和 Daisy。Sylvia 低下头，视线落在刚才 Daisy 撑着空气的那双手上。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Say nothing. Lower your eyes.",
+          "description": "Daisy 的手还攥着你的手臂，她的手腕上有一道浅红的压痕——Alpha 命令留下的。你的嘴唇动了一下，又合上。\"The Pack needed an heir. You were the solution.\"那句话还在客厅里，像烟一样散不掉。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "\"I heard every word. And I remember.\"",
+          "description": "Daisy 的眼睛还是红的，她刚才一个字都说不出来——你替她开口。壁炉的火烧得很低，James 带上门的声音还没有散尽，你的腿还在抖，但你把它压住了。",
+          "check": "WIL（意志）10"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia 的视线从 Daisy 的手腕上移开，低下头，沉默。）\n（Daisy 看着她，慢慢松开手，嘴唇抿紧，没有说话。）\n（壁炉里的火烧得更低了。客厅里只剩两个人的呼吸声。）\n\n（厨房那边，灶台上的锅沸腾的声音穿过门缝传来，匀速，不停。Sylvia抬起头，看了一眼厨房的方向，走过去。Daisy跟在后面。）\n\n黑屏字幕：You said nothing. But you didn't forget a single word Luna Miller said.",
+        "butterfly_effect": "Sylvia's silence in the face of Luna Miller's admission registers as submission. WIL loses traction; her agency in the household is further eroded."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（话出了口，但声音比预想的低了一档，带着一丝颤。）\n（Daisy 猛地抬起头，眼睛睁大。）\n\nDaisy: （压低声音，急）Sylvia, not here—\n\n（走廊里传来脚步声，两人同时闭嘴。脚步声经过门口，没有停，渐渐远去。）\n\nSylvia: I heard every word. And I remember.\n\n（Daisy 看了她一会儿，慢慢点头，没有多说。厨房那边，灶台上的锅沸腾的声音穿过门缝传来，匀速，不停。两人一前一后走回厨房，谁都没有再开口。）\n\n黑屏字幕：You said it — too quiet, maybe. But Daisy heard you.",
+        "butterfly_effect": "Sylvia speaks, but her voice falters under pressure. WIL registers a marginal gain; the words were said, though their weight did not fully land."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Daisy 的手在 Sylvia 手臂上猛地收紧了一下。）\n\nDaisy: （愣了整整两秒，声音压得极低）You're serious.\n\nSylvia: （平静，不重复）I heard every word. And I remember.\n\n（Daisy 看着她，眼眶慢慢红了，但她没有哭。她松开 Sylvia 的手臂，把自己的手背在身后，攥成拳。）\n\nDaisy: （轻，但很稳）Then we remember together.\n\n（两人没有再说话。壁炉的火烧得很低。厨房那边，灶台上的锅沸腾的声音穿过门缝传来，匀速，不停。Sylvia先转身往厨房走，Daisy跟上。）\n\n黑屏字幕：You and Daisy remember the same thing now. You're not alone in this anymore.",
+        "butterfly_effect": "Sylvia names what was done to her, and Daisy witnesses it. WIL solidifies; the bond between them shifts from comfort to alliance."
+      }
+    ]
+  }
+}

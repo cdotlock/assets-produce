@@ -1,0 +1,72 @@
+{
+  "ep_num": 13,
+  "variant_kind": "minor_mainline",
+  "output": {
+    "episode_id": "EP 13",
+    "episode_title": "我自己走",
+    "characters": [
+      "Sylvia",
+      "James",
+      "Huxley",
+      "Cynthia",
+      "Daisy"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色长发散落，穿着深灰色简约长裙，外罩黑色厚实外套，黑色平底靴，左手腕有细布条缠绕，背负黑色大背包。",
+      "James": "三十岁左右男性，深色剪裁西装，白色衬衫无领带，皮鞋，神情凝重。",
+      "Huxley": "三十岁左右男性，深色军绿色战术外套，黑色长裤，厚底靴，表情沉静。",
+      "Cynthia": "四十岁左右女性，深蓝色正装外套，直筒裤，低跟皮鞋，头发束于脑后，神态从容。",
+      "Daisy": "二十多岁女性，黑色连帽卫衣，深色紧身裤，运动鞋，头发随意扎起。"
+    },
+    "scene_locations": {
+      "银月领地 豪宅 侧廊": {
+        "location_id": null,
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "豪宅侧翼廊道，深色实木廊柱，壁灯光线微弱，石材地面，一侧为侧门通向户外，夜间廊内几乎无人，光线昏暗。"
+      },
+      "银月领地 东部边界": {
+        "location_id": "silver_moon_east_border",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "领地边界线，密林边缘与开阔地交界，月光从树隙投落，地面杂草与碎石，夜色深蓝，远处森林漆黑深邃，树根旁有黑色背包，边界感强烈。"
+      }
+    },
+    "pre_choice_script": "（场景：银月领地 豪宅 侧廊 — 夜）\n（议事厅散场后，Sylvia靠在侧廊的廊柱上。高烧让她的视线开始涣散，额角沁出薄汗，呼吸浅而急促。她闭了一下眼，重新睁开。）\n\n（Huxley从走廊另一端快步走过来，在她面前停住。他看了一眼她的脸色，没有废话。）\n\nHuxley: （声音压低）You need to leave tonight. Lyra can't take another day of this.\n\n（Sylvia没有反驳。她知道他说的是对的。）\n\nSylvia: （喘着气）James—\n\nHuxley: He's with Kennedy in the main hall. Shift change in twenty minutes. East border, I've got a bag ready.\n\n（拐角处传来脚步声。Daisy从阴影里走出来，看见Sylvia的状态，嘴唇抿紧了一下，没有说话。）\n\n（Sylvia从廊柱上直起身，站了一秒。她转头看向议事厅的方向——走廊尽头，James的声音和Kennedy的声音隐约交叠在一起，传过来。）\n\n（她转回头，看着Huxley。）\n\nSylvia: Let's go.\n\n（三人沿侧廊向侧门移动。Sylvia走在中间，脚步不快但没有停。走到侧门前，她伸手推门——）\n\n（身后传来沉重的脚步声。James从走廊拐角出现，看见三人的背影，大步追过来，手伸向Sylvia的手臂。）\n\n（Cynthia不知什么时候已经站在侧门旁的阴影里。她侧身一步，不动声色地挡在James和Sylvia之间。）\n\nCynthia: （看着James，声音清晰，走廊里的回音让每个字都很重）During review, the declarant's physical state falls under council jurisdiction. Any interference requires written application to the council.\n\n（James的手停在半空。他看着Cynthia，牙关咬紧，喉结滚动了一下。他清楚再动手只会把这一幕彻底钉死在议会记录里。）\n\n（他把手放下来。）\n\n（Sylvia推开侧门，走出去。夜风灌进来。Huxley跟在她身侧，一步之遥，没有碰她。Daisy最后出来，把门在身后带上。）\n\n（场景：银月领地 豪宅外围 — 夜）\n（三人绕开巡逻路线，穿过东侧林地，朝边界方向走。Sylvia的脚步越来越慢，高烧把她的重心往前拉，但她还在走。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Lean on Huxley. Get to the border.",
+          "description": "你刚在走廊里看着Cynthia用一句话把James钉在原地，但现在规程帮不了你的膝盖。树线还在前方，月光把碎石路照得发白，你的腿在抖。Huxley在你右侧一步远，他没有伸手——但你知道只要靠过去，他会接住你。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "Walk to the border on your own feet.",
+          "description": "Cynthia替你挡住了James的手，Huxley替你准备了背包，Daisy替你守着后路。但从这扇侧门到边界线之间的每一步，你要自己走。你的靴底踩上碎石，声音比你想象的要稳。",
+          "check": "WIL（意志）12"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia向右靠了半步。Huxley没有说话，手臂抵上她的肩侧，力道轻得像是偶然。）\n\n（三人继续穿过林地。豪宅方向突然传来一声低沉的怒吼，James的气息在整片领地骤然蔓延压下来——Daisy的脚步顿了一下。Sylvia的手指收紧了，但脚步没有停。）\n\nDaisy: （低声）Don't look back.\n\n（东部边界。月光从树隙落下来。Huxley从树根旁提起背包，递过去。Sylvia接过来，背上，两肩绷紧，她抬眼看了他一秒。）\n\nSylvia: （轻，只有他听得见）Thank you.\n\n（她转身，踏过边界线，走进黑暗的森林。脚步一直没有停。）\n（特写——边界线这侧，Huxley的靴尖停在线前，没有越过去。他站在原地，看着她的背影消失进树林。定格。）\n\n黑屏字幕：You walked into the dark. Everything behind you stayed on the other side of the line.",
+        "butterfly_effect": "Sylvia accepted physical support at the threshold; her departure is completed. The council-hall victory and Cynthia's intervention gave her procedural ground, but the physical cost is real. WIL carries a slight deficit entering the next phase."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（Sylvia迈开步子，脚踩上碎石路，腿软了一下——她扶住旁边的树干，停了两秒，没有回头。Huxley的手悬在半空，没有碰她。）\n\n（三人继续穿过林地。豪宅方向突然传来一声低沉的怒吼，James的气息在整片领地骤然蔓延压下来——Sylvia的步子踉了一下，Daisy下意识伸手，Sylvia摆了摆手，没有接。）\n\n（东部边界。Huxley从树根旁提起背包，递过去。Sylvia接过来，背上，两肩因重量前倾，她停了一拍，把脊背重新撑直。她抬眼看了他一秒。）\n\nSylvia: （轻，只有他听得见）Thank you.\n\n（她转身，踏过边界线，走进黑暗的森林。脚步一直没有停。）\n（特写——边界线这侧，Huxley的靴尖停在线前，没有越过去。他站在原地，看着她的背影消失进树林。定格。）\n\n黑屏字幕：You stumbled. But you didn't stop. You didn't look back.",
+        "butterfly_effect": "Sylvia held the line in name but stumbled on the path. She won the procedural battle in the council hall and walked out under Cynthia's protection, but the physical cost of the rejection state nearly undid her. WIL shows strain but not collapse."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Sylvia迈开步子，靴底踩上碎石，声音沉稳。高烧还在，但步子是直的。）\n\n（三人继续穿过林地。豪宅方向突然传来一声低沉的怒吼，James的气息在整片领地骤然蔓延压下来——Daisy的步子一顿，Sylvia的步子没有停，连节奏都没有乱。）\n\n（东部边界。Huxley从树根旁提起背包，递过去。Sylvia接过来，背上，两肩绷紧，她抬眼看了他一秒。）\n\nSylvia: （轻，只有他听得见）Thank you.\n\n（她转身，踏过边界线，走进黑暗的森林。脚步一直没有停。）\n（特写——边界线这侧，Huxley的靴尖停在线前，没有越过去。他站在原地，看着她的背影消失进树林。定格。）\n\n黑屏字幕：You walked into the dark. Every step was yours.",
+        "butterfly_effect": "Sylvia crossed the threshold entirely under her own power. She won the procedural fight sitting down, walked out under Cynthia's shield, and completed the departure standing up. WIL solidifies; the departure registers as chosen, not endured."
+      }
+    ]
+  }
+}

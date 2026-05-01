@@ -1,0 +1,61 @@
+{
+  "ep_num": 10,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 10",
+    "episode_title": "熄灭",
+    "characters": [
+      "Sylvia",
+      "James"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色宽松长袖上衣，深灰色长裤，赤脚，头发散落，左掌心有四道浅红压痕。",
+      "James": "三十岁左右男性，黑色厚实睡裤，深色无袖上衣，赤足，发型凌乱。"
+    },
+    "scene_locations": {
+      "银月领地 豪宅 主卧": {
+        "location_id": "silver_moon_manor_master_bedroom",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "大型卧室，深色实木四柱床，厚重深色床帘半敞，地毯柔暗，落地窗帘拉合，壁灯熄灭，仅床头柜台灯亮着昏黄光晕，床头柜上有空陶杯与布包，地板中央有一处坐压的浅痕，空气中残留草药气息，黎明前天色漆黑。"
+      }
+    },
+    "pre_choice_script": "（场景：银月领地 豪宅 主卧 — 深夜）\n（Sylvia推开主卧门，把布包放到床头柜上。她去卫生间接了水，放进电热壶，按下开关，退后一步，背靠墙站着等。壁灯是灭的，只有床头柜的台灯亮着，把她的影子拉得很长。）\n（水沸了。她把草药倒进杯里，看着水色一点一点变深，端起来，一口喝尽。）\n（特写——空杯放回桌面。她的手没有抖。）\n（时间流逝。Sylvia慢慢滑落到地板上，双臂抱住膝盖，额头抵在膝上。特写——她的牙关咬紧，指甲掐进掌心，没有发出任何声音。）\n（字幕：黎明前）\n（特写——她的手慢慢松开，掌心留下四道红痕。她的眼睛睁开，直视前方，喉结滚动一下。腹中那点温热悄然消失。同一瞬间，她的肩膀微微下沉，像什么东西断了。）\n（豪宅远端传来一声低沉的Alpha怒吼，随即是沉重的脚步声。主卧门被撞开。）\n（James冲进来，扫到地板上的Sylvia，眼睛骤然变深。他猛地走上前，蹲下来，抓住她的肩膀。）\n\nJames: (声音撕裂) What did you do? I felt it — I felt my child die.\n\n（Sylvia撑着地板站起来，拍开他的手。她直视他，嘴唇抿紧，没有后退。）\n\nSylvia: (声音极平) I spared him. From this. From you.\n\n（James腾地站起来，双手直接扼向她的咽喉——手指触到她颈侧皮肤的瞬间，他停住了。）\n（特写——Sylvia的眼睛。没有恐惧，没有求饶，只是看着他，平静得像一块石头。）\n（James的双手悬在她颈侧，没有继续动。他的下颌绷紧，喉咙里发出一声低哑的声音，却没有一个字成形。）\n（两人对视。James的手还没有收回去。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Turn away. Don't give him the last word.",
+          "description": "他的手指还贴着你颈侧，掌心的温度透过皮肤传进来。你的四道指甲痕还在发烫，地板上那个坐压的浅痕就在你脚边。你把视线移开——不是因为怕，是因为你已经没有什么要给他了。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "Say the words. Now. To his face.",
+          "description": "他的手还没有放下来，你能感觉到他的呼吸打在你额头上。空杯还在床头柜上，草药的苦味还在你喉咙里。你张开嘴——不是明天，不是在长老面前，就是现在，就是对着这双手。",
+          "check": "WIL（意志）12"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia把视线从James脸上移开，转向落地窗的方向。窗帘拉合，什么也看不见，但她就这样站着，背脊是直的。）\n（James的手悬了很久，慢慢垂落。他的嘴唇动了动，没有发出声音。）\n\nJames: (声音低沉，像压着什么) You can't just—\n\nSylvia: (不转头，声音平静) Tomorrow. In front of every Elder. I will say the words. Get ready.\n\n（沉默。James站在原地，拳头攥紧又松开。Sylvia没有再开口，也没有动。她的手垂在身侧，掌心的红痕朝下。）\n（James最终转身，沉重的脚步声走向门口。门没有关上，走廊里透进一线灰白的黎明前光线。）\n\n黑屏字幕：Tomorrow. The council hall. In front of every Elder. You will say the words yourself.",
+        "butterfly_effect": "Sylvia withholds the final confrontation, preserving her declaration for the council. WIL holds steady but gains no forward momentum."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（Sylvia深吸一口气，开口——）\n\nSylvia: I, Sylvia—\n\n（声音在第一个字之后断了。她的喉咙发紧，草药的苦味还压在舌根，身体在这一刻背叛了她的意志。）\n（James的眼睛骤然锁住她，手指微微收紧，随即又停住。）\n\nJames: (声音低沉，像压着什么) You don't even know what you're doing.\n\n（Sylvia闭上眼睛，一秒，两秒。她重新睁开，下颌骨咬紧，声音比刚才低，但稳住了。）\n\nSylvia: Tomorrow. In front of every Elder. I will say the words. Get ready.\n\n（James的手缓缓放下来，停在身侧。他站在原地，没有离开，也没有再开口。Sylvia转向窗边，背对他，不再看他。）\n\n黑屏字幕：You couldn't finish tonight. But tomorrow, in the council hall, in front of everyone — you will.",
+        "butterfly_effect": "The words broke before they landed. James registers the hesitation. WIL takes a fractional hit, but the declaration stands for tomorrow."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Sylvia没有移开视线，就这样直视着他，开口，声音清晰，一字一顿。）\n\nSylvia: I, Sylvia, reject you, James, as my Alpha and my mate—\n\n（James的手猛地收回来，像被烫到。他后退半步，眼睛里有什么东西裂开。）\n\nJames: (声音撕裂) Stop—\n\nSylvia: (继续，声音没有颤抖) —from this moment, and from every moment after.\n\n（话音落下，房间里的空气像被什么东西猛地抽走。James站在原地，呼吸急促，双手攥成拳。Sylvia的身体因誓词不完整而传来一阵刺痛，但她站着，没有动。）\n\nJames: (声音低沉，像压着什么) You don't know what you're doing.\n\nSylvia: (转身，不再看他) I know exactly what I'm doing.\n\n（James的手缓缓放下来，停在身侧。Sylvia走向窗边，背对他，不再开口。）\n\n黑屏字幕：You've already said it once. Tomorrow, in the council hall, in front of every Elder, you'll say it again.",
+        "butterfly_effect": "The words were spoken first in private — unwitnessed, incomplete, but real. Sylvia's WIL registers a meaningful gain. James's composure fractures earlier than anticipated."
+      }
+    ]
+  }
+}

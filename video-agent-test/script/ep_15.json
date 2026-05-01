@@ -1,0 +1,66 @@
+{
+  "ep_num": 15,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 15",
+    "episode_title": "活下去",
+    "characters": [
+      "Sylvia",
+      "Iris Blackwood"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色厚棉外套，黑色长裤，磨损登山靴，左手腕有细布绷带，背负深色大背包，头发凌乱垂散。",
+      "Iris Blackwood": "三十多岁女性，暗绿色宽领毛衣，深棕色直筒长裤，皮质系带靴，头发扎成低马尾，无饰品。"
+    },
+    "scene_locations": {
+      "中立区 无名溪流旁": {
+        "location_id": null,
+        "parent_location_id": null,
+        "visual_prompt": "溪流旁泥地，浅色卵石散布，水流细浅清澈，溪岸杂草丛生，周围阔叶林遮蔽，日光从树隙斜透，地面潮湿，光线漫射柔和。"
+      },
+      "河谷领地 疗养小屋": {
+        "location_id": null,
+        "parent_location_id": "river_valley_manor",
+        "visual_prompt": "小型木制小屋内部，单张铁架床铺白色床单，床头木质夜柜，一盏油灯置于柜面，窗帘为米白薄棉布，窗外隐约可见植被，墙面浅木色，地面旧木板，角落有折叠椅，整体昏暖安静。"
+      }
+    },
+    "pre_choice_script": "（场景：河谷领地 疗养小屋 — 日）\n\n字幕：【Iris Blackwood: Alpha of the River Valley Territory, specializing in sheltering the exiled】\n\n（Iris 将 Sylvia 扶到床边坐下。她蹲下来，双手轻按 Sylvia 的腹部两侧，表情收紧了一下。）\n\nIris: The tear hasn't healed. But it won't kill you. Not if you stay.\n\n（Sylvia 没有反应。她的视线落在地板上，喉结滚动了一下。）\n\nIris: (站起来，声音放慢) A she-wolf's worth has nothing to do with the bond. Nothing.\n\n（停顿。）\n\nIris: First — just stay alive.\n\n（特写 — Sylvia 的手，攥着背包带，慢慢松开了。）\n\n（场景：河谷领地 疗养小屋 — 夜）\n\n（一盏油灯。Sylvia 躺在床上，眼睛睁着，盯着横梁。特写 — 她的手平放在身侧，掌心朝上，不再攥任何东西。）\n\n（窗外有虫鸣。没有脚步声，没有命令。Sylvia 的眼睫缓缓垂下去，又抬起来。她侧过身，面向墙壁。）\n\n（这时，床头联络装置发出一声低鸣。Sylvia 坐起来，盯着屏幕。）\n\n（特写 — 屏幕上显示发件人：Kayden。内容：\"Daisy is under house arrest. James found out. She can't reach you anymore.\"）\n\n（Sylvia 的下颌绷紧，手指按住屏幕边缘，没有松开。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Put the device down. Turn back to the wall.",
+          "description": "Kayden 的名字还亮在屏幕上，油灯把那行字的影子拉长到床单上。你的手指按着屏幕边缘，凉的。Iris 今天说的话还在耳朵里——\"just stay alive\"——你把装置翻扣在夜柜上，那行字消失了。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "Send a reply to Kayden. Ask about Daisy's condition.",
+          "description": "屏幕的光打在你手背上，Daisy 的名字没有出现在那行字里，但你知道她在哪里、因为什么。你腹部还有隐隐的钝痛，腿踩地时还在抖——你的拇指悬在屏幕上方，没有落下去。",
+          "check": "WIL（意志）10"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia 将联络装置翻扣在夜柜上，屏幕的光熄灭了。）\n\n（她重新躺下，面向墙壁。油灯的火苗轻轻摇了一下，虫鸣还在窗外。她的手平放在腹部，掌心贴着薄薄的床单，一动不动。）\n\n（特写 — 她的眼睛睁着，没有眼泪，只是盯着木板墙的纹路，呼吸很慢，很浅。）\n\n（良久，她闭上眼睛。翻扣的装置在夜柜上静静发着微弱的余光，照不到她的脸。）\n\n黑屏字幕：Daisy is under house arrest because she helped you escape. You lay in bed all night, eyes open. The next morning, you went to find Iris.",
+        "butterfly_effect": "Sylvia chose stillness over action; her WIL stabilizes at a baseline but registers no forward momentum. Daisy's situation remains an unaddressed weight."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（Sylvia 的拇指落在屏幕上，停了两秒，打出几个字，又全部删掉。）\n\n（她的手开始抖。不是冷，是那行字——\"She can't reach you anymore\"——在眼前重叠成另一个画面：Daisy 被 James 以 Alpha 命令强压噤声的那一刻，那声哑掉的呼吸。）\n\n（她把装置攥进掌心，低下头，额头抵在膝盖上。油灯的光把她的影子压成一团，虫鸣从窗缝钻进来，填满整间小屋。）\n\n（她没有发出去任何东西。装置的屏幕自动熄灭。）\n\n（Sylvia 缓缓抬起头，把装置放回夜柜，手慢慢松开。她重新躺下，眼睛睁着，盯着横梁，呼吸一点点平稳下来。）\n\n黑屏字幕：You didn't sleep. The next morning, you went to find Iris.",
+        "butterfly_effect": "Sylvia reached for agency but was stopped by the weight of helplessness. WIL takes a minor hit; Daisy's situation registers as an unresolved fracture."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Sylvia 的拇指落下去，打出一行字：\"How bad is it. Is she safe right now.\"）\n\n（她盯着屏幕，没有放下装置。等待的时间里，油灯的火苗轻轻晃了一下，虫鸣从窗外漫进来。）\n\n（回复来得很快。Kayden：\"Confined to quarters. Not hurt. James doesn't know about the route.\"）\n\n（Sylvia 的下颌慢慢松开了一毫米。她把这行字看了很久，然后把装置放回夜柜，手掌平压在上面，没有翻扣它。）\n\n（她重新躺下，这次面朝天花板，眼睛睁着。屏幕的余光还亮着，照在夜柜侧面，像一盏很小的灯。）\n\n（特写 — 她的手平放在身侧，掌心朝上，手指舒展，没有攥任何东西。）\n\n黑屏字幕：Daisy is safe — for now. You didn't sleep. The next morning, you went to find Iris.",
+        "butterfly_effect": "Sylvia acted on Daisy's behalf within her current limits. WIL gains a marginal increment; her capacity to hold others without losing herself registers as strengthened."
+      }
+    ]
+  }
+}

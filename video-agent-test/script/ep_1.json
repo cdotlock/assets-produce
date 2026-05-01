@@ -1,0 +1,68 @@
+{
+  "ep_num": 1,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 1",
+    "episode_title": "Kenny",
+    "characters": [
+      "Sylvia",
+      "James",
+      "Kennedy"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色针织长袖上衣，深灰色宽腿长裤，腰腹处因孕肚微微撑起，黑色平底软鞋，左手腕细银手链。",
+      "James": "三十岁左右男性，深色羊绒大衣半敞，内搭黑色高领毛衣，深色修身长裤，黑色皮鞋，领口微乱。",
+      "Kennedy": "二十多岁女性，黑色长款风衣，黑色高领内搭，黑色长裤，黑色低跟靴，头发散落。"
+    },
+    "scene_locations": {
+      "银月领地 豪宅 厨房": {
+        "location_id": "silver_moon_manor_kitchen",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "宽敞厨房，哑光深灰橱柜，白色大理石岛台，岛台上摆有切菜板与食材，灶台火苗亮着，吊灯暖黄，窗外针叶林树影，空气静止，光线沉郁。"
+      },
+      "新月领地 公墓": {
+        "location_id": "new_moon_cemetery",
+        "parent_location_id": "new_moon_cemetery",
+        "visual_prompt": "户外公墓，灰色石碑排列于草地间，新坟土色深暗，落叶覆盖土路，枯树枝桠交错，天空阴云低压，远处针叶林深暗，整体色调冷灰沉郁，风吹草动。"
+      }
+    },
+    "pre_choice_script": "（场景：银月领地 豪宅 厨房 — 日）\n\n画外音 — Sylvia:（低沉平静）\"In our world, the Moon Goddess binds two wolves together — a Fate Bond. You feel everything your mate feels. But if he keeps choosing someone else, that bond doesn't just hurt. It slowly destroys you.\"\n\n字幕：【Sylvia: Luna of the Silver Moon Territory, wife of Alpha James, seven months pregnant】\n\n（Sylvia 站在岛台旁切菜。腹部隆起，动作缓慢而小心。灶台上的火苗安静地燃着。）\n\n字幕：【James: Alpha (Clan Leader) of the Silver Moon Territory】\n\n（James 推门冲进厨房，外套半敞，神情慌乱，目光在她脸上停了不到一秒，立刻移开。）\n\nJames: Alpha Barnes passed. I have to go.\n\n（Sylvia 放下刀，手本能地覆上腹部，转过身。）\n\nSylvia: I'll come with you.\n\nJames:（摆手，已在往外走）Road's too long. You shouldn't travel.\n\n（他在门口停下，背对她，沉默了一秒。）\n\nJames: Don't wait up.\n\n（门关上。厨房里只剩切菜板上的食材和还亮着的灶台。Sylvia 的手仍压在腹部，一动不动。胸口某处骤然发凉，手指慢慢收紧了一下。）\n\n（她拿上车钥匙，朝门口走去。）\n\n---\n\n（场景：新月领地 公墓 — 日，数小时后）\n\n（Sylvia 将车停在公墓入口，下车，走到一排石碑后，手撑着碑沿，站定。）\n\n（三米外，James 单膝跪在新坟旁，双臂将身旁的女人揽住，低头靠近她的耳边。）\n\nJames:（极轻，像在哄）Shh. Kenny. I'm here.\n\n（Kennedy 把脸埋进他胸口。James 的手顺着她的头发慢慢往下压，动作熟稳，从容。）\n\n字幕：【Kennedy: Daughter of the late Alpha Barnes of the New Moon Territory】\n\n（风向变了。James 猛地抬头，与 Sylvia 对视。他的神情从温柔瞬间僵住——但双臂不仅没有松开，反而收紧了。）\n\n（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）\n\n（Sylvia 等着。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Stand still. Let the silence do the work.",
+          "description": "James的目光从你脸上滑开了，落在Kennedy肩头，连看都不看你一眼。胸口那条连结冰凉得像一块死石。风把Kennedy的哭声送过来，你站在那里，三米远，挺着七个月的肚子。你不开口——让这份沉默替你逼他。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "Say his name. Make him look at you.",
+          "description": "他跪在那里，抱着另一个女人，用从未给过你的声音说\"I'm here\"。你的腹部还有重量，风把Kennedy的哭声送过来，James的手一直没有松开。你站在三米外，他的眼睛还是没有转过来。你张开嘴。",
+          "check": "WIL（意志）10"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia没有动，也没有再开口。她就那样站在三米外，手覆在腹部，风吹着她的头发。）\n\n（James的目光落在Kennedy肩头，不看她。Kennedy的哭声填满了两人之间的沉默。十秒，二十秒，没有人说话。）\n\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）\n\n黑屏字幕：He won't speak first. So you will.",
+        "butterfly_effect": "Sylvia's silence registers as restraint, not surrender. James receives no confrontation but also no permission. WIL holds steady."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（Sylvia 深吸一口气，开口。）\n\nSylvia: Kennedy.\n\n（声音比她预想的小了一号，被风压住，散在石碑之间。James 的目光慢慢移过来，落在她脸上，神情没有愧疚，只有一种沉默的、疲倦的拒绝。Kennedy 从他怀里微微抬头，眼圈红着，看了她一眼，又把脸埋回去。James 的手臂没有松。）\n\nJames:（低，像在结束一件事）Not now, Sylvia.\n\n（Sylvia 站在原地，嘴唇动了一下，没有声音出来。风继续吹。）\n\n黑屏字幕：\"Not now\" — but you're not going to wait until he's ready.",
+        "butterfly_effect": "Sylvia attempted confrontation but her voice failed to land. James registers her as manageable. WIL marginally engaged but yields no immediate shift."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Sylvia 开口，声音平稳，一字一顿，落地有声。）\n\nSylvia: Kennedy.\n\n（Kennedy 从 James 怀里抬起头，眼圈红着，挑衅地看向 Sylvia。James 的目光终于转过来，落在她脸上——他的下颌绷紧了。）\n\nSylvia:（声音极平，没有起伏）What is the relationship between you and her?\n\n（沉默。风把 Kennedy 散落的发丝吹过来。James 的嘴唇动了一下，没有开口。他的双臂仍揽着 Kennedy，但手指不自觉地收紧了一下。）\n\n黑屏字幕：He doesn't answer. But you don't need his answer anymore.",
+        "butterfly_effect": "Sylvia held her ground and forced James to register her presence. WIL gains traction; James can no longer treat her silence as consent."
+      }
+    ]
+  }
+}

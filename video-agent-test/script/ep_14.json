@@ -1,0 +1,66 @@
+{
+  "ep_num": 14,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 14",
+    "episode_title": "快没了",
+    "characters": [
+      "Sylvia",
+      "Iris Blackwood"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色厚实外套，袖口沾有泥迹，深色长裤，磨损登山靴，背负大号登山背包，左手腕无饰品。",
+      "Iris Blackwood": "三十岁左右女性，深橄榄色户外夹克，深色修身长裤，厚底皮靴，无多余饰品，气质沉稳干练。"
+    },
+    "scene_locations": {
+      "银月领地 东部边界": {
+        "location_id": "silver_moon_east_border",
+        "parent_location_id": "silver_moon_east_border",
+        "visual_prompt": "领地边界线，密林边缘与开阔地交界，月光从树隙投落，地面杂草与碎石，夜色深蓝，远处森林漆黑深邃，背景方向隐约有豪宅灯光，边界感强烈。"
+      },
+      "中立区 溪流旁": {
+        "location_id": null,
+        "parent_location_id": null,
+        "visual_prompt": "窄浅溪流，水面清浅透底，溪岸为深色泥地，杂草低伏，落叶散布，周围阔叶林遮挡直射光，日光漫射呈冷白色，空间潮湿安静。"
+      }
+    },
+    "pre_choice_script": "（场景：银月领地 东部边界 — 夜）\n（Sylvia 踏过边界线，走入树线。背包的重量压着她的肩膀微微前倾，靴底踩过碎石与枯叶，一步一步往前。）\n（身后，James 的怒吼声在领地上空炸开，气息浪潮从豪宅方向骤然蔓延，压过整片夜色。）\n（Sylvia 的脚步没有停。树线将身后的光彻底隔断，黑暗合拢，怒吼声被森林吞进去。）\n\n字幕：三十天后\n\n（场景：中立区 溪流旁 — 日）\n（溪流窄浅，水声细碎。Sylvia 站在溪边，背包已经瘪下去大半，外套袖口沾着泥。她弯腰，伸手向水面。）\n（腿突然软了。她的手没能碰到水，整个人侧倒在溪旁的泥地上，背包压着她的背。她试图撑起来，手肘一滑，没能起身。）\n（特写 — 她的嘴唇干裂，眼睫微颤，喉咙里发出一声极低的唤声。）\n\nSylvia: (气声，几乎听不见) Lyra...\n\n（没有回应。她的手指在泥地里收紧，又松开。）\n（一双手从侧面伸过来，稳稳扶住她的肩膀，将她从泥地里抬起。）\n（Iris 俯身看她，气息沉稳，没有任何压迫性。她打量 Sylvia 一眼，视线落在瘪掉的背包上，再落回她的脸。）\n\n字幕：【Iris Blackwood: Alpha of the River Valley Territory】\n\nIris: (平静，直接) Are you a lone wolf?\n\n（特写 — Sylvia 抬起眼，对上 Iris 的目光。她的嘴唇动了一下，喉咙滚动了一下，没有立刻说话。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Say nothing. Look away.",
+          "description": "Iris 的手还扶着你的肩膀，你能感觉到那个力道是稳的，不是要抓住你，是要托住你。你的嘴唇动了一下，又闭上——背包里那张地图已经翻烂了边角，三十天，你没有开口问过任何人任何事。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "\"Not anymore.\"",
+          "description": "泥地的湿气还贴着你的外套，Iris 的目光落在你脸上，不是审问，是等待。你上一次开口说自己是谁，是在议事厅，是对着James。你的喉咙很干，那两个字压在舌根，你能感觉到它们的重量。",
+          "check": "WIL（意志）10"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia 的视线从 Iris 脸上移开，落到溪面上，没有说话。）\n（Iris 没有追问。她沉默了一秒，将 Sylvia 的手臂搭上自己的肩膀，开始扶她站起来。）\n\nIris: (平静，不是审问，是确认) You don't have to answer that.\n\n（特写 — Sylvia 的脚踩进泥地，腿在抖，但没有再倒下。她的视线还是低着的，喉结滚动了一下，没有出声。）\n（两人沿溪岸慢慢走出镜头。背包还在 Sylvia 背上。溪流的水声在身后渐渐远去。）\n\n黑屏字幕：You don't know how much further you can go. But Iris held you up — all the way to her territory.",
+        "butterfly_effect": "Sylvia's silence in the face of Iris's question leaves her WIL stagnant; the first step toward rebuilding self-definition is deferred."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（Sylvia 张开嘴，声音从喉咙里挤出来，比她预想的更哑、更碎。）\n\nSylvia: (声音破碎，几乎听不清) Not... anymore.\n\n（话说出口，眼眶却先热了。她低下头，手指重新扣紧背包带，指节泛白。）\n（Iris 没有说话，也没有松手。她静静地等了一秒，然后将 Sylvia 的手臂搭上自己的肩膀，开始扶她站起来。）\n\nIris: (平静，不是审问，是确认) You don't have to answer that.\n\n（特写 — Sylvia 的脚踩进泥地，腿在抖，但没有再倒下。她抬起眼，视线落在溪对岸的树线上，没有再开口。）\n（两人沿溪岸慢慢走出镜头。背包还在 Sylvia 背上。）\n\n黑屏字幕：You don't know how much further you can go. But Iris held you up — all the way to her territory.",
+        "butterfly_effect": "Sylvia speaks her loss aloud for the first time, but the words fracture before they land; WIL stirs but does not yet consolidate."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Sylvia 抬起眼，对上 Iris 的目光。她的嘴唇动了一下，喉咙很干，但声音出来的时候是平的。）\n\nSylvia: (低，但清晰) Not anymore.After meeting you.\n\n（Iris 的眼神没有变，只是停顿了一秒，像是在确认她听到的是真的。然后她将 Sylvia 的手臂搭上自己的肩膀，开始扶她站起来。）\n\nIris: (平静，不是审问，是确认) You don't have to answer that.\n\n（特写 — Sylvia 的脚踩进泥地，站起来，腿在抖，但没有再倒下。她的视线跟着 Iris 的方向，第一次没有低下去。）\n（两人沿溪岸慢慢走出镜头。背包还在 Sylvia 背上。）\n\n黑屏字幕：You don't know how much further you can go. But Iris held you up — all the way to her territory.",
+        "butterfly_effect": "Sylvia names her own severance without being asked; WIL registers a meaningful gain as self-definition begins to re-root."
+      }
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "ep_num": 12,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 12",
+    "episode_title": "等你了",
+    "characters": [
+      "Sylvia",
+      "James",
+      "Daisy",
+      "Kennedy"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色长发松散，穿着室内便装——深灰色宽松针织衫，黑色长裤，赤脚，左手腕无饰品。",
+      "James": "三十岁左右男性，银月领地Alpha正装——深炭灰色西装，白色衬衫，无领带，袖口金属袖扣，黑色皮鞋。",
+      "Daisy": "二十多岁女性，黑色连帽卫衣，深色紧身裤，运动鞋，头发随意扎起，神色紧张。",
+      "Kennedy": "二十多岁女性，新月领地访客装束——米白色长款外套，内搭浅灰针织连衣裙，棕色踝靴，发型整洁盘起。（仅声音出现）"
+    },
+    "scene_locations": {
+      "银月领地 豪宅 主卧": {
+        "location_id": "silver_moon_manor_master_bedroom",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "大型卧室，深色实木四柱床，厚重深色床帘半拢，地毯柔暗，落地窗窗帘拉合，壁灯调至最低亮度，门缝透出走廊昏黄光线，床头柜上草药茶杯已空，空气沉闷压抑。"
+      },
+      "银月领地 豪宅 走廊": {
+        "location_id": "silver_moon_manor_corridor",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "长廊，深色实木护壁板，壁灯昏黄，地面深色地毯，走廊尽头透出集会厅方向的暖光，隐约可见人影晃动。"
+      }
+    },
+    "pre_choice_script": "（场景：银月领地 豪宅 主卧 — 傍晚）\n（议事厅散场。James一言不发地走在Sylvia前面，穿过走廊，推开主卧的门，示意她进去。）\n\nJames: Stay here tonight. Kennedy is attending the gathering as a guest. You don't show up.\n\n（Sylvia站在门口，看着他。）\n\nSylvia: The review—\n\nJames: （打断她，声音压低）Three days. You sit here, keep quiet, and wait.\n\n（他没有等她回答，退出去，门从外面锁上。金属门锁咔嗒一声，走廊里的脚步声远去。）\n\n（Sylvia站在原地，听着锁舌落定的声音。她慢慢转身，看了一眼空荡荡的卧室——床头台灯还亮着，落地窗窗帘拉合，什么都看不见。）\n\n（时间流逝。字幕：深夜）\n\n（Sylvia靠坐在床脚的地板上，双臂抱膝。高烧从脊背蔓延上来，不完整的拒绝状态开始反噬——誓词已当众宣读，连结却悬而未决，撕裂感一波一波地涌。她咬紧后槽牙，额头抵在膝盖上，指甲掐进掌心。）\n\n（走廊外隐约传来集会的动静。一个女人的笑声穿过墙壁——是Kennedy，清晰可辨。）\n\n（Sylvia闭上眼睛，在心里唤Lyra。第一声，没有回应。第二声，微弱的震颤，像一根快烧尽的烛芯。第三声——什么也没有了。）\n\n（特写——她的手指松开，掌心四道红痕。额头上薄汗，嘴唇干裂。）\n\n（窗格被轻轻敲了两下。）\n\n（Sylvia抬起头。窗帘缝隙透进一线月光，一个黑影贴在玻璃外侧。）\n\n（她撑着床沿站起来，拉开窗帘一角——Daisy蹲在窗台外沿，看见她的脸色，表情骤然绷紧。）\n\n（Sylvia打开窗锁。Daisy翻进来，伸手摸了摸她的额头，手指缩回去的速度说明了一切。）\n\nDaisy: （压低声音，语速很快）You're burning up. Lyra?\n\nSylvia: （气声）...fading.\n\nDaisy: （咬了一下嘴唇，没有犹豫太久）If you stay here another night, she won't make it. Neither will you.\n\n（沉默。走廊外传来集会散场的脚步声，渐渐远去。）\n\nDaisy: Huxley's waiting at the east border. Bag's packed. Route's clear during shift change.\n\n（Sylvia看着Daisy伸过来的手，没有立刻接。她的视线落在门上——那扇从外面锁住的门。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Take Daisy's hand. Go now.",
+          "description": "Daisy的手就在你面前，窗户开着，夜风灌进来带着松木和泥土的气味。走廊外已经安静了，集会散了，巡逻换班还有一刻钟。你的膝盖在抖，Lyra的存在感像水渍一样在蒸发。门从外面锁着——但窗户没有。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "Stand up on your own. Walk out through the window.",
+          "description": "Daisy的手伸在半空，但你低头看了看自己的掌心——四道红痕还在。你撑着床沿，把重心移到双脚上。高烧让视线有点虚，但你知道接下来每一步都得是自己走的，从这扇窗开始。",
+          "check": "WIL（意志）12"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia握住Daisy的手。Daisy的掌心是干燥的，力道稳，把她拉起来。）\n\n（两人翻出窗台。月光下，豪宅侧翼的草地上没有人影。Daisy搀着Sylvia贴着墙根走，脚步很轻，没有发出声音。）\n\n（走廊那头传来一声门响——有人经过主卧门外，脚步停了一秒，又走开了。Daisy的手在Sylvia肩上收紧了一下，两人没有停。）\n\n（特写——Sylvia的赤脚踩在湿草地上，脚趾因高烧而微微蜷缩，但她没有回头看那扇亮着台灯的窗户。两人贴着外墙继续走，绕过花园拐角。）\n\n黑屏字幕：Your feet are cold. Your knees are shaking. But you didn't stop.",
+        "butterfly_effect": "Sylvia's escape relied on Daisy's physical support; WIL takes a minor hit as the departure registers as assisted rather than autonomous."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（Sylvia松开床沿，试图自己站稳——膝盖一软，身体往前倾，Daisy眼疾手快扶住她的手臂。）\n\nDaisy: （低声，没有责备）I've got you.\n\n（Sylvia咬紧牙，重新找到重心。她推开Daisy的手，自己迈向窗台——但翻出去的时候又踉了一下，Daisy从后面托住她的腰，两人一起落在草地上。）\n\n（月光下，Sylvia跪在湿草地上喘了两口气，然后自己撑着站起来。Daisy没有再伸手，只是紧紧跟着她。两人贴着墙根绕过花园拐角。）\n\n黑屏字幕：You fell. But you got back up on your own.",
+        "butterfly_effect": "Sylvia attempted self-reliance but her body failed her; WIL registers effort but not consolidation. The escape proceeds with partial assistance."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Sylvia松开床沿，站直。膝盖在抖，但她的重心稳住了。）\n\n（她没有接Daisy的手，自己走到窗前，双手撑住窗框，翻了出去。落地的瞬间腿弯了一下——撑住了，没有倒。）\n\n（Daisy紧跟着翻出来，看了她一眼，什么都没说，只是跟上。）\n\n（月光下，两人贴着墙根走。Sylvia的赤脚踩在湿草地上，每一步都清晰，节奏没有乱。高烧还在，但她的脊背是直的。两人绕过花园拐角，没有回头。）\n\n黑屏字幕：The fever is still burning. But your steps didn't falter.",
+        "butterfly_effect": "Sylvia exits under her own power despite physical deterioration; WIL consolidates. The escape registers as self-determined from the first step."
+      }
+    ]
+  }
+}

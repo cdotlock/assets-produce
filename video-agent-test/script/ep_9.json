@@ -1,0 +1,66 @@
+{
+  "ep_num": 9,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 9",
+    "episode_title": "给我",
+    "characters": [
+      "Sylvia",
+      "Elara Vance"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色长发散落，穿着深灰色宽松长袖上衣，黑色长裤，深色平底靴，左手腕无任何饰品，双手空握。",
+      "Elara Vance": "三十多岁女性，深棕色亚麻长裙，米白色宽松外套，深色系围裙，头发盘起，颈间细绳挂着小陶瓶。"
+    },
+    "scene_locations": {
+      "银月领地 治疗师小屋": {
+        "location_id": "silver_moon_healer_cottage",
+        "parent_location_id": "silver_moon_healer_cottage",
+        "visual_prompt": "独立木制小屋，低矮屋檐，草药束悬挂于横梁，木质药柜排列，单支蜡烛燃于桌角，窗口透出一线昏黄灯光，桌面摆有陶罐与布包，深夜，草药气息浓重，空气静止。"
+      },
+      "银月领地 豪宅 外小路": {
+        "location_id": null,
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "豪宅通往外围的石板小路，两侧高大针叶林，树隙间月光碎落地面，夜色深蓝，路面无人，远处豪宅轮廓隐于暗中，冷寂无声。"
+      }
+    },
+    "pre_choice_script": "（场景：银月领地 治疗师小屋 — 凌晨）\n（外面星光闪闪，治疗师小屋窗口透出一线灯光。Sylvia推开门走进去，手边什么都没拿。）\n（Elara从药柜旁转过身，看见她，没有说话，等她开口。）\n\nSylvia: I've decided.I can't bring this child into a broken bond.\n\nSylvia: My child shouldn't live under the shadow of Kennedy.\n\n（Elara放下手里的陶罐，走到桌边，在她对面站定，目光直视。）\n\nElara: The moment it ends — James feels it. Instantly.\n\nElara: Lyra will feel it too. The pain is real.\n\nElara: There's no going back from this.\n\nSylvia: I know.\n\n（Elara沉默两秒，又开口。）\n\nElara: You know.\n\nSylvia: I know.\n\n（两个字落地，小屋里彻底静下来。烛火轻轻晃了一下。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Look away. Wait for her to decide.",
+          "description": "Elara还站在桌对面，陶罐放下的声音还留在空气里。你没有再开口，眼神移开，落在桌角那支烛火上——火苗在动，你的手没有。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "\"Give it to me.\"",
+          "description": "Elara的眼睛还盯着你，\"You know\"这两个字刚落地。药柜最底层的暗格还没打开，你听见自己的声音从喉咙里出来，比你预想的更平稳。",
+          "check": "WIL（意志）12"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "Reaction 1",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia的视线落在桌角烛火上，没有再说话。）\n（Elara看了她片刻，蹲下来，打开柜子最底层的暗格，取出一个深色布包，放到桌面上。布包落桌的声音很轻。）\n（Sylvia的手没有动。Elara在她对面等着。）\n\nElara: （低声，字字清晰）Boiling water. Drink it fast. Don't be alone after.\n\n（Sylvia的手终于伸过来，覆上布包，停了一秒，才把它拿起来，攥进手心。她抬起头，看了Elara一眼。）\n\nSylvia: Thank you.\n\n（她转身，推开门走出去。）\n\n（场景：银月领地 豪宅 外小路 — 深夜）\n（小路两侧是针叶林，月光从树隙落下来。Sylvia一个人走着，手里捏着那个布包。）\n（特写——她的脚步，稳，没有停顿。月光打在她脸上，眼睛直视前方，嘴唇抿紧，没有回头。）\n（远景——Sylvia的背影走进豪宅大门，门在她身后关上。月光留在空荡荡的小路上。她穿过走廊，推开主卧的门。）\n\n黑屏字幕：The bundle is warm in your hand. You push open the bedroom door, close it behind you. No lights.",
+        "butterfly_effect": "Sylvia's silence before taking the herbs registers as a moment of hesitation absorbed alone. WIL holds but gains no forward momentum."
+      },
+      {
+        "reaction_id": "Reaction 2",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（\"Give it to me.\"）\n（话出了口，声音比预想的小了半个音阶。Elara没有立刻动，只是静静看着她。）\n（沉默拉长了两秒。Sylvia的手指微微收紧，她没有收回视线。）\n（Elara蹲下来，打开柜子最底层的暗格，取出一个深色布包，放到桌面上。布包落桌的声音很轻。）\n（Sylvia的手伸过来，覆上去，停了一秒，才攥进手心。）\n\nElara: （低声，字字清晰）Boiling water. Drink it fast. Don't be alone after.\n\nSylvia: （轻，但清楚）Thank you.\n\n（她转身，推开门走出去。）\n\n（场景：银月领地 豪宅 外小路 — 凌晨）\n（月光从树隙落下来。Sylvia一个人走着，手里捏着那个布包，脚步稳，没有停顿。）\n（特写——月光打在她脸上，眼睛直视前方，嘴唇抿紧，没有回头。）\n（远景——Sylvia的背影走进豪宅大门，门在她身后关上。月光留在空荡荡的小路上。她穿过走廊，推开主卧的门。）\n\n黑屏字幕：The bundle is warm in your hand. You push open the bedroom door, close it behind you. No lights.",
+        "butterfly_effect": "Sylvia spoke first but the voice faltered. The act of asking is logged; the steadiness is not yet earned. WIL registers minimal gain."
+      },
+      {
+        "reaction_id": "Reaction 3",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（\"Give it to me.\"）\n（声音平，落地，不带一丝颤抖。）\n（Elara看了她一秒，然后蹲下来，打开柜子最底层的暗格，取出一个深色布包，放到桌面上。布包落桌的声音很轻。）\n（Sylvia的手伸过来，覆上去，没有停顿，直接攥进手心。）\n\nElara: （低声，字字清晰）Boiling water. Drink it fast. Don't be alone after.\n\n（Sylvia抬起头，和Elara的视线对了一秒。）\n\nSylvia: （轻，但清楚）Thank you.\n\n（她转身，推开门走出去。Elara站在原地，没有动，看着门口。）\n\n（场景：银月领地 豪宅 外小路 — 凌晨）\n（月光从树隙落下来。Sylvia一个人走着，手里捏着那个布包。）\n（特写——脚步，稳，没有停顿。月光打在她脸上，眼睛直视前方，嘴唇抿紧，没有回头。）\n（远景——Sylvia的背影走进豪宅大门，门在她身后关上。月光留在空荡荡的小路上。她穿过走廊，推开主卧的门。）\n\n黑屏字幕：The bundle is still warm. You push open the bedroom door, close it behind you. No lights.",
+        "butterfly_effect": "Sylvia named her need aloud without flinching. WIL gains a clear notch; her agency in this moment is self-authored."
+      }
+    ]
+  }
+}

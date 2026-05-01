@@ -1,0 +1,61 @@
+{
+  "ep_num": 18,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 18",
+    "episode_title": "等着你",
+    "characters": [
+      "Sylvia",
+      "Huxley"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色连帽外套，深灰色修身长裤，黑色系带马丁靴，左手腕细银手链，背单肩深色背包，外套口袋略微鼓起。",
+      "Huxley": "三十岁左右男性，深橄榄色厚实夹克，黑色圆领针织衫，深色直筒长裤，棕色皮靴，鬓角夹杂银丝。"
+    },
+    "scene_locations": {
+      "中立区 咖啡馆": {
+        "location_id": "neutral_zone_cafe",
+        "parent_location_id": "neutral_zone_cafe",
+        "visual_prompt": "中立区小型咖啡馆，砖墙裸露，木质吧台，吊灯暖黄，窗边卡座，桌面陶瓷杯，窗外天色由日光向橙黄偏移，馆内顾客稀少，光线温暖低调。"
+      }
+    },
+    "pre_choice_script": "字幕：次日\n\n（场景：中立区 咖啡馆 — 日）\n\n（Sylvia推开木门，背包搭在一侧肩上，外套口袋鼓起一个小角。她在门口停了一秒，视线扫过靠窗的卡座。）\n\n（Huxley已经坐在那里。鬓角比记忆里多了几缕白发。他看见她推门进来，没有站起来，没有开口，只是把手里的杯子放下，等她走过来。）\n\n（Sylvia在他对面坐下，把背包放在脚边。两人对视，沉默了两秒。）\n\nHuxley: You look better.\n\nSylvia: You have more white hair.\n\n（Huxley没有辩驳，低头看了看桌面，喉结动了一下。）\n\n（特写 — Sylvia的手放在桌上，指节放松，没有收紧。）\n\n（沉默延续。Sylvia的胸腔微微起伏，微微低下头，像是在听什么。Huxley的呼吸也慢了一拍，眼神往内收了一下。两人都没有说话。片刻后，Sylvia慢慢抬起头。）\n\nHuxley: I want to do this properly. Every step — your call. No commands. No pressure.\n\n（Sylvia看着他，看了整整三秒。）\n\nSylvia: Okay.\n\n（Huxley的手在桌面下握紧了一下，然后松开。他抬眼看向窗外，天色正往橙黄偏移。）\n\nHuxley: Tonight's a full moon. I found a quiet meadow nearby.\n\n（他把视线收回来，落在她脸上。）\n\nHuxley: Not an order. Just — if you want.",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Stay a little longer. Not yet.",
+          "description": "Huxley的杯子还放在桌上，热气已经散了大半。他说\"not an order\"，但你的手指不自觉地碰了一下外套口袋——那张纸条还在里面。咖啡馆的暖光把他鬓角的白发照得很清楚，你低下眼睛，没有站起来。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "Let's go.",
+          "description": "他把视线收回来落在你脸上的那一秒，Lyra在你胸腔里动了一下——不是挣扎，是认出了什么。外套口袋里的纸条硌着你的手背，你的椅子腿在地板上轻响一声，背包已经搭上了肩。",
+          "check": "WIL（意志）10"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia没有动。她的手指在桌沿轻轻搭着，视线落在杯子侧面。）\n\nSylvia: Can we just... sit here for a while?\n\n（Huxley没有催。他把杯子重新端起来，靠在椅背上，把窗外的橙色天光看了很久。）\n\nHuxley: Of course，we have enough time.\n\n（沉默落下来，但这次不是空的。窗外天色一点一点加深，从橙黄压向暮蓝。Sylvia的手指慢慢离开桌沿，垂回膝上。她侧过脸，看了一眼窗外。）\n\n（特写 — 她外套口袋的轮廓，那张纸条的角微微翘起。）\n\n（Sylvia站起来，拎起背包搭上肩，没有说话，只是朝门口走了一步，在门边停下，回头看了他一眼。）\n\nHuxley: （已经跟着站起来，推开椅子，动作比平时快了半拍。）\n\n（两人一前一后推开玻璃门，走出咖啡馆。外面月光铺在碎石路上。）\n\n黑屏字幕：You looked back at him. He was already on his feet.",
+        "butterfly_effect": "Sylvia chose to pause before stepping forward. WIL holds steady but registers no active gain; the bond's first move was deferred, not declined."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（Sylvia站起来，背包搭上肩，转向门口。）\n\nSylvia: Let's go.\n\n（声音比预想的小了一号，像是话出了口才意识到自己说了什么。她的脚步在门边顿了一下，手扶上门框，没有回头。）\n\n（Huxley没有催她，也没有追上来。沉默里，Sylvia听见他椅子轻响，站起来的声音。）\n\nHuxley: （声音很平，不带任何压力）I'm right behind you.\n\n（Sylvia的手指在门框上松开。她深吸一口气，推开门，迈出去。）\n\n（特写 — 门外，暮色已经压下来，碎石路在橙蓝交界的天光里延伸向前。Huxley跟着走出来，推开椅子的动作比平时快了半拍。）\n\n黑屏字幕：\"I'm right behind you.\" You didn't look back. But you knew he was there.",
+        "butterfly_effect": "Sylvia moved forward despite the hesitation. WIL registers a marginal gain; the bond's first step was taken, though not yet fully claimed."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Sylvia已经转向门口。）\n\nSylvia: Let's go.\n\n（Huxley愣了一秒。特写 — 他的手推开椅子，动作比平时快了半拍。）\n\n（Sylvia没有等他开口，也没有回头确认。她推开木门，门铃轻响一声，暮色扑进来。碎石路在橙蓝交界的天光里向前延伸，远处草地的轮廓已经隐入暮色。）\n\n（Huxley跟着走出来，在她身侧一步的位置停下。两人并排站在门口，没有说话。）\n\n（特写 — Sylvia的手指碰了一下外套口袋，那张纸条的角硌了一下她的掌心，然后她把手放开，垂在身侧。）\n\n黑屏字幕：You didn't wait for him. But he followed. The note is still in your pocket.",
+        "butterfly_effect": "Sylvia moved first, without waiting for permission or reassurance. WIL gains traction; her agency in initiating the bond's first step registers as a clear internal shift."
+      }
+    ]
+  }
+}

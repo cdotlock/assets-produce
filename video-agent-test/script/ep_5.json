@@ -1,0 +1,68 @@
+{
+  "ep_num": 5,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 5",
+    "episode_title": "撑不住",
+    "characters": [
+      "Sylvia",
+      "Huxley",
+      "Elara Vance"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色针织毛衣，深灰色直筒长裤，黑色平底靴，左手腕细银手链，眼下有青黑，头发松散束于脑后。",
+      "Huxley": "三十岁左右男性，深橄榄色厚实外套，黑色高领毛衣，深色长裤，黑色皮靴。",
+      "Elara Vance": "三十多岁女性，米白色亚麻长衫，深棕色皮质腰带，棕色低跟短靴，颈间挂木质听诊器，发髻低盘。"
+    },
+    "scene_locations": {
+      "银月领地 豪宅 行政办公室": {
+        "location_id": "silver_moon_manor_admin_office",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "深色实木办公桌，台灯暖光低照，桌面散落物资订单与数字表格，一支钢笔横放于文件边缘，椅子侧翻倒在地板上，文件散落一地，晨光从窗外庭院斜入，光线冷白。"
+      },
+      "银月领地 治疗师小屋": {
+        "location_id": "silver_moon_healer_cottage",
+        "parent_location_id": null,
+        "visual_prompt": "独立木制小屋，低矮屋檐，草药束悬挂横梁，木质药柜排列，陶罐置于诊桌正中，烛光与草药气息弥漫，窗台干花与陶罐，整体色调暖棕，窗外廊下可见一道人影背光而立。"
+      }
+    },
+    "pre_choice_script": "字幕：次日清晨。（场景：银月领地 豪宅 行政办公室 — 日）\n（清晨光线从庭院窗斜入，Sylvia坐在办公桌前，桌面摊开一叠物资订单。她的笔停在某一行数字上，没有落下去。）\n（特写——她的手背上有一道昨夜靠墙时留下的压痕，还没有消。她低头，重新把笔对准那一行数字。）\n（连结那一端，死寂。Sylvia的眼睫微动，她把笔放下，抬手按了按太阳穴。）\n（眩晕来得没有任何预兆。文件从桌边滑落，她伸手去抓，整个人随着椅子往侧面倒下去，手肘先撞上地板，下意识双臂交叉护住腹部。）\n（门从外面被推开。Huxley站在门口，视线落在地板上的她，两步跨过来，单膝跪地，一只手托住她的背。）\n\nSylvia: (喘着气，手撑地想起来) I'm fine. Just—\n\nHuxley: (已经将她抱起，声音平) You're not. You need treatment.\n\n（他抱着她走出办公室，没有回头。特写——她的手指攥住他外套的衣领，指节泛白。）\n\n（场景：银月领地 治疗师小屋 — 日）\n\n字幕：【Elara Vance: Healer of the Silver Moon Territory】\n\n（Elara将Huxley挥手请出，关上小屋的门。她在Sylvia对面坐下，不说话，先检查脉搏，再检查眼睛，动作快而专注。）\n（窗外，Huxley站在廊下没有离开。特写——他的背影，肩膀绷直，一动不动。）\n（Elara放下听诊器，在药柜前停了一下，把一个陶罐放到桌上，转过来看Sylvia。）\n\nElara: (直接，没有铺垫) Do you know what near rejection is?\n\nSylvia: (声音很轻) He chose someone else. Hasn't let go.\n\nElara: That line — it's tearing you apart. Both of you. But you're the weaker side right now.\n\n（特写——Sylvia的手放在腹部，手指收紧，没有松开。）\n\nElara: (把陶罐推向她，每个字都清晰) One more full moon. You only have so much time left. If it's not resolved before then, you will... die.\n\nSylvia: (喉结滚动，停顿一秒) When is the next full moon?\n\n（Elara在一张纸上写下了一个日期，推过去。）\n（特写——Sylvia的嘴唇抿紧。她盯着那个数字，没有说话，没有哭，只是低头看了一眼自己放在腹部的那只手。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Fold the paper and say nothing.",
+          "description": "那个日期压在纸上，Elara的眼睛还看着你。陶罐就在桌上，草药的气味钻进鼻腔。你把纸折起来，折了一次，又折了一次，直到那个数字消失在掌心里。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "\"What are my options? All of them.\"",
+          "description": "纸还摊在桌上，那个日期你已经记住了。Elara把陶罐推过来的时候没有说话——那个沉默比任何解释都重。你的手还压在腹部，指尖感觉得到自己的心跳。",
+          "check": "WIL（意志）10"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia把折好的纸攥在手心，没有抬头。）\n（Elara没有追问，只是把陶罐轻轻推得更近了一些，随后起身去整理药柜，背对着她。）\n（沉默在小屋里拉长。窗外廊下，Huxley的背影还没有动。）\n（Sylvia慢慢抬起头，直视前方，眼神里有什么东西在沉下去，又在沉下去。她把那张纸塞进外套口袋，手按在口袋外侧，没有移开。）\n\nElara: (没有转身，声音平) The door's open when you're ready.\n\n（窗外，连结那一端忽然传来一阵清晰的温柔。Sylvia的手指猛地收紧，把口袋里的纸攥皱了。）\n\n（门从外面推开。Huxley走进来，目光先落在Elara脸上，再转向Sylvia。两人对视，谁都没有先说话。）\n\n黑屏字幕：You memorized the date. The paper in your pocket is already crumpled.",
+        "butterfly_effect": "Sylvia absorbs the deadline in silence without seeking agency. WIL registers no forward momentum; her passivity in the face of the verdict slightly deepens her sense of helplessness."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（话出了口，但声音比预想的低了一档，末尾轻微地抖了一下。）\n（Elara转过身，看了她一秒，没有立刻回答。）\n\nElara: (声音平，但没有回避) There aren't many. And none of them are easy.\n\n（她在Sylvia对面重新坐下，把陶罐往旁边移开，腾出桌面，两手交叠，正视她。）\n\nElara: The bond can be broken — but only from your side. It will hurt. It will scar.\n\n（特写——Sylvia的手放在腹部，手指收紧，又松开。Elara在纸上写下了一个日期，推过去。Sylvia盯着那个数字，嘴唇抿紧。）\n\n（窗外，连结那一端忽然传来一阵清晰的温柔。Sylvia的手指猛地收紧，把口袋里的纸攥皱了。）\n\n（门从外面推开。Huxley走进来，目光先落在Elara脸上，再转向Sylvia。两人对视，谁都没有先说话。）\n\n黑屏字幕：Not many options. But at least you asked. The date is on the paper — and in your head.",
+        "butterfly_effect": "Sylvia asks the question but cannot hold the answer. WIL shows a hairline crack of initiative, though the follow-through collapses under pressure."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Elara没有立刻回答。她在Sylvia对面重新坐下，把陶罐往旁边移开，腾出桌面，两手交叠，正视她。）\n\nElara: You're the first person who's asked me that.\n\nSylvia: Then be the first person who answers me straight.\n\n（Elara的嘴角极细微地动了一下。她没有回避。）\n\nElara: The bond can be broken — but only from your side. A rejection vow, spoken publicly, in front of the council. It will hurt. It will scar. And James will feel it the moment you say the words.\n\n（特写——Sylvia的眼神没有移开。她把那句话在脑子里过了一遍，手指在腹部慢慢松开。Elara在纸上写下了一个日期，推过去。Sylvia盯着那个数字。）\n\n（窗外，连结那一端忽然传来一阵清晰的温柔。Sylvia的手指猛地收紧，把口袋里的纸攥皱了。）\n\n（门从外面推开。Huxley走进来，目光先落在Elara脸上，再转向Sylvia。两人对视，谁都没有先说话。）\n\n黑屏字幕：You know every path now. None of them are easy. But you asked, and Elara answered.",
+        "butterfly_effect": "Sylvia demands full information and holds steady through the answer. WIL gains measurable traction; her capacity to face unfiltered truth registers as a forward shift in agency."
+      }
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "ep_num": 7,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 7",
+    "episode_title": "嫉妒",
+    "characters": [
+      "Sylvia",
+      "James",
+      "Huxley",
+      "Kennedy"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色针织高领毛衣，深灰色直筒长裤，黑色低跟皮靴，左手腕细银手链。",
+      "James": "三十岁左右男性，深色剪裁西装外套，黑色衬衫，无领带，黑色皮鞋。",
+      "Huxley": "三十岁左右男性，深橄榄色厚实衬衫，卷起袖口至肘部，深色长裤，棕色皮靴。",
+      "Kennedy": "二十多岁女性，米白色宽松针织上衣，浅灰色阔腿裤，裸色平底鞋，颈间细金项链。"
+    },
+    "scene_locations": {
+      "银月领地 豪宅 议事厅": {
+        "location_id": "silver_moon_manor_council_hall",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "宽阔石材厅堂，长形会议桌，高背木椅，石材地面，穹顶高挑，壁灯排列，主位设有凸起台阶，整体色调冷灰庄严，晨光从侧窗斜入，光带落在空置椅背上。"
+      },
+      "银月领地 豪宅 主卧": {
+        "location_id": "silver_moon_manor_master_bedroom",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "大型卧室，深色实木四柱床，厚重深色床帘，落地窗俯瞰庭院，窗帘半开，庭院灯光从外透入，壁灯熄灭，房间笼罩在昏暗冷光中，床铺未动，窗边单椅空置。"
+      }
+    },
+    "pre_choice_script": "（场景：银月领地 豪宅 议事厅 — 日）\n（字幕：次日）\n\n（议事厅内，成员们已陆续落座，低声交谈。Sylvia坐在席位上，双手平放桌面。）\n\n（大门推开。James走进来。）\n\n（Kennedy的气息随他入场——弥散，清晰，无处可躲。几个成员抬眼对视，没有人开口。）\n\n（特写——Sylvia的手指悄悄收紧，按上椅子扶手。她皮肤下有什么东西在涌动，手背上细密的狼人纹路开始浮现，从指节向上蔓延。）\n\n（Huxley从侧席起身，走到她身后，一只手稳稳落在她肩上。）\n\nHuxley: (极低，只她能听见) Breathe. I've got you.\n\n（特写——纹路慢慢退去。Sylvia的手一点一点松开扶手。）\n\n（James走向主位，落座前扫视全场。视线在Huxley的手上停了一秒——再移到Sylvia的脸上，又停了一秒。他的下颌绷紧，随即移开，坐下。）\n\nJames: (平稳，像什么都没发生) The meeting begins.\n\n（全场无人提那股气味。James始终没有提。）\n\n（快速镜头：集会上众人在激烈讨论，Sylvia也想开口却被Luna Miller瞪了一眼，Sylvia只好闭嘴，随后集会很快结束，众人散场离开。）\n\n（场景：银月领地 豪宅 主卧 — 日）\n（字幕：集会结束后）\n\n（Sylvia推开主卧门，进去，门在身后合上。）\n\n（走廊另一端，Kennedy的声音穿过门缝传进来——笑声，轻快，像在自己家里。）\n\nKennedy: (门外) James, you're impossible—\n\nJames: (门外，低笑) Come on.\n\n（Sylvia站在门边，没有动。特写——她的眼睫颤了一下，随即静止。）\n\n（她转身，走到窗边，站定，视线落在窗外庭院。）\n\n（特写——她的手缓缓覆上腹部，按住，停了两秒，然后放下来。）\n\n（Sylvia转过身，背对窗，面朝紧闭的卧室门。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Close the window. Shut it all out.",
+          "description": "Kennedy的笑声从走廊穿进来，轻快得像在自己家里。James那声低笑跟在后面，你从来没听他用那个声调跟你说过话。窗边有风，如果你把窗户关上，至少能切掉一半声音。你的手已经放在窗框上了。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "Sit down. Stay awake. Memorize everything.",
+          "description": "Kennedy的声音说\"James, you're impossible\"，他的低笑跟上来。你可以把窗关上，把自己埋进被子里，假装听不见。但你没有——你把椅子转向门的方向，坐下来，把每一个声音、每一句话、每一个笑声都记在脑子里。明天你会用到它们。",
+          "check": "WIL（意志）10"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia伸手把窗户拉上，玻璃碰框的声音很轻，走廊那边的笑声被切掉了一半。她拉上窗帘，退后一步，站在黑暗里。）\n\n（庭院灯光被挡在外面。房间越来越暗，只剩门缝底下的一线光。Kennedy的声音变得模糊、遥远，像隔了一层水。）\n\n（Sylvia没有躺下，也没有换衣服。她靠着墙慢慢滑坐下来，抱住膝盖，额头抵上去。）\n\n（特写——她的眼睫低垂，喉咙轻轻动了一下，什么都没有说出来。夜色渐深，她就那样坐在地板上。）\n\n（门把手转动的声音从走廊传来。）\n\n黑屏字幕：You shut yourself in the dark. You don't want to hear that laughter anymore.",
+        "butterfly_effect": "Sylvia's silence tonight was chosen by exhaustion, not surrender. WIL holds but does not advance."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（Sylvia走向窗边椅子，在那里坐下来，衣服没换，背脊挺直，手放在膝上。）\n\n（Kennedy的笑声还在穿过门缝传来，James的低笑跟在后面。Sylvia把每一句都听进去，试着把要说的话排成顺序——但那些笑声让她喉咙发紧，某几个字突然变得很重，压下来。她的手指在膝盖上收了一下。）\n\n（特写——她的眼睛没有闭上，视线钉在紧闭的卧室门上，眼眶慢慢发红，但眼泪没有落下来。她把嘴唇抿紧，把那些松散的话重新压回去。）\n\n（夜色越来越深。她还是坐在那里，背脊挺直，什么都没有说出来。）\n\n（门把手转动的声音从走廊传来。）\n\n黑屏字幕：You didn't say a word. But you remembered everything you needed to.",
+        "butterfly_effect": "The words were ready but didn't hold under silence. WIL takes a small wound; the confrontation is not cancelled, only delayed to the edge."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Sylvia走向窗边椅子，在那里坐下来，衣服没换，背脊挺直，手放在膝上。）\n\n（Kennedy的笑声穿过门缝传来，James的声音跟在后面，她没有去想那些笑声意味着什么。她只是把要说的话在脑子里过了一遍，一条一条，清楚，有顺序，没有眼泪。三次去新月领地。集会上的气味。Elara的诊断。他一次都没有问过。）\n\n（特写——她的手指平放在膝盖上，没有收紧，呼吸平稳而缓慢。庭院灯光从窗外透进来，冷白地打在她侧脸上，眼神清醒，像在等一件早就算好了的事情发生。）\n\n（夜色深下去。她就这样坐着，不动，不睡，背脊始终是直的。）\n\n（门把手转动的声音从走廊传来。）\n\n黑屏字幕：Three trips to Crescent territory. The scent at the assembly. Elara's diagnosis. You're ready.",
+        "butterfly_effect": "Sylvia held her ground in silence and arrived at the confrontation with full clarity. WIL strengthened; the words she prepared carry weight."
+      }
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "ep_num": 13,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 13",
+    "episode_title": "走进去",
+    "characters": [
+      "Sylvia",
+      "Daisy",
+      "Kayden",
+      "Huxley"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色宽松长袖上衣，深色长裤，黑色系带靴，左手腕缠着细布条，背负深色大背包。",
+      "Daisy": "二十多岁女性，深橄榄色连帽外套，黑色紧身裤，黑色运动鞋，头发束于颈后。",
+      "Kayden": "二十多岁男性，深灰色战术夹克，黑色长裤，黑色厚底靴，短发，无饰品。",
+      "Huxley": "三十岁左右男性，深棕色皮质外套，深色衬衫，深色长裤，黑色靴子，手持深色大背包。"
+    },
+    "scene_locations": {
+      "银月领地 豪宅外围": {
+        "location_id": "silver_moon_manor_perimeter",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "豪宅侧翼与东部林地之间的开阔地带，月光照射下的草地与碎石小径，巡逻路线标记隐约可见，夜色深蓝，远处豪宅灯光微弱。"
+      },
+      "银月领地 东部边界": {
+        "location_id": "silver_moon_east_border",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "领地边界线，密林边缘与开阔地交界，月光从树隙投落，地面杂草与碎石，夜色深蓝，远处森林漆黑深邃，边界感强烈，地面草叶被踩倒后缓慢弹回。"
+      }
+    },
+    "pre_choice_script": "（场景：银月领地 豪宅外围 — 深夜）\n（Sylvia和Daisy贴着豪宅外墙绕过花园。拐角处，Kayden已经蹲在灌木丛后面等着\n\n字幕：【Kayden: Member of the Silver Moon Territory, escape operation accomplice】\n，看见Sylvia的状态，他从地上捡起一件外套递过来，没有说话。）\n\n（Daisy从背包里掏出一双靴子塞给Sylvia。Sylvia蹲下来换上，手指因高烧而有些笨拙，但她没有让任何人帮忙。）\n\n（三人绕开巡逻路线，穿过东侧林地。Kayden在前面带路，Daisy在Sylvia身侧，始终保持一臂距离，没有搀扶。）\n\n（场景：银月领地 东部边界 — 深夜）\n（月光从树隙落下来。Huxley站在边界线内侧，背靠一棵老橡树，脚边搁着一个黑色大背包。他看见三人的身影，从树干上直起身，目光越过Daisy和Kayden，落在Sylvia脸上，停了一秒。）\n\n（Huxley蹲下来，拉开背包拉链，让Sylvia看里面的东西——地图、压缩食物、水壶、中立区联络人信息、一小瓶退烧药。他一样一样指给她看，声音很低，语速平稳。）\n\nHuxley: Route's marked. Three safe points along the way. Contact in the neutral zone will take it from there.\n\n（他拉上背包，站起来，看着Sylvia。沉默了几秒。）\n\nHuxley: （声音比刚才更低，像是说了很久才说出来的话）Three years ago, when you first came to Silver Moon...My wolf Karl then found out. It knew it earlier than I did... I love you.\n\n（Sylvia抬起头看他。）\n\nHuxley: But you were already bonded to James. I had no right to say anything. So I didn't.\n\n（他停顿了一下，视线没有移开。）\n\nHuxley: I'm not asking for anything. Not now. Heal first. But if one day you're ready... I'll be there. So you can feel what a real bond is supposed to feel like.\n\n（Sylvia看着他，没有说话。月光落在两人之间那段沉默里。然后Huxley把背包提起来，递到她面前。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Let him help you carry the bag on your back.",
+          "description": "Huxley的话还停在空气里，背包在他手上，月光照着他的指节。你的肩膀在抖——不只是因为高烧。三年来第一次有人把选择权交到你手里，没有附加条件。背包很重，你知道自己现在不一定背得动。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "Take the bag yourself. Shoulder it alone.",
+          "description": "背包在Huxley手上，他的话你都听见了。你看了一眼背包的肩带——它很重，你的手在抖，高烧还压着你的每一根骨头。但你伸出手。三年来第一份没有附加条件的善意，你要用自己的手接住它。",
+          "check": "WIL（意志）12"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia点了点头。Huxley走到她身后，轻轻将背包搭上她的双肩，手指在肩带上停了一秒，调了调松紧，然后松开。）\n\n（背包的重量压下来，她的膝盖弯了一下——但她站住了。）\n\nSylvia: （轻，只有他听得见）Thank you.\n\n（她转身面向边界线。黑暗的森林在前方展开，什么也看不见。）\n\n（特写——边界线这侧，Huxley的靴尖停在线前，没有越过去。他站在原地，看着她的背影被森林吞没。定格。）\n\n黑屏字幕：You walked into the dark. Everything behind you stayed on the other side of the line.",
+        "butterfly_effect": "Sylvia accepted help shouldering the burden; WIL registers the reliance but the departure is completed. Huxley's confession becomes a quiet anchor rather than a demand."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（Sylvia伸出手，接过背包。她把它提起来，试图自己套上肩带——手臂因高烧而发颤，背包滑了一下，一条肩带落在肘弯处。她咬牙重新拉上去，背包终于搭上双肩，重量让她前倾了一步。）\n\n（Huxley的手在半空停了一下，没有碰她。）\n\nSylvia: （喘了一口气，抬眼看他一秒）Thank you.\n\n（她转身面向边界线。黑暗的森林在前方展开。）\n\n（特写——边界线这侧，Huxley的靴尖停在线前，没有越过去。他站在原地，看着她的背影被森林吞没。定格。）\n\n黑屏字幕：You walked into the dark. Your steps weren't steady. But you didn't look back.",
+        "butterfly_effect": "Sylvia tried to shoulder the burden alone but her body showed strain; WIL registers determination despite physical limitation. The departure is self-initiated but visibly costly."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Sylvia伸出手，接过背包。她把它提起来，一气呵成套上双肩，肩带落在正确的位置，背包的重量压下来——她站着，没有晃。）\n\n（Huxley看着她，没有动，嘴角有什么东西微微动了一下。）\n\nSylvia: （轻，只有他听得见）Thank you.\n\n（她转身面向边界线。黑暗的森林在前方展开。）\n\n（特写——边界线这侧，Huxley的靴尖停在线前，没有越过去。他站在原地，看着她的背影被森林吞没。定格。）\n\n黑屏字幕：You walked into the dark. Every step was yours.",
+        "butterfly_effect": "Sylvia shoulders the burden entirely on her own; WIL solidifies. The first unconditional kindness she's received in three years is met with self-determined strength. The departure registers as chosen."
+      }
+    ]
+  }
+}

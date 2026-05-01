@@ -1,0 +1,61 @@
+{
+  "ep_num": 8,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 8",
+    "episode_title": "没有否认",
+    "characters": [
+      "Sylvia",
+      "James"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色针织长裙，外披深灰色开衫，赤脚，左手腕一圈细银链。",
+      "James": "三十岁左右男性，深色休闲外套，深灰长裤，皮鞋，衣领微松。"
+    },
+    "scene_locations": {
+      "银月领地 豪宅 主卧": {
+        "location_id": "silver_moon_manor_master_bedroom",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "大型卧室，深色实木四柱床，厚重深色床帘，落地窗俯瞰庭院，庭院灯光从窗帘缝隙透入，壁灯调至最低亮度，房间中央地毯上光线昏暗，床边与窗边椅各形成独立光区，空间静谧压抑。"
+      }
+    },
+    "pre_choice_script": "（场景：银月领地 豪宅 主卧 — 深夜）\n（庭院灯光从半开的窗帘透进来，在地毯上压出一条细长亮带。Sylvia坐在窗边，背脊挺直，衣服没换，手平放在膝上，视线停在窗外。）\n（门把手转动的声音。James推门进来，脚步在看见她的瞬间顿了一下。随着门开，他身上的气息散进来——Kennedy的气味，清晰，不可回避。）\n（Sylvia没有站起来，也没有转头。）\n\nSylvia: This week. New Moon territory. Three times.\n\n（James把门带上，站在原地，没有说话。）\n\nSylvia: The assembly this morning. Her scent. On your clothes. Everyone smelled it.\n\n（特写——James的喉结动了一下，嘴唇没有张开。）\n\nSylvia: Elara's diagnosis. Six weeks ago. You never asked once.\n\n（她转过头，直视他。）\n\nSylvia: Not once, James.\n\n（James的下颌绷紧，视线落在她脸上，没有移开，也没有反驳。）\n（Sylvia从窗边站起来，走到房间中央，在他面前两步远的位置停下。）\n\nSylvia: I was never your mate. I was your mother's solution.\n\n（沉默压下来。James的手指慢慢收紧，垂在身侧。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Turn away. There's nothing left to say.",
+          "description": "你站在他面前两步远，他的手指收紧垂在身侧，连一个字的否认都没有给你。你的嘴唇动了一下，最终什么都没说出口——话到喉咙口，又咽回去了。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "Say it. Tell me Kennedy is suffering too.",
+          "description": "他的眼睛一直盯着你，下颌骨咬死，却没有一句反驳。你盯着他沉默的脸，Kennedy的气味还在这个房间里，你的手在开衫袖口里慢慢握紧。",
+          "check": "WIL（意志）12"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia转过身，走到卧室另一侧，在靠墙的椅子上坐下，背对他。）\n（James站在原地，看着她的背影。沉默拉长。他走向床，在床沿坐下，没有再开口。）\n（推镜头——两盏壁灯，一侧照着James坐在床边，一侧照着Sylvia坐在椅上，两人之间隔着整个房间的距离。）\n\n（字幕：天亮）\n\n（晨光从窗帘缝隙透进来。James从床上起身，拿起外套，走向门口。他在门口停了一下，手握着门把，没有回头，推门走出去。）\n（门带上的声音，轻。）\n（特写——Sylvia在椅子上坐直了身体，视线落在门上，停了三秒。她的手慢慢握成拳，放在膝上，没有松开。）\n\n黑屏字幕：You waited until deep night, then got up and walked to Elara's cottage. You've made your decision.",
+        "butterfly_effect": "Sylvia swallowed the confrontation. Her silence registers as endurance, not surrender — but James leaves without cost. WIL holds, does not grow."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（话出了口，声音比预想的低了一个刻度，带着一丝裂缝。）\n\nSylvia: Go ahead. Say it. Tell me Kennedy is suffering too.\n\n（James的视线终于移开了，落在地板上。他开口，声音低，像在自言自语。）\n\nJames: Kennedy is suffering too.\n\n（特写——Sylvia的眼睫微颤，停了两秒。她看着他，把这句话听完了，没有哭，嘴唇抿紧。）\n（她转过身，走到卧室另一侧，在靠墙的椅子上坐下，背对他。手搭在椅背上，指节白了一下，又松开。）\n（James在床沿坐下，没有再开口。两人之间隔着整个房间的距离。）\n\n（字幕：凌晨）\n\n（窗外还是漆黑一片。James睡着了。Sylvia从椅子上起身，拿起外套，走向门口。她在门口停了一下，手握着门把，没有回头，推门走出去。她穿过走廊，走出豪宅大门，朝治疗师小屋走去。）\n\n黑屏字幕：\"Kennedy is suffering too.\" He said it. And that told you everything. You walked to Elara's cottage. You've made your decision.",
+        "butterfly_effect": "Sylvia forced the words out but absorbed the blow alone. James named Kennedy's suffering without once naming hers. WIL tested, fractionally spent."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（话出了口，声音平稳，清楚。）\n\nSylvia: Go ahead. Say it. Tell me Kennedy is suffering too.\n\n（James的视线没有移开，他开口，声音低，像在自言自语。）\n\nJames: Kennedy is suffering too.\n\n（特写——Sylvia的眼睫微颤，停了两秒。她看着他，把这句话听完了，没有哭。她慢慢点了一下头，声音很轻，每个字都落地。）\n\nSylvia: I know she is. And you just told me everything I needed to hear.\n\n（James的手指收紧，没有说话。）\n（Sylvia转过身，走到卧室另一侧，在靠墙的椅子上坐下，背对他。她的背脊是直的。）\n（James在床沿坐下，没有再开口。两人之间隔着整个房间的距离。）\n\n（字幕：凌晨）\n\n（窗外还是漆黑一片。James睡着了。Sylvia从椅子上起身，拿起外套，走向门口。她在门口停了一下，手握着门把，没有回头，推门走出去。她穿过走廊，走出豪宅大门，朝治疗师小屋走去。）\n\n黑屏字幕：He told you everything you needed to hear. You walked to Elara's cottage. You've made your decision.",
+        "butterfly_effect": "Sylvia extracted James's confession and named its meaning aloud. The clarity is hers now, not his to revoke. WIL and INT register a quiet, decisive gain."
+      }
+    ]
+  }
+}

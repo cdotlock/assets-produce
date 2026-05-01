@@ -1,0 +1,65 @@
+{
+  "ep_num": 12,
+  "variant_kind": "minor_mainline",
+  "output": {
+    "episode_id": "EP 12",
+    "episode_title": "坐着别动",
+    "characters": [
+      "Sylvia",
+      "James",
+      "Kennedy",
+      "Cynthia"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色长发松散垂肩，银月领地Luna正式礼服——深酒红色长裙，收腰剪裁，丝绒质感，颈间细金项链，黑色低跟皮鞋。",
+      "James": "三十岁左右男性，银月领地Alpha正装——深炭灰色西装，白色衬衫，无领带，袖口金属袖扣，黑色皮鞋。",
+      "Kennedy": "二十多岁女性，新月领地访客装束——米白色长款外套，内搭浅灰针织连衣裙，棕色踝靴，发型整洁盘起。",
+      "Cynthia": "五十岁左右女性，银月领地长老正式服装——深藏青色直筒长裙套装，银色胸针，黑色低跟鞋，发髻严整。"
+    },
+    "scene_locations": {
+      "银月领地 豪宅 议事厅": {
+        "location_id": "silver_moon_manor_council_hall",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "宽阔石材厅堂，长形会议桌，高背木椅，石材地面，穹顶高挑，壁灯排列，主位设有凸起台阶。夜间灯光全开，壁灯冷白光打在石材上，侧门半掩，长桌椅位多数占据，主位空置，整体色调冷灰庄严。"
+      }
+    },
+    "pre_choice_script": "（场景：银月领地 豪宅 议事厅 — 夜）\n（Cynthia宣布完毕，转身往侧门走，两名长老跟上。James绕过主位，走到Sylvia席位旁，俯身压低声音，几乎贴着她耳边。）\n\nJames: Go back to the room. Kennedy's coming.\n\n（Sylvia没有转头。她的声音平稳，整个厅都听得见。）\n\nSylvia: The review is on record. I have the right to be present at any public proceeding during the review period.\n\n（James的下颌绷紧。侧门口，Cynthia的脚步停了。）\n\nSylvia: That's procedure. Not something an Alpha command can override.\n\n（James没有再开口。Cynthia和两名长老还没有完全离场，他无法在此刻再发出Alpha命令而不让自己当场再落一次脸。他退回主位，目光扫了一眼还站在侧门口的Cynthia，把后面的话堵了回去。）\n\n（门开。引导员将Kennedy带进来。Kennedy跨过门槛，视线落在Sylvia身上——她停住脚，从容的神情裂开一道缝。全场没有人说话。）\n\n（Sylvia坐在自己的席位上，没有站起来，没有开口，只是看着她。Kennedy不知道该往哪儿走。）\n\nJames: （嗓子发紧，整个议事厅都听见了那声勉强）...Kennedy.\n\n（Kennedy的眼神往James方向偏了一下，又偏回来。她最终在引导员的示意下落座，目光始终没有再看Sylvia的方向。）\n\n（议事程序继续推进。Cynthia从侧门回到长老席位，开始宣读审议期间的程序细则。Sylvia坐在原位，一言不发。）\n\n（时间流逝。特写——Sylvia的手，悄悄扣紧了椅子扶手，指节泛白。热从她后背蔓延上来，不完整的拒绝状态开始发作，Lyra的存在感骤然模糊。她咬住后槽牙，维持着坐直的姿势，力气在以可见的速度离开她的身体。）\n\n（Cynthia的声音从厅堂另一端传来，清晰而遥远。Sylvia的视线开始轻微漂移，但她的脊背没有弯。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Signal Cynthia. Step out with dignity.",
+          "description": "你已经赢了该赢的。Kennedy进门时停住脚的那一刻，James被迫当众叫出她名字的那一刻——议事厅里所有人都看见了。现在你的身体在往下坠，Lyra快要抓不住了。Cynthia在长老席上，你只需要一个眼神。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "Hold on until the session ends. Don't leave first.",
+          "description": "Kennedy已经不敢看你了，James那声勉强的\"Kennedy\"还钉在石墙上。你的手指已经把扶手攥出了温度，后背的热一波一波往上涌，Lyra的存在感像水渍一样在蒸发。但你坐着——你要让所有人看见，你是最后一个离开这张桌子的人。",
+          "check": "WIL（意志）12"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia的视线越过桌面，落在Cynthia身上。两人对视了一秒。Cynthia合上手里的文件夹，清了一下嗓子。）\n\nCynthia: （面向全场）The remaining procedural items will be tabled for tomorrow. Session adjourned.\n\n（成员们开始离席。Kennedy在引导员陪同下快步离开,经过Sylvia席位时视线死死盯着前方,没有转头。James在主位上坐了两秒,站起来,什么都没说,走了。）\n\n（议事厅空了大半。Sylvia松开扶手,缓缓站起来。椅脚在石材地面上发出一声轻响。她站着,身体晃了一下——Cynthia已经走到她身侧,没有搀扶,只是站在那里，让Sylvia自己决定下一步。）\n\n（Sylvia深吸一口气，迈出第一步，走向侧门。脚步是稳的，但每一步都在消耗剩下的东西。Cynthia跟在她身后，一步之遥。）\n\n（侧门在两人身后合上。）\n\n黑屏字幕：Everyone left before you did. You were the last one at that table.",
+        "butterfly_effect": "Sylvia chose a controlled exit over endurance; her procedural victory is intact — Kennedy's humiliation and James's forced compliance are already on record. WIL holds steady; the retreat is strategic, not a collapse."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（Sylvia没有动。）\n\n（议事程序继续。Cynthia的声音从厅堂另一端传来，清晰而遥远。Sylvia坐在席位上，后背的热已经漫到颈根，视线开始漂移。她咬紧后槽牙，把目光钉在桌面上。）\n\n（特写——她的指节，死死扣住扶手，泛白，纹丝不动。但她的肩膀在微微下沉。）\n\n（Cynthia宣读到第三条细则时，停顿了一下，视线越过文件落在Sylvia脸上。她合上文件夹，宣布今日议事暂时休会，剩余细则明日继续。）\n\n（成员们陆续离席。Kennedy在引导员陪同下快步离开，没有回头。James站起来，看了Sylvia一眼，转身走了。）\n\n（议事厅渐渐空了。Sylvia还坐在原位，手指终于从扶手上松开，整个人往前倾，额头抵在桌沿上。她撑住了，但所有人都看见了她在消耗。）\n\n黑屏字幕：Cynthia called the session early. You held on — but everyone saw what it cost you.",
+        "butterfly_effect": "Sylvia held her ground but the effort cost her visibly. Cynthia's early adjournment preserved Sylvia's position but also put her physical deterioration on the council record. WIL shows resilience under pressure but not dominance."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Sylvia没有动。）\n\n（议事程序继续。Cynthia的声音在厅堂里回响，一条一条宣读审议细则。Sylvia坐在席位上，后背的热还在烧，指节已经泛白——但她的脊背是直的，呼吸是稳的，视线钉在桌面正前方。）\n\n（Kennedy偶尔往她方向看一眼，每一次都先移开视线。James在主位上翻文件，翻了三次同一页。）\n\n（特写——Sylvia的手，死死扣住扶手，指节泛白，纹丝不动。）\n\n（Cynthia宣布当日议事程序结束。长老们起身，成员们陆续离席。Kennedy在引导员陪同下先行离开，经过Sylvia席位时脚步明显加快，没有转头。James最后一个站起来，看了Sylvia一眼，嘴唇动了一下，没有说话，走了。）\n\n（议事厅空了。Sylvia还坐在原位，手指终于从扶手上松开，掌心留下两道深红的压痕。她的身体前倾，额头几乎碰到桌面，喘了一口气。）\n\n黑屏字幕：You won what you needed to win. Kennedy froze. James choked on her name. That's enough for today.",
+        "butterfly_effect": "Sylvia outlasted everyone in the council hall; her composure under duress shifts the power dynamic decisively. CHA and WIL register a measurable gain. Kennedy's repeated aversion and James's inability to act are now part of the record."
+      }
+    ]
+  }
+}

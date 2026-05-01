@@ -1,0 +1,70 @@
+{
+  "ep_num": 4,
+  "variant_kind": "mainline",
+  "output": {
+    "episode_id": "EP 4",
+    "episode_title": "打量",
+    "characters": [
+      "Sylvia",
+      "Cynthia",
+      "James",
+      "Luna Miller"
+    ],
+    "character_outfits": {
+      "Sylvia": "二十多岁女性，深色针织长裙，腰线以下因孕肚微微撑起，外搭深灰色薄款开衫，黑色平底软底鞋，左手腕细银手链。",
+      "Cynthia": "五十岁左右女性，深酒红色合身西装外套，黑色直筒长裤，低跟皮鞋，发髻盘高，细金项链。",
+      "James": "三十岁左右男性，深色修身衬衫，深灰西裤，黑色皮带，皮鞋。",
+      "Luna Miller": "六十岁左右女性，烟灰色长款羊绒外套，黑色高领毛衣，深色长裤，低跟踝靴，手腕宽版金手镯。"
+    },
+    "scene_locations": {
+      "银月领地 豪宅 走廊": {
+        "location_id": "silver_moon_manor_corridor",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "长廊，深色实木护壁板，壁灯昏黄间距排列，地面深色地毯吸音，走廊尽头光线减弱。书房门虚掩，门缝透出一线暖光，门框投落细长光带于地毯上。"
+      },
+      "银月领地 豪宅 Luna书房": {
+        "location_id": "silver_moon_manor_luna_study",
+        "parent_location_id": "silver_moon_manor",
+        "visual_prompt": "私密书房，整面书架，深绿绒布窗帘全部拉合，实木圆桌旁三把椅子，台灯聚光打亮桌面，书房门内侧可见门把手，门缝向外透出暖黄光线。"
+      }
+    },
+    "pre_choice_script": "（场景：银月领地 豪宅 走廊 — 夜）\n（走廊壁灯昏黄，Sylvia背靠护壁板，侧身立在书房门旁。门缝透出一线暖光，压在她脚边的地毯上。她没有动。）\n\n字幕：【Cynthia: Member of the Elder Council of the Silver Moon Territory】\n\nCynthia: (门内，声音一字一顿，压着怒气) Every member knows, James. Every. Single. One.\n\nJames: (强硬) My bond is not your business.\n\nCynthia: (声音抬高) She can't give you an heir. You know that. We all know that.\n\n（特写——Sylvia的手指在护壁板上慢慢收紧，指节泛白。）\n\nJames: (音量上来) Don't tell me what I know—\n\nLuna Miller: (打断，声音比两人都低，却让走廊里的空气也跟着凝住) Enough.\n\n（书房里彻底静了两秒。）\n\nLuna Miller: (慢，每个字都落地) I will handle this. Both of you, sit down.\n\n（特写——Sylvia的喉结轻轻滚动一下。她把每一句话在脑子里过了一遍，嘴唇抿成一条直线。）\n\n（书房门从里面被推开。Cynthia先走出来，抬头，和Sylvia正面撞上视线。）\n\n（两人对视。Cynthia没有说话。她的目光从Sylvia的脸往下移，停在隆起的腹部，又抬回来，在她眼睛上停了整整三秒。）",
+    "choice_node": {
+      "type": "成长型",
+      "options": [
+        {
+          "id": "A",
+          "content": "Hold Cynthia's gaze. Let her see you heard everything.",
+          "description": "Cynthia的视线从你的脸移到腹部，又移回来。她刚才在书房里替你说了那些你自己没有资格坐在桌边说的话。走廊里只有你们两个，书房门还开着一道缝，Luna Miller的声音在里面低低地继续。你不避开眼睛。",
+          "check": "无需检定"
+        },
+        {
+          "id": "B",
+          "content": "Push past Cynthia. Walk into the study.",
+          "description": "Cynthia刚走出来，书房门还没合上，里面的灯光漏了一道宽缝。Luna Miller还在说话，James还坐在里面。Cynthia的眼神落在你腹部的那一秒像在说什么——但你不需要别人替你说。你自己走进去。",
+          "check": "WIL（意志）12"
+        }
+      ]
+    },
+    "post_choice_outcomes": [
+      {
+        "reaction_id": "反应一",
+        "trigger_condition": "选择选项 A",
+        "story_content": "（Sylvia没有动，也没有避开视线。Cynthia和她对视了整整三秒。）\n\n（Cynthia的嘴唇动了一下，像是要说什么，最终只是微微摇了摇头——那个摇头不是否定，更像是某种无声的确认。她转身，朝走廊另一头走去，脚步声均匀，没有回头。）\n\n（Sylvia站在原地，没有追，也没有进书房。她的手抬起来，覆上腹部，按住，手心传来一点温度。里面还有说话声，低而模糊，是Luna Miller的声音。）\n\n（特写——书房门缝的那一线暖光，照在Sylvia脸侧。她的眼睛没有眨，直视着走廊深处Cynthia消失的方向。）\n\n黑屏字幕：You went back to your room and closed the door. You spent the whole night thinking about what Cynthia's headshake meant.",
+        "butterfly_effect": "Sylvia chose to stay outside the room. Her absence from the table registers as compliance. WIL gains no traction; Cynthia's assessment of her as a passive figure is reinforced."
+      },
+      {
+        "reaction_id": "反应二",
+        "trigger_condition": "选择选项 B - 检定失败",
+        "story_content": "（Sylvia的手按上书房门板，推开一道缝——）\n（门轴发出一声轻响。书房里三个人同时转过头来。）\n（James的椅子腿在地板上划出一声钝响，他站起来，眉头皱死。）\n\nJames: (低，压着) What are you doing here?\n\n（Sylvia站在门口，光从身后的走廊打来，她的手还扶着门框。她张嘴，声音比预想的低了一个调。）\n\nSylvia: I heard everything.\n\n（Luna Miller没有动，只是把手放在桌面上，目光落在她身上，像在等一个她早就知道答案的问题。Cynthia已经站起来，从Sylvia身边走出去，经过时目光在她腹部停了一秒，没有说话，脚步声消失在走廊里。）\n\nLuna Miller: (平静) Close the door, Sylvia.\n\n（Sylvia把门带上，站在书房里，书架和深绿窗帘把外面的夜色全部隔绝在外。台灯的光打在她脸上，她的手垂下来，覆上腹部，按住。）\n\n黑屏字幕：You stayed in the study until Luna Miller dismissed you. You went back to your room. You didn't sleep.",
+        "butterfly_effect": "Sylvia stepped in but lost the initiative. Luna Miller registers her as reactive rather than threatening. WIL shows marginal presence but CHA gains no ground."
+      },
+      {
+        "reaction_id": "反应三",
+        "trigger_condition": "选择选项 B - 检定成功",
+        "story_content": "（Sylvia推开书房门，走进去，把门在身后带上。）\n（三双眼睛转过来。James从椅子上站起来，嘴唇动了动，没有发出声音。Cynthia的视线落在她腹部，停了一秒，随即站起身，从她身边走出去，把书房门重新带上，脚步声消失在走廊里。）\n（书房里只剩三个人。台灯的光打在实木圆桌上，Sylvia走到桌边那把空椅子前，站定，没有坐下。）\n\nSylvia: (平，字句清晰) If this is about me, I should be in the room.\n\n（Luna Miller看了她整整三秒，嘴角微动，像是某个早就预备好的判断得到了印证。）\n\nLuna Miller: (慢，不动声色) Sit down, but don't speak.\n\n（Sylvia没有动。她的手垂在身侧，指尖贴着腹部侧面，眼睛直视着Luna Miller，没有低头。）\n\n黑屏字幕：You sat in that study until everyone left. You memorized Luna Miller's expression. You didn't sleep.",
+        "butterfly_effect": "Sylvia claimed a seat at the table on her own terms. Luna Miller registers a shift in her as a variable rather than a given. WIL and CHA both gain marginal traction."
+      }
+    ]
+  }
+}
