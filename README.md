@@ -4,12 +4,19 @@ Agent-native multi-format asset production platform — based on opencode.
 
 > **Status**: Phase 0 bootstrap (not usable yet).
 
+## Repository Boundary
+
+除 [`video-agent-test/`](video-agent-test) 与 [`claude-code/`](claude-code) 外，本仓库其他项目目录属于我们改造的 `MOBAI-ASSESTS-Agent`。
+[`video-agent-test/`](video-agent-test) 和 [`claude-code/`](claude-code) 保留为原版工作流参考。
+
 ## Layout
 
 - [`agent/`](agent) — opencode-based agent + CLI base (cloned from `sst/opencode` dev branch)
 - [`web/`](web) — creator workstation (Next.js + shadcn/ui, scaffolded in Phase 5)
 - [`cli-example/`](cli-example) — `MiniMax-AI/cli` (design reference, unmaintained)
 - [`legacy/`](legacy) — old Agent Forge snapshot (parked, do not maintain / deploy / test)
+- [`video-agent-test/`](video-agent-test) — original video-agent workflow reference
+- [`claude-code/`](claude-code) — upstream `anthropics/claude-code` workflow reference
 - [`docs/superpowers/specs/`](docs/superpowers/specs) — master spec, phase plans, verification reports
 
 ## Read Next
