@@ -1,0 +1,298 @@
+{
+  "test_case": {
+    "case_id": "case_07",
+    "case_name": "道具连续性 - 车钥匙首次出现",
+    "description": "测试道具处理能力，车钥匙必须首次出现在手里，不能声称'岛台上原本就有'，避免虚构参考视频中不存在的道具",
+    "scene": "银月领地豪宅厨房",
+    "characters": [
+      "Sylvia (孕期Luna)"
+    ],
+    "emotion_arc": "决心→行动",
+    "duration": "8s",
+    "key_challenges": [
+      "道具首次出现方式：从画面下缘外取回（手里）",
+      "不虚构岛台上的道具位置",
+      "动作连贯：放下刀→手覆腹部→取钥匙→朝门口走",
+      "孕肚对动作的影响（弯腰取物略显吃力）",
+      "景别：中景到全景（展示走向门口）"
+    ],
+    "script_segment": "（门关上。厨房里只剩切菜板上的食材和还亮着的灶台。Sylvia 的手仍压在腹部，一动不动。胸口某处骤然发凉，手指慢慢收紧了一下。）\n\n（她拿上车钥匙，朝门口走去。）",
+    "reference_assets": {
+      "images": [
+        "kitchen_empty.png",
+        "Sylvia_portrait_pregnant.png"
+      ],
+      "previous_shot_end_frame": "shot_3_end.png"
+    },
+    "expected_prompt_elements": [
+      "车钥匙首次出现：Sylvia从画面下缘外（岛台抽屉/挂钩）取回，出现在手中",
+      "禁止：'岛台右前方一串银色车钥匙静置'等虚构描述",
+      "动作细节：手指收紧→伸手取钥匙→握紧→转身朝门口",
+      "孕肚影响：弯腰取物动作略显吃力，手扶岛台边缘",
+      "背景一致性：切菜板、食材、灶台火苗仍在原位",
+      "景别变化：中景Sylvia→全景展示走向门口"
+    ]
+  },
+  "runs": [
+    {
+      "run_number": 1,
+      "case_id": "case_07",
+      "case_name": "道具连续性 - 车钥匙首次出现",
+      "frontmatter": {
+        "shot_id": "case_07_run1",
+        "duration": "8s",
+        "mode": "多参考",
+        "scene": "银月领地豪宅厨房",
+        "emotion_arc": "决心→行动",
+        "assets": {
+          "images": [
+            "kitchen_empty.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：银月领地豪宅厨房\n\n关键场景：\n（门关上。厨房里只剩切菜板上的食材和还亮着的灶台。Sylvia 的手仍压在腹部，一动不动。胸口某处骤然发凉，手指慢慢收紧了一下。）\n\n（她拿上车钥匙，朝门口走去。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 2,
+      "case_id": "case_07",
+      "case_name": "道具连续性 - 车钥匙首次出现",
+      "frontmatter": {
+        "shot_id": "case_07_run2",
+        "duration": "8s",
+        "mode": "多参考",
+        "scene": "银月领地豪宅厨房",
+        "emotion_arc": "决心→行动",
+        "assets": {
+          "images": [
+            "kitchen_empty.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：银月领地豪宅厨房\n\n关键场景：\n（门关上。厨房里只剩切菜板上的食材和还亮着的灶台。Sylvia 的手仍压在腹部，一动不动。胸口某处骤然发凉，手指慢慢收紧了一下。）\n\n（她拿上车钥匙，朝门口走去。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 3,
+      "case_id": "case_07",
+      "case_name": "道具连续性 - 车钥匙首次出现",
+      "frontmatter": {
+        "shot_id": "case_07_run3",
+        "duration": "8s",
+        "mode": "多参考",
+        "scene": "银月领地豪宅厨房",
+        "emotion_arc": "决心→行动",
+        "assets": {
+          "images": [
+            "kitchen_empty.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：银月领地豪宅厨房\n\n关键场景：\n（门关上。厨房里只剩切菜板上的食材和还亮着的灶台。Sylvia 的手仍压在腹部，一动不动。胸口某处骤然发凉，手指慢慢收紧了一下。）\n\n（她拿上车钥匙，朝门口走去。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 4,
+      "case_id": "case_07",
+      "case_name": "道具连续性 - 车钥匙首次出现",
+      "frontmatter": {
+        "shot_id": "case_07_run4",
+        "duration": "8s",
+        "mode": "多参考",
+        "scene": "银月领地豪宅厨房",
+        "emotion_arc": "决心→行动",
+        "assets": {
+          "images": [
+            "kitchen_empty.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：银月领地豪宅厨房\n\n关键场景：\n（门关上。厨房里只剩切菜板上的食材和还亮着的灶台。Sylvia 的手仍压在腹部，一动不动。胸口某处骤然发凉，手指慢慢收紧了一下。）\n\n（她拿上车钥匙，朝门口走去。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 5,
+      "case_id": "case_07",
+      "case_name": "道具连续性 - 车钥匙首次出现",
+      "frontmatter": {
+        "shot_id": "case_07_run5",
+        "duration": "8s",
+        "mode": "多参考",
+        "scene": "银月领地豪宅厨房",
+        "emotion_arc": "决心→行动",
+        "assets": {
+          "images": [
+            "kitchen_empty.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：银月领地豪宅厨房\n\n关键场景：\n（门关上。厨房里只剩切菜板上的食材和还亮着的灶台。Sylvia 的手仍压在腹部，一动不动。胸口某处骤然发凉，手指慢慢收紧了一下。）\n\n（她拿上车钥匙，朝门口走去。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 6,
+      "case_id": "case_07",
+      "case_name": "道具连续性 - 车钥匙首次出现",
+      "frontmatter": {
+        "shot_id": "case_07_run6",
+        "duration": "8s",
+        "mode": "多参考",
+        "scene": "银月领地豪宅厨房",
+        "emotion_arc": "决心→行动",
+        "assets": {
+          "images": [
+            "kitchen_empty.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：银月领地豪宅厨房\n\n关键场景：\n（门关上。厨房里只剩切菜板上的食材和还亮着的灶台。Sylvia 的手仍压在腹部，一动不动。胸口某处骤然发凉，手指慢慢收紧了一下。）\n\n（她拿上车钥匙，朝门口走去。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 7,
+      "case_id": "case_07",
+      "case_name": "道具连续性 - 车钥匙首次出现",
+      "frontmatter": {
+        "shot_id": "case_07_run7",
+        "duration": "8s",
+        "mode": "多参考",
+        "scene": "银月领地豪宅厨房",
+        "emotion_arc": "决心→行动",
+        "assets": {
+          "images": [
+            "kitchen_empty.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：银月领地豪宅厨房\n\n关键场景：\n（门关上。厨房里只剩切菜板上的食材和还亮着的灶台。Sylvia 的手仍压在腹部，一动不动。胸口某处骤然发凉，手指慢慢收紧了一下。）\n\n（她拿上车钥匙，朝门口走去。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 8,
+      "case_id": "case_07",
+      "case_name": "道具连续性 - 车钥匙首次出现",
+      "frontmatter": {
+        "shot_id": "case_07_run8",
+        "duration": "8s",
+        "mode": "多参考",
+        "scene": "银月领地豪宅厨房",
+        "emotion_arc": "决心→行动",
+        "assets": {
+          "images": [
+            "kitchen_empty.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：银月领地豪宅厨房\n\n关键场景：\n（门关上。厨房里只剩切菜板上的食材和还亮着的灶台。Sylvia 的手仍压在腹部，一动不动。胸口某处骤然发凉，手指慢慢收紧了一下。）\n\n（她拿上车钥匙，朝门口走去。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 9,
+      "case_id": "case_07",
+      "case_name": "道具连续性 - 车钥匙首次出现",
+      "frontmatter": {
+        "shot_id": "case_07_run9",
+        "duration": "8s",
+        "mode": "多参考",
+        "scene": "银月领地豪宅厨房",
+        "emotion_arc": "决心→行动",
+        "assets": {
+          "images": [
+            "kitchen_empty.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：银月领地豪宅厨房\n\n关键场景：\n（门关上。厨房里只剩切菜板上的食材和还亮着的灶台。Sylvia 的手仍压在腹部，一动不动。胸口某处骤然发凉，手指慢慢收紧了一下。）\n\n（她拿上车钥匙，朝门口走去。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 10,
+      "case_id": "case_07",
+      "case_name": "道具连续性 - 车钥匙首次出现",
+      "frontmatter": {
+        "shot_id": "case_07_run10",
+        "duration": "8s",
+        "mode": "多参考",
+        "scene": "银月领地豪宅厨房",
+        "emotion_arc": "决心→行动",
+        "assets": {
+          "images": [
+            "kitchen_empty.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：银月领地豪宅厨房\n\n关键场景：\n（门关上。厨房里只剩切菜板上的食材和还亮着的灶台。Sylvia 的手仍压在腹部，一动不动。胸口某处骤然发凉，手指慢慢收紧了一下。）\n\n（她拿上车钥匙，朝门口走去。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    }
+  ]
+}

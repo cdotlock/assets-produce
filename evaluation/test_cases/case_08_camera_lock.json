@@ -1,0 +1,29 @@
+{
+  "case_id": "case_08",
+  "case_name": "景别硬锁 - 推镜到近景后停止",
+  "description": "测试E-8景别硬锁规则，镜头推进到目标景别后必须停止，不能继续推过头",
+  "scene": "新月领地公墓",
+  "characters": ["Sylvia (孕期Luna)"],
+  "emotion_arc": "震惊→失落凝固",
+  "duration": "12s",
+  "key_challenges": [
+    "景别硬锁：从中景推至近景面部特写后停止",
+    "推进速度：缓慢均匀，不突兀",
+    "收尾三重静止：最后3秒完全静止",
+    "面部表情细节：眼眶泛红、嘴唇微颤、眉头微蹙",
+    "背景虚化：推至近景后背景自然虚化"
+  ],
+  "script_segment": "（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）",
+  "reference_assets": {
+    "images": ["Sylvia_portrait_pregnant.png", "cemetery_scene.png"],
+    "previous_shot_end_frame": "shot_6a_end.png"
+  },
+  "expected_prompt_elements": [
+    "景别硬锁明确：0-8s缓慢推进从中景至近景面部特写，8s后停止推进",
+    "收尾三重静止：9-12s镜头完全静止、Sylvia姿态静止、背景静止",
+    "推进过程：匀速、平滑、不抖动",
+    "面部细节递进：眼眶泛红→嘴唇微颤→眉头微蹙→凝固",
+    "禁止：推过头到大特写、推进后又拉回、抖动或跳帧",
+    "背景处理：推至近景后背景自然虚化但仍可辨识公墓环境"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "case_id": "case_06",
+  "case_name": "英语对白口型同步 - 多轮对话",
+  "description": "测试E-6英语对白口型同步格式，多轮对话场景，需要精确标注每句台词的时间和口型",
+  "scene": "新月领地公墓",
+  "characters": ["Sylvia (孕期Luna)", "James (Alpha)"],
+  "emotion_arc": "质问→等待→失望",
+  "duration": "14s",
+  "key_challenges": [
+    "英语对白格式：【秒数】角色名 speaks \"台词\" (口型同步)",
+    "多轮对话时间分配合理",
+    "对话间的沉默停顿",
+    "面部朝向：Sylvia正面、James侧面回避",
+    "情绪递进：从平静质问到声音微颤"
+  ],
+  "script_segment": "（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）\n\n（Sylvia 等着。）\n\n（Sylvia 开口，声音平稳，一字一顿，落地有声。）\n\nSylvia: Kennedy.\n\n（Kennedy 从 James 怀里抬起头，眼圈红着，挑衅地看向 Sylvia。James 的目光终于转过来，落在她脸上——他的下颌绷紧了。）\n\nSylvia:（声音极平，没有起伏）What is the relationship between you and her?",
+  "reference_assets": {
+    "images": ["Sylvia_portrait_pregnant.png", "James_portrait.png", "Kennedy_portrait.png"],
+    "previous_shot_end_frame": "shot_5_end.png"
+  },
+  "expected_prompt_elements": [
+    "【2s】Sylvia speaks \"James. We need to talk.\" (口型同步)",
+    "【5s-7s】沉默停顿，无对白",
+    "【8s】Sylvia speaks \"Kennedy.\" (口型同步)",
+    "【11s】Sylvia speaks \"What is the relationship between you and her?\" (口型同步)",
+    "面部朝向约束：Sylvia正面、James侧面45度",
+    "情绪微变：Sylvia从平稳到声音微颤、James下颌绷紧"
+  ]
+}

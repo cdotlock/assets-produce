@@ -1,0 +1,28 @@
+{
+  "case_id": "case_01",
+  "case_name": "情感对峙场景 - 孕期Luna发现Alpha出轨",
+  "description": "典型的狗血短剧情感高潮场景，女主怀孕7个月发现丈夫在墓地安慰前女友，需要处理多人物、复杂情绪弧、孕肚特征",
+  "scene": "新月领地公墓",
+  "characters": ["Sylvia (孕期Luna)", "James (Alpha)", "Kennedy (前女友)"],
+  "emotion_arc": "震惊→失落→压抑愤怒",
+  "duration": "12s",
+  "key_challenges": [
+    "孕肚特征必须明显且一致",
+    "三人空间关系清晰（Sylvia站立3米外，James跪地抱Kennedy）",
+    "情绪层次：Sylvia克制但眼眶泛红，James僵硬回避，Kennedy依赖性哭泣",
+    "景别控制：中景到近景推进，最终定格Sylvia面部特写"
+  ],
+  "script_segment": "（三米外，James 单膝跪在新坟旁，双臂将身旁的女人揽住，低头靠近她的耳边。）\n\nJames:（极轻，像在哄）Shh. Kenny. I'm here.\n\n（Kennedy 把脸埋进他胸口。James 的手顺着她的头发慢慢往下压，动作熟稳，从容。）\n\n（风向变了。James 猛地抬头，与 Sylvia 对视。他的神情从温柔瞬间僵住——但双臂不仅没有松开，反而收紧了。）\n\n（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）",
+  "reference_assets": {
+    "images": ["Sylvia_portrait_pregnant.png", "James_portrait.png", "Kennedy_portrait.png", "cemetery_scene.png"],
+    "previous_shot_end_frame": "shot_5_end.png"
+  },
+  "expected_prompt_elements": [
+    "零字幕四层防御（前200字内）",
+    "孕肚描述至少3处强化",
+    "三人位置关系明确（前景/中景/远景）",
+    "景别硬锁：推至近景后停止",
+    "收尾三重静止",
+    "情绪微动作：Sylvia手指收紧、James下颌绷紧、Kennedy肩膀颤抖"
+  ]
+}

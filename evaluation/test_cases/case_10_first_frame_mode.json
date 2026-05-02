@@ -1,0 +1,31 @@
+{
+  "case_id": "case_10",
+  "case_name": "首尾帧模式 - 使用末帧PNG作为首帧锚图",
+  "description": "测试防御清单第5条强制SOP，使用前一shot的末帧PNG作为@图1首帧锚图，避免ARK视频输入拦截",
+  "scene": "新月领地公墓",
+  "characters": ["Sylvia (孕期Luna)", "James (Alpha)", "Kennedy"],
+  "emotion_arc": "质问→等待→压抑",
+  "duration": "11s",
+  "key_challenges": [
+    "mode: 首尾帧，videos: []保持为空",
+    "首帧锚图来源：gen_end_frame/shot_6a_end.png",
+    "prompt开头句：@图1作为首帧",
+    "关键场景①第一动词必须是渐变动词（缓/微/渐/轻/慢）",
+    "视觉风格硬约束段落在前300字内",
+    "严禁使用@视频1"
+  ],
+  "script_segment": "（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）",
+  "reference_assets": {
+    "images": ["gen_end_frame/shot_6a_end.png", "Sylvia_portrait_pregnant.png", "James_portrait.png", "Kennedy_portrait.png"],
+    "previous_shot_end_frame": "shot_6a_end.png"
+  },
+  "expected_prompt_elements": [
+    "frontmatter: mode: 首尾帧, videos: []",
+    "assets.images[0]: gen_end_frame/shot_6a_end.png",
+    "prompt开头句：@图1作为首帧。",
+    "关键场景①第一动词：Sylvia缓步走出/微微前倾/渐渐站定（渐变动词）",
+    "视觉风格硬约束（前300字）：全画面严格采用赛璐璐平涂风格cel-shaded flat anime illustration...",
+    "禁止：@视频1、剧烈起手动词（冲向/猛推/跃起/瞬间/骤然）",
+    "一次性过滤器清单全部通过"
+  ]
+}

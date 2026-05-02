@@ -1,0 +1,298 @@
+{
+  "test_case": {
+    "case_id": "case_08",
+    "case_name": "景别硬锁 - 推镜到近景后停止",
+    "description": "测试E-8景别硬锁规则，镜头推进到目标景别后必须停止，不能继续推过头",
+    "scene": "新月领地公墓",
+    "characters": [
+      "Sylvia (孕期Luna)"
+    ],
+    "emotion_arc": "震惊→失落凝固",
+    "duration": "12s",
+    "key_challenges": [
+      "景别硬锁：从中景推至近景面部特写后停止",
+      "推进速度：缓慢均匀，不突兀",
+      "收尾三重静止：最后3秒完全静止",
+      "面部表情细节：眼眶泛红、嘴唇微颤、眉头微蹙",
+      "背景虚化：推至近景后背景自然虚化"
+    ],
+    "script_segment": "（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）",
+    "reference_assets": {
+      "images": [
+        "Sylvia_portrait_pregnant.png",
+        "cemetery_scene.png"
+      ],
+      "previous_shot_end_frame": "shot_6a_end.png"
+    },
+    "expected_prompt_elements": [
+      "景别硬锁明确：0-8s缓慢推进从中景至近景面部特写，8s后停止推进",
+      "收尾三重静止：9-12s镜头完全静止、Sylvia姿态静止、背景静止",
+      "推进过程：匀速、平滑、不抖动",
+      "面部细节递进：眼眶泛红→嘴唇微颤→眉头微蹙→凝固",
+      "禁止：推过头到大特写、推进后又拉回、抖动或跳帧",
+      "背景处理：推至近景后背景自然虚化但仍可辨识公墓环境"
+    ]
+  },
+  "runs": [
+    {
+      "run_number": 1,
+      "case_id": "case_08",
+      "case_name": "景别硬锁 - 推镜到近景后停止",
+      "frontmatter": {
+        "shot_id": "case_08_run1",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n景别硬锁：0-8s 缓慢推进从中景至近景面部特写，8s 后停止推进，镜头完全静止。\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 2,
+      "case_id": "case_08",
+      "case_name": "景别硬锁 - 推镜到近景后停止",
+      "frontmatter": {
+        "shot_id": "case_08_run2",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n景别硬锁：0-8s 缓慢推进从中景至近景面部特写，8s 后停止推进，镜头完全静止。\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 3,
+      "case_id": "case_08",
+      "case_name": "景别硬锁 - 推镜到近景后停止",
+      "frontmatter": {
+        "shot_id": "case_08_run3",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n景别硬锁：0-8s 缓慢推进从中景至近景面部特写，8s 后停止推进，镜头完全静止。\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 4,
+      "case_id": "case_08",
+      "case_name": "景别硬锁 - 推镜到近景后停止",
+      "frontmatter": {
+        "shot_id": "case_08_run4",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n景别硬锁：0-8s 缓慢推进从中景至近景面部特写，8s 后停止推进，镜头完全静止。\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 5,
+      "case_id": "case_08",
+      "case_name": "景别硬锁 - 推镜到近景后停止",
+      "frontmatter": {
+        "shot_id": "case_08_run5",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n景别硬锁：0-8s 缓慢推进从中景至近景面部特写，8s 后停止推进，镜头完全静止。\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 6,
+      "case_id": "case_08",
+      "case_name": "景别硬锁 - 推镜到近景后停止",
+      "frontmatter": {
+        "shot_id": "case_08_run6",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n景别硬锁：0-8s 缓慢推进从中景至近景面部特写，8s 后停止推进，镜头完全静止。\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 7,
+      "case_id": "case_08",
+      "case_name": "景别硬锁 - 推镜到近景后停止",
+      "frontmatter": {
+        "shot_id": "case_08_run7",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n景别硬锁：0-8s 缓慢推进从中景至近景面部特写，8s 后停止推进，镜头完全静止。\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 8,
+      "case_id": "case_08",
+      "case_name": "景别硬锁 - 推镜到近景后停止",
+      "frontmatter": {
+        "shot_id": "case_08_run8",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n景别硬锁：0-8s 缓慢推进从中景至近景面部特写，8s 后停止推进，镜头完全静止。\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 9,
+      "case_id": "case_08",
+      "case_name": "景别硬锁 - 推镜到近景后停止",
+      "frontmatter": {
+        "shot_id": "case_08_run9",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n景别硬锁：0-8s 缓慢推进从中景至近景面部特写，8s 后停止推进，镜头完全静止。\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 10,
+      "case_id": "case_08",
+      "case_name": "景别硬锁 - 推镜到近景后停止",
+      "frontmatter": {
+        "shot_id": "case_08_run10",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n景别硬锁：0-8s 缓慢推进从中景至近景面部特写，8s 后停止推进，镜头完全静止。\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "gaps_present": []
+      }
+    }
+  ]
+}

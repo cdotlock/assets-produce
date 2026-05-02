@@ -1,0 +1,29 @@
+{
+  "case_id": "case_05",
+  "case_name": "跨场景转场 - 从室内到户外",
+  "description": "测试跨场景衔接能力，从厨房到公墓，需要引用上场景末帧+新场景空镜，建立时空转换",
+  "scene": "新月领地公墓（从银月领地厨房转场）",
+  "characters": ["Sylvia (孕期Luna)"],
+  "emotion_arc": "决心→疲惫→警觉",
+  "duration": "11s",
+  "key_challenges": [
+    "首尾帧模式：引用上场景末帧作为@图1",
+    "新场景建立：公墓环境描述（灰色石碑、枯树、阴云）",
+    "时间跨度暗示：'数小时后'",
+    "Sylvia状态变化：从厨房的克制到公墓的疲惫",
+    "动作设计：下车→走到石碑后→站定（避免连续距离变化）"
+  ],
+  "script_segment": "（场景：新月领地 公墓 — 日，数小时后）\n\n（Sylvia 将车停在公墓入口，下车，走到一排石碑后，手撑着碑沿，站定。）",
+  "reference_assets": {
+    "images": ["shot_4_end.png", "cemetery_scene.png", "Sylvia_portrait_pregnant.png"],
+    "previous_shot_end_frame": "shot_4_end.png"
+  },
+  "expected_prompt_elements": [
+    "mode: 首尾帧",
+    "@图1作为首帧（上场景末帧）",
+    "新场景环境完整描述：户外公墓、灰色石碑、枯树、阴云、冷灰色调",
+    "动作拆解：首帧已在车旁→走向石碑（同景别水平移动）→站定",
+    "避免：从远景走到近景的身形缩放变化",
+    "Sylvia状态：疲惫但坚定，孕肚明显，动作略显吃力"
+  ]
+}

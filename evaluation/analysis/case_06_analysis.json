@@ -1,0 +1,173 @@
+{
+  "case_id": "case_06",
+  "case_name": "英语对白口型同步 - 多轮对话",
+  "identified_gaps": [],
+  "run_comparisons": [
+    {
+      "run_number": 1,
+      "similarity_ratio": 0.9784589892294946,
+      "length_diff": 52,
+      "video_length": 1233,
+      "mobai_length": 1181,
+      "diff_lines": 24,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 2,
+      "similarity_ratio": 0.9784589892294946,
+      "length_diff": 52,
+      "video_length": 1233,
+      "mobai_length": 1181,
+      "diff_lines": 24,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 3,
+      "similarity_ratio": 0.9784589892294946,
+      "length_diff": 52,
+      "video_length": 1233,
+      "mobai_length": 1181,
+      "diff_lines": 24,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 4,
+      "similarity_ratio": 0.9784589892294946,
+      "length_diff": 52,
+      "video_length": 1233,
+      "mobai_length": 1181,
+      "diff_lines": 24,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 5,
+      "similarity_ratio": 0.9784589892294946,
+      "length_diff": 52,
+      "video_length": 1233,
+      "mobai_length": 1181,
+      "diff_lines": 24,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 6,
+      "similarity_ratio": 0.9784589892294946,
+      "length_diff": 52,
+      "video_length": 1233,
+      "mobai_length": 1181,
+      "diff_lines": 24,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 7,
+      "similarity_ratio": 0.9784589892294946,
+      "length_diff": 52,
+      "video_length": 1233,
+      "mobai_length": 1181,
+      "diff_lines": 24,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 8,
+      "similarity_ratio": 0.9784589892294946,
+      "length_diff": 52,
+      "video_length": 1233,
+      "mobai_length": 1181,
+      "diff_lines": 24,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 9,
+      "similarity_ratio": 0.9784589892294946,
+      "length_diff": 52,
+      "video_length": 1233,
+      "mobai_length": 1181,
+      "diff_lines": 24,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 10,
+      "similarity_ratio": 0.9784589892294946,
+      "length_diff": 52,
+      "video_length": 1233,
+      "mobai_length": 1181,
+      "diff_lines": 24,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    }
+  ],
+  "metrics": {
+    "avg_similarity": 0.9784589892294946,
+    "avg_length_diff": 52.0,
+    "avg_video_length": 1233.0,
+    "avg_mobai_length": 1181.0
+  }
+}

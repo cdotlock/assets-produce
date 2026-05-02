@@ -1,0 +1,439 @@
+{
+  "test_case": {
+    "case_id": "case_05",
+    "case_name": "跨场景转场 - 从室内到户外",
+    "description": "测试跨场景衔接能力，从厨房到公墓，需要引用上场景末帧+新场景空镜，建立时空转换",
+    "scene": "新月领地公墓（从银月领地厨房转场）",
+    "characters": [
+      "Sylvia (孕期Luna)"
+    ],
+    "emotion_arc": "决心→疲惫→警觉",
+    "duration": "11s",
+    "key_challenges": [
+      "首尾帧模式：引用上场景末帧作为@图1",
+      "新场景建立：公墓环境描述（灰色石碑、枯树、阴云）",
+      "时间跨度暗示：'数小时后'",
+      "Sylvia状态变化：从厨房的克制到公墓的疲惫",
+      "动作设计：下车→走到石碑后→站定（避免连续距离变化）"
+    ],
+    "script_segment": "（场景：新月领地 公墓 — 日，数小时后）\n\n（Sylvia 将车停在公墓入口，下车，走到一排石碑后，手撑着碑沿，站定。）",
+    "reference_assets": {
+      "images": [
+        "shot_4_end.png",
+        "cemetery_scene.png",
+        "Sylvia_portrait_pregnant.png"
+      ],
+      "previous_shot_end_frame": "shot_4_end.png"
+    },
+    "expected_prompt_elements": [
+      "mode: 首尾帧",
+      "@图1作为首帧（上场景末帧）",
+      "新场景环境完整描述：户外公墓、灰色石碑、枯树、阴云、冷灰色调",
+      "动作拆解：首帧已在车旁→走向石碑（同景别水平移动）→站定",
+      "避免：从远景走到近景的身形缩放变化",
+      "Sylvia状态：疲惫但坚定，孕肚明显，动作略显吃力"
+    ]
+  },
+  "runs": [
+    {
+      "run_number": 1,
+      "case_id": "case_05",
+      "case_name": "跨场景转场 - 从室内到户外",
+      "frontmatter": {
+        "shot_id": "case_05_run1",
+        "duration": "11s",
+        "mode": "多参考",
+        "scene": "新月领地公墓（从银月领地厨房转场）",
+        "emotion_arc": "决心→疲惫→警觉",
+        "assets": {
+          "images": [
+            "shot_4_end.png",
+            "cemetery_scene.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓（从银月领地厨房转场）\n\n关键场景 ①：\n（场景：新月领地 公墓 — 日，数小时后）\n\n（Sylvia 将车停在公墓入口，下车，走到一排石碑后，手撑着碑沿，站定。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "首尾帧模式：引用上场景末帧作为@图1",
+          "新场景建立：公墓环境描述（灰色石碑、枯树、阴云）",
+          "时间跨度暗示：'数小时后'",
+          "Sylvia状态变化：从厨房的克制到公墓的疲惫",
+          "动作设计：下车→走到石碑后→站定（避免连续距离变化）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 2,
+      "case_id": "case_05",
+      "case_name": "跨场景转场 - 从室内到户外",
+      "frontmatter": {
+        "shot_id": "case_05_run2",
+        "duration": "11s",
+        "mode": "多参考",
+        "scene": "新月领地公墓（从银月领地厨房转场）",
+        "emotion_arc": "决心→疲惫→警觉",
+        "assets": {
+          "images": [
+            "shot_4_end.png",
+            "cemetery_scene.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓（从银月领地厨房转场）\n\n关键场景 ①：\n（场景：新月领地 公墓 — 日，数小时后）\n\n（Sylvia 将车停在公墓入口，下车，走到一排石碑后，手撑着碑沿，站定。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "首尾帧模式：引用上场景末帧作为@图1",
+          "新场景建立：公墓环境描述（灰色石碑、枯树、阴云）",
+          "时间跨度暗示：'数小时后'",
+          "Sylvia状态变化：从厨房的克制到公墓的疲惫",
+          "动作设计：下车→走到石碑后→站定（避免连续距离变化）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 3,
+      "case_id": "case_05",
+      "case_name": "跨场景转场 - 从室内到户外",
+      "frontmatter": {
+        "shot_id": "case_05_run3",
+        "duration": "11s",
+        "mode": "多参考",
+        "scene": "新月领地公墓（从银月领地厨房转场）",
+        "emotion_arc": "决心→疲惫→警觉",
+        "assets": {
+          "images": [
+            "shot_4_end.png",
+            "cemetery_scene.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓（从银月领地厨房转场）\n\n关键场景 ①：\n（场景：新月领地 公墓 — 日，数小时后）\n\n（Sylvia 将车停在公墓入口，下车，走到一排石碑后，手撑着碑沿，站定。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "首尾帧模式：引用上场景末帧作为@图1",
+          "新场景建立：公墓环境描述（灰色石碑、枯树、阴云）",
+          "时间跨度暗示：'数小时后'",
+          "Sylvia状态变化：从厨房的克制到公墓的疲惫",
+          "动作设计：下车→走到石碑后→站定（避免连续距离变化）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 4,
+      "case_id": "case_05",
+      "case_name": "跨场景转场 - 从室内到户外",
+      "frontmatter": {
+        "shot_id": "case_05_run4",
+        "duration": "11s",
+        "mode": "多参考",
+        "scene": "新月领地公墓（从银月领地厨房转场）",
+        "emotion_arc": "决心→疲惫→警觉",
+        "assets": {
+          "images": [
+            "shot_4_end.png",
+            "cemetery_scene.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓（从银月领地厨房转场）\n\n关键场景 ①：\n（场景：新月领地 公墓 — 日，数小时后）\n\n（Sylvia 将车停在公墓入口，下车，走到一排石碑后，手撑着碑沿，站定。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "首尾帧模式：引用上场景末帧作为@图1",
+          "新场景建立：公墓环境描述（灰色石碑、枯树、阴云）",
+          "时间跨度暗示：'数小时后'",
+          "Sylvia状态变化：从厨房的克制到公墓的疲惫",
+          "动作设计：下车→走到石碑后→站定（避免连续距离变化）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 5,
+      "case_id": "case_05",
+      "case_name": "跨场景转场 - 从室内到户外",
+      "frontmatter": {
+        "shot_id": "case_05_run5",
+        "duration": "11s",
+        "mode": "多参考",
+        "scene": "新月领地公墓（从银月领地厨房转场）",
+        "emotion_arc": "决心→疲惫→警觉",
+        "assets": {
+          "images": [
+            "shot_4_end.png",
+            "cemetery_scene.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓（从银月领地厨房转场）\n\n关键场景 ①：\n（场景：新月领地 公墓 — 日，数小时后）\n\n（Sylvia 将车停在公墓入口，下车，走到一排石碑后，手撑着碑沿，站定。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "首尾帧模式：引用上场景末帧作为@图1",
+          "新场景建立：公墓环境描述（灰色石碑、枯树、阴云）",
+          "时间跨度暗示：'数小时后'",
+          "Sylvia状态变化：从厨房的克制到公墓的疲惫",
+          "动作设计：下车→走到石碑后→站定（避免连续距离变化）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 6,
+      "case_id": "case_05",
+      "case_name": "跨场景转场 - 从室内到户外",
+      "frontmatter": {
+        "shot_id": "case_05_run6",
+        "duration": "11s",
+        "mode": "多参考",
+        "scene": "新月领地公墓（从银月领地厨房转场）",
+        "emotion_arc": "决心→疲惫→警觉",
+        "assets": {
+          "images": [
+            "shot_4_end.png",
+            "cemetery_scene.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓（从银月领地厨房转场）\n\n关键场景 ①：\n（场景：新月领地 公墓 — 日，数小时后）\n\n（Sylvia 将车停在公墓入口，下车，走到一排石碑后，手撑着碑沿，站定。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "首尾帧模式：引用上场景末帧作为@图1",
+          "新场景建立：公墓环境描述（灰色石碑、枯树、阴云）",
+          "时间跨度暗示：'数小时后'",
+          "Sylvia状态变化：从厨房的克制到公墓的疲惫",
+          "动作设计：下车→走到石碑后→站定（避免连续距离变化）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 7,
+      "case_id": "case_05",
+      "case_name": "跨场景转场 - 从室内到户外",
+      "frontmatter": {
+        "shot_id": "case_05_run7",
+        "duration": "11s",
+        "mode": "多参考",
+        "scene": "新月领地公墓（从银月领地厨房转场）",
+        "emotion_arc": "决心→疲惫→警觉",
+        "assets": {
+          "images": [
+            "shot_4_end.png",
+            "cemetery_scene.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓（从银月领地厨房转场）\n\n关键场景 ①：\n（场景：新月领地 公墓 — 日，数小时后）\n\n（Sylvia 将车停在公墓入口，下车，走到一排石碑后，手撑着碑沿，站定。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "首尾帧模式：引用上场景末帧作为@图1",
+          "新场景建立：公墓环境描述（灰色石碑、枯树、阴云）",
+          "时间跨度暗示：'数小时后'",
+          "Sylvia状态变化：从厨房的克制到公墓的疲惫",
+          "动作设计：下车→走到石碑后→站定（避免连续距离变化）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 8,
+      "case_id": "case_05",
+      "case_name": "跨场景转场 - 从室内到户外",
+      "frontmatter": {
+        "shot_id": "case_05_run8",
+        "duration": "11s",
+        "mode": "多参考",
+        "scene": "新月领地公墓（从银月领地厨房转场）",
+        "emotion_arc": "决心→疲惫→警觉",
+        "assets": {
+          "images": [
+            "shot_4_end.png",
+            "cemetery_scene.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓（从银月领地厨房转场）\n\n关键场景 ①：\n（场景：新月领地 公墓 — 日，数小时后）\n\n（Sylvia 将车停在公墓入口，下车，走到一排石碑后，手撑着碑沿，站定。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "首尾帧模式：引用上场景末帧作为@图1",
+          "新场景建立：公墓环境描述（灰色石碑、枯树、阴云）",
+          "时间跨度暗示：'数小时后'",
+          "Sylvia状态变化：从厨房的克制到公墓的疲惫",
+          "动作设计：下车→走到石碑后→站定（避免连续距离变化）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 9,
+      "case_id": "case_05",
+      "case_name": "跨场景转场 - 从室内到户外",
+      "frontmatter": {
+        "shot_id": "case_05_run9",
+        "duration": "11s",
+        "mode": "多参考",
+        "scene": "新月领地公墓（从银月领地厨房转场）",
+        "emotion_arc": "决心→疲惫→警觉",
+        "assets": {
+          "images": [
+            "shot_4_end.png",
+            "cemetery_scene.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓（从银月领地厨房转场）\n\n关键场景 ①：\n（场景：新月领地 公墓 — 日，数小时后）\n\n（Sylvia 将车停在公墓入口，下车，走到一排石碑后，手撑着碑沿，站定。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "首尾帧模式：引用上场景末帧作为@图1",
+          "新场景建立：公墓环境描述（灰色石碑、枯树、阴云）",
+          "时间跨度暗示：'数小时后'",
+          "Sylvia状态变化：从厨房的克制到公墓的疲惫",
+          "动作设计：下车→走到石碑后→站定（避免连续距离变化）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 10,
+      "case_id": "case_05",
+      "case_name": "跨场景转场 - 从室内到户外",
+      "frontmatter": {
+        "shot_id": "case_05_run10",
+        "duration": "11s",
+        "mode": "多参考",
+        "scene": "新月领地公墓（从银月领地厨房转场）",
+        "emotion_arc": "决心→疲惫→警觉",
+        "assets": {
+          "images": [
+            "shot_4_end.png",
+            "cemetery_scene.png",
+            "Sylvia_portrait_pregnant.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓（从银月领地厨房转场）\n\n关键场景 ①：\n（场景：新月领地 公墓 — 日，数小时后）\n\n（Sylvia 将车停在公墓入口，下车，走到一排石碑后，手撑着碑沿，站定。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "首尾帧模式：引用上场景末帧作为@图1",
+          "新场景建立：公墓环境描述（灰色石碑、枯树、阴云）",
+          "时间跨度暗示：'数小时后'",
+          "Sylvia状态变化：从厨房的克制到公墓的疲惫",
+          "动作设计：下车→走到石碑后→站定（避免连续距离变化）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    }
+  ]
+}

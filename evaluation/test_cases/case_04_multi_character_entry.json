@@ -1,0 +1,29 @@
+{
+  "case_id": "case_04",
+  "case_name": "多人物登场 - 新角色进入已有场景",
+  "description": "测试场景人物清点能力，新角色Kennedy登场时必须避免'凭空出现'，需建立完整空间关系",
+  "scene": "新月领地公墓",
+  "characters": ["Sylvia (孕期Luna)", "James (Alpha)", "Kennedy (新登场)"],
+  "emotion_arc": "观察→震惊→压抑",
+  "duration": "13s",
+  "key_challenges": [
+    "Kennedy首次登场必须有立绘引用",
+    "三人同框建立空间关系（前景Sylvia+中景James+Kennedy）",
+    "避免'画面中不得出现其他人物'这类无根据禁令",
+    "Kennedy身份特征首次描述要完整",
+    "James与Kennedy的亲密动作（拥抱、抚摸头发）"
+  ],
+  "script_segment": "（Sylvia 将车停在公墓入口，下车，走到一排石碑后，手撑着碑沿，站定。）\n\n（三米外，James 单膝跪在新坟旁，双臂将身旁的女人揽住，低头靠近她的耳边。）\n\nJames:（极轻，像在哄）Shh. Kenny. I'm here.\n\n（Kennedy 把脸埋进他胸口。James 的手顺着她的头发慢慢往下压，动作熟稳，从容。）\n\n字幕：【Kennedy: Daughter of the late Alpha Barnes of the New Moon Territory】",
+  "reference_assets": {
+    "images": ["Sylvia_portrait_pregnant.png", "James_portrait.png", "Kennedy_portrait.png", "cemetery_scene.png"],
+    "previous_shot_end_frame": "shot_4_end.png"
+  },
+  "expected_prompt_elements": [
+    "Kennedy首次登场：@图3 Kennedy（完整身份描述）",
+    "三人位置关系明确：前景Sylvia站立、中景James跪地、Kennedy在James怀中",
+    "Kennedy服装特征：黑色长款风衣、黑色高领内搭、头发散落",
+    "亲密动作细节：James双臂揽住、手顺头发下压、Kennedy脸埋胸口",
+    "人物唯一性铁律：每个角色仅一人，严禁分身",
+    "Sylvia观察视角：从石碑后看向中景"
+  ]
+}

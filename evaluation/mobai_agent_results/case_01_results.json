@@ -1,0 +1,341 @@
+{
+  "test_case": {
+    "case_id": "case_01",
+    "case_name": "情感对峙场景 - 孕期Luna发现Alpha出轨",
+    "description": "典型的狗血短剧情感高潮场景，女主怀孕7个月发现丈夫在墓地安慰前女友，需要处理多人物、复杂情绪弧、孕肚特征",
+    "scene": "新月领地公墓",
+    "characters": [
+      "Sylvia (孕期Luna)",
+      "James (Alpha)",
+      "Kennedy (前女友)"
+    ],
+    "emotion_arc": "震惊→失落→压抑愤怒",
+    "duration": "12s",
+    "key_challenges": [
+      "孕肚特征必须明显且一致",
+      "三人空间关系清晰（Sylvia站立3米外，James跪地抱Kennedy）",
+      "情绪层次：Sylvia克制但眼眶泛红，James僵硬回避，Kennedy依赖性哭泣",
+      "景别控制：中景到近景推进，最终定格Sylvia面部特写"
+    ],
+    "script_segment": "（三米外，James 单膝跪在新坟旁，双臂将身旁的女人揽住，低头靠近她的耳边。）\n\nJames:（极轻，像在哄）Shh. Kenny. I'm here.\n\n（Kennedy 把脸埋进他胸口。James 的手顺着她的头发慢慢往下压，动作熟稳，从容。）\n\n（风向变了。James 猛地抬头，与 Sylvia 对视。他的神情从温柔瞬间僵住——但双臂不仅没有松开，反而收紧了。）\n\n（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）",
+    "reference_assets": {
+      "images": [
+        "Sylvia_portrait_pregnant.png",
+        "James_portrait.png",
+        "Kennedy_portrait.png",
+        "cemetery_scene.png"
+      ],
+      "previous_shot_end_frame": "shot_5_end.png"
+    },
+    "expected_prompt_elements": [
+      "零字幕四层防御（前200字内）",
+      "孕肚描述至少3处强化",
+      "三人位置关系明确（前景/中景/远景）",
+      "景别硬锁：推至近景后停止",
+      "收尾三重静止",
+      "情绪微动作：Sylvia手指收紧、James下颌绷紧、Kennedy肩膀颤抖"
+    ]
+  },
+  "runs": [
+    {
+      "run_number": 1,
+      "case_id": "case_01",
+      "case_name": "情感对峙场景 - 孕期Luna发现Alpha出轨",
+      "frontmatter": {
+        "shot_id": "case_01_run1",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落→压抑愤怒",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy (前女友)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（三米外，James 单膝跪在新坟旁，双臂将身旁的女人揽住，低头靠近她的耳边。）\n\nJames:（极轻，像在哄）Shh. Kenny. I'm here.\n\n（Kennedy 把脸埋进他胸口。James 的手顺着她的头发慢慢往下压，动作熟稳，从容。）\n\n（风向变了。James 猛地抬头，与 Sylv...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy (前女友)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 2,
+      "case_id": "case_01",
+      "case_name": "情感对峙场景 - 孕期Luna发现Alpha出轨",
+      "frontmatter": {
+        "shot_id": "case_01_run2",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落→压抑愤怒",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy (前女友)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（三米外，James 单膝跪在新坟旁，双臂将身旁的女人揽住，低头靠近她的耳边。）\n\nJames:（极轻，像在哄）Shh. Kenny. I'm here.\n\n（Kennedy 把脸埋进他胸口。James 的手顺着她的头发慢慢往下压，动作熟稳，从容。）\n\n（风向变了。James 猛地抬头，与 Sylv...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy (前女友)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 3,
+      "case_id": "case_01",
+      "case_name": "情感对峙场景 - 孕期Luna发现Alpha出轨",
+      "frontmatter": {
+        "shot_id": "case_01_run3",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落→压抑愤怒",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy (前女友)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（三米外，James 单膝跪在新坟旁，双臂将身旁的女人揽住，低头靠近她的耳边。）\n\nJames:（极轻，像在哄）Shh. Kenny. I'm here.\n\n（Kennedy 把脸埋进他胸口。James 的手顺着她的头发慢慢往下压，动作熟稳，从容。）\n\n（风向变了。James 猛地抬头，与 Sylv...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy (前女友)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 4,
+      "case_id": "case_01",
+      "case_name": "情感对峙场景 - 孕期Luna发现Alpha出轨",
+      "frontmatter": {
+        "shot_id": "case_01_run4",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落→压抑愤怒",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy (前女友)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（三米外，James 单膝跪在新坟旁，双臂将身旁的女人揽住，低头靠近她的耳边。）\n\nJames:（极轻，像在哄）Shh. Kenny. I'm here.\n\n（Kennedy 把脸埋进他胸口。James 的手顺着她的头发慢慢往下压，动作熟稳，从容。）\n\n（风向变了。James 猛地抬头，与 Sylv...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy (前女友)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 5,
+      "case_id": "case_01",
+      "case_name": "情感对峙场景 - 孕期Luna发现Alpha出轨",
+      "frontmatter": {
+        "shot_id": "case_01_run5",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落→压抑愤怒",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy (前女友)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（三米外，James 单膝跪在新坟旁，双臂将身旁的女人揽住，低头靠近她的耳边。）\n\nJames:（极轻，像在哄）Shh. Kenny. I'm here.\n\n（Kennedy 把脸埋进他胸口。James 的手顺着她的头发慢慢往下压，动作熟稳，从容。）\n\n（风向变了。James 猛地抬头，与 Sylv...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy (前女友)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 6,
+      "case_id": "case_01",
+      "case_name": "情感对峙场景 - 孕期Luna发现Alpha出轨",
+      "frontmatter": {
+        "shot_id": "case_01_run6",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落→压抑愤怒",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy (前女友)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（三米外，James 单膝跪在新坟旁，双臂将身旁的女人揽住，低头靠近她的耳边。）\n\nJames:（极轻，像在哄）Shh. Kenny. I'm here.\n\n（Kennedy 把脸埋进他胸口。James 的手顺着她的头发慢慢往下压，动作熟稳，从容。）\n\n（风向变了。James 猛地抬头，与 Sylv...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy (前女友)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 7,
+      "case_id": "case_01",
+      "case_name": "情感对峙场景 - 孕期Luna发现Alpha出轨",
+      "frontmatter": {
+        "shot_id": "case_01_run7",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落→压抑愤怒",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy (前女友)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（三米外，James 单膝跪在新坟旁，双臂将身旁的女人揽住，低头靠近她的耳边。）\n\nJames:（极轻，像在哄）Shh. Kenny. I'm here.\n\n（Kennedy 把脸埋进他胸口。James 的手顺着她的头发慢慢往下压，动作熟稳，从容。）\n\n（风向变了。James 猛地抬头，与 Sylv...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy (前女友)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 8,
+      "case_id": "case_01",
+      "case_name": "情感对峙场景 - 孕期Luna发现Alpha出轨",
+      "frontmatter": {
+        "shot_id": "case_01_run8",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落→压抑愤怒",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy (前女友)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（三米外，James 单膝跪在新坟旁，双臂将身旁的女人揽住，低头靠近她的耳边。）\n\nJames:（极轻，像在哄）Shh. Kenny. I'm here.\n\n（Kennedy 把脸埋进他胸口。James 的手顺着她的头发慢慢往下压，动作熟稳，从容。）\n\n（风向变了。James 猛地抬头，与 Sylv...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy (前女友)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 9,
+      "case_id": "case_01",
+      "case_name": "情感对峙场景 - 孕期Luna发现Alpha出轨",
+      "frontmatter": {
+        "shot_id": "case_01_run9",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落→压抑愤怒",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy (前女友)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（三米外，James 单膝跪在新坟旁，双臂将身旁的女人揽住，低头靠近她的耳边。）\n\nJames:（极轻，像在哄）Shh. Kenny. I'm here.\n\n（Kennedy 把脸埋进他胸口。James 的手顺着她的头发慢慢往下压，动作熟稳，从容。）\n\n（风向变了。James 猛地抬头，与 Sylv...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy (前女友)"
+        ],
+        "gaps_present": []
+      }
+    },
+    {
+      "run_number": 10,
+      "case_id": "case_01",
+      "case_name": "情感对峙场景 - 孕期Luna发现Alpha出轨",
+      "frontmatter": {
+        "shot_id": "case_01_run10",
+        "duration": "12s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "震惊→失落→压抑愤怒",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy (前女友)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景：\n（三米外，James 单膝跪在新坟旁，双臂将身旁的女人揽住，低头靠近她的耳边。）\n\nJames:（极轻，像在哄）Shh. Kenny. I'm here.\n\n（Kennedy 把脸埋进他胸口。James 的手顺着她的头发慢慢往下压，动作熟稳，从容。）\n\n（风向变了。James 猛地抬头，与 Sylv...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy (前女友)"
+        ],
+        "gaps_present": []
+      }
+    }
+  ]
+}

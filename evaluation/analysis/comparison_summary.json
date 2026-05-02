@@ -1,0 +1,70 @@
+{
+  "total_cases": 10,
+  "overall_metrics": {
+    "avg_similarity": 0.9870404860487516,
+    "avg_length_diff": 28.7
+  },
+  "gap_frequency": {},
+  "cases": [
+    {
+      "case_id": "case_01",
+      "case_name": "情感对峙场景 - 孕期Luna发现Alpha出轨",
+      "gaps": [],
+      "similarity": 0.9754253308128542
+    },
+    {
+      "case_id": "case_02",
+      "case_name": "室内对白场景 - 厨房独白与突然闯入",
+      "gaps": [],
+      "similarity": 0.978494623655914
+    },
+    {
+      "case_id": "case_03",
+      "case_name": "静态情绪戏 - 无对白微表情特写",
+      "gaps": [],
+      "similarity": 0.9918699186991871
+    },
+    {
+      "case_id": "case_04",
+      "case_name": "多人物登场 - 新角色进入已有场景",
+      "gaps": [],
+      "similarity": 0.9754253308128542
+    },
+    {
+      "case_id": "case_05",
+      "case_name": "跨场景转场 - 从室内到户外",
+      "gaps": [],
+      "similarity": 0.9989023051591659
+    },
+    {
+      "case_id": "case_06",
+      "case_name": "英语对白口型同步 - 多轮对话",
+      "gaps": [],
+      "similarity": 0.9784589892294946
+    },
+    {
+      "case_id": "case_07",
+      "case_name": "道具连续性 - 车钥匙首次出现",
+      "gaps": [],
+      "similarity": 0.998916576381365
+    },
+    {
+      "case_id": "case_08",
+      "case_name": "景别硬锁 - 推镜到近景后停止",
+      "gaps": [],
+      "similarity": 0.9989384288747345
+    },
+    {
+      "case_id": "case_09",
+      "case_name": "角色唯一性 - 避免同一角色多次@图引用导致分身",
+      "gaps": [],
+      "similarity": 0.9749518304431601
+    },
+    {
+      "case_id": "case_10",
+      "case_name": "首尾帧模式 - 使用末帧PNG作为首帧锚图",
+      "gaps": [],
+      "similarity": 0.9990215264187867
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "case_id": "case_04",
+  "case_name": "多人物登场 - 新角色进入已有场景",
+  "identified_gaps": [],
+  "run_comparisons": [
+    {
+      "run_number": 1,
+      "similarity_ratio": 0.9754253308128544,
+      "length_diff": 52,
+      "video_length": 1084,
+      "mobai_length": 1032,
+      "diff_lines": 21,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 2,
+      "similarity_ratio": 0.9754253308128544,
+      "length_diff": 52,
+      "video_length": 1084,
+      "mobai_length": 1032,
+      "diff_lines": 21,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 3,
+      "similarity_ratio": 0.9754253308128544,
+      "length_diff": 52,
+      "video_length": 1084,
+      "mobai_length": 1032,
+      "diff_lines": 21,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 4,
+      "similarity_ratio": 0.9754253308128544,
+      "length_diff": 52,
+      "video_length": 1084,
+      "mobai_length": 1032,
+      "diff_lines": 21,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 5,
+      "similarity_ratio": 0.9754253308128544,
+      "length_diff": 52,
+      "video_length": 1084,
+      "mobai_length": 1032,
+      "diff_lines": 21,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 6,
+      "similarity_ratio": 0.9754253308128544,
+      "length_diff": 52,
+      "video_length": 1084,
+      "mobai_length": 1032,
+      "diff_lines": 21,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 7,
+      "similarity_ratio": 0.9754253308128544,
+      "length_diff": 52,
+      "video_length": 1084,
+      "mobai_length": 1032,
+      "diff_lines": 21,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 8,
+      "similarity_ratio": 0.9754253308128544,
+      "length_diff": 52,
+      "video_length": 1084,
+      "mobai_length": 1032,
+      "diff_lines": 21,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 9,
+      "similarity_ratio": 0.9754253308128544,
+      "length_diff": 52,
+      "video_length": 1084,
+      "mobai_length": 1032,
+      "diff_lines": 21,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 10,
+      "similarity_ratio": 0.9754253308128544,
+      "length_diff": 52,
+      "video_length": 1084,
+      "mobai_length": 1032,
+      "diff_lines": 21,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    }
+  ],
+  "metrics": {
+    "avg_similarity": 0.9754253308128542,
+    "avg_length_diff": 52.0,
+    "avg_video_length": 1084.0,
+    "avg_mobai_length": 1032.0
+  }
+}

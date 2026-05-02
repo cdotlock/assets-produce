@@ -1,0 +1,428 @@
+{
+  "test_case": {
+    "case_id": "case_03",
+    "case_name": "静态情绪戏 - 无对白微表情特写",
+    "description": "纯情绪张力场景，无台词，依靠微表情和肢体语言传递内心戏，测试对E-11情绪弧优先和微动作描写的掌握",
+    "scene": "新月领地公墓",
+    "characters": [
+      "Sylvia (孕期Luna)"
+    ],
+    "emotion_arc": "克制→眼眶泛红→失落凝固",
+    "duration": "10s",
+    "key_challenges": [
+      "无对白场景的情绪传递",
+      "微表情细节：眼眶泛红、嘴唇微颤、呼吸节奏变化",
+      "静态构图：首帧即最终构图，10s内只做微动",
+      "环境音效：风声、远处哭声、落叶声",
+      "孕肚在画面中的存在感（手覆腹部姿势）"
+    ],
+    "script_segment": "（Sylvia没有动，也没有再开口。她就那样站在三米外，手覆在腹部，风吹着她的头发。）\n\n（James的目光落在Kennedy肩头，不看她。Kennedy的哭声填满了两人之间的沉默。十秒，二十秒，没有人说话。）\n\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）",
+    "reference_assets": {
+      "images": [
+        "Sylvia_portrait_pregnant.png",
+        "cemetery_scene.png"
+      ],
+      "previous_shot_end_frame": "shot_6a_end.png"
+    },
+    "expected_prompt_elements": [
+      "首帧即最终构图（已站定）",
+      "微动作清单：风吹发丝、眼眶泛红过程、手指微收紧、呼吸起伏",
+      "景别硬锁：近景面部特写",
+      "收尾三重静止",
+      "环境音效层次：主风声+远处哭声+偶尔落叶",
+      "禁止：走动、大幅度动作、表情剧烈变化"
+    ]
+  },
+  "runs": [
+    {
+      "run_number": 1,
+      "case_id": "case_03",
+      "case_name": "静态情绪戏 - 无对白微表情特写",
+      "frontmatter": {
+        "shot_id": "case_03_run1",
+        "duration": "10s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "克制→眼眶泛红→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia没有动，也没有再开口。她就那样站在三米外，手覆在腹部，风吹着她的头发。）\n\n（James的目光落在Kennedy肩头，不看她。Kennedy的哭声填满了两人之间的沉默。十秒，二十秒，没有人说话。）\n\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n对白与口型同步：\n【2s】Sylvia speaks \"James. We need to talk.\" (口型同步)\n【8s】Sylvia speaks \"Kennedy.\" (口型同步)\n【11s】Sylvia speaks \"What is the relationship between you and her?\" (口型同步)\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "无对白场景的情绪传递",
+          "微表情细节：眼眶泛红、嘴唇微颤、呼吸节奏变化",
+          "静态构图：首帧即最终构图，10s内只做微动",
+          "环境音效：风声、远处哭声、落叶声",
+          "孕肚在画面中的存在感（手覆腹部姿势）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 2,
+      "case_id": "case_03",
+      "case_name": "静态情绪戏 - 无对白微表情特写",
+      "frontmatter": {
+        "shot_id": "case_03_run2",
+        "duration": "10s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "克制→眼眶泛红→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia没有动，也没有再开口。她就那样站在三米外，手覆在腹部，风吹着她的头发。）\n\n（James的目光落在Kennedy肩头，不看她。Kennedy的哭声填满了两人之间的沉默。十秒，二十秒，没有人说话。）\n\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n对白与口型同步：\n【2s】Sylvia speaks \"James. We need to talk.\" (口型同步)\n【8s】Sylvia speaks \"Kennedy.\" (口型同步)\n【11s】Sylvia speaks \"What is the relationship between you and her?\" (口型同步)\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "无对白场景的情绪传递",
+          "微表情细节：眼眶泛红、嘴唇微颤、呼吸节奏变化",
+          "静态构图：首帧即最终构图，10s内只做微动",
+          "环境音效：风声、远处哭声、落叶声",
+          "孕肚在画面中的存在感（手覆腹部姿势）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 3,
+      "case_id": "case_03",
+      "case_name": "静态情绪戏 - 无对白微表情特写",
+      "frontmatter": {
+        "shot_id": "case_03_run3",
+        "duration": "10s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "克制→眼眶泛红→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia没有动，也没有再开口。她就那样站在三米外，手覆在腹部，风吹着她的头发。）\n\n（James的目光落在Kennedy肩头，不看她。Kennedy的哭声填满了两人之间的沉默。十秒，二十秒，没有人说话。）\n\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n对白与口型同步：\n【2s】Sylvia speaks \"James. We need to talk.\" (口型同步)\n【8s】Sylvia speaks \"Kennedy.\" (口型同步)\n【11s】Sylvia speaks \"What is the relationship between you and her?\" (口型同步)\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "无对白场景的情绪传递",
+          "微表情细节：眼眶泛红、嘴唇微颤、呼吸节奏变化",
+          "静态构图：首帧即最终构图，10s内只做微动",
+          "环境音效：风声、远处哭声、落叶声",
+          "孕肚在画面中的存在感（手覆腹部姿势）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 4,
+      "case_id": "case_03",
+      "case_name": "静态情绪戏 - 无对白微表情特写",
+      "frontmatter": {
+        "shot_id": "case_03_run4",
+        "duration": "10s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "克制→眼眶泛红→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia没有动，也没有再开口。她就那样站在三米外，手覆在腹部，风吹着她的头发。）\n\n（James的目光落在Kennedy肩头，不看她。Kennedy的哭声填满了两人之间的沉默。十秒，二十秒，没有人说话。）\n\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n对白与口型同步：\n【2s】Sylvia speaks \"James. We need to talk.\" (口型同步)\n【8s】Sylvia speaks \"Kennedy.\" (口型同步)\n【11s】Sylvia speaks \"What is the relationship between you and her?\" (口型同步)\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "无对白场景的情绪传递",
+          "微表情细节：眼眶泛红、嘴唇微颤、呼吸节奏变化",
+          "静态构图：首帧即最终构图，10s内只做微动",
+          "环境音效：风声、远处哭声、落叶声",
+          "孕肚在画面中的存在感（手覆腹部姿势）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 5,
+      "case_id": "case_03",
+      "case_name": "静态情绪戏 - 无对白微表情特写",
+      "frontmatter": {
+        "shot_id": "case_03_run5",
+        "duration": "10s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "克制→眼眶泛红→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia没有动，也没有再开口。她就那样站在三米外，手覆在腹部，风吹着她的头发。）\n\n（James的目光落在Kennedy肩头，不看她。Kennedy的哭声填满了两人之间的沉默。十秒，二十秒，没有人说话。）\n\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n对白与口型同步：\n【2s】Sylvia speaks \"James. We need to talk.\" (口型同步)\n【8s】Sylvia speaks \"Kennedy.\" (口型同步)\n【11s】Sylvia speaks \"What is the relationship between you and her?\" (口型同步)\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "无对白场景的情绪传递",
+          "微表情细节：眼眶泛红、嘴唇微颤、呼吸节奏变化",
+          "静态构图：首帧即最终构图，10s内只做微动",
+          "环境音效：风声、远处哭声、落叶声",
+          "孕肚在画面中的存在感（手覆腹部姿势）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 6,
+      "case_id": "case_03",
+      "case_name": "静态情绪戏 - 无对白微表情特写",
+      "frontmatter": {
+        "shot_id": "case_03_run6",
+        "duration": "10s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "克制→眼眶泛红→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia没有动，也没有再开口。她就那样站在三米外，手覆在腹部，风吹着她的头发。）\n\n（James的目光落在Kennedy肩头，不看她。Kennedy的哭声填满了两人之间的沉默。十秒，二十秒，没有人说话。）\n\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n对白与口型同步：\n【2s】Sylvia speaks \"James. We need to talk.\" (口型同步)\n【8s】Sylvia speaks \"Kennedy.\" (口型同步)\n【11s】Sylvia speaks \"What is the relationship between you and her?\" (口型同步)\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "无对白场景的情绪传递",
+          "微表情细节：眼眶泛红、嘴唇微颤、呼吸节奏变化",
+          "静态构图：首帧即最终构图，10s内只做微动",
+          "环境音效：风声、远处哭声、落叶声",
+          "孕肚在画面中的存在感（手覆腹部姿势）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 7,
+      "case_id": "case_03",
+      "case_name": "静态情绪戏 - 无对白微表情特写",
+      "frontmatter": {
+        "shot_id": "case_03_run7",
+        "duration": "10s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "克制→眼眶泛红→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia没有动，也没有再开口。她就那样站在三米外，手覆在腹部，风吹着她的头发。）\n\n（James的目光落在Kennedy肩头，不看她。Kennedy的哭声填满了两人之间的沉默。十秒，二十秒，没有人说话。）\n\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n对白与口型同步：\n【2s】Sylvia speaks \"James. We need to talk.\" (口型同步)\n【8s】Sylvia speaks \"Kennedy.\" (口型同步)\n【11s】Sylvia speaks \"What is the relationship between you and her?\" (口型同步)\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "无对白场景的情绪传递",
+          "微表情细节：眼眶泛红、嘴唇微颤、呼吸节奏变化",
+          "静态构图：首帧即最终构图，10s内只做微动",
+          "环境音效：风声、远处哭声、落叶声",
+          "孕肚在画面中的存在感（手覆腹部姿势）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 8,
+      "case_id": "case_03",
+      "case_name": "静态情绪戏 - 无对白微表情特写",
+      "frontmatter": {
+        "shot_id": "case_03_run8",
+        "duration": "10s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "克制→眼眶泛红→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia没有动，也没有再开口。她就那样站在三米外，手覆在腹部，风吹着她的头发。）\n\n（James的目光落在Kennedy肩头，不看她。Kennedy的哭声填满了两人之间的沉默。十秒，二十秒，没有人说话。）\n\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n对白与口型同步：\n【2s】Sylvia speaks \"James. We need to talk.\" (口型同步)\n【8s】Sylvia speaks \"Kennedy.\" (口型同步)\n【11s】Sylvia speaks \"What is the relationship between you and her?\" (口型同步)\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "无对白场景的情绪传递",
+          "微表情细节：眼眶泛红、嘴唇微颤、呼吸节奏变化",
+          "静态构图：首帧即最终构图，10s内只做微动",
+          "环境音效：风声、远处哭声、落叶声",
+          "孕肚在画面中的存在感（手覆腹部姿势）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 9,
+      "case_id": "case_03",
+      "case_name": "静态情绪戏 - 无对白微表情特写",
+      "frontmatter": {
+        "shot_id": "case_03_run9",
+        "duration": "10s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "克制→眼眶泛红→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia没有动，也没有再开口。她就那样站在三米外，手覆在腹部，风吹着她的头发。）\n\n（James的目光落在Kennedy肩头，不看她。Kennedy的哭声填满了两人之间的沉默。十秒，二十秒，没有人说话。）\n\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n对白与口型同步：\n【2s】Sylvia speaks \"James. We need to talk.\" (口型同步)\n【8s】Sylvia speaks \"Kennedy.\" (口型同步)\n【11s】Sylvia speaks \"What is the relationship between you and her?\" (口型同步)\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "无对白场景的情绪传递",
+          "微表情细节：眼眶泛红、嘴唇微颤、呼吸节奏变化",
+          "静态构图：首帧即最终构图，10s内只做微动",
+          "环境音效：风声、远处哭声、落叶声",
+          "孕肚在画面中的存在感（手覆腹部姿势）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    },
+    {
+      "run_number": 10,
+      "case_id": "case_03",
+      "case_name": "静态情绪戏 - 无对白微表情特写",
+      "frontmatter": {
+        "shot_id": "case_03_run10",
+        "duration": "10s",
+        "mode": "多参考",
+        "scene": "新月领地公墓",
+        "emotion_arc": "克制→眼眶泛红→失落凝固",
+        "assets": {
+          "images": [
+            "Sylvia_portrait_pregnant.png",
+            "cemetery_scene.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia没有动，也没有再开口。她就那样站在三米外，手覆在腹部，风吹着她的头发。）\n\n（James的目光落在Kennedy肩头，不看她。Kennedy的哭声填满了两人之间的沉默。十秒，二十秒，没有人说话。）\n\n（Sylvia的眼眶慢慢发红。失落、愤怒、委屈涌上来——但她没有哭，没有求。她站在原地，等着一个他显然不打算给的回答。）...\n\n对白与口型同步：\n【2s】Sylvia speaks \"James. We need to talk.\" (口型同步)\n【8s】Sylvia speaks \"Kennedy.\" (口型同步)\n【11s】Sylvia speaks \"What is the relationship between you and her?\" (口型同步)\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)"
+        ],
+        "key_challenges": [
+          "无对白场景的情绪传递",
+          "微表情细节：眼眶泛红、嘴唇微颤、呼吸节奏变化",
+          "静态构图：首帧即最终构图，10s内只做微动",
+          "环境音效：风声、远处哭声、落叶声",
+          "孕肚在画面中的存在感（手覆腹部姿势）"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true
+        }
+      }
+    }
+  ]
+}

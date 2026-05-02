@@ -1,0 +1,173 @@
+{
+  "case_id": "case_07",
+  "case_name": "道具连续性 - 车钥匙首次出现",
+  "identified_gaps": [],
+  "run_comparisons": [
+    {
+      "run_number": 1,
+      "similarity_ratio": 0.9989165763813651,
+      "length_diff": 2,
+      "video_length": 924,
+      "mobai_length": 922,
+      "diff_lines": 11,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 2,
+      "similarity_ratio": 0.9989165763813651,
+      "length_diff": 2,
+      "video_length": 924,
+      "mobai_length": 922,
+      "diff_lines": 11,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 3,
+      "similarity_ratio": 0.9989165763813651,
+      "length_diff": 2,
+      "video_length": 924,
+      "mobai_length": 922,
+      "diff_lines": 11,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 4,
+      "similarity_ratio": 0.9989165763813651,
+      "length_diff": 2,
+      "video_length": 924,
+      "mobai_length": 922,
+      "diff_lines": 11,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 5,
+      "similarity_ratio": 0.9989165763813651,
+      "length_diff": 2,
+      "video_length": 924,
+      "mobai_length": 922,
+      "diff_lines": 11,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 6,
+      "similarity_ratio": 0.9989165763813651,
+      "length_diff": 2,
+      "video_length": 924,
+      "mobai_length": 922,
+      "diff_lines": 11,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 7,
+      "similarity_ratio": 0.9989165763813651,
+      "length_diff": 2,
+      "video_length": 924,
+      "mobai_length": 922,
+      "diff_lines": 11,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 8,
+      "similarity_ratio": 0.9989165763813651,
+      "length_diff": 2,
+      "video_length": 924,
+      "mobai_length": 922,
+      "diff_lines": 11,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 9,
+      "similarity_ratio": 0.9989165763813651,
+      "length_diff": 2,
+      "video_length": 924,
+      "mobai_length": 922,
+      "diff_lines": 11,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    },
+    {
+      "run_number": 10,
+      "similarity_ratio": 0.9989165763813651,
+      "length_diff": 2,
+      "video_length": 924,
+      "mobai_length": 922,
+      "diff_lines": 11,
+      "video_compliance": {
+        "zero_subtitle_in_first_200": true,
+        "visual_style_in_first_300": true,
+        "character_uniqueness_declared": true,
+        "three_fold_stillness": true,
+        "prohibition_list_present": true
+      },
+      "mobai_gaps": []
+    }
+  ],
+  "metrics": {
+    "avg_similarity": 0.998916576381365,
+    "avg_length_diff": 2.0,
+    "avg_video_length": 924.0,
+    "avg_mobai_length": 922.0
+  }
+}

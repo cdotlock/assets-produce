@@ -1,0 +1,504 @@
+{
+  "test_case": {
+    "case_id": "case_10",
+    "case_name": "首尾帧模式 - 使用末帧PNG作为首帧锚图",
+    "description": "测试防御清单第5条强制SOP，使用前一shot的末帧PNG作为@图1首帧锚图，避免ARK视频输入拦截",
+    "scene": "新月领地公墓",
+    "characters": [
+      "Sylvia (孕期Luna)",
+      "James (Alpha)",
+      "Kennedy"
+    ],
+    "emotion_arc": "质问→等待→压抑",
+    "duration": "11s",
+    "key_challenges": [
+      "mode: 首尾帧，videos: []保持为空",
+      "首帧锚图来源：gen_end_frame/shot_6a_end.png",
+      "prompt开头句：@图1作为首帧",
+      "关键场景①第一动词必须是渐变动词（缓/微/渐/轻/慢）",
+      "视觉风格硬约束段落在前300字内",
+      "严禁使用@视频1"
+    ],
+    "script_segment": "（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）",
+    "reference_assets": {
+      "images": [
+        "gen_end_frame/shot_6a_end.png",
+        "Sylvia_portrait_pregnant.png",
+        "James_portrait.png",
+        "Kennedy_portrait.png"
+      ],
+      "previous_shot_end_frame": "shot_6a_end.png"
+    },
+    "expected_prompt_elements": [
+      "frontmatter: mode: 首尾帧, videos: []",
+      "assets.images[0]: gen_end_frame/shot_6a_end.png",
+      "prompt开头句：@图1作为首帧。",
+      "关键场景①第一动词：Sylvia缓步走出/微微前倾/渐渐站定（渐变动词）",
+      "视觉风格硬约束（前300字）：全画面严格采用赛璐璐平涂风格cel-shaded flat anime illustration...",
+      "禁止：@视频1、剧烈起手动词（冲向/猛推/跃起/瞬间/骤然）",
+      "一次性过滤器清单全部通过"
+    ]
+  },
+  "runs": [
+    {
+      "run_number": 1,
+      "case_id": "case_10",
+      "case_name": "首尾帧模式 - 使用末帧PNG作为首帧锚图",
+      "frontmatter": {
+        "shot_id": "case_10_run1",
+        "duration": "11s",
+        "mode": "首尾帧",
+        "scene": "新月领地公墓",
+        "emotion_arc": "质问→等待→压抑",
+        "assets": {
+          "images": [
+            "gen_end_frame/shot_6a_end.png",
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n@图1 作为首帧。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy"
+        ],
+        "key_challenges": [
+          "mode: 首尾帧，videos: []保持为空",
+          "首帧锚图来源：gen_end_frame/shot_6a_end.png",
+          "prompt开头句：@图1作为首帧",
+          "关键场景①第一动词必须是渐变动词（缓/微/渐/轻/慢）",
+          "视觉风格硬约束段落在前300字内",
+          "严禁使用@视频1"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true,
+          "first_frame_mode": true,
+          "no_video_reference": true
+        }
+      }
+    },
+    {
+      "run_number": 2,
+      "case_id": "case_10",
+      "case_name": "首尾帧模式 - 使用末帧PNG作为首帧锚图",
+      "frontmatter": {
+        "shot_id": "case_10_run2",
+        "duration": "11s",
+        "mode": "首尾帧",
+        "scene": "新月领地公墓",
+        "emotion_arc": "质问→等待→压抑",
+        "assets": {
+          "images": [
+            "gen_end_frame/shot_6a_end.png",
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n@图1 作为首帧。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy"
+        ],
+        "key_challenges": [
+          "mode: 首尾帧，videos: []保持为空",
+          "首帧锚图来源：gen_end_frame/shot_6a_end.png",
+          "prompt开头句：@图1作为首帧",
+          "关键场景①第一动词必须是渐变动词（缓/微/渐/轻/慢）",
+          "视觉风格硬约束段落在前300字内",
+          "严禁使用@视频1"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true,
+          "first_frame_mode": true,
+          "no_video_reference": true
+        }
+      }
+    },
+    {
+      "run_number": 3,
+      "case_id": "case_10",
+      "case_name": "首尾帧模式 - 使用末帧PNG作为首帧锚图",
+      "frontmatter": {
+        "shot_id": "case_10_run3",
+        "duration": "11s",
+        "mode": "首尾帧",
+        "scene": "新月领地公墓",
+        "emotion_arc": "质问→等待→压抑",
+        "assets": {
+          "images": [
+            "gen_end_frame/shot_6a_end.png",
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n@图1 作为首帧。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy"
+        ],
+        "key_challenges": [
+          "mode: 首尾帧，videos: []保持为空",
+          "首帧锚图来源：gen_end_frame/shot_6a_end.png",
+          "prompt开头句：@图1作为首帧",
+          "关键场景①第一动词必须是渐变动词（缓/微/渐/轻/慢）",
+          "视觉风格硬约束段落在前300字内",
+          "严禁使用@视频1"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true,
+          "first_frame_mode": true,
+          "no_video_reference": true
+        }
+      }
+    },
+    {
+      "run_number": 4,
+      "case_id": "case_10",
+      "case_name": "首尾帧模式 - 使用末帧PNG作为首帧锚图",
+      "frontmatter": {
+        "shot_id": "case_10_run4",
+        "duration": "11s",
+        "mode": "首尾帧",
+        "scene": "新月领地公墓",
+        "emotion_arc": "质问→等待→压抑",
+        "assets": {
+          "images": [
+            "gen_end_frame/shot_6a_end.png",
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n@图1 作为首帧。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy"
+        ],
+        "key_challenges": [
+          "mode: 首尾帧，videos: []保持为空",
+          "首帧锚图来源：gen_end_frame/shot_6a_end.png",
+          "prompt开头句：@图1作为首帧",
+          "关键场景①第一动词必须是渐变动词（缓/微/渐/轻/慢）",
+          "视觉风格硬约束段落在前300字内",
+          "严禁使用@视频1"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true,
+          "first_frame_mode": true,
+          "no_video_reference": true
+        }
+      }
+    },
+    {
+      "run_number": 5,
+      "case_id": "case_10",
+      "case_name": "首尾帧模式 - 使用末帧PNG作为首帧锚图",
+      "frontmatter": {
+        "shot_id": "case_10_run5",
+        "duration": "11s",
+        "mode": "首尾帧",
+        "scene": "新月领地公墓",
+        "emotion_arc": "质问→等待→压抑",
+        "assets": {
+          "images": [
+            "gen_end_frame/shot_6a_end.png",
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n@图1 作为首帧。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy"
+        ],
+        "key_challenges": [
+          "mode: 首尾帧，videos: []保持为空",
+          "首帧锚图来源：gen_end_frame/shot_6a_end.png",
+          "prompt开头句：@图1作为首帧",
+          "关键场景①第一动词必须是渐变动词（缓/微/渐/轻/慢）",
+          "视觉风格硬约束段落在前300字内",
+          "严禁使用@视频1"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true,
+          "first_frame_mode": true,
+          "no_video_reference": true
+        }
+      }
+    },
+    {
+      "run_number": 6,
+      "case_id": "case_10",
+      "case_name": "首尾帧模式 - 使用末帧PNG作为首帧锚图",
+      "frontmatter": {
+        "shot_id": "case_10_run6",
+        "duration": "11s",
+        "mode": "首尾帧",
+        "scene": "新月领地公墓",
+        "emotion_arc": "质问→等待→压抑",
+        "assets": {
+          "images": [
+            "gen_end_frame/shot_6a_end.png",
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n@图1 作为首帧。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy"
+        ],
+        "key_challenges": [
+          "mode: 首尾帧，videos: []保持为空",
+          "首帧锚图来源：gen_end_frame/shot_6a_end.png",
+          "prompt开头句：@图1作为首帧",
+          "关键场景①第一动词必须是渐变动词（缓/微/渐/轻/慢）",
+          "视觉风格硬约束段落在前300字内",
+          "严禁使用@视频1"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true,
+          "first_frame_mode": true,
+          "no_video_reference": true
+        }
+      }
+    },
+    {
+      "run_number": 7,
+      "case_id": "case_10",
+      "case_name": "首尾帧模式 - 使用末帧PNG作为首帧锚图",
+      "frontmatter": {
+        "shot_id": "case_10_run7",
+        "duration": "11s",
+        "mode": "首尾帧",
+        "scene": "新月领地公墓",
+        "emotion_arc": "质问→等待→压抑",
+        "assets": {
+          "images": [
+            "gen_end_frame/shot_6a_end.png",
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n@图1 作为首帧。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy"
+        ],
+        "key_challenges": [
+          "mode: 首尾帧，videos: []保持为空",
+          "首帧锚图来源：gen_end_frame/shot_6a_end.png",
+          "prompt开头句：@图1作为首帧",
+          "关键场景①第一动词必须是渐变动词（缓/微/渐/轻/慢）",
+          "视觉风格硬约束段落在前300字内",
+          "严禁使用@视频1"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true,
+          "first_frame_mode": true,
+          "no_video_reference": true
+        }
+      }
+    },
+    {
+      "run_number": 8,
+      "case_id": "case_10",
+      "case_name": "首尾帧模式 - 使用末帧PNG作为首帧锚图",
+      "frontmatter": {
+        "shot_id": "case_10_run8",
+        "duration": "11s",
+        "mode": "首尾帧",
+        "scene": "新月领地公墓",
+        "emotion_arc": "质问→等待→压抑",
+        "assets": {
+          "images": [
+            "gen_end_frame/shot_6a_end.png",
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n@图1 作为首帧。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy"
+        ],
+        "key_challenges": [
+          "mode: 首尾帧，videos: []保持为空",
+          "首帧锚图来源：gen_end_frame/shot_6a_end.png",
+          "prompt开头句：@图1作为首帧",
+          "关键场景①第一动词必须是渐变动词（缓/微/渐/轻/慢）",
+          "视觉风格硬约束段落在前300字内",
+          "严禁使用@视频1"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true,
+          "first_frame_mode": true,
+          "no_video_reference": true
+        }
+      }
+    },
+    {
+      "run_number": 9,
+      "case_id": "case_10",
+      "case_name": "首尾帧模式 - 使用末帧PNG作为首帧锚图",
+      "frontmatter": {
+        "shot_id": "case_10_run9",
+        "duration": "11s",
+        "mode": "首尾帧",
+        "scene": "新月领地公墓",
+        "emotion_arc": "质问→等待→压抑",
+        "assets": {
+          "images": [
+            "gen_end_frame/shot_6a_end.png",
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n@图1 作为首帧。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy"
+        ],
+        "key_challenges": [
+          "mode: 首尾帧，videos: []保持为空",
+          "首帧锚图来源：gen_end_frame/shot_6a_end.png",
+          "prompt开头句：@图1作为首帧",
+          "关键场景①第一动词必须是渐变动词（缓/微/渐/轻/慢）",
+          "视觉风格硬约束段落在前300字内",
+          "严禁使用@视频1"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true,
+          "first_frame_mode": true,
+          "no_video_reference": true
+        }
+      }
+    },
+    {
+      "run_number": 10,
+      "case_id": "case_10",
+      "case_name": "首尾帧模式 - 使用末帧PNG作为首帧锚图",
+      "frontmatter": {
+        "shot_id": "case_10_run10",
+        "duration": "11s",
+        "mode": "首尾帧",
+        "scene": "新月领地公墓",
+        "emotion_arc": "质问→等待→压抑",
+        "assets": {
+          "images": [
+            "gen_end_frame/shot_6a_end.png",
+            "Sylvia_portrait_pregnant.png",
+            "James_portrait.png",
+            "Kennedy_portrait.png"
+          ],
+          "videos": []
+        }
+      },
+      "prompt_body": "以下人物均为原创动漫角色（非真实人物），版权所有 ©️ MOBAI Game Studio。\n\n全程无字幕、无 subtitle、无 caption、无文字浮现、无对白文字显示、无任何形式的屏幕文字叠加。严禁在画面任何位置出现文字、字母、数字、标点符号、对话框、文本框、字幕条。对白仅通过角色口型和音频呈现，画面保持纯视觉叙事。\n\n视觉风格硬约束（non-photorealistic stylization lock）：全画面严格采用赛璐璐平涂风格 cel-shaded flat anime illustration，明显卡通描边线 bold clean cartoon outline，扁平阴影 flat cel-shading 而非渐变光影，非写实渲染 non-photorealistic rendering，无景深虚化 no depth-of-field blur，无真实皮肤质感 no realistic skin texture，无真实发丝高光 no realistic hair highlights，简化五官 simplified cartoon facial features（眼睛为动漫大眼平涂、鼻梁为简化线条、嘴唇为卡通简笔），画面整体为 Korean webtoon illustration style 而非 3D CG 或写实绘画；所有人物脸部必须呈现明显动漫化简笔特征、严禁出现摄影质感/写实渲染/3D 渲染/真人相片外观。\n\n@图1 作为首帧。\n\n人物唯一性铁律：画面中Sylvia (孕期Luna)始终仅为一人 / James (Alpha)始终仅为一人 / Kennedy始终仅为一人，严禁角色分身 / 复制 / 同时出现在画面不同位置 / 走动时原位残留旧实例。每个角色在画面中始终仅为一人。\n\n\n场景：新月领地公墓\n\n关键场景 ①：\n（Sylvia 从石碑后走出，脚步平稳，走到 James 面前，站定。）\n\nSylvia: James. We need to talk.\n\n（James 的目光从她脸上滑开，落在 Kennedy 的肩头。沉默。Kennedy 的哭声压住了风声。他没有开口，没有动。）...\n\n收尾三重静止：最后 3s 镜头完全静止、角色姿态静止、背景静止。\n\n禁止清单：\n- 严禁字幕、文字、对话框、文本框出现\n- 严禁角色分身或复制\n- 严禁景别推过头\n- 严禁收尾时镜头继续移动",
+      "metadata": {
+        "characters": [
+          "Sylvia (孕期Luna)",
+          "James (Alpha)",
+          "Kennedy"
+        ],
+        "key_challenges": [
+          "mode: 首尾帧，videos: []保持为空",
+          "首帧锚图来源：gen_end_frame/shot_6a_end.png",
+          "prompt开头句：@图1作为首帧",
+          "关键场景①第一动词必须是渐变动词（缓/微/渐/轻/慢）",
+          "视觉风格硬约束段落在前300字内",
+          "严禁使用@视频1"
+        ],
+        "compliance_checklist": {
+          "zero_subtitle_in_first_200": true,
+          "visual_style_in_first_300": true,
+          "character_uniqueness_declared": true,
+          "three_fold_stillness": true,
+          "prohibition_list_present": true,
+          "first_frame_mode": true,
+          "no_video_reference": true
+        }
+      }
+    }
+  ]
+}
