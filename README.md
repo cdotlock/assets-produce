@@ -6,8 +6,8 @@ Agent-native multi-format asset production platform — based on opencode.
 
 ## Repository Boundary
 
-除 [`video-agent-test/`](video-agent-test) 与 [`claude-code/`](claude-code) 外，本仓库其他项目目录属于我们改造的 `MOBAI-ASSESTS-Agent`。
-[`video-agent-test/`](video-agent-test) 和 [`claude-code/`](claude-code) 保留为原版工作流参考。
+除 [`video-agent-test/`](video-agent-test) 外，本仓库其他项目目录属于我们改造的 `MOBAI-ASSESTS-Agent`。
+[`video-agent-test/`](video-agent-test) 保留为原版工作流参考。
 
 ## Layout
 
@@ -16,7 +16,6 @@ Agent-native multi-format asset production platform — based on opencode.
 - [`cli-example/`](cli-example) — `MiniMax-AI/cli` (design reference, unmaintained)
 - [`legacy/`](legacy) — old Agent Forge snapshot (parked, do not maintain / deploy / test)
 - [`video-agent-test/`](video-agent-test) — original video-agent workflow reference
-- [`claude-code/`](claude-code) — upstream `anthropics/claude-code` workflow reference
 - [`docs/superpowers/specs/`](docs/superpowers/specs) — master spec, phase plans, verification reports
 
 ## Read Next
