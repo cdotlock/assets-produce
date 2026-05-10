@@ -57,7 +57,7 @@ Live submit is intentionally disabled in this prompt-only path. Running `agent v
 | `agent config export-schema` exposes new commands | ✅ | schema tool count updated to `28`; includes `video-submit` |
 | `bun run agent:build` | ✅ | passed; bundle generated at `agent/packages/opencode/dist/agent.mjs` |
 | `bun --cwd=agent run typecheck` | ✅ | passed via turbo, `4` tasks successful |
-| Related unit tests | ✅ | `bun --cwd=agent/packages/opencode test test/video/video.test.ts test/cli/cmd-config.test.ts`: `16` pass, `0` fail |
+| Related unit tests | ✅ | `bun --cwd=agent/packages/opencode test test/video/video.test.ts test/cli/cmd-config.test.ts`: `17` pass, `0` fail |
 | `bun --cwd=web run typecheck` | ✅ | passed |
 | `bun --cwd=web run build` | ✅ | passed after replacing build-time Google Font fetch with system font tokens |
 | Patch hygiene | ✅ | `git diff --check` passed |
@@ -81,13 +81,39 @@ Prompt quality comparison against copied reference prompts:
 - `video-agent-test/works/silver-moon-manor/episodes/ep_2/shots/shot_1/prompt.md` review score: `92`, `11/12` checks.
 - `shot_1` vs `shot_2` compare score: `98`; deltas: score `0`, body length `-13`, timecode count `1`, image marker count `-2`, forbidden count `0`.
 
-## 6. Notes And Deviations
+## 6. AB Prompt Parity
+
+Added repeatable prompt-only AB script:
+
+```bash
+bun scripts/phase7-ab-prompt-parity.mjs
+```
+
+It compares the copied reference `video-agent-test` Go `videoctl` against the new built `agent video` CLI without calling any image/video generation, upload, download, or postprocess command.
+
+Latest result:
+
+- ✅ basic payload: payload JSON and `prompt` field match reference `videoctl`
+- ✅ continuation payload: payload JSON and `prompt` field match reference `videoctl`
+- ✅ text-only payload: payload JSON and `prompt` field match reference `videoctl`
+- ✅ invalid duration: both sides fail
+- ✅ dry-run request: `request.json` matches reference `videoctl`
+- ✅ validate: normalized URL validation result matches reference `videoctl`
+
+AB caught and fixed two parity bugs:
+
+- duplicate `previous_video_url` handling: `agent video payload` now deduplicates previous video URL exactly like `videoctl`.
+- invalid string duration: `agent video payload` now fails instead of silently falling back to `12`.
+
+The AB assertion that matters for final prompt output is strict: `payload.prompt` from `videoctl` must equal `payload.prompt` from `agent video` for every AB payload case.
+
+## 7. Notes And Deviations
 
 - Built CLI smoke found and fixed a prompt-local asset sidecar gap: local asset refs now resolve against `--project-root` first, then the prompt file directory. This preserves copied reference prompts that use repo-root paths while making standalone prompt files portable.
 - The named `superpowers:code-reviewer` command is not installed in this local environment (`which superpowers` returned no executable). A read-only Phase 7 code-review pass was run through the available review workflow instead; findings are recorded below.
 - `/compact` cannot be invoked from this environment as a shell/tool command. It remains the next manual session step after commit and push.
 
-## 7. Code Review
+## 8. Code Review
 
 The available read-only code-review pass found one P2 issue:
 

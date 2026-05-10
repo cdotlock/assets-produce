@@ -79,6 +79,45 @@ describe("video prompt payload", () => {
     await fs.writeFile(promptPath, promptText("assets/source.png"))
     await expect(buildPayload(promptPath, { projectRoot: root })).rejects.toThrow("without an OSS sidecar")
   })
+
+  test("matches videoctl payload semantics for previous media and duration errors", async () => {
+    const root = await makeTempProject()
+    const imageURL = "https://bucket.oss-cn-shanghai.aliyuncs.com/source.png"
+    const lastURL = "https://bucket.oss-cn-shanghai.aliyuncs.com/last.png"
+    const videoURL = "https://bucket.oss-cn-shanghai.aliyuncs.com/ref.mp4"
+    await fs.writeFile(path.join(root, "assets", "source.png.url"), `${imageURL}\n`)
+    await fs.writeFile(path.join(root, "assets", "last.png.url"), `${lastURL}\n`)
+    await fs.writeFile(path.join(root, "assets", "ref.mp4.url"), `${videoURL}\n`)
+    const promptPath = path.join(root, "continuation.md")
+    await fs.writeFile(
+      promptPath,
+      [
+        "---",
+        "duration: 8",
+        "ratio: 9:16",
+        "first_frame: assets/source.png",
+        "previous_frame_url: assets/last.png",
+        "previous_video_url: assets/ref.mp4",
+        "assets:",
+        "  images:",
+        "    - assets/last.png",
+        "  videos:",
+        "    - assets/ref.mp4",
+        "---",
+        "Continuation prompt body.",
+      ].join("\n"),
+    )
+
+    const payload = await buildPayload(promptPath, { projectRoot: root })
+    expect(payload.referenceImageUrls).toEqual([lastURL])
+    expect(payload.sourceVideoUrls).toEqual([videoURL])
+
+    await fs.writeFile(
+      promptPath,
+      ["---", "duration: twelve", "assets:", "  images:", "    - assets/source.png", "---", "Invalid."].join("\n"),
+    )
+    await expect(buildPayload(promptPath, { projectRoot: root })).rejects.toThrow("invalid duration")
+  })
 })
 
 describe("video prompt validation and dry-run state", () => {
