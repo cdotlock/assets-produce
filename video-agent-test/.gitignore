@@ -1,0 +1,41 @@
+# Local system/editor state
+.DS_Store
+.claude/
+.env
+.env.*
+!.env.example
+
+# Python cache/build artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Runtime logs
+*.log
+ep16_gen_logs/
+bin/
+scripts/bin/
+
+# Security: API keys and tokens
+*.key
+*_token.sh
+*_api_key.txt
+
+# Works directory - generated content
+works/*/PLAN.md
+works/**/videos/*.mp4
+works/**/videos/*.mov
+works/**/end-frames/*.png
+works/**/end-frames/*.jpg
+works/**/end-frames/*.jpeg
+works/**/review/*.json
+works/**/runs/
+
+# Archive keeps prompts, metadata, scripts, and .url records; not heavy media.
+archive/**/*.mp4
+archive/**/*.mov
+archive/**/*.png
+archive/**/*.jpg
+archive/**/*.jpeg

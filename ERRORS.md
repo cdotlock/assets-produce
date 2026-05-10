@@ -247,6 +247,60 @@ errors are routed by name (`*Auth*` → AUTH, network errno → NETWORK).
 
 ---
 
+## `agent video`
+
+Phase 7 video commands are prompt-only. They parse, validate, review, compare,
+and dry-run prompt payloads; they do not call image or video generation.
+
+### `video payload <prompt>`
+
+| Scenario | Error Message | Exit Code |
+|---|---|---|
+| Missing `<prompt>` positional | `Not enough non-option arguments` (yargs) | 2 |
+| Prompt missing YAML frontmatter | `missing YAML frontmatter` | 1 |
+| Prompt body empty | `prompt body is empty` | 1 |
+| Local asset missing `.url` sidecar | `<asset> asset is a local path without an OSS sidecar: ...` | 1 |
+| Non-OSS URL without `--allow-non-oss` | `<asset> URL is not recognized as an OSS URL: ...` | 1 |
+| No image URL without `--allow-text-only` | `no image OSS URL found...` | 1 |
+
+### `video validate <prompt>`
+
+| Scenario | Error Message | Exit Code |
+|---|---|---|
+| Missing `<prompt>` positional | `Not enough non-option arguments` (yargs) | 2 |
+| Prompt has no media refs without `--allow-empty` | JSON/text result with `没有找到任何媒体资源...` | 1 |
+| Local asset missing `.url` sidecar | JSON/text result with `本地路径未上传 OSS，缺少 sidecar: ...` | 1 |
+| URL returns HTTP error | JSON/text result with `HTTP <status>` | 1 |
+| URL Content-Type mismatch | JSON/text result with `Content-Type ... 不是有效图片/视频类型` | 1 |
+| URL check network failure | JSON/text result with fetch error message | 1 |
+
+### `video submit <prompt>`
+
+| Scenario | Error Message | Exit Code |
+|---|---|---|
+| Missing `<prompt>` positional | `Not enough non-option arguments` (yargs) | 2 |
+| Missing `--dry-run` | `live video submit is disabled in this prompt-only CLI path; rerun with --dry-run` | 2 |
+| Run directory already exists and is not empty | `run directory already exists and is not empty: <dir>` | 1 |
+| Payload build failure | same failures as `video payload` | 1 |
+
+### `video status <runDir>`
+
+| Scenario | Error Message | Exit Code |
+|---|---|---|
+| Missing `<runDir>` positional | `Not enough non-option arguments` (yargs) | 2 |
+| Missing `state.json` | `ENOENT: no such file or directory, open '<runDir>/state.json'` | 1 |
+| Invalid `state.json` | JSON parse error | 1 |
+
+### `video prompt review <prompt>` / `video prompt compare <candidate> <reference>`
+
+| Scenario | Error Message | Exit Code |
+|---|---|---|
+| Missing positional | `Not enough non-option arguments` (yargs) | 2 |
+| Prompt parse failure | `missing YAML frontmatter` / `prompt body is empty` / YAML parse message | 1 |
+| Review checklist not fully passed | score/check report is printed; process exits non-zero | 1 |
+
+---
+
 ## Global Errors (any command)
 
 ### Yargs argument-validation errors

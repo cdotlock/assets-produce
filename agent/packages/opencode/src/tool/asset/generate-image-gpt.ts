@@ -22,7 +22,7 @@ export const Parameters = Schema.Struct({
   }),
 })
 
-export const GenerateImageGptTool = Tool.define(
+export const GenerateImageGptTool = Tool.define<typeof Parameters, Record<string, unknown>, never>(
   "generate-image-gpt",
   Effect.gen(function* () {
     return {

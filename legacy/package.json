@@ -1,6 +1,6 @@
 {
   "name": "agent-forge",
-  "version": "0.1.0",
+  "version": "0.1.6",
   "private": true,
   "bin": {
     "agent-forge": "./dist/bin/agent-forge.js"
@@ -14,10 +14,11 @@
     "lint": "eslint",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
+    "db:deploy": "prisma migrate deploy",
     "release": "docker buildx build --platform linux/amd64 -t ghcr.io/rydia-china/agent-forge:latest -f Dockerfile . --load && docker push ghcr.io/rydia-china/agent-forge:latest && echo '✅ 已推送到 ghcr.io/rydia-china/agent-forge:latest'",
     "db:backup": "bash scripts/db-backup.sh",
     "db:restore": "echo 'Usage: docker exec -i agent-forge-db-dev psql -U postgres -d agent_forge < backups/YOUR_FILE.sql'",
-    "deploy:prod": "ssh root@47.97.112.115 'cd /war/www/soft/agent-forge && docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d'"
+    "deploy:prod": "bash scripts/deploy-prod-offline.sh"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
@@ -34,6 +35,7 @@
     "quickjs-emscripten": "^0.31.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "sharp": "^0.34.5",
     "uuid": "^14.0.0",
     "zod": "^4.3.6"
   },

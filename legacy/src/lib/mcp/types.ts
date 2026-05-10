@@ -20,6 +20,8 @@ export interface ToolContext {
   persistentParentAgentId?: string;
   /** Current subagent nesting depth. */
   agentDepth?: number;
+  /** Parent execution cancellation signal. */
+  signal?: AbortSignal;
   /** Optional progress bridge used by streaming agent/subagent execution. */
   onProgress?: (event: ToolProgressEvent) => void;
 }

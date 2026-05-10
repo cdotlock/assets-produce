@@ -117,13 +117,11 @@ function addOutfitsFromValue(
   seen: Set<string>,
   scriptId: string,
   value: unknown,
-  nameMapping?: Map<string, string>,
 ): void {
   const outfits = parseRecord(value);
   if (!outfits) return;
   for (const name of Object.keys(outfits)) {
-    const normalizedName = nameMapping?.get(name) ?? name;
-    addScriptCostumeResource(items, seen, scriptId, normalizedName);
+    addScriptCostumeResource(items, seen, scriptId, name);
   }
 }
 
@@ -169,29 +167,6 @@ async function listKeyResourceMetaByScopeIds(
 }
 
 /* ------------------------------------------------------------------ */
-/*  Helper: Build character name mapping (short name -> full name)    */
-/* ------------------------------------------------------------------ */
-
-function buildCharacterNameMapping(characterArcs: unknown): Map<string, string> {
-  const mapping = new Map<string, string>();
-  for (const arc of parseArray(characterArcs)) {
-    if (!isRecord(arc)) continue;
-    const fullName = arc.name;
-    if (typeof fullName !== "string") continue;
-    
-    // Map full name to itself
-    mapping.set(fullName, fullName);
-    
-    // Extract first name (before first space) and map to full name
-    const firstName = fullName.split(/\s+/)[0];
-    if (firstName && firstName !== fullName) {
-      mapping.set(firstName, fullName);
-    }
-  }
-  return mapping;
-}
-
-/* ------------------------------------------------------------------ */
 /*  Expected resource computation from uploads                         */
 /* ------------------------------------------------------------------ */
 
@@ -203,9 +178,6 @@ function computeExpectedKeys(
   const items: ExpectedResourceMeta[] = [];
   const seen = new Set<string>();
 
-  // Build name mapping from character arcs
-  const nameMapping = buildCharacterNameMapping(upload.character_arcs);
-
   for (const arc of upload.character_arcs ?? []) {
     addNovelCharacterResource(items, seen, novelId, arc.name);
   }
@@ -214,10 +186,12 @@ function computeExpectedKeys(
   const allSceneNames = new Set<string>();
   const gridParents: string[] = [];
   for (const location of locations) {
-    if (location.visual_prompt?.trim()) allSceneNames.add(location.name);
     const realSubLocations = (location.sub_locations ?? []).filter(
       (subLocation) => subLocation.id !== location.id,
     );
+    if (realSubLocations.length === 0 && location.visual_prompt?.trim()) {
+      allSceneNames.add(location.name);
+    }
     if (realSubLocations.length >= 2) gridParents.push(location.name);
     for (const subLocation of location.sub_locations ?? []) {
       if (subLocation.visual_prompt?.trim()) allSceneNames.add(subLocation.name);
@@ -237,7 +211,7 @@ function computeExpectedKeys(
     if (!episode || !scriptId) continue;
     // Episode data may reference local characters/scenes, but it only creates script-scope resources.
     const outfits = episode.output.character_outfits;
-    if (outfits) addOutfitsFromValue(items, seen, scriptId, outfits, nameMapping);
+    if (outfits) addOutfitsFromValue(items, seen, scriptId, outfits);
   }
 
   return items;
@@ -266,9 +240,6 @@ async function computeStoredExpectedKeys(
   const items: ExpectedResourceMeta[] = [];
   const seen = new Set<string>();
 
-  // Build name mapping from character arcs
-  const nameMapping = buildCharacterNameMapping(novel?.characterArcs);
-
   for (const arc of parseArray(novel?.characterArcs)) {
     if (!isRecord(arc)) continue;
     const name = arc.name;
@@ -279,15 +250,20 @@ async function computeStoredExpectedKeys(
     if (!isRecord(location)) continue;
     const name = location.name;
     const visualPrompt = location.visual_prompt;
-    if (typeof name === "string" && typeof visualPrompt === "string" && visualPrompt.trim()) {
-      addNovelSceneResource(items, seen, novelId, name);
-    }
 
     const subLocations = parseArray(location.sub_locations);
     const realSubLocations = subLocations.filter((subLocation) => {
       if (!isRecord(subLocation)) return false;
       return subLocation.id !== location.id;
     });
+    if (
+      realSubLocations.length === 0
+      && typeof name === "string"
+      && typeof visualPrompt === "string"
+      && visualPrompt.trim()
+    ) {
+      addNovelSceneResource(items, seen, novelId, name);
+    }
     if (typeof name === "string" && realSubLocations.length >= 2) {
       addNovelSceneGridResource(items, seen, novelId, name);
     }
@@ -308,11 +284,51 @@ async function computeStoredExpectedKeys(
     const initResult = parseRecord(script.initResult);
     // Stored episode data may only add script-scoped resources for the requested script.
     if (scriptScopeIds.has(scriptId)) {
-      addOutfitsFromValue(items, seen, scriptId, initResult?.character_outfits ?? script.costumes, nameMapping);
+      addOutfitsFromValue(items, seen, scriptId, initResult?.character_outfits ?? script.costumes);
     }
   }
 
   return items;
+}
+
+function containerParentSceneKeysFromUpload(upload: NovelScriptUpload): string[] {
+  const keys = new Set<string>();
+  for (const location of upload.location_bible ?? []) {
+    const realSubLocations = (location.sub_locations ?? []).filter(
+      (subLocation) => subLocation.id !== location.id,
+    );
+    if (realSubLocations.length > 0) keys.add(sceneKey(location.name));
+  }
+  return Array.from(keys);
+}
+
+function containerParentSceneKeysFromStoredLocationBible(locationBible: unknown): string[] {
+  const keys = new Set<string>();
+  for (const location of parseArray(locationBible)) {
+    if (!isRecord(location) || typeof location.name !== "string") continue;
+    const subLocations = parseArray(location.sub_locations);
+    const realSubLocations = subLocations.filter((subLocation) => (
+      isRecord(subLocation) && subLocation.id !== location.id
+    ));
+    if (realSubLocations.length > 0) keys.add(sceneKey(location.name));
+  }
+  return Array.from(keys);
+}
+
+async function deleteEmptyContainerParentScenePlaceholders(
+  novelId: string,
+  keys: string[],
+): Promise<void> {
+  if (keys.length === 0) return;
+  await prisma.keyResource.deleteMany({
+    where: {
+      scopeType: "novel",
+      scopeId: novelId,
+      category: "场景",
+      key: { in: keys },
+      currentVersion: 0,
+    },
+  });
 }
 
 /* ------------------------------------------------------------------ */
@@ -360,6 +376,10 @@ async function createEmptyKeyResources(
   createdEpisodes: EpisodeSummary[],
 ): Promise<void> {
   await upsertExpectedResources(computeExpectedKeys(novelId, upload, createdEpisodes));
+  await deleteEmptyContainerParentScenePlaceholders(
+    novelId,
+    containerParentSceneKeysFromUpload(upload),
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -440,12 +460,28 @@ export async function createEmptyKeyResourcesWithDiff(
 /* ------------------------------------------------------------------ */
 
 export async function ensureExpectedNovelResources(novelId: string): Promise<void> {
+  const novel = await prisma.novel.findUnique({
+    where: { id: novelId },
+    select: { locationBible: true },
+  });
   await upsertExpectedResources(await computeStoredExpectedKeys(novelId, new Set<string>()));
+  await deleteEmptyContainerParentScenePlaceholders(
+    novelId,
+    containerParentSceneKeysFromStoredLocationBible(novel?.locationBible),
+  );
 }
 
 export async function ensureExpectedEpisodeResources(
   novelId: string,
   scriptId: string,
 ): Promise<void> {
+  const novel = await prisma.novel.findUnique({
+    where: { id: novelId },
+    select: { locationBible: true },
+  });
   await upsertExpectedResources(await computeStoredExpectedKeys(novelId, new Set([scriptId])));
+  await deleteEmptyContainerParentScenePlaceholders(
+    novelId,
+    containerParentSceneKeysFromStoredLocationBible(novel?.locationBible),
+  );
 }

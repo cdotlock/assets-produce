@@ -445,6 +445,35 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 
 ---
 
+### Phase 7 — Prompt Workflow Parity & Launch Readiness ⚠ 1.8
+
+**目标**：把 `video-agent-claude-wangbo` 的视频 prompt 生产经验和最新 Agent-Forge 工作流吸收到本项目，以 agent-native CLI/tool 形态实现 prompt-only 的可上线链路。
+
+**范围**：
+- 用 `video-agent-claude-wangbo` 的有效内容覆盖 `video-agent-test/`，作为本仓库内 prompt workflow 学习/对照样本；排除 `.git`、`.claude`、`.DS_Store`、本地编译产物、真实视频和生成帧等重媒体。
+- 用 `https://github.com/Rydia-China/Agent-Forge` 的 `main` 最新代码覆盖 `legacy/`，保留其参考定位：不维护、不部署、不纳入根 workspace。
+- 实现 agent-native 视频 prompt 工作流 CLI：prompt frontmatter 解析、资产 URL/sidecar 解析、payload dry-run、URL 校验、run-state dry-run/status、prompt 质量 review/compare。
+- 保留现有图片/视频 atomic tools 的接口；本 phase 不触发任何真实图片或视频生成。
+- 修复当前阻塞上线的 typecheck/build/runtime 问题，尤其是 tool metadata union 类型和 skill loader 错误类型。
+- 更新 `.env.example`、`ERRORS.md`、`SKILL.md`、`config export-schema`，让外部 agent 能发现并正确调用新 CLI。
+
+**不做**：
+- 不调用真实图片生成工具。
+- 不调用真实视频生成工具。
+- 不把 `video-agent-test/` 或 `legacy/` 变成运行依赖。
+- 不在仓库内新增可被实际加载的 markdown skill body；正式 skill body 仍归 Langfuse。
+- 不复活 Agent-Forge 的硬编码视频流水线 service。
+
+**验收**：
+- `video-agent-test/` 与 `video-agent-claude-wangbo` 的有效文本/源码/剧本/prompt 样本同步，且无 `.git`、`.claude`、`.DS_Store`、mp4 或本地生成帧污染。
+- `legacy/` 与 Agent-Forge `main` 最新 commit 同步，并记录 commit SHA。
+- `agent video prompt/payload/validate/submit/status/review/compare`（最终命令名以 Phase 7 plan 为准）在 dry-run / mocked URL 场景下全部跑通。
+- prompt 生成/评审测试只生成文本 prompt，并用参考 prompt + review checklist 做质量对比；不得调用任何真实图片/视频生成。
+- `bun run agent:build`、`bun --cwd=agent run typecheck`、相关 unit tests、`bun --cwd=web run typecheck`、`bun --cwd=web run build` 全部通过。
+- `agent config export-schema` 包含 Phase 7 新 CLI 命令，外部 agent 可直接发现。
+
+---
+
 ## 11. 工作流（Claude Code Session 必读）
 
 ### 11.1 进入新 phase 时
@@ -547,6 +576,7 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 | 1.5 | 2026-04-29 | Phase 2.x：用户提供新 DeepSeek 凭据(`sk-f801...`),实测 `deepseek-v4-flash` / `v4-pro` 走 `@ai-sdk/openai-compatible` SDK + 标准 `/v1/chat/completions` 路径完全跑通。**1.4 中关于 opencode 路由到 `/anthropic/chat/completions` 的判断是错的**：opencode 没有"全 provider 走 Anthropic 路径"的策略,models.dev catalog 把 DeepSeek 标记 `npm: "@ai-sdk/openai-compatible"`,所以走 OpenAI 兼容路径。`deepseek-chat` / `deepseek-reasoner` 仍 404 是 DeepSeek 端 v3 endpoint 已停服或新凭据无权访问,与 opencode 无关。spec § 10 Phase 2 acceptance #2 ⚠ 标记从 1.4 改引 1.5,Phase 2 验收 7/7 全过。影响范围:解除 1.4 推迟;不动 § 2 / § 8 任何设计。 | cdotlock + Claude |
 | 1.6 | 2026-04-29 | Phase 3 实施时调整 atomic tool 命名:在 tool id 里编码具体模型后缀,LLM 看 tool 名就能区分能力。映射:`generate-image` → `generate-image-nanobanana`(nanobanana 2 / `gemini-3.1-flash-image-preview`);`generate-image-gpt` 不变(原本就带模型名);`generate-video` → `generate-video-seedance`(SeedDance 2 pro);`happyhorse` → `generate-video-happyhorse`(HappyHorse / Kling-style);`concat-clips` / `crop-video` 不变(无 AI 模型,FFmpeg-style ops)。env vars 同步:`FC_GENERATE_IMAGE_*` → `FC_GENERATE_IMAGE_NANOBANANA_*`,`FC_GENERATE_VIDEO_*` → `FC_GENERATE_VIDEO_SEEDANCE_*`,`FC_HAPPYHORSE_*` → `FC_GENERATE_VIDEO_HAPPYHORSE_*`。原因:LLM 凭 tool 名选 tool 而不读 description body,语义化 tool id 显著降低误调率。spec § 10 Phase 3 tool 列表加 ⚠ 引本行。影响范围:命名;tool 接口形态、6 tool 数量、§ 11.4 跨 phase 接口稳定原则不变(命名更新作为本 phase 内 lock-in 起点)。 | cdotlock + Claude |
 | 1.7 | 2026-04-30 | Phase 6 落地时两项 acceptance 调整：(a) **cold start ≤ 100ms 不可达**。Bun bundle 实测 2.17 MB ≤ 30 MB 通过；hyperfine min 585 ms（mean 674 ms），dev 路径 568-612 ms，bundle 几乎 0 加成。floor 是 opencode 自身 import graph（Effect 4 runtime + langfuse + AI SDKs + drizzle + yargs），与本 phase 改动无关。100 ms 目标在 Bun + 当前 opencode runtime 下物理不可达，除非把所有重 dep 改成 lazy import 进 handler 内（深度重构，可能破坏 Effect runtime / plugin loader semantics，超出 Phase 6 范围）。决策：本次只把 § 10 Phase 6 acceptance #2 阈值由 ≤ 100 ms 改为 ≤ 800 ms，把 585 ms 实测纳入合规线；如未来要进一步压低，走独立 phase。(b) **`legacy/` 暂不删**：用户 2026-04-30 决定保留 25 MB legacy/（旧 Agent Forge）作参考；当前不维护、不部署、不测试规则不变（CLAUDE.md § 物理结构）。Task 8 推迟到下次 spec 修订时再决议。Phase 6 验收第 5 条「legacy/ 被移除后构建/测试/部署不受影响」改为「legacy/ 推迟移除（保留为参考）」。影响范围：仅本 phase acceptance；§ 2 / § 6 / § 11.4 接口稳定与 SKILL/CLI/MCP/API 四层原则均不变。 | cdotlock + Claude |
+| 1.8 | 2026-05-11 | 用户要求把 `video-agent-claude-wangbo` 的视频 prompt 生产经验和最新 Agent-Forge 工作流吸收到本项目，并明确补充本次不得尝试任何图片/视频生成，只做 prompt 生成与参考水平对比。新增 Phase 7：`video-agent-test/` 覆盖为 `video-agent-claude-wangbo` 的有效学习样本；`legacy/` 直接同步 `Rydia-China/Agent-Forge` 最新 `main`；CLI 以 agent-native 方式实现 prompt frontmatter/payload dry-run/URL 校验/run-state/review/compare 等确定性能力；保留现有媒体 atomic tools 但本 phase 不调用真实生成。影响范围：新增 prompt-only launch readiness phase；不改变 § 2 原子能力 + skill 编排原则，不允许硬编码视频流水线 service。 | cdotlock + Codex |
 
 > 后续修订请在此追加新行，并在受影响的 phase 章节加 ⚠ 标记 + 引用本表行号。
 

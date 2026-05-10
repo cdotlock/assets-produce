@@ -25,7 +25,7 @@ export const Parameters = Schema.Struct({
   }),
 })
 
-export const GenerateImageNanobananaTool = Tool.define(
+export const GenerateImageNanobananaTool = Tool.define<typeof Parameters, Record<string, unknown>, never>(
   TOOL_ID,
   Effect.gen(function* () {
     return {

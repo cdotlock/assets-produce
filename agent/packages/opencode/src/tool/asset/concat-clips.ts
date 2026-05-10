@@ -17,7 +17,7 @@ export const Parameters = Schema.Struct({
   }),
 })
 
-export const ConcatClipsTool = Tool.define(
+export const ConcatClipsTool = Tool.define<typeof Parameters, Record<string, unknown>, never>(
   "concat-clips",
   Effect.gen(function* () {
     return {

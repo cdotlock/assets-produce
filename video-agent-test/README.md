@@ -1,153 +1,130 @@
-# Video Agent Test
+# 视频分镜生成系统
 
-互动短剧视频逐镜头生成测试管线。用 Claude Code + 即梦 Seedance 2.0 协作跑通"剧本 → prompt → 视频 → 画廊"的完整流程。
+互动短剧的逐镜头视频 prompt 生成管线。用 Claude Code 打开本项目，说"生成 EP2"即可开始。
 
-## 初次使用
+## 目录结构
 
-### 1. 安装依赖
+```
+video-agent-claude-wangbo/
+├── agent-skills/video-episode-generation/   # Skill 包（agent 的工作流入口）
+│   ├── SKILL.md                             # 唯一入口（内嵌完整 SOP）
+│   ├── references/                          # 按步骤强制加载的参考文档
+│   │   ├── authority-prompt-template.md     # 九段式 prompt 格式参考（五镜实例，仅参考格式）
+│   │   ├── character-dna.md                 # 角色服装锁 + 立绘映射
+│   │   ├── seedance-lessons.md              # Seedance 生成经验
+│   │   ├── director-playbook.md             # 镜头语言速查
+│   │   ├── shot-id-policy.md                # Shot 命名规则
+│   │   ├── review-checklist.md              # 独立审核 27 项检查（7 组）
+│   │   ├── deep-analysis.md                 # 深度问题分析
+│   │   ├── problems-log.md                  # 历史问题日志
+│   │   └── memory.md                        # 跨会话生产经验记忆
+├── scripts/videoctl/                        # Go CLI 入口（视频任务唯一执行入口）
+├── internal/                                # videoctl 内部模块
+│
+├── works/                                   # 活跃工作区
+│   └── silver-moon-manor/                   # 作品：银月庄园
+│       ├── PLAN.md                          # 动态生产计划（打勾式）
+│       ├── assets/                          # 人物立绘 + 场景图
+│       ├── scripts/                         # 剧本 JSON（ep_1~ep_20）
+│       ├── ref-frames/                      # 参考帧（按集分目录）
+│       └── episodes/ep_{N}/shots/           # 各镜头 prompt
+│
+├── archive/                                 # 完成作品归档（待用）
+└── .env.example                             # 环境变量模板
+```
 
-本项目用 Python 3 的 `imageio-ffmpeg`（内置 ffmpeg 二进制，不需要系统安装 ffmpeg）：
+## 使用方式
+
+### 环境配置
 
 ```bash
-pip3 install imageio-ffmpeg
+cp .env.example .env
+# 填入 AGENT_API_KEY（找 Rydia 内部分发）
+make build
 ```
 
-### 2. 打开 Claude Code 并切换到本项目
+### Claude Code CLI
+
+本仓库提供 `scripts/claude-mob` 包装脚本，用于把 Claude Code 指向 Mob-AI Anthropic 兼容网关。脚本默认使用 `https://ai.mob-ai.cn`、`claude-opus-4-6:free` 和 `CLAUDE_CODE_EFFORT_LEVEL=max`，但不会在仓库里保存 token。
 
 ```bash
-cd ~/Desktop/video-agent-test
-claude
+mkdir -p .claude
+cat > .claude/mob-ai.env <<'EOF'
+ANTHROPIC_AUTH_TOKEN=<token>
+EOF
+
+scripts/claude-mob
 ```
 
-Claude Code 会自动读取 `CLAUDE.md`，了解项目工作流。
+`.claude/` 已被 `.gitignore` 忽略；不要把真实 token 写进可提交文件。
 
-### 3. 准备素材
+### 生成视频 prompt
 
-- 把剧本文件放到 `script/`（txt/md/json 都可）
-- 把人物立绘、场景空镜放到 `portrait_and_scene/`
+在 Claude Code 中说：
+- "生成 EP2 的 shot_1" — 生成单个镜头
+- "生成 EP2" — 生成整集所有镜头
+- "开启钟文鼎特批危险超速生成模式" — 跳过用户确认（仅限特殊场景）
 
-素材命名建议（非强制）：
-```
-portrait_and_scene/
-├── scene_kitchen.png      # 厨房空镜
-├── scene_cemetery.png     # 公墓空镜
-├── Sylvia_portrait.png    # 主角立绘
-├── James_portrait.png
-└── Kennedy_portrait.png
-```
+### 默认流程（interactive 模式）
 
-### 4. 开始生成
+1. Agent 读剧本 → 分析情绪 → 写九段式 prompt
+2. 独立 Reviewer 冷读审核 27 项检查
+3. **主控 Agent 审核后停下等你确认**（你可以直接打开 .md 手改 prompt）
+4. 你说"可以生成了" → Agent 验证 URL → 调用 Seedance 生成
 
-跟 Claude Code 说：
+**安全机制**：默认情况下，每个镜头的视频生成必须经过用户确认。Agent 检测到你手动修改了 prompt.md 时，会自我反思并将经验写入 memory.md。只有用户明确说出"开启钟文鼎特批危险超速生成模式"，Agent 才会在不等待确认的情况下自行调用视频生成（URL 验证仍然强制执行）。
 
-> 生成 ep1 的 shot_1
+### 脚本
 
-Claude 会：
-1. 读 `script/` 下的剧本
-2. 按 Seedance skill 规则写出 shot_1 的 prompt
-3. 保存到 `ep_video/shot_1.md`
-4. 告诉你去哪个入口、上传哪些素材、粘贴 prompt、duration 填多少
-5. **停下等你反馈**
-
-你去即梦生成，把视频下载回来命名为 `shot_1.mp4` 放到 `ep_video/`，告诉 Claude：
-
-> shot_1 已生成
-
-Claude 会：
-1. 核实文件存在
-2. 运行 `gen_ref_video.py` 裁剪末 5s 到 `gen_ref_video/shot_1_ref.mp4`
-3. 运行 `build_gallery.py` 更新画廊
-4. 停下等你说"继续 shot_2"
-
-### 5. 查看画廊
-
-浏览器打开 `gen_video_gallery.html`（双击即可）。每条 shot 一行，显示：
-- 生成好的视频
-- 末 5s 的 ref 视频（供下一镜头引用）
-- 引用的所有参考图/参考视频（缩略图）
-- 完整 prompt（可一键复制）
-
-每生成一条画廊就自动刷新一次。
-
-## 目录说明
-
-| 目录 | 谁写入 | 内容 |
-|---|---|---|
-| `script/` | 你 | 剧本文件（任意格式） |
-| `portrait_and_scene/` | 你 | 人物立绘、场景空镜、首尾帧锚图 |
-| `ep_video/` | 你（放 mp4）+ Claude（写 md） | `shot_x.mp4` 是你放的生成好的视频；`shot_x.md` 是 Claude 写的 prompt |
-| `gen_ref_video/` | gen_ref_video.py 自动 | 每个视频的末 5s，命名 `shot_x_ref.mp4` |
-| `skills/` | 已内置 | agent 的工作流和命名规则 |
-
-## 脚本调用
-
-所有脚本都可独立运行（Claude 会在正确时机调用，你也可以手动跑）：
+Go CLI 是视频任务的唯一脚本入口。源码入口在 `scripts/videoctl/`，本地编译产物放在 `scripts/bin/videoctl`。Agent 使用前应先读 `scripts/videoctl/AGENT_REFERENCE.md`。
 
 ```bash
-# 裁剪单条
-python3 gen_ref_video.py --shot shot_1
+# 编译
+make build
 
-# 裁剪所有未处理的
-python3 gen_ref_video.py
+# 上传本地素材到 OSS，并在旁边写 <file>.url
+scripts/bin/videoctl upload <file...>
 
-# 强制覆盖
-python3 gen_ref_video.py --shot shot_1 --force
+# 验证 prompt 中所有 URL 可达且内容类型正确
+scripts/bin/videoctl validate <prompt.md>
 
-# 改裁剪时长
-python3 gen_ref_video.py --shot shot_1 --duration 3
+# 从 prompt.md 构建 API payload（调试用）
+scripts/bin/videoctl payload <prompt.md>
 
-# 更新画廊
-python3 build_gallery.py
+# 生成 dry-run request.json，不调用网关
+scripts/bin/videoctl submit <prompt.md> --dry-run --run-dir <run_dir>
+
+# 提交并等待生成完成（默认最多 1200 秒，30 秒轮询）
+scripts/bin/videoctl submit <prompt.md> --wait
+
+# 下载视频 URL 并写 .url sidecar
+scripts/bin/videoctl download <video_url> --out <shot.mp4>
+
+# 抽末帧和空间候选帧
+scripts/bin/videoctl extract-end-frame <shot.mp4> <shot_end.png>
+scripts/bin/videoctl extract-candidates <shot.mp4> <end_frames_dir> --shot-id <shot_id>
+scripts/bin/videoctl select-spatial-frame <chosen_candidate.png> <shot_spatial.png>
 ```
 
-## Shot ID 命名
+## API
 
-- 主线递增：`shot_1 / shot_2 / shot_3 ...`
-- 同段拆分（台词太长）：`shot_3a / shot_3b`
-- 分支剧情：`shot_5-1 / shot_5-2 / shot_5-3`
-
-完整规则见 `skills/SHOT_ID_POLICY.md`。
-
-## Prompt 规则
-
-写 prompt 时 Claude 会遵守桌面那份完整的 Seedance skill：
+视频生成统一通过 `scripts/bin/videoctl submit <prompt.md> --wait` 进入外部分发生成接口：
 
 ```
-~/Desktop/System Prompt 即梦 Seedance 2.0 互动剧本视频化专家.md
+POST https://agent.mob-ai.cn/api/external/video/generate
+Authorization: Bearer $AGENT_API_KEY
 ```
 
-里面定义了：
-- A 段 Definition：5 种衔接情况
-- B 段 Prompt 开头句式
-- E-1 零字幕四层防御
-- E-6 英语对白口型同步格式
-- E-7 禁止清单模板
-- E-8 景别硬锁（推到目标景别后停止）
-- E-9 收尾三重静止
-- E-10 面部朝向反向约束
-- E-11 情绪弧优先拆分
-- E-12 钩子密度
-- G 段 台词守护拆分
+`AGENT_API_KEY` 仍由 `.env` 提供；网关端点由 CLI 封装，不要手写 HTTP 请求绕过 CLI。
 
-如果该文件不在 `~/Desktop/` 或移动了位置，请修改本项目 `CLAUDE.md` 里的引用路径。
+视频生成最长等待 20 分钟（1200 秒），不要提前判定超时。
 
-## 排错
+视频生成前，所有本地图片/视频素材都必须先通过 `/api/external/video/oss/upload` 上传到 OSS。`prompt.md` frontmatter 里的 `assets.images`、`assets.videos`、`previous_video_url`、`previous_frame_url` 应该是 OSS URL；本地路径只适合作为上传前草稿，不应进入正式生成 payload。
 
-### 画廊空白或缺信息
-检查 `ep_video/shot_X.md` 是否有正确的 frontmatter（开头三道 `---` 分隔符）。
+`videoctl payload` 是视频生成 payload 构建器：它只负责从 `prompt.md` 生成 `/api/external/video/generate` 的 JSON，不会发请求。它会拒绝没有 OSS URL 或 `.url` sidecar 的本地素材，避免视频生成时漏传参考图/参考视频。
 
-### gen_ref_video.py 报错
-视频时长不足 5s。加 `--duration 3` 或 `--duration 2`。
+## 注意事项
 
-### 即梦生成的视频有字幕浮现
-说明 E-1 零字幕约束没写进 prompt 头部。让 Claude 重写 prompt，确保前 200 字有"全程无字幕、无 subtitle、无 caption..."。
-
-### 镜头推过头 / 收尾不静止
-上一轮测试反馈的通病。Claude 应按 E-8 景别硬锁 + E-9 收尾三重静止写 prompt。如果仍失败，说明规则优先级还需调整。
-
-## 设计原则
-
-1. **一次一条**：agent 严格逐镜头生成，不批量，杜绝"写了一堆 prompt 但没一条能用"
-2. **文件 >  对话**：prompt 必须落盘到 `.md` 文件，不放在聊天对话里，方便用户复制和回溯
-3. **参考可追溯**：每个 shot 的 frontmatter 明确记录引用的素材，画廊能一眼看到"这条视频是用了哪些素材生成的"
-4. **脚本自动化繁琐步骤**：裁剪 / 画廊生成交给脚本，agent 只负责思考和写 prompt
+- **不要手动创建 PLAN.md**，Agent 读完工作流后会自动创建
+- **memory.md** 是跨会话积累的，Agent 会在发现问题时自动更新
+- 作品完成后可以把 `works/{novel_id}/` 归档到 `archive/{novel_id}/`，然后在 `works/` 下继续做下一个活跃作品

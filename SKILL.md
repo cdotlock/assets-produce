@@ -52,6 +52,10 @@ agent config validate
 # 5. Inspect a built-in tool's name + JSON params schema
 agent tools list
 agent tools show generate-image-nanobanana
+
+# Prompt-only video workflow helpers (Phase 7; no image/video generation)
+agent video payload video-agent-test/works/silver-moon-manor/episodes/ep_2/shots/shot_1/prompt.md --allow-non-oss
+agent video prompt review video-agent-test/works/silver-moon-manor/episodes/ep_2/shots/shot_1/prompt.md
 ```
 
 ---
@@ -111,6 +115,8 @@ sub-command's own words. Examples:
 | `tools-call` | `agent tools call <id> ...` |
 | `oss-put` | `agent oss put <local> <key>` |
 | `skills-export-schema` | `agent skills export-schema` |
+| `video-payload` | `agent video payload <prompt.md>` |
+| `video-prompt-compare` | `agent video prompt compare <candidate.md> <reference.md>` |
 | `run` | `agent run "..."` |
 
 Top-level single-word entries like `run`, `serve`, `models` invoke directly
@@ -144,6 +150,25 @@ agent users add --username alice --role creator --password testpw12 --dry-run
 
 Use this from an LLM to confirm field resolution before committing to a real
 write.
+
+### 5.4 Prompt-only video workflow
+
+Phase 7 adds `agent video ...` commands for the deterministic parts of the
+`video-agent-claude-wangbo` prompt workflow: parse prompt frontmatter, resolve
+`.url` sidecars, build payload JSON, validate media URLs, write dry-run run
+state, and review/compare prompt text.
+
+These commands **do not** call image or video generation. Live video submit is
+intentionally disabled on this path; `agent video submit` requires `--dry-run`.
+
+```bash
+agent video payload <prompt.md> --project-root <root>
+agent video validate <prompt.md> --project-root <root> --allow-non-oss --json
+agent video submit <prompt.md> --dry-run --run-dir /tmp/video-run --project-root <root>
+agent video status /tmp/video-run
+agent video prompt review <prompt.md> --json
+agent video prompt compare <candidate.md> <reference.md> --json
+```
 
 ---
 

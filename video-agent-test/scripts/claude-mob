@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+local_env="$root/.claude/mob-ai.env"
+
+if [[ -f "$local_env" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$local_env"
+  set +a
+fi
+
+export ANTHROPIC_BASE_URL="${ANTHROPIC_BASE_URL:-https://ai.mob-ai.cn}"
+export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC="${CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC:-1}"
+
+export ANTHROPIC_MODEL="${ANTHROPIC_MODEL:-claude-opus-4-6:free}"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="${ANTHROPIC_DEFAULT_OPUS_MODEL:-claude-opus-4-6:free}"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="${ANTHROPIC_DEFAULT_SONNET_MODEL:-claude-opus-4-6:free}"
+
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="${ANTHROPIC_DEFAULT_HAIKU_MODEL:-claude-sonnet-4-6:free}"
+export ANTHROPIC_SMALL_FAST_MODEL="${ANTHROPIC_SMALL_FAST_MODEL:-claude-sonnet-4-6:free}"
+export CLAUDE_CODE_SUBAGENT_MODEL="${CLAUDE_CODE_SUBAGENT_MODEL:-claude-opus-4-6:free}"
+
+export CLAUDE_CODE_EFFORT_LEVEL="${CLAUDE_CODE_EFFORT_LEVEL:-max}"
+
+if [[ -z "${ANTHROPIC_AUTH_TOKEN:-}" ]]; then
+  cat >&2 <<EOF
+ERROR: ANTHROPIC_AUTH_TOKEN is required.
+
+Create $local_env with:
+ANTHROPIC_AUTH_TOKEN=<token>
+EOF
+  exit 1
+fi
+
+exec claude "$@"

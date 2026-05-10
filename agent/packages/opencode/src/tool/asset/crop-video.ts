@@ -20,7 +20,7 @@ export const Parameters = Schema.Struct({
   }),
 })
 
-export const CropVideoTool = Tool.define(
+export const CropVideoTool = Tool.define<typeof Parameters, Record<string, unknown>, never>(
   "crop-video",
   Effect.gen(function* () {
     return {

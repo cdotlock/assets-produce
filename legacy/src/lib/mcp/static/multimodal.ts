@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { Tool, CallToolResult } from "@modelcontextprotocol/sdk/types";
 import type { McpProvider } from "../types";
+import { callImageGenerationApi } from "../../services/image-api-client";
 
 function text(t: string): CallToolResult {
   return { content: [{ type: "text", text: t }] };
@@ -15,7 +16,14 @@ const GenerateImageParams = z.object({
     z.object({
       prompt: z.string().min(1),
       referenceImageUrls: z.array(z.string().url()).optional(),
-      model: z.enum(["gemini", "gpt"]).optional().default("gemini"),
+      model: z.enum([
+        "gemini",
+        "gemini-flash",
+        "gpt",
+        "image-gemini-pro",
+        "image-gemini-flash",
+        "image-gpt",
+      ]).optional().default("gemini"),
     }),
   ).min(1),
 });
@@ -28,6 +36,7 @@ const GenerateVideoParams = z.object({
       styleName: z.string().optional(),
       referenceImageUrls: z.array(z.string().url()).optional(),
       sourceVideoUrls: z.array(z.string().url()).optional(),
+      duration: z.number().min(1).max(15).optional(),
     }),
   ).min(1),
 });
@@ -44,9 +53,13 @@ const CropVideoParams = z.object({
   items: z.array(
     z.object({
       videoUrl: z.string().url(),
-      startTime: z.number().min(0),
-      endTime: z.number().min(0),
-    }),
+      startTime: z.number().min(0).optional(),
+      endTime: z.number().min(0).optional(),
+      tailSeconds: z.number().min(1).max(15).optional(),
+    }).refine(
+      (item) => item.tailSeconds !== undefined || (item.startTime !== undefined && item.endTime !== undefined),
+      "Provide tailSeconds or both startTime and endTime",
+    ),
   ).min(1),
 });
 
@@ -117,8 +130,15 @@ export const multimodalMcp: McpProvider = {
                   },
                   model: {
                     type: "string",
-                    enum: ["gemini", "gpt"],
-                    description: "图片生成模型：'gemini'（默认）或 'gpt'",
+                    enum: [
+                      "gemini",
+                      "gemini-flash",
+                      "gpt",
+                      "image-gemini-pro",
+                      "image-gemini-flash",
+                      "image-gpt",
+                    ],
+                    description: "图片生成模型：gemini/image-gemini-pro（默认）、gemini-flash/image-gemini-flash 或 gpt/image-gpt",
                   },
                 },
                 required: ["prompt"],
@@ -154,6 +174,7 @@ export const multimodalMcp: McpProvider = {
                     items: { type: "string" },
                     description: "Optional source video URLs for continuation (use crop_video to extract tail segments)",
                   },
+                  duration: { type: "number", description: "Optional target duration in seconds, 1-15" },
                 },
                 required: ["prompt"],
               },
@@ -165,7 +186,7 @@ export const multimodalMcp: McpProvider = {
       {
         name: "crop_video",
         description:
-          "Crop video(s) by time range via FC. Use this to extract segments (e.g., last N seconds for continuation). Returns array of {status, videoUrl} for each item.",
+          "Crop video(s) by time range via FC. Prefer tailSeconds for continuation (e.g. last 15 seconds). Returns array of {status, videoUrl} for each item.",
         inputSchema: {
           type: "object" as const,
           properties: {
@@ -176,10 +197,11 @@ export const multimodalMcp: McpProvider = {
                 type: "object",
                 properties: {
                   videoUrl: { type: "string", description: "Source video URL to crop" },
-                  startTime: { type: "number", description: "Start time in seconds" },
-                  endTime: { type: "number", description: "End time in seconds" },
+                  startTime: { type: "number", description: "Start time in seconds; required when tailSeconds is absent" },
+                  endTime: { type: "number", description: "End time in seconds; required when tailSeconds is absent" },
+                  tailSeconds: { type: "number", description: "Crop this many seconds from the end; preferred for continuation, max 15" },
                 },
-                required: ["videoUrl", "startTime", "endTime"],
+                required: ["videoUrl"],
               },
             },
           },
@@ -226,31 +248,10 @@ export const multimodalMcp: McpProvider = {
         const results = await Promise.allSettled(
           items.map(async (item, i) => {
             try {
-              const isGpt = item.model === "gpt";
-              const url = isGpt 
-                ? process.env.FC_GENERATE_IMAGE_GPT_URL 
-                : process.env.FC_GENERATE_IMAGE_URL;
-              const token = isGpt 
-                ? process.env.FC_GENERATE_IMAGE_GPT_TOKEN 
-                : process.env.FC_GENERATE_IMAGE_TOKEN;
-              
-              if (!url || !token) {
-                throw new Error(
-                  isGpt
-                    ? "FC_GENERATE_IMAGE_GPT_URL and FC_GENERATE_IMAGE_GPT_TOKEN must be configured in .env"
-                    : "FC_GENERATE_IMAGE_URL and FC_GENERATE_IMAGE_TOKEN must be configured in .env"
-                );
-              }
-
-              const timeout = isGpt ? 180000 : 120000; // GPT: 3 min, Gemini: 2 min
-              const imageUrl = await callFcEndpoint(
-                url,
-                token,
-                {
-                  prompt: item.prompt,
-                  referenceImageUrls: item.referenceImageUrls,
-                },
-                timeout,
+              const imageUrl = await callImageGenerationApi(
+                item.prompt,
+                item.referenceImageUrls,
+                item.model,
               );
               return { index: i, status: "ok" as const, imageUrl, model: item.model };
             } catch (e) {
@@ -291,6 +292,7 @@ export const multimodalMcp: McpProvider = {
                   styleName: item.styleName,
                   referenceImageUrls: item.referenceImageUrls,
                   sourceVideoUrls: item.sourceVideoUrls,
+                  duration: item.duration,
                 },
                 300000, // 5 minutes for video generation
               );
@@ -327,6 +329,7 @@ export const multimodalMcp: McpProvider = {
                 videoUrl: item.videoUrl,
                 startTime: item.startTime,
                 endTime: item.endTime,
+                tailSeconds: item.tailSeconds,
               });
               return { index: i, status: "ok" as const, videoUrl };
             } catch (e) {

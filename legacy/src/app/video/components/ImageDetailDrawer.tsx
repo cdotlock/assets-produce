@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button, Drawer, Input, Spin, Typography, App, Tag, Tooltip } from "antd";
 import {
   ReloadOutlined,
   RollbackOutlined,
   SaveOutlined,
   CopyOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import { fetchJson } from "@/app/components/client-utils";
 
@@ -17,7 +18,7 @@ import { fetchJson } from "@/app/components/client-utils";
 interface VersionRow {
   id: string;
   version: number;
-  prompt: string;
+  prompt: string | null;
   url: string | null;
   refUrls: string[];
   createdAt: string;
@@ -25,14 +26,24 @@ interface VersionRow {
 
 interface ImageGenDetail {
   id: string;
-  sessionId: string;
+  mediaType: string;
   key: string;
+  category: string | null;
   currentVersion: number;
+  title: string | null;
   prompt: string | null;
   url: string | null;
   versions: VersionRow[];
   createdAt: string;
   updatedAt: string;
+}
+
+interface UploadImageVersionResult {
+  id: string;
+  key: string;
+  imageUrl: string;
+  compressedImageUrl: string;
+  version: number;
 }
 
 /* ------------------------------------------------------------------ */
@@ -53,11 +64,13 @@ export interface ImageDetailDrawerProps {
 
 export function ImageDetailDrawer({ imageGenId, onClose, onRefresh }: ImageDetailDrawerProps) {
   const { message } = App.useApp();
+  const uploadInputRef = useRef<HTMLInputElement | null>(null);
   const [detail, setDetail] = useState<ImageGenDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [editPrompt, setEditPrompt] = useState("");
   const [isSavingPrompt, setIsSavingPrompt] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [rollingBackVersion, setRollingBackVersion] = useState<number | null>(null);
   const [viewedVersion, setViewedVersion] = useState(0);
 
@@ -68,7 +81,7 @@ export function ImageDetailDrawer({ imageGenId, onClose, onRefresh }: ImageDetai
       const data = await fetchJson<ImageGenDetail>(`/api/key-resources/${id}`);
       setDetail(data);
       const curVer = data.versions.find((v) => v.version === data.currentVersion);
-      setEditPrompt(curVer?.prompt ?? "");
+      setEditPrompt(curVer?.prompt ?? data.prompt ?? "");
       setViewedVersion(data.currentVersion);
     } catch {
       void message.error("Failed to load image detail");
@@ -88,11 +101,16 @@ export function ImageDetailDrawer({ imageGenId, onClose, onRefresh }: ImageDetai
   /* ---- Derived state ---- */
   const viewedVerRow = detail?.versions.find((v) => v.version === viewedVersion) ?? null;
   const isViewingCurrent = !detail || viewedVersion === detail.currentVersion;
-  const promptDirty = viewedVerRow != null && editPrompt !== viewedVerRow.prompt;
+  const hasVersions = (detail?.versions.length ?? 0) > 0;
+  const basePrompt = viewedVerRow?.prompt ?? detail?.prompt ?? "";
+  const hasPromptInput = editPrompt.trim().length > 0;
+  const promptDirty = detail != null && editPrompt !== basePrompt;
+  const canSavePrompt = promptDirty && hasPromptInput;
+  const canGenerate = hasPromptInput || Boolean(viewedVerRow?.prompt);
 
   /* ---- Save prompt ---- */
   const handleSavePrompt = useCallback(async () => {
-    if (!detail || !promptDirty) return;
+    if (!detail || !canSavePrompt) return;
     setIsSavingPrompt(true);
     try {
       await fetchJson(`/api/key-resources/${detail.id}`, {
@@ -108,14 +126,14 @@ export function ImageDetailDrawer({ imageGenId, onClose, onRefresh }: ImageDetai
     } finally {
       setIsSavingPrompt(false);
     }
-  }, [detail, editPrompt, promptDirty, fetchDetail, message, onRefresh]);
+  }, [detail, editPrompt, canSavePrompt, fetchDetail, message, onRefresh]);
 
   /* ---- Regenerate ---- */
   const handleRegenerate = useCallback(async () => {
     if (!detail) return;
     setIsRegenerating(true);
     try {
-      const promptOverride = promptDirty ? editPrompt : undefined;
+      const promptOverride = hasPromptInput ? editPrompt : undefined;
       await fetchJson(`/api/key-resources/${detail.id}/regenerate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -124,12 +142,42 @@ export function ImageDetailDrawer({ imageGenId, onClose, onRefresh }: ImageDetai
       void message.success("Image regenerated");
       void fetchDetail(detail.id, true);
       onRefresh?.();
-    } catch {
-      void message.error("Regeneration failed");
+    } catch (err: unknown) {
+      void message.error(err instanceof Error ? err.message : "Regeneration failed");
     } finally {
       setIsRegenerating(false);
     }
-  }, [detail, editPrompt, promptDirty, fetchDetail, message, onRefresh]);
+  }, [detail, editPrompt, hasPromptInput, fetchDetail, message, onRefresh]);
+
+  /* ---- Upload local image ---- */
+  const handleUploadImage = useCallback(async (file: File | null) => {
+    if (!detail || !file) return;
+    if (!file.type.startsWith("image/")) {
+      void message.error("Please choose an image file");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    setIsUploading(true);
+    try {
+      const result = await fetchJson<UploadImageVersionResult>(
+        `/api/key-resources/${detail.id}/upload`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+      void message.success(`Uploaded v${result.version}`);
+      void fetchDetail(detail.id, true);
+      onRefresh?.();
+    } catch (err: unknown) {
+      void message.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setIsUploading(false);
+    }
+  }, [detail, fetchDetail, message, onRefresh]);
 
   /* ---- Rollback ---- */
   const handleRollback = useCallback(async (version: number) => {
@@ -159,7 +207,7 @@ export function ImageDetailDrawer({ imageGenId, onClose, onRefresh }: ImageDetai
           <div className="flex items-center gap-2">
             <span className="truncate font-mono text-sm">{detail.key}</span>
             <Tag color="blue" style={{ fontSize: 10, lineHeight: "16px", margin: 0 }}>
-              v{detail.currentVersion}
+              {detail.currentVersion > 0 ? `v${detail.currentVersion}` : "pending"}
             </Tag>
             {!isViewingCurrent && (
               <Tag color="orange" style={{ fontSize: 10, lineHeight: "16px", margin: 0 }}>
@@ -212,7 +260,7 @@ export function ImageDetailDrawer({ imageGenId, onClose, onRefresh }: ImageDetai
                         style={{ width: 56, height: 56 }}
                         onClick={() => {
                           setViewedVersion(ver.version);
-                          setEditPrompt(ver.prompt);
+                          setEditPrompt(ver.prompt ?? "");
                         }}
                       >
                         {ver.url ? (
@@ -264,18 +312,39 @@ export function ImageDetailDrawer({ imageGenId, onClose, onRefresh }: ImageDetai
                 value={editPrompt}
                 onChange={(e) => setEditPrompt(e.target.value)}
                 autoSize={{ minRows: 6, maxRows: 24 }}
+                placeholder="Enter a prompt to generate this image"
                 style={{ fontSize: 12 }}
               />
             </div>
 
             {/* Action buttons */}
             <div className="flex shrink-0 flex-wrap gap-2">
+              <input
+                ref={uploadInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                className="hidden"
+                onChange={(event) => {
+                  const file = event.currentTarget.files?.item(0) ?? null;
+                  void handleUploadImage(file);
+                  event.currentTarget.value = "";
+                }}
+              />
+              <Button
+                size="small"
+                icon={<UploadOutlined />}
+                onClick={() => uploadInputRef.current?.click()}
+                loading={isUploading}
+                disabled={detail.mediaType !== "image"}
+              >
+                Upload Image
+              </Button>
               <Button
                 size="small"
                 icon={<SaveOutlined />}
                 onClick={() => void handleSavePrompt()}
                 loading={isSavingPrompt}
-                disabled={!promptDirty}
+                disabled={!canSavePrompt}
               >
                 Save Prompt
               </Button>
@@ -285,8 +354,9 @@ export function ImageDetailDrawer({ imageGenId, onClose, onRefresh }: ImageDetai
                 icon={<ReloadOutlined />}
                 onClick={() => void handleRegenerate()}
                 loading={isRegenerating}
+                disabled={!canGenerate}
               >
-                {promptDirty ? "Save & Regenerate" : "Regenerate"}
+                {!hasVersions ? "Generate" : promptDirty ? "Save & Regenerate" : "Regenerate"}
               </Button>
               {!isViewingCurrent && (
                 <Button

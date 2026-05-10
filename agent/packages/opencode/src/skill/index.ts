@@ -292,7 +292,12 @@ export const layer = Layer.effect(
       const info = map.get(name)
       if (!info) return undefined
       if (info.location.startsWith("langfuse://")) {
-        return yield* managed.loadBody(name)
+        return yield* managed.loadBody(name).pipe(
+          Effect.catch((err) => {
+            log.error("managed.loadBody failed", { name, err })
+            return Effect.succeed(undefined)
+          }),
+        )
       }
       return info.content
     })

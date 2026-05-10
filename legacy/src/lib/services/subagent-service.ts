@@ -261,6 +261,7 @@ async function executeSubAgent(
             version: resource.persisted.version,
             url: resource.url ?? null,
             data: resource.data ?? null,
+            prompt: resource.prompt ?? null,
             title: resource.title ?? null,
           } as unknown as Prisma.InputJsonValue).catch(() => {/* logged in pushEvent */});
           return;
@@ -270,6 +271,7 @@ async function executeSubAgent(
           title: resource.title,
           url: resource.url,
           data: resource.data as Prisma.InputJsonValue | undefined,
+          prompt: resource.prompt,
         })
           .then((row) => {
             return pushEvent(subagentId, "key_resource", {
@@ -279,6 +281,7 @@ async function executeSubAgent(
               version: row.version,
               url: resource.url ?? null,
               data: resource.data ?? null,
+              prompt: resource.prompt ?? null,
               title: resource.title ?? null,
             } as unknown as Prisma.InputJsonValue);
           })
@@ -309,7 +312,17 @@ async function executeSubAgent(
       agentConfig,
     );
 
-    if (result.interruption) {
+    if (ac.signal.aborted) {
+      await prisma.subAgent.update({
+        where: { id: subagentId },
+        data: {
+          status: "cancelled",
+          output: result.reply || null,
+          error: "SubAgent cancelled",
+        },
+      });
+      await pushEvent(subagentId, "error", { error: "SubAgent cancelled" });
+    } else if (result.interruption) {
       await prisma.subAgent.update({
         where: { id: subagentId },
         data: {

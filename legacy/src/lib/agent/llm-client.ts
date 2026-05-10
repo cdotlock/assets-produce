@@ -52,26 +52,13 @@ export function mcpToolToOpenAI(tool: Tool): ChatCompletionTool {
 
 export type LlmMessage = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
-type LlmThinkingMode = "enabled" | "disabled";
-type ThinkingRequest = { thinking?: { type: LlmThinkingMode } };
 type JsonResponseFormat = { type: "json_object" };
-type NonStreamingRequest = ChatCompletionCreateParamsNonStreaming & ThinkingRequest;
-type StreamingRequest = ChatCompletionCreateParamsStreaming & ThinkingRequest;
+type NonStreamingRequest = ChatCompletionCreateParamsNonStreaming;
+type StreamingRequest = ChatCompletionCreateParamsStreaming;
 
 export interface ChatCompletionOptions {
   responseFormat?: JsonResponseFormat;
-}
-
-function getThinkingMode(): LlmThinkingMode | undefined {
-  const raw = process.env.LLM_THINKING_MODE?.trim().toLowerCase();
-  if (raw === "enabled") return "enabled";
-  if (raw === "provider-default") return undefined;
-  return "disabled";
-}
-
-function applyThinkingMode(body: ThinkingRequest): void {
-  const mode = getThinkingMode();
-  if (mode) body.thinking = { type: mode };
+  signal?: AbortSignal;
 }
 
 export async function chatCompletion(
@@ -81,14 +68,16 @@ export async function chatCompletion(
   options?: ChatCompletionOptions,
 ): Promise<OpenAI.Chat.Completions.ChatCompletion> {
   const client = getClient();
+  const resolvedModel = model ?? DEFAULT_MODEL;
   const body: NonStreamingRequest = {
-    model: model ?? DEFAULT_MODEL,
+    model: resolvedModel,
     messages,
     tools: tools?.length ? tools : undefined,
     response_format: options?.responseFormat,
   };
-  applyThinkingMode(body);
-  const rawRes: unknown = await client.chat.completions.create(body);
+  const rawRes: unknown = options?.signal
+    ? await client.chat.completions.create(body, { signal: options.signal })
+    : await client.chat.completions.create(body);
 
   let res: ChatCompletion;
   if (typeof rawRes === "string") {
@@ -119,22 +108,21 @@ export async function chatCompletionStream(
   model?: string,
 ): Promise<AsyncIterable<ChatCompletionChunk>> {
   const client = getClient();
+  const resolvedModel = model ?? DEFAULT_MODEL;
   
   console.log("[llm-client] Creating stream with:", {
-    model: model ?? DEFAULT_MODEL,
+    model: resolvedModel,
     messageCount: messages.length,
     toolCount: tools?.length ?? 0,
     baseURL: process.env.LLM_BASE_URL,
-    thinkingMode: getThinkingMode() ?? "provider-default",
   });
   
   const body: StreamingRequest = {
-    model: model ?? DEFAULT_MODEL,
+    model: resolvedModel,
     messages,
     tools: tools?.length ? tools : undefined,
     stream: true,
   };
-  applyThinkingMode(body);
   const stream = await client.chat.completions.create(
     body,
     signal ? { signal } : undefined,
@@ -178,7 +166,6 @@ export async function generateTitle(userMessage: string): Promise<string> {
         },
       ],
     };
-    applyThinkingMode(body);
     const rawRes: unknown = await client.chat.completions.create(body);
     
     // Handle case where OpenAI SDK returns a string instead of object

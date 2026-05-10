@@ -5,14 +5,14 @@
  * Data queries (2): get_episode, get_status
  * Novel-level image gen (2): generate_portrait, generate_scene (single/grid/hd)
  * EP-level image gen (1): generate_costume
- * Prompt/video gen (2): save_reviewed_video_prompt, execute_video_prompt
+ * Prompt/video gen (3): optimize_video_prompts, save_reviewed_video_prompt, execute_video_prompt
  *
  * All generate_* tools auto-handle key/scope/category/KeyResource/domain_resources.
  */
 
 import { z } from "zod";
 import type { Tool, CallToolResult } from "@modelcontextprotocol/sdk/types";
-import type { McpProvider } from "../types";
+import type { McpProvider, ToolContext } from "../types";
 import type { Prisma } from "@/generated/prisma";
 import * as novelService from "@/lib/services/novel-service";
 import * as episodeService from "@/lib/services/episode-service";
@@ -20,6 +20,7 @@ import * as orchestrationService from "@/lib/services/video-workflow-orchestrati
 import * as assetGenerationService from "@/lib/services/video-asset-generation-service";
 import * as batchTaskService from "@/lib/services/batch-generation-task-service";
 import * as keyResourceService from "@/lib/services/key-resource-service";
+import * as promptOptimizerService from "@/lib/services/video-prompt-optimizer-service";
 import { setKeyResourceMetadata } from "@/lib/services/video-asset-generation-service";
 
 /* ------------------------------------------------------------------ */
@@ -87,7 +88,8 @@ const TOOLS: Tool[] = [
     name: "get_episode",
     description:
       "Get full episode data (characters, outfits, scene_locations, pre_choice_script, " +
-      "choice_node, post_choice_outcomes). Returns the complete init_result JSON.",
+      "choice_node, post_choice_outcomes). Returns the complete init_result JSON plus " +
+      "episodeWindow with previous/current/next episode original scriptContent and initResult.",
     inputSchema: {
       type: "object" as const,
       properties: {
@@ -100,7 +102,7 @@ const TOOLS: Tool[] = [
     name: "get_status",
     description:
       "Unified status & resource query. Returns identity, ALL generated resources with URLs, " +
-      "progress summary (portraits/scenes/costumes/videos done/total), and running async tasks. " +
+      "resource completion summary (portraits/scenes/costumes/videos done/total), and running async tasks. " +
       "Pass scriptId for EP-level detail (auto-resolves novelId, includes novel + EP resources). " +
       "Pass novelId alone for novel-wide overview (all EPs included). " +
       "Use mediaType/keyPattern to filter resources (e.g. mediaType='video', keyPattern='clip_1').",
@@ -132,7 +134,7 @@ const TOOLS: Tool[] = [
           minItems: 1,
         },
         styleName: { type: "string", description: "样式预设名称（可选）" },
-        model: { type: "string", description: "图片生成模型（可选）：'gemini'/'google/gemini-*' 走 Gemini FC；'gpt'/'gpt-*' 走 GPT Image FC" },
+        model: { type: "string", description: "图片生成提供方（可选）：'gemini' 走 Gemini FC，具体 Gemini 模型由该 FC 部署的 GEMINI_MODEL 固定；'gpt'/'gpt-*' 走 GPT Image FC" },
       },
       required: ["novelId", "characterNames"],
     },
@@ -141,7 +143,8 @@ const TOOLS: Tool[] = [
     name: "submit_scenes_task",
     description:
       "批量生成场景图片（小说级）。异步执行，立即返回 taskId。" +
-      "单个生成时传入长度为 1 的数组。适用于生成小说中所有场景的背景图。",
+      "单个生成时传入长度为 1 的数组。适用于生成小说中所有场景的背景图。" +
+      "生成类型由服务端根据 location_bible 与资源占位自动裁决；调用方不能传 mode。",
     inputSchema: {
       type: "object" as const,
       properties: {
@@ -149,15 +152,10 @@ const TOOLS: Tool[] = [
         sceneNames: {
           type: "array",
           items: { type: "string" },
-          description: "场景名称列表（单个生成时传入长度为 1 的数组）",
+          description: "场景名称或占位资源 key/title 列表（单个生成时传入长度为 1 的数组）。例如 scene_银月领地_豪宅_grid 会解析为父地点 grid 工作流。",
           minItems: 1,
         },
-        mode: {
-          type: "string",
-          enum: ["single", "grid", "hd"],
-          description: "生成模式（可选，默认 single）",
-        },
-        model: { type: "string", description: "图片生成模型（可选）：'gemini'/'google/gemini-*' 走 Gemini FC；'gpt'/'gpt-*' 走 GPT Image FC" },
+        model: { type: "string", description: "图片生成提供方（可选）：'gemini' 走 Gemini FC，具体 Gemini 模型由该 FC 部署的 GEMINI_MODEL 固定；'gpt'/'gpt-*' 走 GPT Image FC" },
       },
       required: ["novelId", "sceneNames"],
     },
@@ -178,7 +176,7 @@ const TOOLS: Tool[] = [
           minItems: 1,
         },
         styleName: { type: "string", description: "样式预设名称（可选）" },
-        model: { type: "string", description: "图片生成模型（可选）：'gemini'/'google/gemini-*' 走 Gemini FC；'gpt'/'gpt-*' 走 GPT Image FC" },
+        model: { type: "string", description: "图片生成提供方（可选）：'gemini' 走 Gemini FC，具体 Gemini 模型由该 FC 部署的 GEMINI_MODEL 固定；'gpt'/'gpt-*' 走 GPT Image FC" },
       },
       required: ["scriptId", "characterNames"],
     },
@@ -186,7 +184,7 @@ const TOOLS: Tool[] = [
   {
     name: "get_task_status",
     description:
-      "查询异步任务状态和结果。返回任务的当前状态（pending/running/completed/failed）、进度、结果或错误信息。",
+      "查询异步任务状态和结果。返回任务的当前状态（pending/running/completed/failed）、结果或错误信息。",
     inputSchema: {
       type: "object" as const,
       properties: {
@@ -210,10 +208,24 @@ const TOOLS: Tool[] = [
 
   // --- Prompt Persistence & Video Execution ---
   {
+    name: "optimize_video_prompts",
+    description:
+      "服务端确定性执行 EP 视频 Prompt Optimizer。只传 scriptId；工具会按 scriptId 读取当前 EP、前后一集 episodeWindow 原文、资源状态和换装 URL，构造 Optimizer 输入并调度 Writer/Reviewer。EP 主控禁止自行拼接或转述 episodeWindow，必须调用本工具。",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        scriptId: { type: "string", description: "Episode script DB ID" },
+        savePrompts: { type: "boolean", description: "通过后是否保存 reviewed prompts，默认 true" },
+        stopBeforeVideoGeneration: { type: "boolean", description: "是否在生成视频前停止，默认 true" },
+        model: { type: "string", description: "可选：Optimizer 使用的模型" },
+      },
+      required: ["scriptId"],
+    },
+  },
+  {
     name: "save_reviewed_video_prompt",
     description:
-      "保存 Reviewer 已通过的视频 prompt。EP 主控在 Prompt Writer subagent 和 Reviewer subagent 都通过后调用；" +
-      "只持久化 prompt/review 元数据，不生成视频。",
+      "低层保存工具：保存 Reviewer 已通过的视频 prompt。通常不要由 EP 主控直接调用；EP 主控应调用 optimize_video_prompts，由服务端确定性组装上下文、调度 Optimizer 并保存。此工具会校验 refUrls 必须属于当前 scriptId 可见资源。",
     inputSchema: {
       type: "object" as const,
       properties: {
@@ -233,19 +245,19 @@ const TOOLS: Tool[] = [
   {
     name: "execute_video_prompt",
     description:
-      "执行一个已通过 review 的视频 prompt。只有用户明确要求生成视频时才调用；工具会解析 definition 中的资源引用、套用 video_style 并调用视频生成。",
+      "执行一个已通过 review 的视频 prompt。只有用户明确要求生成视频时才调用；Seedance 为主路径。工具返回 videoUrl 和 lastFrameUrl；连续 clip 必须把上一轮返回的 videoUrl 作为 previousVideoUrl、lastFrameUrl 作为 previousFrameUrl，严禁自行拼接、推断或省略 previousFrameUrl。",
     inputSchema: {
       type: "object" as const,
       properties: {
         scriptId: { type: "string", description: "Episode script DB ID" },
-        key: { type: "string", description: "生成后保存的视频资源 key" },
+        key: { type: "string", description: "已通过 review 的视频 prompt key，例如 clip_1；生成后的视频资源会保存为独立 video_<key>，避免覆盖 视频Prompt。" },
         prompt: { type: "string", description: "Reviewer 放行的视频 prompt" },
         definition: { type: "string", description: "素材定义，例如 '@图1 是 [场景X]，@图2 是 [人物A换装图]'" },
         duration: { type: "number", description: "Duration in seconds (4-15)" },
         provider: {
           type: "string",
           enum: ["jimeng", "happyhorse"],
-          description: "视频生成 provider。默认 jimeng；快乐马测试传 happyhorse。两种 provider 都由工具套用 video_style。",
+          description: "视频生成 provider。默认 jimeng/Seedance 主路径；happyhorse 仅作为兼容/测试路径。两种 provider 都由工具套用 video_style。",
         },
         resolution: {
           type: "string",
@@ -258,13 +270,41 @@ const TOOLS: Tool[] = [
           description: "HappyHorse 可选宽高比",
         },
         model: { type: "string", description: "HappyHorse 可选模型名" },
-        previousVideoUrl: { type: "string", description: "可选：延续上一段视频时传入上一段 URL，工具会截取末帧/尾段" },
+        previousVideoUrl: {
+          type: "string",
+          description: "连续 clip 必填：上一轮 execute_video_prompt 返回的 videoUrl。工具默认裁最后 15 秒作为 Seedance sourceVideoUrls 参照。",
+        },
+        previousFrameUrl: {
+          type: "string",
+          description: "连续 clip 必填：上一轮 execute_video_prompt 返回的 lastFrameUrl。严禁自行拼接或猜测 URL；工具会作为 Seedance 首帧/参考图参照传递。",
+        },
+        continuationTailSeconds: {
+          type: "number",
+          description: "可选：从上一 clip 尾部裁取的视频秒数，默认 15，范围 1-15。",
+        },
         title: { type: "string", description: "Human-readable label" },
       },
       required: ["scriptId", "key", "prompt", "definition", "duration"],
     },
   },
 ];
+
+type McpTaskResult = Omit<batchTaskService.TaskResult, "progress" | "total">;
+
+function toMcpTaskResult(task: batchTaskService.TaskResult): McpTaskResult {
+  return {
+    id: task.id,
+    type: task.type,
+    scopeType: task.scopeType,
+    scopeId: task.scopeId,
+    status: task.status,
+    result: task.result,
+    error: task.error,
+    startedAt: task.startedAt,
+    completedAt: task.completedAt,
+    createdAt: task.createdAt,
+  };
+}
 
 /* ------------------------------------------------------------------ */
 /*  Tool Implementations                                               */
@@ -280,6 +320,7 @@ export const videoWorkflowMcp: McpProvider = {
   async callTool(
     name: string,
     args: Record<string, unknown>,
+    context?: ToolContext,
   ): Promise<CallToolResult> {
     try {
       switch (name) {
@@ -297,11 +338,16 @@ export const videoWorkflowMcp: McpProvider = {
         case "get_episode": {
           const { scriptId } = ScriptIdParam.parse(args);
           const episode = await episodeService.getEpisode(scriptId);
+          const episodeWindow = await episodeService.getEpisodeWindow(scriptId);
 
           if (!episode) return text(`Episode not found: ${scriptId}`);
           if (!episode.initResult) return text(`Episode ${scriptId} has no init_result data`);
 
-          return json({ scriptKey: episode.scriptKey, ...episode.initResult as Record<string, unknown> });
+          return json({
+            scriptKey: episode.scriptKey,
+            ...episode.initResult as Record<string, unknown>,
+            episodeWindow,
+          });
         }
 
         case "get_status": {
@@ -334,7 +380,7 @@ export const videoWorkflowMcp: McpProvider = {
           if (!result) {
             return json({ status: "error", error: "Task not found" });
           }
-          return json(result);
+          return json(toMcpTaskResult(result));
         }
 
         case "list_tasks": {
@@ -350,11 +396,18 @@ export const videoWorkflowMcp: McpProvider = {
           const scopeType = novelId ? "novel" : "script";
           const scopeId = (novelId || scriptId) as string;
           const tasks = await batchTaskService.listTasks(scopeType, scopeId);
-          return json(tasks);
+          return json(tasks.map(toMcpTaskResult));
+        }
+
+        case "optimize_video_prompts": {
+          const params = promptOptimizerService.OptimizeVideoPromptsParams.parse(args);
+          const result = await promptOptimizerService.optimizeVideoPrompts(params, context);
+          return json(result);
         }
 
         case "save_reviewed_video_prompt": {
           const params = SaveReviewedVideoPromptParams.parse(args);
+          await promptOptimizerService.assertReferenceUrlsBelongToScript(params.scriptId, params.refUrls);
           const data = {
             ...(params.definition ? { definition: params.definition } : {}),
             ...(params.duration ? { duration: params.duration } : {}),

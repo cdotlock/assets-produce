@@ -38,6 +38,7 @@ export interface GenerateAndPersistImageResult {
   key: string;
   keyResourceId: string;
   imageUrl?: string;
+  compressedImageUrl?: string;
   version: number;
   error?: string;
 }
@@ -45,9 +46,14 @@ export interface GenerateAndPersistImageResult {
 export interface ExecuteVideoPromptResult {
   status: string;
   key: string;
+  videoKey: string;
   keyResourceId: string;
   version: number;
   videoUrl: string;
+  lastFrameUrl: string;
   referenceImageCount: number;
+  sourceVideoUrls?: string[];
+  previousVideoUrl?: string;
+  previousFrameUrl?: string;
   prompt: string;
 }

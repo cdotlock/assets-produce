@@ -34,7 +34,7 @@ export const Parameters = Schema.Struct({
   }),
 })
 
-export const GenerateVideoSeedanceTool = Tool.define(
+export const GenerateVideoSeedanceTool = Tool.define<typeof Parameters, Record<string, unknown>, never>(
   TOOL_ID,
   Effect.gen(function* () {
     return {

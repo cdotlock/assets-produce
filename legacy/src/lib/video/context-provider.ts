@@ -10,6 +10,7 @@
  */
 
 import type { ContextProvider } from "@/lib/agent/context-provider";
+import { getEpisodeWindow } from "@/lib/services/episode-service";
 import { getInitResult } from "@/lib/services/video-workflow-orchestration-service";
 import type { InitWorkflowResult } from "@/lib/video/workflow-types";
 
@@ -35,12 +36,18 @@ export class VideoContextProvider implements ContextProvider {
 
     const initResult: InitWorkflowResult | null =
       await getInitResult(novelId, scriptKey);
+    const episodeWindow = await getEpisodeWindow(scriptId);
 
     const lines: string[] = [
       "# Video Workflow Context",
       `novel_id: ${novelId}`,
       `script_id: ${scriptId}`,
       `script_key: ${scriptKey}`,
+      "",
+      "## Prompt Optimizer Dispatch Rule",
+      "生成或优化视频 prompt 时，你只负责调度，不负责拼接、转述或改写 episodeWindow。",
+      "必须调用 `video_workflow__optimize_video_prompts` 并只传当前 `script_id`；该工具会由服务端按 scriptId 注入当前 EP、前后一集原文窗口、资源状态和完整 skill 上下文。",
+      "禁止自行调用 `subagent__run` 来启动 video-prompt-optimizer，禁止手写 Optimizer instruction 中的 EP 内容。",
     ];
 
     if (!initResult) {
@@ -58,6 +65,28 @@ export class VideoContextProvider implements ContextProvider {
     lines.push(`next_step: ${initResult.nextStep}`);
     if (initResult.missingCharacters?.length) {
       lines.push(`missing_characters: ${initResult.missingCharacters.join(", ")}`);
+    }
+
+    if (episodeWindow.length) {
+      lines.push("");
+      lines.push("## Episode Source Window");
+      lines.push("以下为当前 EP 及前后一集原文窗口。处理 EP2 时必须同时使用 EP1 / EP2 / EP3 原文理解情绪承接。");
+      for (const episode of episodeWindow) {
+        lines.push("");
+        lines.push(`### ${episode.relation.toUpperCase()} ${episode.scriptKey}`);
+        if (episode.scriptName) lines.push(`script_name: ${episode.scriptName}`);
+        lines.push(`script_id: ${episode.scriptId}`);
+        lines.push("script_content:");
+        lines.push("```text");
+        lines.push(episode.scriptContent ?? "");
+        lines.push("```");
+        if (episode.initResult !== null) {
+          lines.push("init_result_json:");
+          lines.push("```json");
+          lines.push(JSON.stringify(episode.initResult, null, 2));
+          lines.push("```");
+        }
+      }
     }
 
     return lines.join("\n");

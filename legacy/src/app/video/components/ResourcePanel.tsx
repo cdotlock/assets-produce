@@ -2,7 +2,17 @@
 
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { Button, Collapse, Drawer, Empty, Input, Spin, Typography, Image, Tag, App } from "antd";
-import { DeleteOutlined, EditOutlined, EyeOutlined, FormatPainterOutlined, SkinOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  EditOutlined,
+  EnvironmentOutlined,
+  EyeOutlined,
+  FormatPainterOutlined,
+  PictureOutlined,
+  SkinOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import type { DomainResources, DomainResource, VideoResourceData } from "../types";
 import { fetchJson } from "@/app/components/client-utils";
 import { ImageDetailDrawer } from "./ImageDetailDrawer";
@@ -31,6 +41,29 @@ export interface ResourcePanelProps {
 
 const ASIDE_CLASS = "flex h-full w-56 min-w-[200px] shrink-0 flex-col border-l border-slate-800 bg-slate-950/80";
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function getDownloadFilename(contentDisposition: string | null): string | null {
+  if (!contentDisposition) return null;
+
+  const encodedMatch = /filename\*=UTF-8''([^;]+)/i.exec(contentDisposition);
+  if (encodedMatch?.[1]) {
+    try {
+      return decodeURIComponent(encodedMatch[1]);
+    } catch {
+      return encodedMatch[1];
+    }
+  }
+
+  const quotedMatch = /filename="([^"]+)"/i.exec(contentDisposition);
+  if (quotedMatch?.[1]) return quotedMatch[1];
+
+  const plainMatch = /filename=([^;]+)/i.exec(contentDisposition);
+  return plainMatch?.[1]?.trim() ?? null;
+}
+
 export function ResourcePanel({ resources, isLoading, novelId, scriptId, isNovelLevel, onRefresh }: ResourcePanelProps) {
   const { message } = App.useApp();
 
@@ -54,12 +87,16 @@ export function ResourcePanel({ resources, isLoading, novelId, scriptId, isNovel
   /* ---- Costume preview drawer state ---- */
   const [costumePreviewOpen, setCostumePreviewOpen] = useState(false);
 
+  /* ---- Export state ---- */
+  const [isExporting, setIsExporting] = useState(false);
+
   /* ---- Collapse expand state (controlled) ---- */
   const [activeKeys, setActiveKeys] = useState<string[]>([]);
   const knownKeysRef = useRef<Set<string>>(new Set());
+  const categories = useMemo(() => resources?.categories ?? [], [resources?.categories]);
 
   /* ---- Smart image rendering ---- */
-  const renderSmartImage = (url: string, alt: string, keyResourceId?: string | null) => {
+  const renderSmartImage = (url: string, alt: string, keyResourceId: string | null | undefined) => {
     if (keyResourceId) {
       return (
         // eslint-disable-next-line @next/next/no-img-element
@@ -68,7 +105,6 @@ export function ResourcePanel({ resources, isLoading, novelId, scriptId, isNovel
           alt={alt}
           className="w-full cursor-pointer"
           style={{ display: "block" }}
-          onClick={() => setSelectedImageGenId(keyResourceId)}
         />
       );
     }
@@ -78,20 +114,60 @@ export function ResourcePanel({ resources, isLoading, novelId, scriptId, isNovel
         alt={alt}
         width="100%"
         style={{ display: "block" }}
-      placeholder={<div className="aspect-square w-full bg-slate-800" />}
+        placeholder={<div className="aspect-square w-full bg-slate-800" />}
         preview={true}
       />
+    );
+  };
+
+  const renderImagePlaceholder = (category: string, title: string | null, canOpenDetail: boolean) => {
+    const iconClass = "text-2xl text-slate-500";
+    const icon = category === "角色立绘"
+      ? <UserOutlined className={iconClass} />
+      : category.includes("场景")
+        ? <EnvironmentOutlined className={iconClass} />
+        : <PictureOutlined className={iconClass} />;
+
+    return (
+      <div className="flex aspect-square flex-col items-center justify-center gap-2 bg-slate-900 px-2 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-md border border-slate-700 bg-slate-800/80">
+          {icon}
+        </div>
+        <span className="line-clamp-2 text-[10px] leading-tight text-slate-500">
+          {canOpenDetail ? "待生成" : title ?? "暂无图片"}
+        </span>
+      </div>
     );
   };
   const jsonDataForDisplay = (r: DomainResource): unknown => {
     const hasPrompt = typeof r.prompt === "string";
     const hasRefUrls = Array.isArray(r.refUrls);
+    if (r.category === "视频Prompt") {
+      const data = isRecord(r.data) ? r.data : {};
+      return {
+        shot_function: data.shot_function,
+        prev_shot_recap: data.prev_shot_recap,
+        next_shot_setup: data.next_shot_setup,
+        definition: data.definition,
+        duration: data.duration,
+        prompt: r.prompt ?? data.prompt,
+        refUrls: r.refUrls ?? data.refUrls,
+        review: isRecord(data.reviewResult)
+          ? {
+              passed: data.reviewResult.passed,
+              allowVideoGeneration: data.reviewResult.allowVideoGeneration,
+              suggestions: data.reviewResult.suggestions,
+              summary: data.reviewResult.summary,
+            }
+          : undefined,
+      };
+    }
     if (!hasPrompt && !hasRefUrls) return r.data;
-    if (typeof r.data !== "object" || r.data === null || Array.isArray(r.data)) {
+    if (!isRecord(r.data)) {
       return r.data;
     }
     return {
-      ...(r.data as Record<string, unknown>),
+      ...r.data,
       ...(hasPrompt ? { prompt: r.prompt } : {}),
       ...(hasRefUrls ? { refUrls: r.refUrls } : {}),
     };
@@ -154,6 +230,59 @@ export function ResourcePanel({ resources, isLoading, novelId, scriptId, isNovel
     }
   }, [editingItem, editText, scriptId, onRefresh, message]);
 
+  const hasGeneratedResources = useMemo(() => {
+    return categories.some((group) =>
+      group.items.some((item) =>
+        item.url != null && (item.mediaType === "image" || item.mediaType === "video"),
+      ),
+    );
+  }, [categories]);
+
+  const handleExport = useCallback(async () => {
+    const endpoint = isNovelLevel
+      ? `/api/video/novel/${encodeURIComponent(novelId)}/resources/export`
+      : scriptId
+        ? `/api/video/episodes/${encodeURIComponent(scriptId)}/resources/export?novelId=${encodeURIComponent(novelId)}`
+        : null;
+
+    if (!endpoint) return;
+
+    setIsExporting(true);
+    try {
+      const response = await fetch(endpoint);
+      if (!response.ok) {
+        let errorMessage = "Export failed";
+        try {
+          const parsed: unknown = await response.json();
+          if (isRecord(parsed) && typeof parsed.error === "string") {
+            errorMessage = parsed.error;
+          }
+        } catch {
+          // Keep the generic export failure message.
+        }
+        throw new Error(errorMessage);
+      }
+
+      const blob = await response.blob();
+      const disposition = response.headers.get("content-disposition");
+      const filename = getDownloadFilename(disposition) ?? "resources.zip";
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      void message.success("Export started");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Export failed";
+      void message.error(errorMessage);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [isNovelLevel, novelId, scriptId, message]);
+
   /* ---- Per media_type renderers ---- */
 
   /* ---- Delete overlay button (shared across media types) ---- */
@@ -170,33 +299,46 @@ export function ResourcePanel({ resources, isLoading, novelId, scriptId, isNovel
     />
   );
 
-  const renderImageItem = (r: DomainResource) => (
-    <div key={r.id} className="group/card relative overflow-hidden rounded-lg">
-      {renderDeleteBtn(r.id)}
-      {r.url ? (
-        renderSmartImage(r.url, r.title ?? "Image", r.keyResourceId ?? r.id)
-      ) : (
-        <div className="flex aspect-square items-center justify-center bg-slate-800">
-          <span className="text-xs text-slate-600">No image</span>
-        </div>
-      )}
-      {r.title && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2 pb-1.5 pt-5">
-          <div className="truncate text-center text-[11px] font-medium text-white">{r.title}</div>
-        </div>
-      )}
-    </div>
-  );
+  const renderImageItem = (r: DomainResource) => {
+    const canOpenDetail = r.keyResourceId != null;
+    const openDetail = () => {
+      if (r.keyResourceId) setSelectedImageGenId(r.keyResourceId);
+    };
+
+    return (
+      <div
+        key={r.id}
+        className={`group/card relative overflow-hidden rounded-lg ${canOpenDetail ? "cursor-pointer" : ""}`}
+        onClick={openDetail}
+        onKeyDown={(e) => {
+          if (!canOpenDetail) return;
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openDetail();
+          }
+        }}
+        role={canOpenDetail ? "button" : undefined}
+        tabIndex={canOpenDetail ? 0 : undefined}
+      >
+        {renderDeleteBtn(r.id)}
+        {r.url ? (
+          renderSmartImage(r.url, r.title ?? "Image", r.keyResourceId)
+        ) : (
+          renderImagePlaceholder(r.category, r.title, canOpenDetail)
+        )}
+        {r.title && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2 pb-1.5 pt-5">
+            <div className="truncate text-center text-[11px] font-medium text-white">{r.title}</div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderVideoItem = (r: DomainResource) => {
     const vData = r.data as VideoResourceData | null;
-    const handleClick = () => {
-      if (r.keyResourceId) {
-        setSelectedImageGenId(r.keyResourceId);
-      } else {
-        setSelectedVideoResource(r);
-      }
-    };
+    const prompt = r.prompt ?? vData?.prompt ?? "";
+    const handleClick = () => setSelectedVideoResource(r);
     return (
       <div key={r.id} className="group/card relative cursor-pointer overflow-hidden rounded-lg" onClick={handleClick}>
         {renderDeleteBtn(r.id)}
@@ -212,9 +354,9 @@ export function ResourcePanel({ resources, isLoading, novelId, scriptId, isNovel
             />
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 px-2">
               <span className="mb-1 text-[10px] font-medium text-amber-400">待生成</span>
-              {vData.prompt && (
+              {prompt && (
                 <p className="line-clamp-3 text-center text-[10px] leading-relaxed text-white/80">
-                  {vData.prompt}
+                  {prompt}
                 </p>
               )}
             </div>
@@ -222,9 +364,9 @@ export function ResourcePanel({ resources, isLoading, novelId, scriptId, isNovel
         ) : (
           <div className="flex aspect-[9/16] flex-col items-center justify-center bg-slate-800 px-2">
             <span className="mb-1 text-[10px] font-medium text-amber-400">待生成</span>
-            {vData?.prompt ? (
+            {prompt ? (
               <p className="line-clamp-4 text-center text-[10px] leading-relaxed text-slate-500">
-                {vData.prompt}
+                {prompt}
               </p>
             ) : (
               <span className="text-xs text-slate-600">No prompt</span>
@@ -265,7 +407,6 @@ export function ResourcePanel({ resources, isLoading, novelId, scriptId, isNovel
   };
 
   /* ---- Auto-expand newly appeared categories, preserve existing expand state ---- */
-  const categories = useMemo(() => resources?.categories ?? [], [resources?.categories]);
   const categoryKeys = useMemo(() => categories.map((g) => `cat-${g.category}`), [categories]);
   useEffect(() => {
     const newKeys = categoryKeys.filter((k) => !knownKeysRef.current.has(k));
@@ -359,6 +500,17 @@ export function ResourcePanel({ resources, isLoading, novelId, scriptId, isNovel
                   style={{ width: 28, height: 28, minWidth: 28 }}
                 />
               )}
+              <Button
+                type="text"
+                size="small"
+                icon={<DownloadOutlined />}
+                onClick={() => void handleExport()}
+                loading={isExporting}
+                disabled={!hasGeneratedResources}
+                className="!text-slate-400 hover:!text-slate-200"
+                title="Export Generated Resources"
+                style={{ width: 28, height: 28, minWidth: 28 }}
+              />
               <Button
                 type="text"
                 size="small"

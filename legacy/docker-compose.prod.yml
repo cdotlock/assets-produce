@@ -2,9 +2,8 @@
 # 生产环境 Docker Compose
 #
 # 使用方式:
-#   推送镜像: pnpm deploy
+#   离线发包部署: pnpm deploy:prod -- --tag vX.Y.Z
 #   服务器部署: docker compose -f docker-compose.prod.yml up -d
-#   服务器需先登录: docker login ghcr.io
 # =============================================================================
 
 services:
@@ -51,7 +50,7 @@ services:
       - app-network
 
   app:
-    image: agent-forge:latest  # 使用本地镜像（离线部署）
+    image: agent-forge:latest  # 由离线镜像包 docker load 到服务器
     restart: unless-stopped
     expose:
       - "8001"
@@ -66,7 +65,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget --spider -q http://localhost:8001/ || exit 1"]
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:8001/api/health || exit 1"]
       start_period: 30s
       interval: 10s
       timeout: 5s

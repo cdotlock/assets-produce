@@ -2,7 +2,7 @@
 
 Agent-native multi-format asset production platform — based on opencode.
 
-> **Status**: Phase 0 bootstrap (not usable yet).
+> **Status**: Phase 7 prompt-workflow parity in progress. CLI/WebUI can build; prompt-only video workflow is being hardened for launch readiness.
 
 ## Repository Boundary
 

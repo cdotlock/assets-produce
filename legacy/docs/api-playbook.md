@@ -24,6 +24,63 @@ MCP 初始化是 **惰性** 的——首次 API 请求触发 `initMcp()`。
 
 因此：刚启动后第一次请求会较慢（冷启动）。
 
+## 外部分发 API
+
+外部分发 key 只用于以下三个接口，不影响 `/api/chat`、`/api/subagents`、`/mcp` 或内部 agent workflow。
+
+配置固定 key：
+
+```bash
+EXTERNAL_VIDEO_API_KEYS=customer-a:secret-a,customer-b:secret-b
+EXTERNAL_VIDEO_API_KEYS='[{"name":"customer-a","key":"secret-a"},{"name":"customer-b","key":"secret-b"}]'
+```
+
+调用时使用任一 header：
+
+```bash
+Authorization: Bearer <key>
+# 或
+x-video-api-key: <key>
+```
+
+Seedance 视频生成：
+
+```bash
+curl -X POST http://localhost:8001/api/external/video/generate \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer <key>' \
+  -d '{"prompt":"a cinematic shot of a city at sunset","duration":5,"ratio":"9:16","resolution":"720P"}'
+```
+
+该接口对外保持同步响应；服务端调用 FC 时先提交异步任务，等待 4 分钟后每 30 秒用短请求轮询结果，避免 FC HTTP 长连接被中间层截断。
+
+HappyHorse 视频生成：
+
+```bash
+curl -X POST http://localhost:8001/api/external/video/happyhorse \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer <key>' \
+  -d '{"prompt":"animate this reference image","media":[{"type":"reference_image","url":"https://example.com/image.png"}],"duration":5}'
+```
+
+独立 OSS 上传：
+
+```bash
+curl -X POST http://localhost:8001/api/external/video/oss/upload \
+  -H 'Authorization: Bearer <key>' \
+  -F 'file=@/path/to/file.mp4' \
+  -F 'folder=video' \
+  -F 'prefix=clip'
+```
+
+三个接口成功/失败都会按 `apiKeyName + product` 写入 `ApiUsageCounter`，用于后续追索：
+
+```sql
+SELECT "apiKeyName", product, "totalCount", "successCount", "failureCount", "lastError", "lastUsedAt"
+FROM "ApiUsageCounter"
+ORDER BY "lastUsedAt" DESC;
+```
+
 ## 时序依赖（因果链）
 
 ### Skill → Agent
@@ -126,7 +183,7 @@ curl -X POST http://localhost:8001/api/subagents/{subagent_id}/cancel
 1. 前端读取用户上传的 JSON 剧本文件
 2. `POST /api/video/novels` 校验 `{ name, script }`
 3. service 写入 `novels`，再批量写入 `novel_scripts`
-4. service 按 JSON 内容初始化 versioned `KeyResource` 占位
+4. service 按 JSON 内容初始化 versioned `KeyResource` 占位；导入脚本中父地点只要有真实子地点，父地点就不作为独立 single 场景任务占位；已有版本/URL 的父地点图不受影响；真实子地点 >= 2 时仍额外创建 `scene_<父地点名>_grid`
 5. `GET /api/video/novels` 从本地 biz-db 返回小说列表
 6. `GET /api/video/novels/{novelId}/episodes` 从本地 `novel_scripts` 返回 episode 列表
 7. episode 资源读取合并 novel scope 与 script scope 的 `KeyResource`
@@ -143,6 +200,13 @@ curl -X POST http://localhost:8001/api/subagents/{subagent_id}/cancel
 4. 服务端注入 `NovelContextProvider`，只暴露小说级上下文和已有 novel scope 资源统计
 5. 默认 skill 为 `novel-resource-mgr`，默认 MCP scope 为 `video_workflow`，用于生成/管理 `scopeType="novel"` 的角色立绘和场景资源
 
+小说级场景生成：
+1. 调用方只传 `sceneNames`，不能传 `mode`；生成类型由服务端根据 `location_bible` 与资源占位自动裁决
+2. 普通地点输出 `scene_<地点名>`
+3. 带 2 个及以上真实子地点的父地点一律走 grid 工作流：先用 `location_grid_style` 输出 `scene_<父地点名>_grid`，再把该参照图传给 `sub_location_style`，逐个生成子地点实际图 `scene_<子地点名>`
+4. `sceneNames` 可以传占位资源的 `key` 或 `title`；服务端会把 `scene_...` key 解析回 `location_bible` 的真实标题，并把 `_grid` key 识别为 grid 工作流
+5. grid 父地点永远不能单独用 `location_style` 裸生成，子地点实际图也不能裸生成
+
 EP 级资源 agent：
 1. 前端选择具体 episode
 2. 会话 user scope 为 `video:{novelId}:{scriptKey}`
@@ -150,13 +214,37 @@ EP 级资源 agent：
 4. 服务端注入 `VideoContextProvider`，提供 `novel_id`、`script_id`、`script_key` 与 `init_result`
 5. 默认 skill 为 `video-workflow`，默认 MCP scope 为 `video_workflow` + `subagent`，用于无文件系统环境下的 EP 级资源门禁、Prompt Optimizer 调度、review 门禁和产视编排
 
+资源导出：
+1. 小说级资源面板导出调用 `GET /api/video/novel/{novelId}/resources/export`
+2. EP 级资源面板导出调用 `GET /api/video/episodes/{scriptId}/resources/export?novelId={novelId}`
+3. 服务端只打包当前版本中已有 URL 的 image/video 资源；JSON prompt、占位资源和下载失败的远程文件不会写入 zip
+4. EP 级导出与面板展示一致，会合并 novel scope 与 script scope 资源
+
+验证重点：响应应为 `Content-Type: application/zip`，`Content-Disposition` 文件名包含小说名；无已生成资源时返回 404。
+
+图片资源外部回传：
+1. 前端资源面板点击 image KeyResource 后打开详情抽屉
+2. 用户上传本地 png/jpeg/webp/gif 图片
+3. 前端调用 `POST /api/key-resources/{id}/upload`，multipart 字段为 `file`
+4. API route 只负责 multipart 解析与 Zod 校验；业务逻辑进入 `key-resource-service.uploadImageVersion`
+5. service 上传原图到 OSS，创建新的 `KeyResourceVersion`，保留当前版本的 `prompt/refUrls/title`，并把 `KeyResource.currentVersion` 指向新版本
+6. 资源面板随后刷新，`GET /api/video/novel/{novelId}/resources` 或 `GET /api/video/episodes/{scriptId}/resources?novelId={novelId}` 应显示上传后的 URL
+
+验证命令：
+```
+curl -X POST http://localhost:8001/api/key-resources/<keyResourceId>/upload \
+  -F 'file=@/path/to/image.png'
+```
+验收：返回包含 `imageUrl` 和递增的 `version`；再次读取资源详情时 `currentVersion` 等于该版本；旧版本仍在 `versions[]` 中，可通过 rollback 恢复。
+
 **视频生成工作流**：
 1. 先提交 EP 级异步批量换装任务，等待 `completed`，并将换装图作为服装权威源
-2. 主控只启动一个一级 Prompt Optimizer subagent，不直接循环调用 Prompt Writer / Reviewer
-3. Prompt Optimizer 内部最多 5 轮增量迭代：每轮调独立 Prompt Writer，再调独立 Reviewer；它维护 `iterationHistory`、`resolvedIssues`、`remainingIssues`、`doNotRegress` 和 `bestVersion`
-4. 若 Reviewer 通过，Optimizer 返回 `status="passed"`、最终 prompts 和 final review；若 5 轮未通过，返回 `max_iterations` 和当前 best version；若发现门禁互相矛盾，返回 `conflict`
-5. 主控只有在 Optimizer 返回 `passed` 且 `allowVideoGeneration=true` 后，才调用 `save_reviewed_video_prompt` 保存 prompt
-6. 视频生成时支持系统资源形式的帧参照：从上一个视频抽取末尾帧并保存为后续 shot 的参考资源
+2. 主控只调用 `video_workflow__optimize_video_prompts`，不自行拼接或转述 Optimizer instruction，不直接调用 `subagent__run`
+3. `optimize_video_prompts` 由服务端按 `scriptId` 读取当前 EP、前后一集原文窗口、资源状态和换装 URL，再确定性启动 Prompt Optimizer
+4. Prompt Optimizer 内部最多 5 轮增量迭代：每轮调独立 Prompt Writer，再调独立 Reviewer；它维护 `iterationHistory`、`resolvedIssues`、`remainingIssues`、`doNotRegress` 和 `bestVersion`
+5. 若 Reviewer 通过，`optimize_video_prompts` 返回 `status="passed"` 并默认保存 reviewed prompts；若 5 轮未通过，返回 `max_iterations` 和当前 best version；若发现门禁互相矛盾，返回 `conflict`
+6. Seedance 是默认视频生成路径；HappyHorse 仅作兼容/测试路径；视频生成默认结构化传递 `ratio="9:16"`，不能只依赖 prompt 文本里的“9:16 尺寸”。
+7. 连续 clip 生成时，`execute_video_prompt` 返回 `videoUrl` 与 `lastFrameUrl`；`clip_2+` 必须把上一轮返回的 `videoUrl` 作为 `previousVideoUrl`、`lastFrameUrl` 作为 `previousFrameUrl`，严禁自行拼接或推断 URL。服务层默认从上一 clip 裁最后 15 秒作为 `sourceVideoUrls`，并把上一 clip 最后一帧图片作为首帧/参考图参照；`lastFrameUrl` 由视频生成 FC 直接返回，或由独立 `FC_EXTRACT_LAST_FRAME_URL` 服务端提取，应用层不下载视频取帧。视频产物资源必须使用工具返回的 `videoKey`（形如 `video_clip_1`），不能覆盖原始 `视频Prompt` 的 `clip_1` key。
 
 **EP Prompt Optimizer 调试 SOP**：
 适用场景：调整 `video-workflow`、`video-prompt-optimizer`、`video-skill-reviewer` 或资源门禁后，需要验证主控、Optimizer、Writer、Reviewer 的实际调度链路。
@@ -174,13 +262,13 @@ pnpm --dir /path/to/Agent-Forge --silent run cli debug:mcp-call '{"provider":"ag
 ```
 pnpm --dir /path/to/Agent-Forge --silent run cli debug:subagent-events '{"subagentId":"<subagent_id>","timeoutMs":180000,"showText":false}'
 ```
-顶层验收：应看到 `video_workflow__get_status`、必要时 `video_workflow__get_episode`，然后只出现一次用于 Prompt Optimizer 的 `subagent__run`。顶层主控不应直接循环调用 Prompt Writer / Reviewer。
+顶层验收：应看到 `video_workflow__get_status`、必要时 `video_workflow__get_episode`，然后只出现一次 `video_workflow__optimize_video_prompts`。顶层主控不应直接调用 `subagent__run`，也不应直接循环调用 Prompt Writer / Reviewer。
 4. 抽取顶层 session 工具调用和工具结果：
 ```
 pnpm --dir /path/to/Agent-Forge --silent run cli debug:session-tools '{"sessionId":"<session_id>","includeToolResults":true,"includeArguments":true,"resultMaxChars":50000}'
 ```
-验收：`subagent__run` 的 arguments 中应包含 `skills:["video-prompt-optimizer",...]`、`mcpScope:["subagent"]`、`includeTrace:true`。工具结果应包含 Optimizer 的结构化输出或 trace，可用于确认内部 Writer/Reviewer 轮次。
-5. 如 `subagent__run` 返回内存 `agentId`，立即抓嵌套 trace：
+验收：`optimize_video_prompts` 的 arguments 只应包含当前 `scriptId` 以及保存/停止选项，不应包含 EP 原文。工具结果应包含 `optimizerTaskId`、`optimizerAgentId`、`iterationCount`、`promptCount`、`savedPrompts`、`remainingIssues`。
+5. 如 `optimize_video_prompts` 返回 `optimizerAgentId`，立即抓嵌套 trace：
 ```
 pnpm --dir /path/to/Agent-Forge --silent run cli debug:mcp-call '{"provider":"subagent","name":"get_trace","arguments":{"agentId":"<optimizerAgentId>","tree":true}}'
 ```
@@ -188,15 +276,16 @@ pnpm --dir /path/to/Agent-Forge --silent run cli debug:mcp-call '{"provider":"su
 6. Optimizer 内部验收：
 - 每轮必须有独立 Prompt Writer 和独立 Reviewer。
 - 最多 5 轮，且每轮更新 `iterationHistory`。
-- 下一轮 Writer 输入必须包含 `latestPromptJson`、`latestReviewJson`、历史 issue 摘要和 `doNotRegress`，而不是只传上一轮口头反馈。
+- 服务端必须完整持久化 `latestPromptJson`、`latestReviewJson`、`iterationHistory`、`doNotRegress`；下一轮 Writer 输入使用 canonical 原文 + 上轮 prompt 摘要、阻塞 issue 摘要、历史轮次摘要和 `doNotRegress`，避免让 LLM 在整段历史里自行拼接。
+- Writer 输出后，服务端先确定性校验 prompt JSON 形状：`key/title/prompt/definition` 必须非空、`duration` 必须在 1-60、`refUrls` 只能是当前 EP `Canonical Resource Status` 中的图片 URL。上一段尾帧、15s 视频参照、压缩图路径等承接资源由视频生成服务层注入，不允许写进 prompt JSON。校验失败时作为 blocking review 进入下一轮，而不是让 Optimizer 工具直接失败。
 - Reviewer issue 应有稳定 `issueId` / `rule` / `blocking`，便于区分 `resolvedIssues`、`remainingIssues`、`newIssues`。
-- `status="passed"` 时才能进入保存；`max_iterations` / `conflict` / `failed` 均不得保存 reviewed prompt，不得产视。
+- `status="passed"` 时 `optimize_video_prompts` 才会保存 reviewed prompt；`max_iterations` / `conflict` / `failed` 均不得保存 reviewed prompt，不得产视。
 7. 停止与恢复规则：
 - 用户要求停止调试时，先取消顶层 `subagent_id`：`curl -X POST http://localhost:8001/api/subagents/<subagent_id>/cancel`。
 - 如果返回 “not found or already finished”，不得为了看 trace 重新执行；先用 `debug:subagent-get`、`debug:session-tools` recall 已持久化结果。
 - `interrupted` 表示 partial context 已保存，不自动重跑；继续前必须基于已有 session 续写。
 8. 保存结果验收：
-- 只有 Optimizer `passed` 且 final review 允许生成时，主控才调用 `save_reviewed_video_prompt`。
+- 只有 `optimize_video_prompts` 返回 `passed` 时，才应出现已保存的 reviewed prompt；主控通常不直接调用 `save_reviewed_video_prompt`。
 - 保存的 prompt JSON data 必须包含 `iterationCount`、`iterationHistory`、`bestVersion`、`resolvedIssues`、`remainingIssues`、`doNotRegress` 和 `optimizerSummary`，保证 UI 可查看版本路径和反馈历史。
 - 用户未明确要求生成视频时，不应出现 `execute_video_prompt`。
 

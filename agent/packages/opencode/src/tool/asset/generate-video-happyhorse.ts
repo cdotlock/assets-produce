@@ -48,7 +48,7 @@ interface MediaInput {
   url: string
 }
 
-export const GenerateVideoHappyHorseTool = Tool.define(
+export const GenerateVideoHappyHorseTool = Tool.define<typeof Parameters, Record<string, unknown>, never>(
   TOOL_ID,
   Effect.gen(function* () {
     return {

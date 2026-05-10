@@ -11,7 +11,7 @@ export const Parameters = Schema.Struct({
   name: Schema.String.annotate({ description: "The name of the skill from available_skills" }),
 })
 
-export const SkillTool = Tool.define(
+export const SkillTool = Tool.define<typeof Parameters, Record<string, unknown>, Skill.Service | Ripgrep.Service>(
   "skill",
   Effect.gen(function* () {
     const skill = yield* Skill.Service

@@ -10,22 +10,19 @@ resources:
       role: ''
       disableOndemand: false
       description: ''
-      timeout: 300
+      timeout: 900
       diskSize: 512
       internetAccess: true
       resourceGroupId: rg-acfmwcye2ca5jca
       instanceIsolationMode: SHARE
-      logConfig:
-        enableRequestMetrics: true
-        enableInstanceMetrics: true
-        logBeginRule: DefaultRegex
-        project: serverless-cn-hangzhou-be4c408d-7f9d-59bc-9f0e-3de9dd268c6d
-        logstore: default-logs
+      logConfig: auto
       functionName: generate-video
       sessionAffinity: NONE
       runtime: nodejs18
       cpu: 0.1
       memorySize: 256
+      layers:
+        - acs:fc:cn-hangzhou:official:layers/FFmpeg7x/versions/1
       environmentVariables:
         OSS_ACCESS_KEY_ID: YOUR_OSS_ACCESS_KEY_ID
         OSS_BUCKET: your-bucket-name
@@ -34,6 +31,24 @@ resources:
         JIMENG_ACCESS_KEY_ID: YOUR_JIMENG_ACCESS_KEY_ID
         JIMENG_SECRET_ACCESS_KEY: YOUR_JIMENG_SECRET_ACCESS_KEY
         OSS_ENDPOINT: https://oss-cn-shanghai.aliyuncs.com
+        BYTEPLUS_ACCESS_KEY_ID: YOUR_BYTEPLUS_ACCESS_KEY_ID
+        BYTEPLUS_SECRET_ACCESS_KEY: YOUR_BYTEPLUS_SECRET_ACCESS_KEY
+        BYTEPLUS_REGION: ap-southeast-1
+        BYTEPLUS_PROJECT_NAME: default
+        BYTEPLUS_ASSET_GROUP_NAME_PREFIX: agent-forge-video
+        BYTEPLUS_ASSET_READY_TIMEOUT_MS: '120000'
+        BYTEPLUS_ASSET_READY_INTERVAL_MS: '3000'
+        ARK_API_KEY: YOUR_ARK_API_KEY
+        ARK_ENDPOINT_ID: YOUR_ARK_ENDPOINT_ID
+        ARK_API_KEY_TTL_SECONDS: '3600'
+        ARK_BASE_URL: https://ark.ap-southeast.bytepluses.com/api/v3
+        ARK_CONTENT_GENERATION_TASKS_PATH: /contents/generations/tasks
+        SEEDANCE_MODEL: dreamina-seedance-2-0-260128
+        SEEDANCE_RATIO: "9:16"
+        SEEDANCE_RESOLUTION: 720p
+        SEEDANCE_WATERMARK: 'false'
+        SEEDANCE_POLL_MAX_RETRIES: '120'
+        SEEDANCE_POLL_INTERVAL_MS: '5000'
       code: ./generate-video
       triggers:
         - triggerConfig:

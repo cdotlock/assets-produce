@@ -4,6 +4,7 @@ import { registry } from "@/lib/mcp/registry";
 import {
   chatCompletion,
   mcpToolToOpenAI,
+  type ChatCompletionOptions,
   type LlmMessage,
 } from "./llm-client";
 import { resolveModel } from "./models";
@@ -100,7 +101,7 @@ export interface SubAgentTrace {
 }
 
 export interface SubAgentResult {
-  status: "completed" | "failed" | "max_iterations";
+  status: "completed" | "failed" | "max_iterations" | "cancelled";
   /** Final text output. */
   output: string;
   error?: string;
@@ -152,6 +153,10 @@ interface ValidationFail {
 }
 type ValidationResult = ValidationOk | ValidationFail;
 
+function validationParseErrorMessage(error: unknown): string {
+  return `JSON parse failed: ${error instanceof Error ? error.message : String(error)}`;
+}
+
 function validateOutput(
   raw: string,
   schema: Record<string, unknown>,
@@ -163,9 +168,7 @@ function validateOutput(
   } catch (e) {
     return {
       ok: false,
-      error: `JSON parse failed: ${
-        e instanceof Error ? e.message : String(e)
-      }\nRaw output (first 500 chars): ${cleaned.slice(0, 500)}`,
+      error: validationParseErrorMessage(e),
     };
   }
 
@@ -191,6 +194,13 @@ function buildValidationRetryPrompt(error: string): string {
     "",
     "Please fix the issues above and output ONLY valid JSON (no markdown fences, no extra text).",
   ].join("\n");
+}
+
+function failedValidationAssistantMessage(error: string): LlmMessage {
+  return {
+    role: "assistant",
+    content: `[discarded invalid non-JSON/schema-invalid output: ${error}]`,
+  };
 }
 
 /* ================================================================== */
@@ -219,6 +229,16 @@ function buildToolLoopSystemPrompt(
   if (skillContent) parts.push(`## Reference Material\n${skillContent}`);
   if (context) parts.push(`## Additional Context\n${context}`);
   return parts.join("\n\n");
+}
+
+function buildSingleShotSystemPrompt(
+  context?: string,
+  skillContent?: string,
+): string | undefined {
+  const parts: string[] = [];
+  if (skillContent) parts.push(`## Reference Material\n${skillContent}`);
+  if (context) parts.push(`## Additional Context\n${context}`);
+  return parts.length > 0 ? parts.join("\n\n") : undefined;
 }
 
 /* ================================================================== */
@@ -319,6 +339,22 @@ function parseToolArgs(raw: string): Record<string, unknown> {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function throwIfAborted(signal?: AbortSignal): void {
+  if (signal?.aborted) {
+    throw new Error("SubAgent cancelled");
+  }
+}
+
+function buildChatOptions(
+  jsonResponse: boolean,
+  signal?: AbortSignal,
+): ChatCompletionOptions | undefined {
+  const options: ChatCompletionOptions = {};
+  if (jsonResponse) options.responseFormat = { type: "json_object" };
+  if (signal) options.signal = signal;
+  return options.responseFormat || options.signal ? options : undefined;
 }
 
 function toolResultToText(result: CallToolResult): string {
@@ -504,13 +540,18 @@ export class SubAgent {
   ): Promise<SubAgentResult> {
     const t0 = Date.now();
     try {
+      throwIfAborted(toolContext?.signal);
       await this.init();
+      throwIfAborted(toolContext?.signal);
 
       if (this.isToolLoop) {
         return await this.runToolLoop(t0, toolContext, progress);
       }
-      return await this.runSingleShot(t0);
+      return await this.runSingleShot(t0, toolContext?.signal);
     } catch (err: unknown) {
+      if (toolContext?.signal?.aborted) {
+        return this.cancelledResult(t0);
+      }
       return this.failResult(t0, err);
     }
   }
@@ -526,17 +567,22 @@ export class SubAgent {
   ): Promise<SubAgentResult> {
     const t0 = Date.now();
     try {
+      throwIfAborted(toolContext?.signal);
       if (!this.initialized) {
         throw new Error("SubAgent has not been run yet — call run() first");
       }
 
       this.messages.push({ role: "user", content: feedback });
+      throwIfAborted(toolContext?.signal);
 
       if (this.isToolLoop) {
         return await this.runToolLoop(t0, toolContext, progress);
       }
-      return await this.runSingleShot(t0);
+      return await this.runSingleShot(t0, toolContext?.signal);
     } catch (err: unknown) {
+      if (toolContext?.signal?.aborted) {
+        return this.cancelledResult(t0);
+      }
       return this.failResult(t0, err);
     }
   }
@@ -581,11 +627,20 @@ export class SubAgent {
         { role: "user", content: this.config.instruction },
       ];
     } else {
+      this.systemPrompt = buildSingleShotSystemPrompt(
+        this.config.context,
+        this.skillContent,
+      ) ?? "";
       const content = buildContent(
         this.config.instruction,
         this.config.imageUrls,
       );
-      this.messages = [{ role: "user", content }];
+      this.messages = this.systemPrompt
+        ? [
+            { role: "system", content: this.systemPrompt },
+            { role: "user", content },
+          ]
+        : [{ role: "user", content }];
     }
   }
 
@@ -593,17 +648,19 @@ export class SubAgent {
   /*  Private: single-shot execution                                   */
   /* ================================================================ */
 
-  private async runSingleShot(t0: number): Promise<SubAgentResult> {
+  private async runSingleShot(t0: number, signal?: AbortSignal): Promise<SubAgentResult> {
     const maxRetries = this.config.outputSchema ? (this.config.maxRetries ?? 2) : 1;
     let validation: ValidationResult | undefined;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      throwIfAborted(signal);
       const completion = await chatCompletion(
         this.messages,
         undefined,
         this.model,
-        this.config.outputSchema ? { responseFormat: { type: "json_object" } } : undefined,
+        buildChatOptions(!!this.config.outputSchema, signal),
       );
+      throwIfAborted(signal);
       const assistantMsg = completion.choices[0]?.message;
       const raw = assistantMsg?.content ?? "";
       this.iterations++;
@@ -624,6 +681,8 @@ export class SubAgent {
           attempts: attempt,
         });
       }
+
+      this.messages[this.messages.length - 1] = failedValidationAssistantMessage(validation.error);
 
       if (attempt < maxRetries) {
         console.warn(
@@ -653,18 +712,21 @@ export class SubAgent {
     let validationAttempts = 0;
     let lastValidation: ValidationResult | undefined;
 
+    throwIfAborted(toolContext?.signal);
     const mcpTools = await registry.listToolsForProviders(this.availableMcpScope);
     const openaiTools = mcpTools.map(mcpToolToOpenAI);
 
     const startIteration = this.iterations;
     for (let localIteration = 0; localIteration < maxIterations; localIteration++) {
+      throwIfAborted(toolContext?.signal);
       const iteration = startIteration + localIteration;
       const completion = await chatCompletion(
         this.messages,
         openaiTools,
         this.model,
-        this.config.outputSchema ? { responseFormat: { type: "json_object" } } : undefined,
+        buildChatOptions(!!this.config.outputSchema, toolContext?.signal),
       );
+      throwIfAborted(toolContext?.signal);
       const choice = completion.choices[0];
       if (!choice) {
         return this.failResult(t0, new Error("No completion choice returned"));
@@ -706,6 +768,8 @@ export class SubAgent {
           });
         }
 
+        this.messages[this.messages.length - 1] = failedValidationAssistantMessage(lastValidation.error);
+
         if (validationAttempts >= maxValidationAttempts) {
           return this.failedValidationResult(t0, maxValidationAttempts, lastValidation);
         }
@@ -724,10 +788,12 @@ export class SubAgent {
       const delayAfterMs = delayTime * 1000;
 
       for (let toolIndex = 0; toolIndex < functionToolCalls.length; toolIndex++) {
+        throwIfAborted(toolContext?.signal);
         if (toolIndex > 0 && delayAfterMs > 0) {
           const previousTrace = this.toolCallTraces[this.toolCallTraces.length - 1];
           if (previousTrace) previousTrace.delayAfterMs = delayAfterMs;
           await sleep(delayAfterMs);
+          throwIfAborted(toolContext?.signal);
         }
 
         const tc = functionToolCalls[toolIndex]!;
@@ -740,6 +806,7 @@ export class SubAgent {
         let toolError: string | undefined;
         let resultText = "";
         try {
+          throwIfAborted(toolContext?.signal);
           const result = await registry.callTool(
             tc.function.name,
             args,
@@ -750,11 +817,15 @@ export class SubAgent {
               agentDepth: this.depth + 1,
             },
           );
+          throwIfAborted(toolContext?.signal);
           resultText = toolResultToText(result);
           if (result.isError) {
             toolError = resultText;
           }
         } catch (err: unknown) {
+          if (toolContext?.signal?.aborted) {
+            throw err;
+          }
           toolError = err instanceof Error ? err.message : String(err);
           resultText = `Error: ${toolError}`;
         }
@@ -784,6 +855,7 @@ export class SubAgent {
         const lastTrace = this.toolCallTraces[this.toolCallTraces.length - 1];
         if (lastTrace) lastTrace.delayAfterMs = delayAfterMs;
         await sleep(delayAfterMs);
+        throwIfAborted(toolContext?.signal);
       }
     }
 
@@ -867,6 +939,21 @@ export class SubAgent {
       durationMs: elapsed,
       trace: this.getTrace(),
       ...extra,
+    };
+  }
+
+  private cancelledResult(t0: number): SubAgentResult {
+    const elapsed = Date.now() - t0;
+    this.totalDurationMs += elapsed;
+    return {
+      status: "cancelled",
+      output: "",
+      error: "SubAgent cancelled",
+      toolCallCount: this.totalToolCalls,
+      model: this.model,
+      durationMs: elapsed,
+      trace: this.getTrace(),
+      keyJsonTitle: this.config.keyJsonTitle,
     };
   }
 }

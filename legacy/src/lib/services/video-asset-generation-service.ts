@@ -22,11 +22,17 @@ import * as keyResourceService from "./key-resource-service";
 import {
   callFcGenerateVideo,
   callFcCropVideo,
+  callFcExtractLastFrame,
 } from "./fc-video-client";
 import {
   callFcHappyHorseGenerate,
   type MediaItem,
 } from "./fc-happyhorse-client";
+import {
+  compressedUrlFromResourceData,
+  compressImageUrlLosslessBestEffort,
+  type ImageCompressionResult,
+} from "./image-compression-service";
 import { compileTemplate } from "@/lib/mcp/static/langfuse-helpers";
 import { getNovelLevelData } from "./novel-service";
 
@@ -45,6 +51,20 @@ export async function resolveStyle(styleName: string): Promise<StylePreset> {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function imageCompressionResultToJson(
+  compression: ImageCompressionResult,
+): Prisma.InputJsonObject {
+  return {
+    originalUrl: compression.originalUrl,
+    compressedUrl: compression.compressedUrl,
+    originalBytes: compression.originalBytes,
+    compressedBytes: compression.compressedBytes,
+    format: compression.format,
+    uploaded: compression.uploaded,
+    ...(compression.note ? { note: compression.note } : {}),
+  };
 }
 
 export interface AnalyzedSubLocation {
@@ -88,6 +108,100 @@ export function analyzeLocations(locationBible: Array<Record<string, unknown>>):
     .filter((location): location is AnalyzedLocation => location !== null);
 }
 
+type SceneGenerationMode = "single" | "grid" | "hd";
+
+interface ResolvedSceneIdentifier {
+  requestedName: string;
+  sceneName: string;
+  placeholderMode: SceneGenerationMode | null;
+}
+
+function stripGridTitleSuffix(title: string): string {
+  return title.endsWith(" (grid)") ? title.slice(0, -" (grid)".length) : title;
+}
+
+function keyNameAlias(key: string): string | null {
+  return key.startsWith("scene_") ? key.slice("scene_".length) : null;
+}
+
+function addSceneAlias(
+  aliases: Map<string, ResolvedSceneIdentifier>,
+  alias: string | null,
+  value: ResolvedSceneIdentifier,
+): void {
+  const normalized = alias?.trim();
+  if (!normalized || aliases.has(normalized)) return;
+  aliases.set(normalized, value);
+}
+
+async function resolveSceneIdentifiers(
+  novelId: string,
+  requestedNames: string[],
+): Promise<ResolvedSceneIdentifier[]> {
+  const resources = await prisma.keyResource.findMany({
+    where: {
+      scopeType: "novel",
+      scopeId: novelId,
+      category: "场景",
+    },
+    select: { key: true, title: true },
+  });
+
+  const aliases = new Map<string, ResolvedSceneIdentifier>();
+  for (const resource of resources) {
+    const title = resource.title?.trim();
+    if (!title) continue;
+
+    const isGrid = resource.key.endsWith("_grid") || title.endsWith(" (grid)");
+    const sceneName = stripGridTitleSuffix(title);
+    const value: ResolvedSceneIdentifier = {
+      requestedName: sceneName,
+      sceneName,
+      placeholderMode: isGrid ? "grid" : "single",
+    };
+
+    addSceneAlias(aliases, resource.key, value);
+    addSceneAlias(aliases, keyNameAlias(resource.key), value);
+    addSceneAlias(aliases, title, value);
+  }
+
+  return requestedNames.map((requestedName) => {
+    const trimmed = requestedName.trim();
+    const fromResource = aliases.get(trimmed);
+    if (fromResource) return { ...fromResource, requestedName: trimmed };
+
+    if (trimmed.startsWith("scene_")) {
+      const withoutPrefix = trimmed.slice("scene_".length);
+      if (withoutPrefix.endsWith("_grid")) {
+        return {
+          requestedName: trimmed,
+          sceneName: withoutPrefix.slice(0, -"_grid".length).replace(/_/g, " "),
+          placeholderMode: "grid",
+        };
+      }
+      return {
+        requestedName: trimmed,
+        sceneName: withoutPrefix.replace(/_/g, " "),
+        placeholderMode: null,
+      };
+    }
+
+    if (trimmed.endsWith("_grid")) {
+      return {
+        requestedName: trimmed,
+        sceneName: trimmed.slice(0, -"_grid".length).replace(/_/g, " "),
+        placeholderMode: "grid",
+      };
+    }
+
+    return {
+      requestedName: trimmed,
+      sceneName: trimmed,
+      placeholderMode: null,
+    };
+  });
+}
+
 /* ------------------------------------------------------------------ */
 /*  KeyResource metadata update                                        */
 /* ------------------------------------------------------------------ */
@@ -129,6 +243,7 @@ export async function generateAndPersistImage(
     key: input.key,
     keyResourceId: gen.id,
     imageUrl: gen.imageUrl,
+    compressedImageUrl: gen.compressedImageUrl,
     version: gen.version,
   };
 }
@@ -243,6 +358,51 @@ export type GenerateSceneInput = z.infer<typeof GenerateSceneParams>;
 export async function generateScene(
   input: GenerateSceneInput,
 ): Promise<GenerateAndPersistImageResult> {
+  const [resolvedScene] = await resolveSceneIdentifiers(input.novelId, [input.sceneName]);
+  const sceneName = resolvedScene?.sceneName ?? input.sceneName;
+
+  if (input.mode === "single") {
+    const { locationBible } = await getNovelLevelData(input.novelId);
+    const analyzed = analyzeLocations(locationBible);
+    const gridParent = analyzed.find((loc) => loc.mode === "grid" && loc.name === sceneName);
+    if (gridParent) {
+      return generateScene({
+        novelId: input.novelId,
+        sceneName,
+        referenceUrls: input.referenceUrls,
+        model: input.model,
+        mode: "grid",
+      });
+    }
+
+    const subLocationGridParent = analyzed.find(
+      (loc) => loc.mode === "grid" && loc.realSubs.some((sub) => sub.name === sceneName),
+    );
+    if (subLocationGridParent) {
+      const gridKey = `scene_${subLocationGridParent.name.replace(/\s+/g, "_")}_grid`;
+      const gridResource = await prisma.keyResource.findFirst({
+        where: { scopeType: "novel", scopeId: input.novelId, key: gridKey, currentVersion: { gt: 0 } },
+        include: { versions: { orderBy: { version: "desc" }, take: 1 } },
+      });
+      const gridUrl = gridResource?.versions[0]?.url ?? null;
+      if (!gridUrl) {
+        await generateScene({
+          novelId: input.novelId,
+          sceneName: subLocationGridParent.name,
+          mode: "grid",
+          model: input.model,
+        });
+      }
+      return generateScene({
+        novelId: input.novelId,
+        sceneName,
+        referenceUrls: input.referenceUrls,
+        model: input.model,
+        mode: "hd",
+      });
+    }
+  }
+
   const styleByMode: Record<string, string> = {
     single: "location_style",
     grid: "location_grid_style",
@@ -254,10 +414,10 @@ export async function generateScene(
   if (input.mode === "grid") {
     const { locationBible } = await getNovelLevelData(input.novelId);
     const analyzed = analyzeLocations(locationBible);
-    const parent = analyzed.find((loc) => loc.name === input.sceneName);
-    if (!parent) throw new Error(`Parent location "${input.sceneName}" not found`);
+    const parent = analyzed.find((loc) => loc.name === sceneName);
+    if (!parent) throw new Error(`Parent location "${sceneName}" not found`);
     if (parent.mode !== "grid") {
-      throw new Error(`Location "${input.sceneName}" not eligible for grid mode (need ≥2 sub-locations)`);
+      throw new Error(`Location "${sceneName}" not eligible for grid mode (need ≥2 sub-locations)`);
     }
 
     const slots: string[] = [`【格 1】${parent.name}：${parent.visualPrompt}`];
@@ -266,7 +426,7 @@ export async function generateScene(
     });
 
     const prompt = compileTemplate(style.stylePrompt, {
-      name: input.sceneName,
+      name: sceneName,
       gridSize: String(parent.gridSize),
       gridSlots: slots.join("\n"),
     });
@@ -275,14 +435,14 @@ export async function generateScene(
       ? [styleRefUrl, ...(input.referenceUrls ?? [])]
       : input.referenceUrls;
 
-    const key = `scene_${input.sceneName.replace(/\s+/g, "_")}_grid`;
+    const key = `scene_${sceneName.replace(/\s+/g, "_")}_grid`;
     return generateAndPersistImage({
       scopeType: "novel",
       scopeId: input.novelId,
       key,
       category: "场景",
       prompt,
-      title: `${input.sceneName} (grid)`,
+      title: `${sceneName} (grid)`,
       refUrls: gridRefs,
       model: input.model,
     });
@@ -292,13 +452,13 @@ export async function generateScene(
 
     let parentLoc: AnalyzedLocation | undefined;
     for (const loc of analyzed) {
-      if (loc.realSubs.some((s) => s.name === input.sceneName)) {
+      if (loc.realSubs.some((s) => s.name === sceneName)) {
         parentLoc = loc;
         break;
       }
     }
     if (!parentLoc) {
-      throw new Error(`Scene "${input.sceneName}" not found as a sub-location`);
+      throw new Error(`Scene "${sceneName}" not found as a sub-location`);
     }
 
     const gridKey = `scene_${parentLoc.name.replace(/\s+/g, "_")}_grid`;
@@ -311,20 +471,20 @@ export async function generateScene(
       throw new Error(`Grid image for parent "${parentLoc.name}" not yet generated`);
     }
 
-    const prompt = compileTemplate(style.stylePrompt, { name: input.sceneName, sceneName: input.sceneName });
+    const prompt = compileTemplate(style.stylePrompt, { name: sceneName, sceneName });
 
     const hdRefs: string[] = [gridUrl];
     if (styleRefUrl) hdRefs.push(styleRefUrl);
     if (input.referenceUrls) hdRefs.push(...input.referenceUrls);
 
-    const key = `scene_${input.sceneName.replace(/\s+/g, "_")}`;
+    const key = `scene_${sceneName.replace(/\s+/g, "_")}`;
     return generateAndPersistImage({
       scopeType: "novel",
       scopeId: input.novelId,
       key,
       category: "场景",
       prompt,
-      title: input.sceneName,
+      title: sceneName,
       refUrls: hdRefs,
       model: input.model,
     });
@@ -332,13 +492,13 @@ export async function generateScene(
     const { locationBible } = await getNovelLevelData(input.novelId);
     let visualPrompt: string | undefined;
     for (const loc of locationBible) {
-      if (String(loc.name) === input.sceneName && loc.visual_prompt) {
+      if (String(loc.name) === sceneName && loc.visual_prompt) {
         visualPrompt = String(loc.visual_prompt);
         break;
       }
       const subs = loc.sub_locations as Array<Record<string, unknown>> | undefined;
       if (subs) {
-        const sub = subs.find((s) => String(s.name) === input.sceneName);
+        const sub = subs.find((s) => String(s.name) === sceneName);
         if (sub?.visual_prompt) {
           visualPrompt = String(sub.visual_prompt);
           break;
@@ -346,23 +506,23 @@ export async function generateScene(
       }
     }
     if (!visualPrompt) {
-      throw new Error(`No visual_prompt found for scene "${input.sceneName}"`);
+      throw new Error(`No visual_prompt found for scene "${sceneName}"`);
     }
 
-    const prompt = compileTemplate(style.stylePrompt, { name: input.sceneName, scenePrompt: visualPrompt });
+    const prompt = compileTemplate(style.stylePrompt, { name: sceneName, scenePrompt: visualPrompt });
 
     const singleRefs = styleRefUrl
       ? [styleRefUrl, ...(input.referenceUrls ?? [])]
       : input.referenceUrls;
 
-    const key = `scene_${input.sceneName.replace(/\s+/g, "_")}`;
+    const key = `scene_${sceneName.replace(/\s+/g, "_")}`;
     return generateAndPersistImage({
       scopeType: "novel",
       scopeId: input.novelId,
       key,
       category: "场景",
       prompt,
-      title: input.sceneName,
+      title: sceneName,
       refUrls: singleRefs,
       model: input.model,
     });
@@ -404,10 +564,10 @@ export async function generateCostume(
 
   const portraitKey = `char_${input.characterName.toLowerCase().replace(/\s+/g, "_")}_portrait`;
   const portrait = await prisma.keyResource.findFirst({
-    where: { scopeType: "novel", scopeId: script.novelId, key: portraitKey },
-    include: { versions: { orderBy: { version: "desc" }, take: 1 } },
+    where: { scopeType: "novel", scopeId: script.novelId, key: portraitKey, currentVersion: { gt: 0 } },
+    include: { versions: { orderBy: { version: "asc" } } },
   });
-  const portraitUrl = portrait?.versions[0]?.url ?? null;
+  const portraitUrl = portrait ? currentResourceVersion(portrait)?.url ?? null : null;
 
   const refParts: string[] = [];
   if (styleRefUrl) refParts.push(styleRefUrl);
@@ -441,12 +601,169 @@ export const ExecuteVideoPromptParams = z.object({
   duration: z.number().min(4).max(15),
   provider: z.enum(["jimeng", "happyhorse"]).optional().default("jimeng"),
   resolution: z.enum(["1080P", "720P"]).optional(),
-  ratio: z.enum(["16:9", "9:16", "1:1", "4:3", "3:4"]).optional(),
+  ratio: z.enum(["16:9", "9:16", "1:1", "4:3", "3:4"]).optional().default("9:16"),
   model: z.string().min(1).optional(),
   previousVideoUrl: z.string().url().optional(),
+  previousFrameUrl: z.string().url().optional(),
+  continuationTailSeconds: z.number().min(1).max(15).optional().default(15),
   title: z.string().optional(),
+}).superRefine((value, ctx) => {
+  if (value.previousVideoUrl && !value.previousFrameUrl) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["previousFrameUrl"],
+      message: "previousFrameUrl is required when previousVideoUrl is provided",
+    });
+  }
+  if (value.previousFrameUrl && !value.previousVideoUrl) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["previousVideoUrl"],
+      message: "previousVideoUrl is required when previousFrameUrl is provided",
+    });
+  }
 });
 export type ExecuteVideoPromptInput = z.infer<typeof ExecuteVideoPromptParams>;
+
+export function videoResourceKeyFromPromptKey(promptKey: string): string {
+  return promptKey.startsWith("video_") ? promptKey : `video_${promptKey}`;
+}
+
+function dedupeStrings(values: string[]): string[] {
+  return Array.from(new Set(values));
+}
+
+interface CurrentImageResource {
+  key: string;
+  scopeType: string;
+  category: string | null;
+  title: string | null;
+  url: string;
+  data: Prisma.JsonValue;
+}
+
+interface DefinitionImageRef {
+  label: string;
+  text: string;
+  start: number;
+  end: number;
+}
+
+function currentResourceVersion<
+  T extends {
+    currentVersion: number;
+    versions: Array<{ version: number; url: string | null; data: Prisma.JsonValue }>;
+  },
+>(resource: T): { version: number; url: string | null; data: Prisma.JsonValue } | null {
+  return resource.versions.find((version) => version.version === resource.currentVersion) ?? null;
+}
+
+function imageReferenceLabels(definition: string): DefinitionImageRef[] {
+  const refs: DefinitionImageRef[] = [];
+  const pattern = /@图\d+\s*是\s*\[([^\]]+)\][^\n\r]*/g;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(definition)) !== null) {
+    const label = match[1]?.trim();
+    if (!label) continue;
+    refs.push({
+      label,
+      text: match[0],
+      start: match.index,
+      end: match.index + match[0].length,
+    });
+  }
+  return refs;
+}
+
+function labelMatchesResource(label: string, resource: CurrentImageResource): boolean {
+  const title = resource.title?.trim();
+  return !!title && (label.includes(title) || title.includes(label));
+}
+
+function findImageResourceForLabel(
+  label: string,
+  imageResources: CurrentImageResource[],
+): CurrentImageResource | null {
+  const costume = imageResources.find((resource) => (
+    resource.scopeType === "script" &&
+    resource.category === "换装" &&
+    labelMatchesResource(label, resource)
+  ));
+  if (costume) return costume;
+
+  return imageResources.find((resource) => labelMatchesResource(label, resource)) ?? null;
+}
+
+function rangeContains(ranges: DefinitionImageRef[], index: number): boolean {
+  return ranges.some((range) => index >= range.start && index < range.end);
+}
+
+function extractStandaloneCurrentUrls(
+  definition: string,
+  consumedRanges: DefinitionImageRef[],
+  allowedUrls: Set<string>,
+): string[] {
+  const matches = definition.matchAll(/https?:\/\/[^\s，。；、)）\]}]+/g);
+  const urls: string[] = [];
+  for (const match of matches) {
+    const url = match[0];
+    if (match.index !== undefined && rangeContains(consumedRanges, match.index)) continue;
+    if (allowedUrls.has(url)) urls.push(url);
+  }
+  return dedupeStrings(urls);
+}
+
+async function resolveVideoReferenceImages(
+  urls: string[],
+  compressedUrlByOriginal: Map<string, string>,
+  key: string,
+): Promise<{ urls: string[]; compression: ImageCompressionResult[] }> {
+  const cache = new Map<string, ImageCompressionResult>();
+  const compression: ImageCompressionResult[] = [];
+  const resolvedUrls: string[] = [];
+
+  for (const url of dedupeStrings(urls)) {
+    const knownCompressedUrl = compressedUrlByOriginal.get(url);
+    if (knownCompressedUrl) {
+      const result: ImageCompressionResult = {
+        originalUrl: url,
+        compressedUrl: knownCompressedUrl,
+        originalBytes: 0,
+        compressedBytes: 0,
+        format: "known-resource",
+        uploaded: knownCompressedUrl !== url,
+        note: "reused compressed URL from image resource metadata",
+      };
+      compression.push(result);
+      resolvedUrls.push(result.compressedUrl);
+      continue;
+    }
+
+    const cached = cache.get(url);
+    const result = cached ?? await compressImageUrlLosslessBestEffort(url, key);
+    cache.set(url, result);
+    compression.push(result);
+    resolvedUrls.push(result.compressedUrl);
+  }
+
+  return {
+    urls: dedupeStrings(resolvedUrls),
+    compression,
+  };
+}
+
+async function resolveLastFrameUrl(
+  videoUrl: string,
+  generatedLastFrameUrl: string | undefined,
+): Promise<string> {
+  if (generatedLastFrameUrl) return generatedLastFrameUrl;
+  if (process.env.FC_EXTRACT_LAST_FRAME_URL && process.env.FC_EXTRACT_LAST_FRAME_TOKEN) {
+    return callFcExtractLastFrame({ videoUrl });
+  }
+  throw new Error(
+    "Video generation returned no lastFrameUrl. Configure FC_EXTRACT_LAST_FRAME_URL/TOKEN or return { videoUrl, lastFrameUrl } from FC_GENERATE_VIDEO_URL.",
+  );
+}
 
 export async function executeVideoPrompt(
   input: ExecuteVideoPromptInput,
@@ -465,49 +782,87 @@ export async function executeVideoPrompt(
       ],
       currentVersion: { gt: 0 },
     },
-    include: { versions: { orderBy: { version: "desc" }, take: 1 } },
+    include: { versions: { orderBy: { version: "asc" } } },
   });
+  const imageResources: CurrentImageResource[] = allResources
+    .filter((resource) => resource.mediaType === "image")
+    .map((resource): CurrentImageResource | null => {
+      const version = currentResourceVersion(resource);
+      if (!version?.url) return null;
+      return {
+        key: resource.key,
+        scopeType: resource.scopeType,
+        category: resource.category,
+        title: resource.title,
+        url: version.url,
+        data: version.data,
+      };
+    })
+    .filter((resource): resource is CurrentImageResource => resource !== null);
+  const currentImageUrls = new Set(imageResources.map((resource) => resource.url));
 
-  const refImageUrls: string[] = [];
-  for (const url of extractUrls(input.definition)) {
-    refImageUrls.push(url);
+  const compressedUrlByOriginal = new Map<string, string>();
+  for (const resource of imageResources) {
+    const compressedUrl = compressedUrlFromResourceData(resource.data);
+    if (compressedUrl) {
+      compressedUrlByOriginal.set(resource.url, compressedUrl);
+      compressedUrlByOriginal.set(compressedUrl, compressedUrl);
+    }
   }
 
-  const imgRefs = input.definition.match(/@图\d+\s*是\s*\[([^\]]+)\]/g) ?? [];
-  for (const ref of imgRefs) {
-    const nameMatch = ref.match(/\[([^\]]+)\]/);
-    if (!nameMatch) continue;
-    const refName = nameMatch[1]!;
-
-    let matched: string | null = null;
-    for (const r of allResources) {
-      const url = r.versions[0]?.url;
-      if (!url) continue;
-      const title = r.title ?? "";
-      if (!title) continue;
-      if (refName.includes(title) || title.includes(refName)) {
-        if (matched && r.category === "角色立绘") continue;
-        matched = url;
-        if (r.category === "换装") break;
-      }
+  const refImageUrls: string[] = [];
+  const namedImageRefs = imageReferenceLabels(input.definition);
+  for (const ref of namedImageRefs) {
+    const matched = findImageResourceForLabel(ref.label, imageResources);
+    if (matched && !refImageUrls.includes(matched.url)) {
+      refImageUrls.push(matched.url);
+      continue;
     }
-    if (matched && !refImageUrls.includes(matched)) refImageUrls.push(matched);
+    for (const url of extractUrls(ref.text).filter((candidate) => currentImageUrls.has(candidate))) {
+      if (!refImageUrls.includes(url)) refImageUrls.push(url);
+    }
+  }
+  for (const url of extractStandaloneCurrentUrls(input.definition, namedImageRefs, currentImageUrls)) {
+    if (!refImageUrls.includes(url)) {
+      refImageUrls.push(url);
+    }
   }
 
   const videoStyle = await resolveStyle("video_style");
+  if (input.previousFrameUrl && !refImageUrls.includes(input.previousFrameUrl)) {
+    refImageUrls.unshift(input.previousFrameUrl);
+  }
   if (videoStyle.styleRefUrl) refImageUrls.unshift(videoStyle.styleRefUrl);
 
+  const resolvedReferenceImages = await resolveVideoReferenceImages(
+    refImageUrls,
+    compressedUrlByOriginal,
+    input.key,
+  );
+  const videoRefImageUrls = resolvedReferenceImages.urls;
+  const sourceImageUrl = input.previousFrameUrl
+    ? (resolvedReferenceImages.compression.find((item) => item.originalUrl === input.previousFrameUrl)?.compressedUrl
+      ?? input.previousFrameUrl)
+    : videoRefImageUrls[0];
+
   let sourceVideoUrls: string[] | undefined;
+  let continuationVideoMode: "cropped-tail" | "full-previous-video" | undefined;
   if (input.previousVideoUrl) {
-    try {
-      const tailUrl = await callFcCropVideo({
-        videoUrl: input.previousVideoUrl,
-        startTime: Math.max(0, input.duration - 5),
-        endTime: input.duration,
-      });
-      sourceVideoUrls = [tailUrl];
-    } catch {
-      // Continue without continuation
+    if (process.env.FC_CROP_VIDEO_URL && process.env.FC_CROP_VIDEO_TOKEN) {
+      try {
+        const tailUrl = await callFcCropVideo({
+          videoUrl: input.previousVideoUrl,
+          tailSeconds: input.continuationTailSeconds,
+        });
+        sourceVideoUrls = [tailUrl];
+        continuationVideoMode = "cropped-tail";
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        throw new Error(`Failed to prepare previous clip continuation video: ${message}`);
+      }
+    } else {
+      sourceVideoUrls = [input.previousVideoUrl];
+      continuationVideoMode = "full-previous-video";
     }
   }
 
@@ -516,36 +871,56 @@ export async function executeVideoPrompt(
     prompt: input.prompt,
   });
 
-  const videoUrl = input.provider === "happyhorse"
-    ? await generateHappyHorseVideo({
+  const generatedVideo = input.provider === "happyhorse"
+    ? { videoUrl: await generateHappyHorseVideo({
       prompt: compiledPrompt,
-      referenceImageUrls: refImageUrls,
+      referenceImageUrls: videoRefImageUrls,
       sourceVideoUrls: sourceVideoUrls ?? [],
       duration: input.duration,
       resolution: input.resolution,
       ratio: input.ratio,
       model: input.model,
-    })
+    }) }
     : await callFcGenerateVideo({
       prompt: compiledPrompt,
-      sourceImageUrl: refImageUrls[0],
-      referenceImageUrls: refImageUrls.length > 0 ? refImageUrls : undefined,
+      sourceImageUrl,
+      referenceImageUrls: videoRefImageUrls.length > 0 ? videoRefImageUrls : undefined,
       sourceVideoUrls,
+      duration: input.duration,
+      ratio: input.ratio,
+      resolution: input.resolution,
     });
+  const videoUrl = generatedVideo.videoUrl;
+  const lastFrameUrl = await resolveLastFrameUrl(videoUrl, generatedVideo.lastFrameUrl);
+  const videoKey = videoResourceKeyFromPromptKey(input.key);
+
+  const videoData: Prisma.InputJsonObject = {
+    promptKey: input.key,
+    duration: input.duration,
+    provider: input.provider,
+    ratio: input.ratio,
+    ...(input.resolution ? { resolution: input.resolution } : {}),
+    lastFrameUrl,
+    continuationTailSeconds: input.continuationTailSeconds,
+    ...(input.previousVideoUrl ? { previousVideoUrl: input.previousVideoUrl } : {}),
+    ...(input.previousFrameUrl ? { previousFrameUrl: input.previousFrameUrl } : {}),
+    ...(sourceVideoUrls ? { sourceVideoUrls, continuationVideoMode } : {}),
+    referenceImageCompression: resolvedReferenceImages.compression.map(imageCompressionResultToJson),
+    originalReferenceImageUrls: refImageUrls,
+    compressedReferenceImageUrls: videoRefImageUrls,
+    ...(sourceImageUrl ? { sourceImageUrl } : {}),
+  };
 
   const kr = await keyResourceService.upsertResource(
     "script",
     input.scriptId,
-    input.key,
+    videoKey,
     "video",
     {
       prompt: compiledPrompt,
       url: videoUrl,
-      refUrls: [...refImageUrls, ...(sourceVideoUrls ?? [])],
-      data: {
-        duration: input.duration,
-        provider: input.provider,
-      } as Prisma.InputJsonValue,
+      refUrls: [...videoRefImageUrls, ...(sourceVideoUrls ?? [])],
+      data: videoData,
     },
   );
   await setKeyResourceMetadata(kr.id, "视频", input.title ?? input.key);
@@ -553,9 +928,14 @@ export async function executeVideoPrompt(
   return {
     status: "ok",
     key: input.key,
+    videoKey,
     keyResourceId: kr.id,
     version: kr.version,
     videoUrl,
+    lastFrameUrl,
+    sourceVideoUrls,
+    previousVideoUrl: input.previousVideoUrl,
+    previousFrameUrl: input.previousFrameUrl,
     referenceImageCount: refImageUrls.length,
     prompt: compiledPrompt,
   };
@@ -682,6 +1062,7 @@ export type BatchGenerateScenesInput = z.infer<typeof BatchGenerateScenesParams>
 export interface BatchGenerateScenesResult {
   results: Array<{
     sceneName: string;
+    mode?: "single" | "grid" | "hd";
     status: "ok" | "error";
     key?: string;
     keyResourceId?: string;
@@ -691,43 +1072,258 @@ export interface BatchGenerateScenesResult {
   }>;
 }
 
+function uniqueNonEmptyNames(names: string[]): string[] {
+  const seen = new Set<string>();
+  const uniqueNames: string[] = [];
+  for (const rawName of names) {
+    const name = rawName.trim();
+    if (!name || seen.has(name)) continue;
+    seen.add(name);
+    uniqueNames.push(name);
+  }
+  return uniqueNames;
+}
+
+function sceneSuccessResult(
+  sceneName: string,
+  mode: "single" | "grid" | "hd",
+  data: GenerateAndPersistImageResult,
+): BatchGenerateScenesResult["results"][number] {
+  return {
+    sceneName,
+    mode,
+    status: data.status,
+    key: data.key,
+    keyResourceId: data.keyResourceId,
+    imageUrl: data.imageUrl,
+    version: data.version,
+    error: data.error,
+  };
+}
+
+function sceneErrorResult(
+  sceneName: string,
+  mode: "single" | "grid" | "hd",
+  error: unknown,
+): BatchGenerateScenesResult["results"][number] {
+  return {
+    sceneName,
+    mode,
+    status: "error",
+    error: error instanceof Error ? error.message : String(error),
+  };
+}
+
+function findGridParentForScene(
+  analyzed: AnalyzedLocation[],
+  sceneName: string,
+): { parent: AnalyzedLocation; requestedSubName: string | null } | null {
+  const directParent = analyzed.find((loc) => loc.name === sceneName);
+  if (directParent) return { parent: directParent, requestedSubName: null };
+
+  for (const loc of analyzed) {
+    const sub = loc.realSubs.find((candidate) => candidate.name === sceneName);
+    if (sub) return { parent: loc, requestedSubName: sub.name };
+  }
+
+  return null;
+}
+
+async function generateSceneResult(
+  novelId: string,
+  sceneName: string,
+  mode: "single" | "grid" | "hd",
+  model: string | undefined,
+): Promise<BatchGenerateScenesResult["results"][number]> {
+  try {
+    const data = await generateScene({
+      novelId,
+      sceneName,
+      mode,
+      model,
+    });
+    return sceneSuccessResult(sceneName, mode, data);
+  } catch (error: unknown) {
+    return sceneErrorResult(sceneName, mode, error);
+  }
+}
+
+function parentNameForSubScene(
+  analyzed: AnalyzedLocation[],
+  sceneName: string,
+): string | null {
+  for (const loc of analyzed) {
+    if (loc.realSubs.some((sub) => sub.name === sceneName)) return loc.name;
+  }
+  return null;
+}
+
+async function generateGridParentAndHdScenes(
+  novelId: string,
+  parent: AnalyzedLocation,
+  requestedSubNames: string[] | null,
+  model: string | undefined,
+): Promise<BatchGenerateScenesResult["results"]> {
+  const gridResult = await generateSceneResult(novelId, parent.name, "grid", model);
+  if (gridResult.status === "error") return [gridResult];
+
+  const hdSceneNames = requestedSubNames
+    ? requestedSubNames
+    : parent.realSubs.map((sub) => sub.name);
+  const hdResults = await Promise.all(
+    hdSceneNames.map((subName) => generateSceneResult(novelId, subName, "hd", model)),
+  );
+
+  return [gridResult, ...hdResults];
+}
+
+async function batchGenerateGridSceneWorkflow(
+  input: BatchGenerateScenesInput,
+): Promise<BatchGenerateScenesResult> {
+  const { locationBible } = await getNovelLevelData(input.novelId);
+  const analyzed = analyzeLocations(locationBible);
+  const requestedNames = await resolveSceneIdentifiers(
+    input.novelId,
+    uniqueNonEmptyNames(input.sceneNames),
+  );
+  const results: BatchGenerateScenesResult["results"] = [];
+  const singleNames: string[] = [];
+  const gridRequests = new Map<string, {
+    parent: AnalyzedLocation;
+    includeAllSubs: boolean;
+    requestedSubNames: Set<string>;
+  }>();
+
+  for (const requested of requestedNames) {
+    const match = findGridParentForScene(analyzed, requested.sceneName);
+    if (!match) {
+      results.push(sceneErrorResult(requested.requestedName, "grid", new Error(`Scene "${requested.sceneName}" not found`)));
+      continue;
+    }
+
+    const { parent, requestedSubName } = match;
+    if (parent.mode !== "grid") {
+      singleNames.push(requested.sceneName);
+      continue;
+    }
+
+    const existingRequest = gridRequests.get(parent.name);
+    const gridRequest = existingRequest ?? {
+      parent,
+      includeAllSubs: false,
+      requestedSubNames: new Set<string>(),
+    };
+
+    if (requestedSubName) {
+      gridRequest.requestedSubNames.add(requestedSubName);
+    } else {
+      gridRequest.includeAllSubs = true;
+    }
+
+    if (!existingRequest) {
+      gridRequests.set(parent.name, gridRequest);
+      continue;
+    }
+  }
+
+  const [singleResults, gridResults] = await Promise.all([
+    Promise.all(
+      singleNames.map((sceneName) => generateSceneResult(input.novelId, sceneName, "single", input.model)),
+    ),
+    Promise.all(
+      Array.from(gridRequests.values()).map((request) => generateGridParentAndHdScenes(
+        input.novelId,
+        request.parent,
+        request.includeAllSubs ? null : Array.from(request.requestedSubNames),
+        input.model,
+      )),
+    ),
+  ]);
+
+  results.push(...singleResults);
+  results.push(...gridResults.flat());
+
+  return { results };
+}
+
 export async function batchGenerateScenes(
   input: BatchGenerateScenesInput,
 ): Promise<BatchGenerateScenesResult> {
-  const results = await Promise.allSettled(
-    input.sceneNames.map((sceneName) =>
-      generateScene({
-        novelId: input.novelId,
-        sceneName,
-        mode: input.mode,
-        model: input.model,
+  if (input.mode === "grid") {
+    return batchGenerateGridSceneWorkflow(input);
+  }
+
+  const { locationBible } = await getNovelLevelData(input.novelId);
+  const analyzed = analyzeLocations(locationBible);
+  const requestedScenes = await resolveSceneIdentifiers(
+    input.novelId,
+    uniqueNonEmptyNames(input.sceneNames),
+  );
+  const results: BatchGenerateScenesResult["results"] = [];
+  const processedScenes = new Set<string>();
+  const singleOrHdRequests: Array<{ sceneName: string; mode: "single" | "hd" }> = [];
+  const gridRequests: string[] = [];
+
+  for (const requested of requestedScenes) {
+    const effectiveMode = requested.placeholderMode === "grid" ? "grid" : input.mode;
+    const dedupeKey = `${effectiveMode}:${requested.sceneName}`;
+    if (processedScenes.has(dedupeKey)) continue;
+
+    const requestedGridParent = analyzed.find(
+      (loc) => loc.mode === "grid" && loc.name === requested.sceneName,
+    );
+    if (input.mode === "single" && requestedGridParent) {
+      gridRequests.push(requested.sceneName);
+      processedScenes.add(dedupeKey);
+      continue;
+    }
+
+    const parentName = parentNameForSubScene(analyzed, requested.sceneName);
+    const gridParent = parentName
+      ? analyzed.find((loc) => loc.name === parentName && loc.mode === "grid")
+      : undefined;
+    if (input.mode === "single" && gridParent) {
+      gridRequests.push(requested.sceneName);
+      processedScenes.add(dedupeKey);
+      continue;
+    }
+
+    if (effectiveMode === "grid") {
+      gridRequests.push(requested.sceneName);
+      processedScenes.add(dedupeKey);
+      continue;
+    }
+
+    singleOrHdRequests.push({ sceneName: requested.sceneName, mode: effectiveMode });
+    processedScenes.add(dedupeKey);
+  }
+
+  const [nonGridResults, gridResults] = await Promise.all([
+    Promise.all(
+      singleOrHdRequests.map((request) => generateSceneResult(
+        input.novelId,
+        request.sceneName,
+        request.mode,
+        input.model,
+      )),
+    ),
+    Promise.all(
+      gridRequests.length === 0 ? [] : [gridRequests].map(async (sceneNames) => {
+        const gridResult = await batchGenerateGridSceneWorkflow({
+          novelId: input.novelId,
+          sceneNames,
+          mode: "grid",
+          model: input.model,
+        });
+        return gridResult.results;
       }),
     ),
-  );
+  ]);
 
-  return {
-    results: results.map((result, index) => {
-      const sceneName = input.sceneNames[index]!;
-      if (result.status === "fulfilled") {
-        const data = result.value;
-        return {
-          sceneName,
-          status: data.status,
-          key: data.key,
-          keyResourceId: data.keyResourceId,
-          imageUrl: data.imageUrl,
-          version: data.version,
-          error: data.error,
-        };
-      } else {
-        return {
-          sceneName,
-          status: "error" as const,
-          error: result.reason instanceof Error ? result.reason.message : String(result.reason),
-        };
-      }
-    }),
-  };
+  results.push(...nonGridResults);
+  results.push(...gridResults.flat());
+
+  return { results };
 }
 
 /* ------------------------------------------------------------------ */
