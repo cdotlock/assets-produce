@@ -1,23 +1,11 @@
 # 视频分镜生成系统
 
-互动短剧的逐镜头视频 prompt 生成管线。用 Claude Code 打开本项目，说"生成 EP2"即可开始。
+互动短剧的逐镜头视频 prompt fixture 和视频 CLI 参考。生产 skill 已迁移到仓库根目录的 `knowledge/novel-to-video/`，本目录不再作为 agent skill 入口。
 
 ## 目录结构
 
 ```
 video-agent-claude-wangbo/
-├── agent-skills/video-episode-generation/   # Skill 包（agent 的工作流入口）
-│   ├── SKILL.md                             # 唯一入口（内嵌完整 SOP）
-│   ├── references/                          # 按步骤强制加载的参考文档
-│   │   ├── authority-prompt-template.md     # 九段式 prompt 格式参考（五镜实例，仅参考格式）
-│   │   ├── character-dna.md                 # 角色服装锁 + 立绘映射
-│   │   ├── seedance-lessons.md              # Seedance 生成经验
-│   │   ├── director-playbook.md             # 镜头语言速查
-│   │   ├── shot-id-policy.md                # Shot 命名规则
-│   │   ├── review-checklist.md              # 独立审核 27 项检查（7 组）
-│   │   ├── deep-analysis.md                 # 深度问题分析
-│   │   ├── problems-log.md                  # 历史问题日志
-│   │   └── memory.md                        # 跨会话生产经验记忆
 ├── scripts/videoctl/                        # Go CLI 入口（视频任务唯一执行入口）
 ├── internal/                                # videoctl 内部模块
 │
@@ -60,10 +48,7 @@ scripts/claude-mob
 
 ### 生成视频 prompt
 
-在 Claude Code 中说：
-- "生成 EP2 的 shot_1" — 生成单个镜头
-- "生成 EP2" — 生成整集所有镜头
-- "开启钟文鼎特批危险超速生成模式" — 跳过用户确认（仅限特殊场景）
+在本仓库中通过根目录 `agent` CLI 和 `knowledge/novel-to-video/` 工作流生成 prompt。不要从本目录加载旧 skill。
 
 ### 默认流程（interactive 模式）
 
@@ -76,7 +61,7 @@ scripts/claude-mob
 
 ### 脚本
 
-Go CLI 是视频任务的唯一脚本入口。源码入口在 `scripts/videoctl/`，本地编译产物放在 `scripts/bin/videoctl`。Agent 使用前应先读 `scripts/videoctl/AGENT_REFERENCE.md`。
+Go CLI 是原视频任务脚本入口，保留为参考。opencode 内部应优先使用根项目的本地 `videoctl` tool。
 
 ```bash
 # 编译

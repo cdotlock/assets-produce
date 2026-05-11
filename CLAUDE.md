@@ -12,10 +12,10 @@ Agent 既是 CLI（外部 agent 黑盒入口），又是 WebUI 后端（创作�
 ## 物理结构
 
 ```
-legacy/                       旧 Agent Forge（参考用，不维护、不部署、不测试）
 agent/                        opencode 改造的 agent + CLI 基座
 web/                          创作者工作台（Next.js + shadcn/ui）
-cli-example/                  MiniMax-AI/cli（设计参考，不维护）
+knowledge/                    本地自包含工作流知识包
+video-agent-test/             prompt-only 剧本/素材 fixture 与视频 CLI 参考
 docs/superpowers/specs/       主 spec + phase plans + verification reports
 ```
 
@@ -24,9 +24,9 @@ docs/superpowers/specs/       主 spec + phase plans + verification reports
 ## 核心架构原则（不可妥协）
 
 1. **原子能力 + skill 编排** — 禁硬编码视频流水线 service
-2. **SKILL/CLI/MCP/API 四层** — SKILL 在 Langfuse、CLI 在 `agent/` binary、Tool 在 opencode 工具表、API 在 FC/OSS/Langfuse
+2. **SKILL/CLI/MCP/API 四层** — SKILL 源材料先在 `knowledge/` 本地自包含，收到上传指令后同步到 Langfuse；CLI 在 `agent/` binary、Tool 在 opencode 工具表、API 在 FC/OSS/Langfuse
 3. **WebUI = 受限 CLI 包装** — 不实现独立业务逻辑，强制 `profile=creator`
-4. **Skill body 在 Langfuse** — 本地只存 metadata，仓库内禁止散落 markdown skill 文件
+4. **Skill body 统一组织** — 禁止散落临时 markdown skill 文件；本地源材料集中在 `knowledge/`，Langfuse 只在用户明确要求时重新上传
 
 详见 [spec § 2](docs/superpowers/specs/2026-04-29-assets-produce-spec.md)。
 
@@ -64,7 +64,7 @@ docs/superpowers/specs/       主 spec + phase plans + verification reports
 ## 红线（违反 = 错误）
 
 - ❌ 不写硬编码视频流水线 service（任何 `*-orchestration` / `*-coordination` / `*-workflow-service` 命名都嫌疑）
-- ❌ 不让 skill body 散落在仓库 markdown 文件
+- ❌ 不让 skill body 散落在仓库 markdown 文件；本地知识必须集中放在 `knowledge/`
 - ❌ 不在 WebUI 实现独立业务逻辑
 - ❌ 不混淆 `creator` / `developer` permission profile
 - ❌ 不在没写 phase plan 前直接动代码

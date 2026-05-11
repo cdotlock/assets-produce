@@ -19,6 +19,7 @@ build/
 .turbo/
 .cache/
 ts-dist/
+.artifacts/
 
 # env files (never commit; .env.example is allowed)
 .env

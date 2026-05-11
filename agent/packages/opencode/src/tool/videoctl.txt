@@ -1,0 +1,15 @@
+Local video prompt workflow tool.
+
+Use this tool instead of Bash when working with video prompt artifacts.
+It wraps the local `agent video` implementation inside opencode and does not call image/video generation services.
+
+Supported operations:
+
+- `payload`: parse `prompt.md` and build the video gateway request JSON locally.
+- `validate`: check prompt media references and sidecar URLs.
+- `submit_dry_run`: write `request.json` and `state.json` into a local run directory without submitting a live job.
+- `status`: read a local dry-run run directory state.
+- `prompt_review`: score one prompt against the local checklist.
+- `prompt_compare`: compare a candidate prompt with a reference prompt.
+
+This tool intentionally does not provide live video submission. Live generation remains a separate explicitly authorized path.

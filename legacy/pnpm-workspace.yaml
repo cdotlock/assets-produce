@@ -1,5 +1,0 @@
-ignoredBuiltDependencies:
-  - protobufjs
-
-onlyBuiltDependencies:
-  - sqlite3

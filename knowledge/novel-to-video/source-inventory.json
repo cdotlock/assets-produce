@@ -1,0 +1,96 @@
+{
+  "generatedAt": "2026-05-11",
+  "purpose": "Local self-contained knowledge pack before rebuilding Langfuse skill bodies.",
+  "activeKnowledgeFiles": [
+    {
+      "path": "knowledge/novel-to-video/prompt-only-contract.md",
+      "status": "active",
+      "reason": "Defines current default prompt-only boundary and compact workflow."
+    },
+    {
+      "path": "knowledge/novel-to-video/image-style-presets.json",
+      "status": "active",
+      "origin": "distilled from removed Agent-Forge legacy snapshot",
+      "reason": "Small Agent-Forge style template set used for image/material prompts."
+    },
+    {
+      "path": "knowledge/novel-to-video/video-prompt-standard.md",
+      "status": "active",
+      "origin": "video-agent-test/视频提示词标准规则.md",
+      "reason": "Essential video prompt structure and anti-costume-enumeration rules."
+    },
+    {
+      "path": "knowledge/novel-to-video/character-reference-policy.md",
+      "status": "active",
+      "origin": "distilled from removed video-agent-test skill reference",
+      "reason": "Essential reference-image and outfit authority rules, expanded with current Silver Moon Manor mappings."
+    },
+    {
+      "path": "knowledge/novel-to-video/seedance-core-lessons.md",
+      "status": "active",
+      "origin": "distilled from removed video-agent-test skill reference",
+      "reason": "Compact active subset; removes live-generation incidents that are irrelevant to prompt-only runs."
+    },
+    {
+      "path": "knowledge/novel-to-video/director-playbook-core.md",
+      "status": "active",
+      "origin": "distilled from removed video-agent-test skill reference",
+      "reason": "Compact active subset for blocking, shot size, entrances, sound, and action-chain limits."
+    },
+    {
+      "path": "knowledge/novel-to-video/shot-id-policy.md",
+      "status": "active",
+      "origin": "distilled from removed video-agent-test skill reference",
+      "reason": "Required for shot ids and @图N/assets.images order."
+    },
+    {
+      "path": "knowledge/novel-to-video/nine-section-template.md",
+      "status": "active",
+      "origin": "distilled from video-agent-test authority template structure",
+      "reason": "Empty scaffold; avoids letting candidate read historical answer examples."
+    },
+    {
+      "path": "knowledge/novel-to-video/videoctl-tool-reference.md",
+      "status": "active",
+      "reason": "Documents the local opencode videoctl tool boundary so skills use the tool instead of Bash or remote workflows."
+    },
+    {
+      "path": "knowledge/novel-to-video/langfuse-draft.md",
+      "status": "active-upload-draft",
+      "reason": "Single-file future Langfuse skill body, sourced only from the active compact pack."
+    }
+  ],
+  "referenceOnlyFiles": [],
+  "activeCandidateRequiredFiles": [
+    "README.md",
+    "case.json",
+    "rules/prompt-only-contract.md",
+    "rules/video-prompt-standard.md",
+    "references/nine-section-template.md",
+    "references/character-reference-policy.md",
+    "references/seedance-core-lessons.md",
+    "references/director-playbook-core.md",
+    "references/shot-id-policy.md",
+    "references/videoctl-tool-reference.md",
+    "style/image-style-presets.json",
+    "inventory/assets.json",
+    "works/silver-moon-manor/scripts/ep_N.json"
+  ],
+  "cleanupDecision": {
+    "deleteFromRepo": [
+      "legacy",
+      "cli-example",
+      "video-agent-test/agent-skills"
+    ],
+    "keepAsReferenceSnapshots": [
+      "video-agent-test without agent-skills"
+    ],
+    "doNotUploadToLangfuse": [
+      "review-checklist.md",
+      "memory.md",
+      "deep-analysis.md",
+      "problems-log.md",
+      "authority-prompt-template.md"
+    ]
+  }
+}

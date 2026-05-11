@@ -1,9 +1,9 @@
 # videoctl Agent Reference
 
-本文件是 Agent 使用 `scripts/bin/videoctl` 前的操作参考。处理视频任务时，先读
-`agent-skills/video-episode-generation/SKILL.md`，再读本文件，然后再执行 CLI。
+本文件是原 Go `scripts/bin/videoctl` 的操作参考。当前项目内的 agent 工作流入口已经迁移到根目录
+`knowledge/novel-to-video/` 和 opencode 内置 `videoctl` tool；不要再从本目录读取旧 skill。
 
-`videoctl` 是视频任务的唯一执行入口。不要调用旧 Python 脚本，不要手写
+原 Go `videoctl` 仅作为参考和兼容 fixture。opencode 内部应使用内置 `videoctl` tool；不要调用旧 Python 脚本，不要手写
 `curl` / `requests.post` 直连内部网关。
 
 ## 1. Mental Model

@@ -2,7 +2,7 @@
 
 > 实验日期：2026-05-02
 > 评估者：Claude Opus 4.6（自动化盲评）
-> Ground Truth：`agent-skills/video-episode-generation/references/authority-prompt-template.md`
+> Ground Truth：historical authority prompt examples removed from repo; current prompt structure lives in `knowledge/novel-to-video/nine-section-template.md`
 
 ## 1. 实验概述
 

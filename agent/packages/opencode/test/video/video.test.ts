@@ -1,15 +1,23 @@
 import { afterEach, describe, expect, test } from "bun:test"
+import { Effect, Layer, ManagedRuntime } from "effect"
 import * as fs from "fs/promises"
 import * as os from "os"
 import * as path from "path"
+import { Agent } from "../../src/agent/agent"
 import { buildPayload } from "../../src/video/payload"
+import { Instance } from "../../src/project/instance"
 import { readState, writeDryRun, createRunDir } from "../../src/video/runstate"
 import { validatePrompt } from "../../src/video/validate"
 import { comparePromptFiles, reviewPromptFile } from "../../src/video/review"
 import { VideoSubmitCommand } from "../../src/cli/cmd/video"
+import { MessageID, SessionID } from "../../src/session/schema"
+import { VideoCtlTool } from "../../src/tool/videoctl"
+import { Truncate } from "../../src/tool/truncate"
+import type { Tool } from "../../src/tool/tool"
 
 const tempDirs: string[] = []
 const servers: Array<{ stop: (closeActiveConnections?: boolean) => void }> = []
+const toolRuntime = ManagedRuntime.make(Layer.mergeAll(Truncate.defaultLayer, Agent.defaultLayer))
 
 afterEach(async () => {
   for (const server of servers.splice(0)) server.stop(true)
@@ -56,6 +64,22 @@ function promptText(assetRef: string): string {
     "",
     "素材上传清单：@图1: assets/source.png。",
   ].join("\n")
+}
+
+function makeToolContext(): Tool.Context {
+  return {
+    sessionID: SessionID.descending(),
+    messageID: MessageID.ascending(),
+    agent: "build",
+    abort: new AbortController().signal,
+    messages: [],
+    metadata() {
+      return Effect.void
+    },
+    ask() {
+      return Effect.void
+    },
+  }
 }
 
 describe("video prompt payload", () => {
@@ -184,6 +208,44 @@ describe("video prompt validation and dry-run state", () => {
     expect(parsed.runDir.startsWith(path.join(root, "runs"))).toBe(true)
     expect(await fs.readFile(path.join(parsed.runDir, "request.json"), "utf8")).toContain(mediaURL)
     expect((await readState(parsed.runDir)).status).toBe("dry_run")
+  })
+})
+
+describe("videoctl opencode tool", () => {
+  test("wraps payload, dry-run submit, status, and prompt review locally", async () => {
+    const root = await makeTempProject()
+    const mediaURL = "https://bucket.oss-cn-shanghai.aliyuncs.com/source.png"
+    await fs.writeFile(path.join(root, "assets", "source.png.url"), `${mediaURL}\n`)
+    const promptPath = path.join(root, "prompt.md")
+    await fs.writeFile(promptPath, promptText("assets/source.png"))
+
+    await Instance.provide({
+      directory: root,
+      async fn() {
+        const info = await toolRuntime.runPromise(VideoCtlTool)
+        const tool = await Effect.runPromise(info.init())
+        const ctx = makeToolContext()
+
+        const payload = await Effect.runPromise(
+          tool.execute({ operation: "payload", promptPath, projectRoot: root }, ctx),
+        )
+        expect(JSON.parse(payload.output).sourceImageUrl).toBe(mediaURL)
+
+        const runDir = path.join(root, "video-run")
+        const dryRun = await Effect.runPromise(
+          tool.execute({ operation: "submit_dry_run", promptPath, projectRoot: root, runDir }, ctx),
+        )
+        const dryRunOutput = JSON.parse(dryRun.output)
+        expect(dryRunOutput.status).toBe("dry_run")
+        expect(dryRunOutput.runDir).toBe(runDir)
+
+        const status = await Effect.runPromise(tool.execute({ operation: "status", runDir }, ctx))
+        expect(JSON.parse(status.output).status).toBe("dry_run")
+
+        const review = await Effect.runPromise(tool.execute({ operation: "prompt_review", promptPath }, ctx))
+        expect(JSON.parse(review.output).score).toBeGreaterThan(0)
+      },
+    })
   })
 })
 

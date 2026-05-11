@@ -1,8 +1,8 @@
 /**
  * Single source of truth for CLI option definitions.
  *
- * Phase 6 § 0.1: shape borrowed verbatim from `cli-example/src/command.ts:4-9`
- * (MiniMax CLI). Three adapters derive yargs builder chains, JSON schema for
+ * Phase 6 § 0.1: shape follows the MiniMax-style CLI reference contract.
+ * Three adapters derive yargs builder chains, JSON schema for
  * LLM tool exports, and plain-text help blocks from the same definitions so
  * SKILL.md / ERRORS.md / `agent config export-schema` stay in sync.
  *
@@ -126,8 +126,8 @@ export function helpFor(cmdName: string, options: OptionDef[]): string {
 
 /**
  * Global flags shared by every CLI command. Adapted from
- * `cli-example/src/command.ts:44-57` (MiniMax CLI). Names are kept identical
- * where possible so SKILL.md can borrow MiniMax docs verbatim.
+ * the MiniMax-style CLI reference contract. Names are kept identical where
+ * possible so SKILL.md can document them consistently.
  *
  * Wiring into the yargs root + per-command honoring is done in later Phase 6
  * tasks (Task 4 for output mode + dry-run + non-interactive, Task 5 for exit

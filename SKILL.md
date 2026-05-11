@@ -56,6 +56,7 @@ agent tools show generate-image-nanobanana
 # Prompt-only video workflow helpers (Phase 7; no image/video generation)
 agent video payload video-agent-test/works/silver-moon-manor/episodes/ep_2/shots/shot_1/prompt.md --allow-non-oss
 agent video prompt review video-agent-test/works/silver-moon-manor/episodes/ep_2/shots/shot_1/prompt.md
+agent tools show videoctl
 ```
 
 ---
@@ -160,6 +161,8 @@ state, and review/compare prompt text.
 
 These commands **do not** call image or video generation. Live video submit is
 intentionally disabled on this path; `agent video submit` requires `--dry-run`.
+Inside opencode sessions, use the built-in `videoctl` tool for the same local
+operations instead of shelling out to old `scripts/bin/videoctl` commands.
 
 ```bash
 agent video payload <prompt.md> --project-root <root>
@@ -168,6 +171,8 @@ agent video submit <prompt.md> --dry-run --run-dir /tmp/video-run --project-root
 agent video status /tmp/video-run
 agent video prompt review <prompt.md> --json
 agent video prompt compare <candidate.md> <reference.md> --json
+
+agent tools call videoctl --json '{"operation":"prompt_review","promptPath":"<prompt.md>"}' --output json
 ```
 
 ---
@@ -200,10 +205,14 @@ debugging "why isn't this picking up my key?" without leaking secrets.
 
 ## 7. Architecture in 3 lines
 
-SKILL/CLI/MCP/API four-layer. SKILL bodies live in Langfuse (project
-`assets-produce`); the CLI is the only entry point for external agents; atomic
-tools live in opencode's tool table; orchestration is by skills, never by
-hardcoded service code. See [`docs/superpowers/specs/2026-04-29-assets-produce-spec.md`](docs/superpowers/specs/2026-04-29-assets-produce-spec.md) § 2 for the full design.
+SKILL/CLI/MCP/API four-layer. Production SKILL bodies are uploaded to Langfuse
+(project `assets-produce`) when explicitly requested, but the current
+novel-to-video source of truth is local and self-contained under
+[`knowledge/novel-to-video/`](knowledge/novel-to-video/). The CLI is the only
+entry point for external agents; atomic tools live in opencode's tool table;
+orchestration is by skills, never by hardcoded service code. See
+[`docs/superpowers/specs/2026-04-29-assets-produce-spec.md`](docs/superpowers/specs/2026-04-29-assets-produce-spec.md)
+§ 2 for the full design.
 
 ---
 

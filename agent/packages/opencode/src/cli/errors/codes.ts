@@ -1,9 +1,9 @@
 /**
  * Phase 6 Task 5 — centralized exit codes.
  *
- * Mirrors `cli-example/src/errors/codes.ts` (per plan § 0.8). The numeric
- * values match the cli-example contract exactly so external agents that
- * already understand MiniMax CLI exit codes can reuse the same mappings.
+ * Mirrors the Phase 6 CLI reference contract. The numeric values stay stable
+ * so external agents that already understand MiniMax-style CLI exit codes can
+ * reuse the same mappings.
  *
  * `130` (SIGINT) is intentionally NOT a named constant — Node/Bun emit it
  * automatically on Ctrl-C and we never set it ourselves. It is documented in

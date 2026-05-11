@@ -58,6 +58,32 @@
 - Preserve runtime behavior of existing tools after type fixes.
 - Keep WebUI build and typecheck green.
 
+### 1.4 Real Agent AB Expansion
+
+User correction after the first parity pass: comparing copied prompt payloads is not sufficient. The required AB test must start from the same real story/source context and let each Agent independently produce prompt artifacts.
+
+Expected output:
+- Five distinct real cases from the Silver Moon Manor production corpus, each run three times on both sides.
+- Reference side for video prompt behavior: `video-agent-test` Claude Code workflow and its video generation skill/reference files.
+- Reference side for image and general asset prompt behavior: `legacy/` Agent-Forge prompt workflow and style/resource prompt conventions.
+- Candidate side: current `agent` CLI / opencode Agent, using the same source context and no answer files.
+- Per run artifacts:
+  - raw Agent stdout/stderr or stream JSON trace
+  - elapsed wall time
+  - token usage when reported by the Agent runtime
+  - generated image prompt JSON/text
+  - generated video prompt markdown/text
+  - self-review / checklist output when produced
+  - evaluator report for behavior trajectory correctness and final prompt effect
+- A final AB report with aggregated timing, token usage, trajectory scores, prompt consistency scores, and replacement gaps.
+
+Isolation rules:
+- The Agent under test may read scripts, style rules, character/resource mappings, and production reference manuals.
+- The Agent under test must not read existing answer prompts under `works/**/episodes/**/shots/**/prompt.md`, `video-agent-test/ablation/**`, or any generated AB output from another run.
+- The harness must not call image/video generation, upload, live video submit, download, or frame extraction commands.
+- `videoctl` and `agent video` may only be used for prompt parsing, review, payload construction, URL validation with explicit dry-run/local fixtures, and run-state dry-run checks.
+- `legacy/` hardcoded orchestration services remain reference material only; production fixes must stay agent-native and atomic-tool/skill based.
+
 ## 2. Execution Steps
 
 ### Step 1 — Baseline Capture
@@ -182,13 +208,27 @@ Tests:
 - `bun --cwd=web run build`
 - CLI smoke against built `agent/dist/agent.mjs`
 
+### Step 9 — Real Agent AB Matrix
+
+Expected output:
+- A repeatable AB harness that executes five real cases, three repetitions each, for the reference Agent path and the candidate `agent` path.
+- Each run writes a normalized artifact directory with prompts, traces, metrics, and no media outputs.
+- The run prompt explicitly forbids answer-file reads and live media tool calls.
+- Metrics are collected directly from runtime outputs where available and marked unavailable only when the runtime does not expose them.
+
+Tests:
+- One pilot case run for each side proves the harness captures prompt artifacts, trace, elapsed time, and token metadata.
+- Full `5 cases × 3 reps × 2 sides` matrix completes or records a concrete runtime failure for each missing run.
+- A post-run audit confirms no media generation/upload/download/extract command was invoked.
+- Generated prompts are evaluated against script truth, reference manuals, existing authority prompt samples, and the historical `ablation/ABLATION_REPORT.md` scoring rubric.
+
 ## 3. Risks
 
 | Risk | Trigger | Mitigation |
 |---|---|---|
 | Reference snapshot grows too large | Copying generated media from `video-agent-claude-wangbo` | Sanitized copy excludes generated video/frame files and local worktrees |
 | Accidentally calls media generation | Testing `tools call generate-*` or live `video submit` without `--dry-run` | Verification commands are prompt-only; search logs and shell history in report; no `tools call generate-image-*` or `generate-video-*` live calls |
-| Violates skill body red line | Copying `SKILL.md` as a production-loaded skill | Keep copied skill only under `video-agent-test/` reference snapshot; production agent skill body remains Langfuse-managed |
+| Violates skill body red line | Copying `SKILL.md` as a production-loaded skill | Keep local prompt knowledge under inert `knowledge/novel-to-video/`; no file is named `SKILL.md`, and upload to Langfuse only after explicit user instruction |
 | Reintroduces hardcoded workflow service | Porting Agent-Forge service names or orchestration classes | Implement deterministic primitives and CLI commands only; high-level playbook remains skill/prompt-level knowledge |
 | `legacy/` AGENTS conflicts with current repo rules | Agent-Forge has its own workflow rules | `legacy/` is copied as inert reference content; current repo AGENTS controls active implementation |
 | URL validation flakes on public network | Live URL HEAD/GET unstable | Unit tests use local mocked HTTP server; manual smoke may use `--allow-non-oss` fixture |

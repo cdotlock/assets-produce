@@ -6,6 +6,7 @@ import type {
   WorkspaceAdaptor as PluginWorkspaceAdaptor,
 } from "@opencode-ai/plugin"
 import { Config } from "@/config/config"
+import { Skill } from "@/skill"
 import { Bus } from "../bus"
 import * as Log from "@opencode-ai/core/util/log"
 import { createOpencodeClient } from "@opencode-ai/sdk"
@@ -103,6 +104,7 @@ export const layer = Layer.effect(
   Effect.gen(function* () {
     const bus = yield* Bus.Service
     const config = yield* Config.Service
+    const skill = yield* Skill.Service
 
     const state = yield* InstanceState.make<State>(
       Effect.fn("Plugin.state")(function* (ctx) {
@@ -114,6 +116,25 @@ export const layer = Layer.effect(
         }
 
         const { Server } = yield* Effect.promise(() => import("../server/server"))
+        const nativeSkills = {
+          all: () =>
+            bridge.promise(
+              Effect.gen(function* () {
+                const infos = yield* skill.all()
+                return yield* Effect.forEach(
+                  infos,
+                  (info) =>
+                    Effect.gen(function* () {
+                      if (info.content.trim()) return info
+                      if (!info.location.startsWith("langfuse://")) return info
+                      const content = yield* skill.loadBody(info.name).pipe(Effect.catch(() => Effect.succeed("")))
+                      return { ...info, content: content ?? "" }
+                    }),
+                  { concurrency: 4 },
+                )
+              }),
+            ),
+        }
 
         const client = createOpencodeClient({
           baseUrl: "http://localhost:4096",
@@ -139,6 +160,8 @@ export const layer = Layer.effect(
           get serverUrl(): URL {
             return Server.url ?? new URL("http://localhost:4096")
           },
+          // oh-my-openagent reads this optional extension to merge native opencode skills.
+          skills: nativeSkills,
           // @ts-expect-error
           $: typeof Bun === "undefined" ? undefined : Bun.$,
         }
@@ -280,6 +303,10 @@ export const layer = Layer.effect(
   }),
 )
 
-export const defaultLayer = layer.pipe(Layer.provide(Bus.layer), Layer.provide(Config.defaultLayer))
+export const defaultLayer = layer.pipe(
+  Layer.provide(Skill.defaultLayer),
+  Layer.provide(Bus.layer),
+  Layer.provide(Config.defaultLayer),
+)
 
 export * as Plugin from "."
