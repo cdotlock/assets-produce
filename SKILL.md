@@ -53,10 +53,10 @@ agent config validate
 agent tools list
 agent tools show generate-image-nanobanana
 
-# Prompt-only video workflow helpers (Phase 7; no image/video generation)
-agent video payload video-agent-test/works/silver-moon-manor/episodes/ep_2/shots/shot_1/prompt.md --allow-non-oss
-agent video prompt review video-agent-test/works/silver-moon-manor/episodes/ep_2/shots/shot_1/prompt.md
-agent tools show videoctl
+# External video workflow CLI (kept outside opencode)
+bun run videoctl:build
+videoctl/bin/videoctl payload video-agent-test/works/silver-moon-manor/episodes/ep_2/shots/shot_1/prompt.md --allow-non-oss
+videoctl/bin/videoctl validate video-agent-test/works/silver-moon-manor/episodes/ep_2/shots/shot_1/prompt.md --allow-non-oss --json
 ```
 
 ---
@@ -116,8 +116,6 @@ sub-command's own words. Examples:
 | `tools-call` | `agent tools call <id> ...` |
 | `oss-put` | `agent oss put <local> <key>` |
 | `skills-export-schema` | `agent skills export-schema` |
-| `video-payload` | `agent video payload <prompt.md>` |
-| `video-prompt-compare` | `agent video prompt compare <candidate.md> <reference.md>` |
 | `run` | `agent run "..."` |
 
 Top-level single-word entries like `run`, `serve`, `models` invoke directly
@@ -152,28 +150,24 @@ agent users add --username alice --role creator --password testpw12 --dry-run
 Use this from an LLM to confirm field resolution before committing to a real
 write.
 
-### 5.4 Prompt-only video workflow
+### 5.4 External videoctl CLI
 
-Phase 7 adds `agent video ...` commands for the deterministic parts of the
-`video-agent-claude-wangbo` prompt workflow: parse prompt frontmatter, resolve
-`.url` sidecars, build payload JSON, validate media URLs, write dry-run run
-state, and review/compare prompt text.
-
-These commands **do not** call image or video generation. Live video submit is
-intentionally disabled on this path; `agent video submit` requires `--dry-run`.
-Inside opencode sessions, use the built-in `videoctl` tool for the same local
-operations instead of shelling out to old `scripts/bin/videoctl` commands.
+Video workflow execution is intentionally outside opencode. Use
+`videoctl/bin/videoctl` for deterministic prompt payloads, media URL validation,
+dry-run state, live submit after explicit user confirmation, download, and frame
+post-processing.
 
 ```bash
-agent video payload <prompt.md> --project-root <root>
-agent video validate <prompt.md> --project-root <root> --allow-non-oss --json
-agent video submit <prompt.md> --dry-run --run-dir /tmp/video-run --project-root <root>
-agent video status /tmp/video-run
-agent video prompt review <prompt.md> --json
-agent video prompt compare <candidate.md> <reference.md> --json
-
-agent tools call videoctl --json '{"operation":"prompt_review","promptPath":"<prompt.md>"}' --output json
+bun run videoctl:build
+videoctl/bin/videoctl payload <prompt.md>
+videoctl/bin/videoctl validate <prompt.md> --timeout 300 --json
+videoctl/bin/videoctl submit <prompt.md> --dry-run --run-dir /tmp/video-run --json
+videoctl/bin/videoctl status /tmp/video-run --json
 ```
+
+Claude Code sessions should load the source skill in
+`claude-skills/novel-to-video/SKILL.md`; Codex/opencode sessions should use the
+same CLI directly and read `knowledge/novel-to-video/`.
 
 ---
 
@@ -208,9 +202,9 @@ debugging "why isn't this picking up my key?" without leaking secrets.
 SKILL/CLI/MCP/API four-layer. Production SKILL bodies are uploaded to Langfuse
 (project `assets-produce`) when explicitly requested, but the current
 novel-to-video source of truth is local and self-contained under
-[`knowledge/novel-to-video/`](knowledge/novel-to-video/). The CLI is the only
-entry point for external agents; atomic tools live in opencode's tool table;
-orchestration is by skills, never by hardcoded service code. See
+[`knowledge/novel-to-video/`](knowledge/novel-to-video/). The opencode CLI is
+the generic agent entry point; video execution is delegated to the external
+`videoctl` CLI; orchestration is by skills, never by hardcoded service code. See
 [`docs/superpowers/specs/2026-04-29-assets-produce-spec.md`](docs/superpowers/specs/2026-04-29-assets-produce-spec.md)
 § 2 for the full design.
 

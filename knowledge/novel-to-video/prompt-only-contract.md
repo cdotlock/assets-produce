@@ -9,7 +9,7 @@ Do:
 - read the case file, full script, asset inventory, style presets, and active local rules
 - produce image prompt specs, video prompt markdown, legacy-compatible JSON, self-review, trace summary, and manifest
 - keep the workflow agent-native: reason from local files and atomic prompt artifacts
-- use the local opencode `videoctl` tool for prompt review, payload construction, prompt comparison, and dry-run state inspection when verification is needed
+- use the external `videoctl/bin/videoctl` CLI for payload construction and dry-run state inspection when verification is needed
 
 Do not:
 
@@ -17,7 +17,7 @@ Do not:
 - generate images or videos
 - upload, submit, download, extract frames, crop, concatenate, or validate live URLs
 - read historical answers, ablation outputs, archived generated prompts, or authority prompt examples
-- call `curl`, ad hoc HTTP scripts, old `scripts/bin/videoctl` commands, live `videoctl submit/upload/download/extract/run-shot`, or media-generation tools
+- call `curl`, ad hoc HTTP scripts, live `videoctl submit/upload/download/extract/run-shot`, or media-generation tools
 
 ## Required Context
 

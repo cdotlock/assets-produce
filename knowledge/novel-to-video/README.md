@@ -16,7 +16,7 @@ When the Langfuse skill is rebuilt, upload `langfuse-draft.md` or a compiled equ
 | `director-playbook-core.md` | Compact shot/director rules |
 | `shot-id-policy.md` | Shot id and reference-image ordering rules |
 | `nine-section-template.md` | Empty nine-section video prompt scaffold |
-| `videoctl-tool-reference.md` | Local opencode `videoctl` tool usage and boundaries |
+| `videoctl-tool-reference.md` | External `videoctl` CLI usage and boundaries |
 | `langfuse-draft.md` | Single-file skill body draft for later Langfuse upload |
 | `source-inventory.json` | Keep/drop audit of source material |
 
@@ -35,4 +35,4 @@ Prompt-only means producing prompt artifacts only:
 - trace summary
 - manifest
 
-It explicitly excludes image/video generation, upload, live URL validation, submit, download, frame extraction, crop, concat, and remote skill loading.
+It explicitly excludes image/video generation, upload, live URL validation, live submit, download, frame extraction, crop, concat, and remote skill loading.

@@ -52,7 +52,7 @@
     {
       "path": "knowledge/novel-to-video/videoctl-tool-reference.md",
       "status": "active",
-      "reason": "Documents the local opencode videoctl tool boundary so skills use the tool instead of Bash or remote workflows."
+      "reason": "Documents the external videoctl CLI boundary so skills avoid direct HTTP scripts and keep opencode generic."
     },
     {
       "path": "knowledge/novel-to-video/langfuse-draft.md",

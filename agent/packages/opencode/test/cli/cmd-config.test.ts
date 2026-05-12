@@ -3,10 +3,9 @@ import { CLI_COMMAND_DESCRIPTORS, getCatalog, parseEnvExample } from "../../src/
 import { networkOptionDefs } from "../../src/cli/network"
 
 describe("config: CLI_COMMAND_DESCRIPTORS", () => {
-  test("includes all P1 leaf commands plus Phase 7 video prompt commands", () => {
+  test("includes all P1 leaf commands", () => {
     // users(4) + tools(4) + skills(8) + oss(3) + run + serve + models = 22
-    // Phase 7 video prompt workflow adds 6 prompt-only commands.
-    expect(CLI_COMMAND_DESCRIPTORS.length).toBe(28)
+    expect(CLI_COMMAND_DESCRIPTORS.length).toBe(22)
   })
 
   test("each entry has a kebab-case name and non-empty description", () => {
@@ -41,12 +40,6 @@ describe("config: CLI_COMMAND_DESCRIPTORS", () => {
       "run",
       "serve",
       "models",
-      "video-payload",
-      "video-validate",
-      "video-submit",
-      "video-status",
-      "video-prompt-review",
-      "video-prompt-compare",
     ]) {
       expect(names.has(expected)).toBe(true)
     }
@@ -112,7 +105,6 @@ describe("config: CLI_COMMAND_DESCRIPTORS", () => {
       "skills-disable",
       "tools-call",
       "oss-put",
-      "video-submit",
     ]
     for (const name of MUTATING_COMMANDS) {
       const { tools } = getCatalog({ filter: name })

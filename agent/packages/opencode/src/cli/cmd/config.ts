@@ -270,34 +270,8 @@ const modelsOptions: OptionDef[] = [
   { flag: "--refresh", description: "refresh the models cache from models.dev", type: "boolean" },
 ]
 
-// video prompt workflow
-const videoPromptPathOptions: OptionDef[] = [
-  { flag: "--project-root", description: "project root used to resolve relative asset paths" },
-  { flag: "--allow-non-oss", description: "allow generic http(s) media URLs instead of OSS-only URLs", type: "boolean" },
-  { flag: "--allow-text-only", description: "allow payloads without sourceImageUrl", type: "boolean" },
-]
-const videoValidateOptions: OptionDef[] = [
-  { flag: "--project-root", description: "project root used to resolve relative asset paths" },
-  { flag: "--timeout", description: "URL check timeout in seconds", type: "number" },
-  { flag: "--allow-non-oss", description: "allow generic http(s) media URLs instead of OSS-only URLs", type: "boolean" },
-  { flag: "--allow-empty", description: "allow prompt files without media references", type: "boolean" },
-  { flag: "--json", description: "print JSON output", type: "boolean" },
-]
-const videoSubmitOptions: OptionDef[] = [
-  { flag: "--project-root", description: "project root used to resolve relative asset paths" },
-  { flag: "--run-dir", description: "explicit run directory for dry-run artifacts" },
-  { flag: "--dry-run", description: "write request/state locally and do not call the video gateway", type: "boolean" },
-  { flag: "--allow-non-oss", description: "allow generic http(s) media URLs instead of OSS-only URLs", type: "boolean" },
-  { flag: "--allow-text-only", description: "allow payloads without sourceImageUrl", type: "boolean" },
-  { flag: "--json", description: "print JSON output", type: "boolean" },
-]
-const videoStatusOptions: OptionDef[] = [
-  { flag: "--json", description: "print JSON output", type: "boolean" },
-]
-
 /**
- * Full descriptor catalog for migrated P1 commands plus Phase 7 prompt-only
- * video workflow commands. Order matches the spec
+ * Full descriptor catalog for migrated P1 commands. Order matches the spec
  * audit table in `docs/superpowers/specs/phase-6-cli-polish-plan.md` § 8.
  */
 export const CLI_COMMAND_DESCRIPTORS: CliCommandDescriptor[] = [
@@ -393,46 +367,6 @@ export const CLI_COMMAND_DESCRIPTORS: CliCommandDescriptor[] = [
     description: "list all available models",
     options: modelsOptions,
     positionals: [{ name: "provider", description: "provider ID to filter models by", required: false }],
-  },
-  // video prompt workflow (Phase 7)
-  {
-    name: "video-payload",
-    description: "build video gateway JSON from prompt.md without calling any media generator",
-    options: videoPromptPathOptions,
-    positionals: [{ name: "prompt", description: "prompt.md path", required: true }],
-  },
-  {
-    name: "video-validate",
-    description: "validate prompt media URLs; does not call image/video generation",
-    options: videoValidateOptions,
-    positionals: [{ name: "prompt", description: "prompt.md path", required: true }],
-  },
-  {
-    name: "video-submit",
-    description: "dry-run video submit request; live media generation is intentionally disabled in Phase 7",
-    options: videoSubmitOptions,
-    positionals: [{ name: "prompt", description: "prompt.md path", required: true }],
-  },
-  {
-    name: "video-status",
-    description: "read a local video dry-run run directory state",
-    options: videoStatusOptions,
-    positionals: [{ name: "runDir", description: "run directory", required: true }],
-  },
-  {
-    name: "video-prompt-review",
-    description: "score one generated prompt against the Phase 7 prompt checklist",
-    options: videoStatusOptions,
-    positionals: [{ name: "prompt", description: "prompt.md path", required: true }],
-  },
-  {
-    name: "video-prompt-compare",
-    description: "compare generated prompt text with a reference prompt",
-    options: videoStatusOptions,
-    positionals: [
-      { name: "candidate", description: "candidate prompt.md", required: true },
-      { name: "reference", description: "reference prompt.md", required: true },
-    ],
   },
 ]
 

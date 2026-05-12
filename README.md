@@ -7,14 +7,16 @@ Agent-native multi-format asset production platform — based on opencode.
 ## Repository Boundary
 
 本仓库只保留可运行项目代码和必要的本地知识包。旧参考仓库与示例 CLI 已清理出工作树。
-`video-agent-test/` 仅保留可用于 prompt-only 验证的剧本、素材和视频 CLI 参考代码；skill 内容已沉淀到 [`knowledge/novel-to-video/`](knowledge/novel-to-video/)。
+视频执行逻辑放在独立 [`videoctl/`](videoctl/) CLI 包里；`video-agent-test/` 只保留 prompt-only AB 验证所需的剧本、素材和 fixture。
 
 ## Layout
 
 - [`agent/`](agent) — opencode-based agent + CLI base (cloned from `sst/opencode` dev branch)
 - [`web/`](web) — creator workstation (Next.js + shadcn/ui, scaffolded in Phase 5)
+- [`videoctl/`](videoctl) — standalone Go CLI for video upload/payload/validate/submit/postprocess
 - [`knowledge/novel-to-video/`](knowledge/novel-to-video/) — self-contained prompt workflow knowledge pack
-- [`video-agent-test/`](video-agent-test) — prompt-only scripts/assets fixture and video CLI reference
+- [`claude-skills/novel-to-video/`](claude-skills/novel-to-video/) — Claude skill source that drives the knowledge pack through `videoctl`
+- [`video-agent-test/`](video-agent-test) — prompt-only scripts/assets fixture workspace
 - [`docs/superpowers/specs/`](docs/superpowers/specs) — master spec, phase plans, verification reports
 
 ## Read Next
@@ -25,6 +27,8 @@ Agent-native multi-format asset production platform — based on opencode.
 
 Single-binary build: `bun run agent:build` writes `agent/dist/agent.mjs`.
 Run with `bun agent/dist/agent.mjs <cmd>` (or `agent/bin/agent <cmd>`).
+
+Video CLI build: `bun run videoctl:build` writes `videoctl/bin/videoctl`.
 
 ## Tooling
 

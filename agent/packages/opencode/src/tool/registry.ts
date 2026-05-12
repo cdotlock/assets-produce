@@ -12,7 +12,6 @@ import { WebFetchTool } from "./webfetch"
 import { WriteTool } from "./write"
 import { InvalidTool } from "./invalid"
 import { SkillTool } from "./skill"
-import { VideoCtlTool } from "./videoctl"
 import { GenerateImageNanobananaTool } from "./asset/generate-image-nanobanana"
 import { GenerateImageGptTool } from "./asset/generate-image-gpt"
 import { GenerateVideoSeedanceTool } from "./asset/generate-video-seedance"
@@ -122,7 +121,6 @@ export const layer: Layer.Layer<
     const greptool = yield* GrepTool
     const patchtool = yield* ApplyPatchTool
     const skilltool = yield* SkillTool
-    const videoctl = yield* VideoCtlTool
     const generateImageNanobanana = yield* GenerateImageNanobananaTool
     const generateImageGpt = yield* GenerateImageGptTool
     const generateVideoSeedance = yield* GenerateVideoSeedanceTool
@@ -214,7 +212,6 @@ export const layer: Layer.Layer<
           search: Tool.init(websearch),
           code: Tool.init(codesearch),
           skill: Tool.init(skilltool),
-          videoctl: Tool.init(videoctl),
           patch: Tool.init(patchtool),
           question: Tool.init(question),
           lsp: Tool.init(lsptool),
@@ -244,7 +241,6 @@ export const layer: Layer.Layer<
             tool.search,
             tool.code,
             tool.skill,
-            tool.videoctl,
             tool.patch,
             tool.generateImageNanobanana,
             tool.generateImageGpt,

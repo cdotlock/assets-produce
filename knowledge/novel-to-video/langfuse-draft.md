@@ -27,18 +27,16 @@ In prompt-only mode:
 
 Live media execution is a separate explicit user-authorized phase.
 
-## Local Tool Boundary
+## Local CLI Boundary
 
-Inside opencode, use the local `videoctl` tool for video prompt workflow operations instead of Bash:
+Use the external `videoctl/bin/videoctl` CLI for video prompt workflow checks:
 
 - `payload`: build gateway request JSON locally
-- `validate`: check media URLs and sidecar resolution
-- `submit_dry_run`: write local `request.json` and `state.json`
+- `validate`: check media URLs and sidecar resolution when live URL checks are explicitly needed
+- `submit --dry-run`: write local `request.json` and `state.json`
 - `status`: inspect local run state
-- `prompt_review`: score one prompt
-- `prompt_compare`: compare two prompts
 
-The `videoctl` tool is prompt-only/dry-run safe. It intentionally does not expose live video submit.
+Live `submit`, `upload`, `download`, and frame extraction remain separate explicit user-authorized steps.
 
 ## Workflow
 
@@ -61,7 +59,7 @@ The `videoctl` tool is prompt-only/dry-run safe. It intentionally does not expos
    - 禁止事项
    - 素材上传清单
 6. Self-review once, then revise only concrete failures.
-7. For local verification, call the `videoctl` tool for prompt review, payload, validation, dry-run submit, status, or comparison. Do not shell out to old `scripts/bin/videoctl`.
+7. For local verification, run `videoctl/bin/videoctl payload`, `validate`, `submit --dry-run`, or `status` as needed. Do not call direct HTTP scripts.
 
 ## Video Prompt Rules
 

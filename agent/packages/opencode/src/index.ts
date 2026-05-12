@@ -32,7 +32,6 @@ import { ToolsCommand } from "./cli/cmd/tools"
 import { SkillsCommand } from "./cli/cmd/skills"
 import { UsersCommand } from "./cli/cmd/users"
 import { ConfigCommand } from "./cli/cmd/config"
-import { VideoCommand } from "./cli/cmd/video"
 import path from "path"
 import { Global } from "@opencode-ai/core/global"
 import { JsonMigration } from "@/storage/json-migration"
@@ -225,7 +224,6 @@ const cli = toYargsBuilder(
   .command(SkillsCommand)
   .command(UsersCommand)
   .command(ConfigCommand)
-  .command(VideoCommand)
   .fail((msg, err) => {
     // Phase 6 Task 5 — yargs-detected usage failures (missing required arg,
     // unknown flag, invalid value) map to ExitCode.USAGE (2). Anything else

@@ -1,115 +1,21 @@
-# 视频分镜生成系统
+# Video Agent Test Fixtures
 
-互动短剧的逐镜头视频 prompt fixture 和视频 CLI 参考。生产 skill 已迁移到仓库根目录的 `knowledge/novel-to-video/`，本目录不再作为 agent skill 入口。
+This directory now holds prompt-only fixtures: scripts, assets, AB workspaces,
+and sample production work folders.
 
-## 目录结构
-
-```
-video-agent-claude-wangbo/
-├── scripts/videoctl/                        # Go CLI 入口（视频任务唯一执行入口）
-├── internal/                                # videoctl 内部模块
-│
-├── works/                                   # 活跃工作区
-│   └── silver-moon-manor/                   # 作品：银月庄园
-│       ├── PLAN.md                          # 动态生产计划（打勾式）
-│       ├── assets/                          # 人物立绘 + 场景图
-│       ├── scripts/                         # 剧本 JSON（ep_1~ep_20）
-│       ├── ref-frames/                      # 参考帧（按集分目录）
-│       └── episodes/ep_{N}/shots/           # 各镜头 prompt
-│
-├── archive/                                 # 完成作品归档（待用）
-└── .env.example                             # 环境变量模板
-```
-
-## 使用方式
-
-### 环境配置
+The executable video workflow lives in the top-level
+[`videoctl/`](../videoctl/) package. Build and run it from the repository root:
 
 ```bash
-cp .env.example .env
-# 填入 AGENT_API_KEY（找 Rydia 内部分发）
-make build
+bun run videoctl:build
+videoctl/bin/videoctl help
 ```
 
-### Claude Code CLI
-
-本仓库提供 `scripts/claude-mob` 包装脚本，用于把 Claude Code 指向 Mob-AI Anthropic 兼容网关。脚本默认使用 `https://ai.mob-ai.cn`、`claude-opus-4-6:free` 和 `CLAUDE_CODE_EFFORT_LEVEL=max`，但不会在仓库里保存 token。
+Use fixture paths from this directory as inputs, for example:
 
 ```bash
-mkdir -p .claude
-cat > .claude/mob-ai.env <<'EOF'
-ANTHROPIC_AUTH_TOKEN=<token>
-EOF
-
-scripts/claude-mob
+videoctl/bin/videoctl payload video-agent-test/works/silver-moon-manor/episodes/ep_2/shots/shot_1/prompt.md
+videoctl/bin/videoctl validate video-agent-test/works/silver-moon-manor/episodes/ep_2/shots/shot_1/prompt.md --allow-non-oss
 ```
 
-`.claude/` 已被 `.gitignore` 忽略；不要把真实 token 写进可提交文件。
-
-### 生成视频 prompt
-
-在本仓库中通过根目录 `agent` CLI 和 `knowledge/novel-to-video/` 工作流生成 prompt。不要从本目录加载旧 skill。
-
-### 默认流程（interactive 模式）
-
-1. Agent 读剧本 → 分析情绪 → 写九段式 prompt
-2. 独立 Reviewer 冷读审核 27 项检查
-3. **主控 Agent 审核后停下等你确认**（你可以直接打开 .md 手改 prompt）
-4. 你说"可以生成了" → Agent 验证 URL → 调用 Seedance 生成
-
-**安全机制**：默认情况下，每个镜头的视频生成必须经过用户确认。Agent 检测到你手动修改了 prompt.md 时，会自我反思并将经验写入 memory.md。只有用户明确说出"开启钟文鼎特批危险超速生成模式"，Agent 才会在不等待确认的情况下自行调用视频生成（URL 验证仍然强制执行）。
-
-### 脚本
-
-Go CLI 是原视频任务脚本入口，保留为参考。opencode 内部应优先使用根项目的本地 `videoctl` tool。
-
-```bash
-# 编译
-make build
-
-# 上传本地素材到 OSS，并在旁边写 <file>.url
-scripts/bin/videoctl upload <file...>
-
-# 验证 prompt 中所有 URL 可达且内容类型正确
-scripts/bin/videoctl validate <prompt.md>
-
-# 从 prompt.md 构建 API payload（调试用）
-scripts/bin/videoctl payload <prompt.md>
-
-# 生成 dry-run request.json，不调用网关
-scripts/bin/videoctl submit <prompt.md> --dry-run --run-dir <run_dir>
-
-# 提交并等待生成完成（默认最多 1200 秒，30 秒轮询）
-scripts/bin/videoctl submit <prompt.md> --wait
-
-# 下载视频 URL 并写 .url sidecar
-scripts/bin/videoctl download <video_url> --out <shot.mp4>
-
-# 抽末帧和空间候选帧
-scripts/bin/videoctl extract-end-frame <shot.mp4> <shot_end.png>
-scripts/bin/videoctl extract-candidates <shot.mp4> <end_frames_dir> --shot-id <shot_id>
-scripts/bin/videoctl select-spatial-frame <chosen_candidate.png> <shot_spatial.png>
-```
-
-## API
-
-视频生成统一通过 `scripts/bin/videoctl submit <prompt.md> --wait` 进入外部分发生成接口：
-
-```
-POST https://agent.mob-ai.cn/api/external/video/generate
-Authorization: Bearer $AGENT_API_KEY
-```
-
-`AGENT_API_KEY` 仍由 `.env` 提供；网关端点由 CLI 封装，不要手写 HTTP 请求绕过 CLI。
-
-视频生成最长等待 20 分钟（1200 秒），不要提前判定超时。
-
-视频生成前，所有本地图片/视频素材都必须先通过 `/api/external/video/oss/upload` 上传到 OSS。`prompt.md` frontmatter 里的 `assets.images`、`assets.videos`、`previous_video_url`、`previous_frame_url` 应该是 OSS URL；本地路径只适合作为上传前草稿，不应进入正式生成 payload。
-
-`videoctl payload` 是视频生成 payload 构建器：它只负责从 `prompt.md` 生成 `/api/external/video/generate` 的 JSON，不会发请求。它会拒绝没有 OSS URL 或 `.url` sidecar 的本地素材，避免视频生成时漏传参考图/参考视频。
-
-## 注意事项
-
-- **不要手动创建 PLAN.md**，Agent 读完工作流后会自动创建
-- **memory.md** 是跨会话积累的，Agent 会在发现问题时自动更新
-- 作品完成后可以把 `works/{novel_id}/` 归档到 `archive/{novel_id}/`，然后在 `works/` 下继续做下一个活跃作品
+Do not add generated `.mp4`, `.png`, `.jpg`, or run-directory artifacts to git.
