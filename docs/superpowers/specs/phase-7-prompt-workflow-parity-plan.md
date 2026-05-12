@@ -3,6 +3,7 @@
 > Spec ref: [§ 10 Phase 7](2026-04-29-assets-produce-spec.md#phase-7--prompt-workflow-parity--launch-readiness--18) / [§ 15 row 1.8](2026-04-29-assets-produce-spec.md#15-修订记录)
 > Date: 2026-05-11
 > Scope update from user: do not attempt any image or video generation; only generate prompt text and compare quality with the supplied reference.
+> Superseded update: on 2026-05-12, video workflow execution was externalized to the top-level `videoctl/` CLI and Claude skill source; opencode no longer owns `agent video` or a built-in `videoctl` tool.
 
 ## 0. Decision Table
 

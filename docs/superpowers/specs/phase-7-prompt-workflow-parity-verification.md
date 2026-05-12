@@ -2,6 +2,11 @@
 
 Date: 2026-05-11
 
+Superseded update: on 2026-05-12, the Phase 7 video workflow surface was
+externalized to the top-level `videoctl/` CLI and `claude-skills/novel-to-video/`.
+The historical `agent video` and built-in opencode `videoctl` evidence below is
+kept as implementation history, not the current runtime boundary.
+
 ## 1. Scope
 
 Phase 7 absorbed two references without turning them into production runtime dependencies:
