@@ -296,3 +296,59 @@ If a handler throws an unrecognized error it lands in the top-level catch in
 
 The constants are defined in
 [`agent/packages/opencode/src/cli/errors/codes.ts`](agent/packages/opencode/src/cli/errors/codes.ts).
+
+---
+
+## Asset Service (Phase 8 REST API)
+
+The Asset Service surface (`/api/v1/assets/*`) speaks a different error
+envelope from the CLI: every non-2xx response is
+`{ "error": { "code": <enum>, "message": <human> } }` with the HTTP
+status pulled from
+[`ASSET_SERVICE_ERROR_HTTP`](agent/packages/opencode/src/business/asset-service/errors.ts).
+This is **not** the CLI exit-code matrix above — Asset Service callers
+are external HTTP clients (novels-to-moonscript, moonshort-backend), not
+shell processes.
+
+The enum is the AssetServiceErrorCode union defined in
+[`agent/.../asset-service/errors.ts`](agent/packages/opencode/src/business/asset-service/errors.ts);
+the HTTP mapping (also in that file) is the only authoritative source —
+this table mirrors it for documentation. Drift between the table and
+`ASSET_SERVICE_ERROR_HTTP` is a bug; update both.
+
+| Code | HTTP | When |
+|---|---|---|
+| `NOT_FOUND` | 404 | Job, asset, or project missing |
+| `PROJECT_NOT_FOUND` | 404 | (reserved) project_id ref doesn't resolve |
+| `ASSET_NOT_FOUND` | 404 | (reserved) asset_id ref doesn't resolve |
+| `INVALID_INPUT` | 400 | zod body / query validation failed |
+| `UNAUTHENTICATED` | 401 | Missing / wrong `Authorization: Bearer <token>` |
+| `FORBIDDEN` | 403 | Token's project allowlist excludes requested project_id |
+| `BUDGET_EXCEEDED` | 422 | Mini agent loop hit `ASSETS_SERVICE_MAX_STEPS_PER_JOB` |
+| `GENERATION_REJECTED` | 422 | Atomic tool's content filter / safety reject |
+| `ATOMIC_TOOL_FAILED` | 502 | Upstream atomic tool 5xx / unrecoverable error |
+| `INTERNAL` | 500 | Unhandled server error (also the fallback for unknown thrown values) |
+
+Routes never throw raw exceptions to the wire — anything inside the
+`handle(c, async () => …)` wrapper either resolves to a typed view or
+becomes one of the codes above via
+[`http/envelope.ts`](agent/packages/opencode/src/business/asset-service/http/envelope.ts).
+
+Worth knowing while debugging:
+
+- `UNAUTHENTICATED` always returns the same body regardless of whether
+  the header is missing, malformed, or pointing at a token the server
+  has never seen. Don't infer "token name exists" from a 401.
+- `FORBIDDEN` includes the requested project_id in the message; the
+  caller can log it for support. The token's `name` (`ntms` / `msb` /
+  `dev`) is not in the response — log lookup happens server-side via
+  `c.var.assetToken.name`.
+- `BUDGET_EXCEEDED` carries the step count in the message when the
+  generator surfaced one (`steps` from `GenerationOutcome`); use this
+  to decide whether the caller should retry with simpler `spec_md`.
+- `ATOMIC_TOOL_FAILED` is a 502 (bad gateway), not a 500. Callers should
+  treat it as a "try again later" signal — the bug is in the upstream
+  tool, not in `asset-service`.
+
+The OpenAPI contract is [`docs/api/openapi.yaml`](docs/api/openapi.yaml);
+the `ErrorEnvelope` schema there enumerates the same codes.

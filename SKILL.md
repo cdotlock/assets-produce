@@ -210,9 +210,66 @@ the generic agent entry point; video execution is delegated to the external
 
 ---
 
-## 8. Links
+## 8. Public Asset Service API (Phase 8+)
+
+`agent serve` exposes a REST surface at `/api/v1/assets/*` for external
+callers (novels-to-moonscript, moonshort-backend, or any AI-native
+consumer). Bearer-token gated; configure tokens via
+`ASSETS_API_TOKEN_*` env vars (see [`.env.example`](.env.example)).
+
+Four operations, all idempotent against (project_id, key, version):
+
+| Op | Method + path | Use case |
+|---|---|---|
+| `asset.create` | `POST /api/v1/assets/create` | Trigger generation; returns queued job id |
+| `asset.status` | `GET /api/v1/assets/jobs/:id` | Poll job state; succeeded view has url + meta |
+| `asset.lookup` | `POST /api/v1/assets/lookup` | Batch resolve keys / names → urls |
+| `asset.catalog.since` | `GET /api/v1/assets/catalog` | Incremental sync via cursor |
+
+Canonical contract: [`docs/api/openapi.yaml`](docs/api/openapi.yaml).
+
+Phase 8 ships a placeholder atomic-tool generator that returns a
+deterministic stub URL so the four endpoints round-trip end-to-end
+without real LLM/atomic-tool calls. Phase 9+ swaps in the
+LLM-driven mini agent loop that consumes the skill bodies in
+[`knowledge/asset-generation/`](knowledge/asset-generation/).
+
+Integration examples (Phase 10):
+
+```bash
+# moonshort-backend creates a CG asset
+curl -X POST http://localhost:8001/api/v1/assets/create \
+  -H 'Authorization: Bearer $ASSETS_API_TOKEN_MSB' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "project_id": "novel_silver_moon",
+    "asset_intent": {
+      "kind": "cg",
+      "key": "ep_3/sylvia_glyph",
+      "spec_md": "Sylvia raises hand; silver glyph ignites."
+    },
+    "client_request_id": "moonshort:remix:42"
+  }'
+
+# novels-to-moonscript resolves asset_refs back to OSS URLs
+curl -X POST http://localhost:8001/api/v1/assets/lookup \
+  -H 'Authorization: Bearer $ASSETS_API_TOKEN_NTMS' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "project_id": "novel_silver_moon",
+    "queries": [{ "name": "Sylvia 立绘" }]
+  }'
+```
+
+Errors follow `{error:{code,message}}` envelope; the full code matrix
+lives in [`ERRORS.md` § Asset Service](ERRORS.md).
+
+---
+
+## 9. Links
 
 - [Main spec](docs/superpowers/specs/2026-04-29-assets-produce-spec.md) — architecture, phase plan, acceptance criteria
 - [`ERRORS.md`](ERRORS.md) — per-command × per-scenario error catalog
 - [`.env.example`](.env.example) — canonical env list (every field the CLI reads)
+- [`docs/api/openapi.yaml`](docs/api/openapi.yaml) — Asset Service REST contract
 - [Phase plans](docs/superpowers/specs/) — `phase-N-*-plan.md` for active work, `phase-N-*-verification.md` for sign-offs
