@@ -18,7 +18,7 @@ const log = Log.create({ service: "asset-service.http.create" })
 export const AssetCreateBody = z.object({
   project_id: z.string().min(1),
   asset_intent: z.object({
-    kind: z.enum(ASSET_KINDS as unknown as [string, ...string[]]),
+    kind: z.enum(ASSET_KINDS),
     key: z.string().min(1),
     spec_md: z.string(),
     refs: z
@@ -64,13 +64,11 @@ export function CreateRoute(svc: AssetService) {
             message: `token not allowed for project ${body.project_id}`,
           })
         }
-        // z.enum widens to `string` in our schema (we have to feed it the
-        // const array via the constructed-tuple cast). Re-cast to AssetIntent
-        // before handing to the service which wants the literal-union form.
+        // ASSET_KINDS is `as const`, so z.enum's inference yields the literal
+        // AssetKind union — no widening cast needed.
         const view = await svc.createJob({
           project_id: body.project_id,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          asset_intent: body.asset_intent as any,
+          asset_intent: body.asset_intent,
           preferences: body.preferences,
           client_request_id: body.client_request_id,
           callback_url: body.callback_url ?? null,

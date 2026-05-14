@@ -144,14 +144,16 @@ export interface CatalogPage {
 // Internal — the repo returns the raw row + (optional) joined Asset, the
 // service layer projects it to AssetJobView.
 
-export const ASSET_KINDS: readonly AssetKind[] = [
+// `as const` produces a literal-typed tuple (rather than `readonly AssetKind[]`),
+// which z.enum() accepts directly so HTTP route schemas don't need a widening cast.
+export const ASSET_KINDS = [
   "character_portrait",
   "scene_bg",
   "cg",
   "cover",
   "shot_image",
   "shot_video",
-]
+] as const satisfies readonly AssetKind[]
 
 export const ASSET_JOB_STATUSES: readonly AssetJobStatus[] = [
   "queued",
