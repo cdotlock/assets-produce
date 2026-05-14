@@ -303,10 +303,17 @@ components:
 
     AssetLookupQuery:
       type: object
+      description: |
+        Resolve an asset by `key` (optionally pinned to a `version`) OR by
+        `name`. At least one of `key` / `name` is required — an empty
+        `{}` query returns INVALID_INPUT.
       properties:
         key: { type: string }
         version: { type: integer, minimum: 1 }
         name: { type: string }
+      anyOf:
+        - required: [key]
+        - required: [name]
 
     AssetLookupRequest:
       type: object

@@ -310,6 +310,19 @@ describe("HTTP — POST /api/v1/assets/lookup", () => {
     expect(res.status).toBe(400)
   })
 
+  test("400 when a query carries neither key nor name (M2 regression)", async () => {
+    const project_id = seedProject()
+    const app = buildApp(project_id)
+    const res = await app.request("/api/v1/assets/lookup", {
+      method: "POST",
+      headers: { ...authBearer(TOKEN_NAMED), ...json({}) },
+      body: JSON.stringify({ project_id, queries: [{}] }),
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as { error?: { code?: string; message?: string } }
+    expect(body.error?.code).toBe("INVALID_INPUT")
+  })
+
   test("403 when token cannot access project_id", async () => {
     const a = seedProject()
     const b = seedProject()

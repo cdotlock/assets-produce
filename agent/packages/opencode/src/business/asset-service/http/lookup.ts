@@ -8,17 +8,22 @@ import { AssetServiceError } from "../errors"
 import { tokenCanAccess, type AssetAuthContext } from "./auth"
 import { handle, makeError, zodMessage } from "./envelope"
 
+const LookupQuery = z
+  .object({
+    key: z.string().optional(),
+    version: z.number().int().positive().optional(),
+    name: z.string().optional(),
+  })
+  // Caller must supply at least one of `key` / `name`; empty `{}` queries
+  // would silently return `no_match` and the caller's batch slot would be
+  // wasted — fail fast at the boundary instead.
+  .refine((q) => Boolean(q.key) || Boolean(q.name), {
+    message: "each query needs at least one of `key` or `name`",
+  })
+
 const LookupBody = z.object({
   project_id: z.string().min(1),
-  queries: z
-    .array(
-      z.object({
-        key: z.string().optional(),
-        version: z.number().int().positive().optional(),
-        name: z.string().optional(),
-      }),
-    )
-    .min(1),
+  queries: z.array(LookupQuery).min(1),
 })
 
 export function LookupRoute(svc: AssetService) {
