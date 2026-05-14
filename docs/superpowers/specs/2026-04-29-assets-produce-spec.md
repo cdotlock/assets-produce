@@ -474,6 +474,103 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 
 ---
 
+### Phase 8 — Asset Service 对外 API ⚠ 1.10
+
+**目标**：把 assets-produce 从"内部 CLI/WebUI 入口"扩展为"对外 asset 生产 + 检索面"，对外暴露 REST + MCP 双层接口；不接两个外部 repo，纯本仓库自洽。详细设计见 [`2026-05-14-three-repo-asset-integration-design.md`](2026-05-14-three-repo-asset-integration-design.md)。
+
+**范围**：
+
+- 新增 `AssetJob` entity + drizzle migration
+- 新增 `agent/packages/opencode/src/business/asset-service/`：`AssetService` 主类、`runAssetGeneration` mini agent loop、`intent-to-skill`、catalog、HTTP routes
+- 4 个 REST 操作：`POST /api/v1/assets/create` / `GET /api/v1/assets/jobs/:id` / `POST /api/v1/assets/lookup` / `GET /api/v1/assets/catalog`
+- 4 个 MCP tools 挂在已有 MCP server：`assets.create` / `assets.status` / `assets.lookup` / `assets.catalog_since`
+- 5 份 skill body 草稿到 `knowledge/asset-generation/`（character-portrait / scene-bg / cg-render / cover / shot-image-from-mss）
+- Bearer token auth；3 个 token 写到 `.env.example`
+- 自动导出 OpenAPI spec 到 `docs/api/openapi.yaml`
+
+**不做**：
+
+- 不调用真实图片/视频生成（test 用 stub atomic tool）
+- 不接 novels-to-moonscript / moonshort-backend
+- 不实现 callback / 自动重试
+- 不引入新 worker 框架；复用既有 opencode session/runtime
+- 不上传 skill body 到 Langfuse（按 § 2 原则 4，用户明确要求时再做）
+
+**验收**：
+
+- `bun --cwd=agent run typecheck` / `bun --cwd=agent run test` 全过
+- `agent serve` 后 curl 4 个端点全通（stub atomic tool）
+- 单元覆盖 ≥ 80%；HTTP route handler 覆盖错误码矩阵
+- OpenAPI spec 用 `openapi-cli validate` 过
+- MCP tools 在 `agent serve` 后能被 MCP client 列出
+- 5 份 skill body 草稿存在，每份 ≥ 30 行
+- Langfuse trace 在一次 stub job 跑完后可见
+- phase-8 plan + verification report 齐
+- commit + push 到 main
+
+---
+
+### Phase 9 — Asset 工具迁移（CG / OSS-sync / upscale）⚠ 1.10
+
+**目标**：把 `moonshort-backend/generate-upscale-matting/` 中纯素材生产工具（CG 渲染 / 批量 upload / upscale）搬到 assets-produce 顶层 `tools/`，让 Phase 8 已落地的 mini agent loop 能力完整。详细设计见 [`2026-05-14-three-repo-asset-integration-design.md`](2026-05-14-three-repo-asset-integration-design.md) § 11 Phase 9。
+
+**范围**：
+
+- 新增 `tools/cg-render/`（cg_render.py 迁移；包 atomic tool `cg-render`）
+- 新增 `tools/oss-sync/`（sync_to_oss.py 迁移；仅离线工具，不挂 atomic tools）
+- 新增 `tools/upscale/`（包 atomic tool `upscale-image`）
+- atomic tool 注册到 opencode 工具表
+- Phase 8 的 `cg-render-spec.md` skill body 引用新 atomic tools
+- moonshort-backend 对应文件加 DEPRECATED 注释（**不删**；删交给 backend 维护方）
+
+**不做**：
+
+- 不迁 `generate-upscale-matting/` 全部子目录（按文件评估，只搬列出三件）
+- 不在本 phase 删 backend 侧旧文件
+- 不动 Phase 8 已稳定的 4 个对外操作
+
+**验收**：
+
+- `tools/cg-render` 跑通 fixture 输入（stub or dev key）
+- `tools/oss-sync` dry-run fixture 目录
+- 新 atomic tools 在 `agent tools list` 出现，schema 完整
+- `cg-render-spec.md` skill 拉起 mini agent loop，跑完 stub CG 生成
+- backend 对应文件加 DEPRECATED 注释 + 单独 commit（不删）
+- phase-9 plan + verification report 齐
+- commit + push 到 main
+
+---
+
+### Phase 10 — 三方接通 ⚠ 1.10
+
+**目标**：把 novels-to-moonscript 与 moonshort-backend 实际接通 assets-produce 对外 API。详细设计见 [`2026-05-14-three-repo-asset-integration-design.md`](2026-05-14-three-repo-asset-integration-design.md) § 11 Phase 10。
+
+**范围**：
+
+- novels-to-moonscript：新增 `src/clients/assets_produce_client.py`（仅 lookup）；MSS `asset_ref` 加可选 id/name/kind；可选 `mss-verify --resolve-assets` flag；`.env.example` 加 `ASSETS_PRODUCE_BASE_URL` / `ASSETS_PRODUCE_TOKEN`
+- moonshort-backend：新增 `app/upstream/assets-produce-http.ts`；修改 `app/upstream/agent-forge-client.ts` real branch（throw 改为 HTTP fetch）；不动 `assets-remix-service.ts` 接口；`.env.example` 加变量；README 写 `ASSETS_REMIX_MODE=real` 切换说明
+- assets-produce：注册 3 个 token；新增 `docs/ops/three-repo-token-flow.md`
+
+**不做**：
+
+- 不强制 backend 默认开 real（feature flag 由 backend 维护方决定何时切）
+- 不动 backend BullMQ / outbox / service-level 任何逻辑
+- 不删 backend `generate-upscale-matting/`
+- 不引入共享 npm/pip 包；三仓 client 各自实现
+- 不要求加 CI E2E（用户本机一条 e2e 走通即验收）
+
+**验收**：
+
+- assets-produce Phase 8 + 9 + 10 单元/integration 全过
+- novels-to-moonscript `assets_produce_client.py` 单元覆盖 happy / 404 / 401 / 网络错
+- moonshort-backend `assets-produce-http.ts` 单元覆盖 4 个操作 + 错误矩阵
+- 用户本机一条 e2e 走通：MSS → backend remix → assets-produce real → 拿 url → 小程序看到图
+- assets-produce 跑一周观察：mini agent loop step/token 在 budget 内
+- phase-10 plan + verification report 齐
+- commit + push 到 3 个 repo 的 main（backend push 必须 backend 维护方 ack）
+
+---
+
 ## 11. 工作流（Claude Code Session 必读）
 
 ### 11.1 进入新 phase 时
@@ -578,6 +675,7 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 | 1.7 | 2026-04-30 | Phase 6 落地时两项 acceptance 调整：(a) **cold start ≤ 100ms 不可达**。Bun bundle 实测 2.17 MB ≤ 30 MB 通过；hyperfine min 585 ms（mean 674 ms），dev 路径 568-612 ms，bundle 几乎 0 加成。floor 是 opencode 自身 import graph（Effect 4 runtime + langfuse + AI SDKs + drizzle + yargs），与本 phase 改动无关。100 ms 目标在 Bun + 当前 opencode runtime 下物理不可达，除非把所有重 dep 改成 lazy import 进 handler 内（深度重构，可能破坏 Effect runtime / plugin loader semantics，超出 Phase 6 范围）。决策：本次只把 § 10 Phase 6 acceptance #2 阈值由 ≤ 100 ms 改为 ≤ 800 ms，把 585 ms 实测纳入合规线；如未来要进一步压低，走独立 phase。(b) **`legacy/` 暂不删**：用户 2026-04-30 决定保留 25 MB legacy/（旧 Agent Forge）作参考；当前不维护、不部署、不测试规则不变（CLAUDE.md § 物理结构）。Task 8 推迟到下次 spec 修订时再决议。Phase 6 验收第 5 条「legacy/ 被移除后构建/测试/部署不受影响」改为「legacy/ 推迟移除（保留为参考）」。影响范围：仅本 phase acceptance；§ 2 / § 6 / § 11.4 接口稳定与 SKILL/CLI/MCP/API 四层原则均不变。 | cdotlock + Claude |
 | 1.8 | 2026-05-11 | 用户要求把 `video-agent-claude-wangbo` 的视频 prompt 生产经验和最新 Agent-Forge 工作流吸收到本项目，并明确补充本次不得尝试任何图片/视频生成，只做 prompt 生成与参考水平对比。新增 Phase 7：`video-agent-test/` 覆盖为 `video-agent-claude-wangbo` 的有效学习样本；`legacy/` 直接同步 `Rydia-China/Agent-Forge` 最新 `main`；CLI 以 agent-native 方式实现 prompt frontmatter/payload dry-run/URL 校验/run-state/review/compare 等确定性能力；保留现有媒体 atomic tools 但本 phase 不调用真实生成。影响范围：新增 prompt-only launch readiness phase；不改变 § 2 原子能力 + skill 编排原则，不允许硬编码视频流水线 service。 | cdotlock + Codex |
 | 1.9 | 2026-05-12 | Phase 7 后续整理：视频业务执行逻辑从 opencode core 外置到顶层 `videoctl/` Go CLI，稳定入口为 `videoctl/bin/videoctl`；新增 `claude-skills/novel-to-video/` 作为 Claude Code skill 源；opencode 不再提供 `agent video` 命令或内置 `videoctl` tool。原因：降低 opencode fork 维护成本，让 Codex/Claude Code 等宿主通过同一 CLI + skill/知识包复用视频工作流。影响范围：Phase 7 runtime boundary；不改变媒体 atomic tools，不引入 MCP。 | cdotlock + Codex |
+| 1.10 | 2026-05-14 | 用户要求把 assets-produce 与 `cdotlock/novels-to-moonscript` 和 `cdotlock/moonshort-backend` 真正接通，并把 backend 内的素材生产能力（CG / sync-to-oss / upscale）迁回 assets-produce。约束：moonshort-backend 不是用户维护，最小改动；novels-to-moonscript 与 assets-produce 由用户维护，可正常改造；技术要 AI-native（mini agent loop + skill 编排，不写新的硬编码 service）。新增 Phase 8 / 9 / 10：Phase 8 在 assets-produce 内立起 4 个对外操作（`asset.create` / `asset.status` / `asset.lookup` / `asset.catalog.since`）REST + MCP 双层；Phase 9 把 CG / OSS-sync / upscale 三件工具搬到 `tools/`，挂上 atomic tools；Phase 10 让 novels-to-moonscript 加 lookup client、moonshort-backend `agent-forge-client.ts` real mode 切到 HTTP to assets-produce（不动 `assets-remix-service.ts` 接口、不动 outbox/BullMQ）。完整设计见 `2026-05-14-three-repo-asset-integration-design.md`。影响范围：assets-produce 对外形态、跨仓集成；不改 § 2 原子能力 + skill 编排原则（mini agent loop 本质就是 LLM + skill body + atomic tools 的运行回路，非硬编码流水线 service），不改 § 11.4 接口稳定（Phase 8 落地后 4 个对外操作即 lock-in 起点）。 | cdotlock + Claude |
 
 > 后续修订请在此追加新行，并在受影响的 phase 章节加 ⚠ 标记 + 引用本表行号。
 
