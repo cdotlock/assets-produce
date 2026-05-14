@@ -1,0 +1,16 @@
+Upscale one PNG image via the external Real-ESRGAN binary — Layer C of the
+asset pipeline (single-image post-render upscale).
+
+- Backed by `tools/upscale/upscale.py`. Net effect: ×4 super-resolution then
+  ÷2 resize → 2× sharpened PNG sitting next to (or at) the requested
+  output_path.
+- Input is a local PNG path (the caller is expected to resolve OSS URLs to
+  local files first). Output is the same — atomic tool does NOT upload to
+  OSS; let the next layer (asset-service generator) handle that.
+- Scale must be 2 or 4. Default model is `realesrgan-x4plus-anime` (good
+  fit for the YA Impasto digital-painting look used across moonshort
+  productions).
+
+Use `mock: true` in tests / before the realesrgan-ncnn-vulkan binary is
+installed under `~/bin/realesrgan/`. Use `dryRun: true` to print the
+resolved Python invocation without running it.
