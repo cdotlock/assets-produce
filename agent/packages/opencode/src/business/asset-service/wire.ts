@@ -16,6 +16,7 @@ import { Effect, Layer } from "effect"
 import { lazy } from "@/util/lazy"
 import { Service as AssetSvc, defaultLayer as assetLayer } from "@/business/asset/asset"
 import { AssetService } from "./asset-service"
+import { createLangfuseTracer } from "./tracer"
 import { loadAssetAuthFromEnv } from "./http/auth"
 import { buildAssetServiceApp } from "./http"
 import type {
@@ -87,6 +88,9 @@ export const assetServiceSingleton = lazy(
     new AssetService({
       generator: placeholderGenerator,
       writer: defaultAssetWriter,
+      // Falls back to nullTracer if LANGFUSE_PUBLIC_KEY / SECRET_KEY are
+      // not set (dev / CI without LF credentials still completes jobs).
+      tracer: createLangfuseTracer(),
     }),
 )
 

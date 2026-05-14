@@ -16,6 +16,7 @@
 import { AssetServiceError } from "./errors"
 import { AssetJobRepo } from "./asset-job.repo"
 import { intentToSkill, type SkillPicker } from "./intent-to-skill"
+import { buildTraceEnd, nullTracer, type Tracer } from "./tracer"
 import type { AssetIntent, AssetKind, AssetPreferences } from "./types"
 import type { AssetJobRow } from "./asset-job.sql"
 
@@ -101,6 +102,11 @@ export interface RunAssetGenerationDeps {
   skillPicker?: SkillPicker
   // Defaults to ASSETS_SERVICE_MAX_STEPS_PER_JOB-equivalent (30 per spec § 6.1).
   maxSteps?: number
+  // Optional per-job tracer. When set, its trace.id wins over the
+  // generator-supplied outcome.langfuse_trace_id (the tracer is the
+  // "owner" of the trace; the outcome's id is a fallback for paths that
+  // don't go through this driver).
+  tracer?: Tracer
 }
 
 export const DEFAULT_MAX_STEPS = 30
@@ -127,18 +133,48 @@ export async function runAssetGeneration(
   const intent = job.intent as AssetIntent
   const preferences = undefined // job.intent already encodes preferences if any
   const maxSteps = deps.maxSteps ?? DEFAULT_MAX_STEPS
+  const tracer = deps.tracer ?? nullTracer
+
+  // Helper that picks tracer.id when present, else generator-supplied id.
+  const traceIdFor = (outcome?: GenerationOutcome): string | null => {
+    if (trace.id) return trace.id
+    return outcome && "langfuse_trace_id" in outcome ? outcome.langfuse_trace_id ?? null : null
+  }
 
   // ---------- Tier 1: pick skill ----------
   let skill: string
   try {
     skill = await intentToSkill({ intent, preferences, picker: deps.skillPicker })
   } catch (e) {
+    // Start a partial trace just so we can emit a failure event.
+    const trace = tracer.startJob({
+      job_id: job.id,
+      project_id: job.project_id,
+      intent,
+      skill: "<unresolved>",
+      preferences,
+      maxSteps,
+    })
+    const code = extractCode(e) ?? "INTERNAL"
+    const message = extractMessage(e) ?? "intent-to-skill failed"
+    trace.end(buildTraceEnd({ failure: { code, message } }))
     return deps.jobRepo.updateStatus(job.id, {
       status: "failed",
-      error_code: extractCode(e) ?? "INTERNAL",
-      error_message: extractMessage(e) ?? "intent-to-skill failed",
+      error_code: code,
+      error_message: message,
+      langfuse_trace_id: trace.id || null,
     })!
   }
+
+  const trace = tracer.startJob({
+    job_id: job.id,
+    project_id: job.project_id,
+    intent,
+    skill,
+    preferences,
+    maxSteps,
+  })
+  trace.event("skill.picked", { skill })
 
   // ---------- Tier 2: run the agent loop (stubbed in tests) ----------
   let outcome: GenerationOutcome
@@ -152,21 +188,27 @@ export async function runAssetGeneration(
       maxSteps,
     })
   } catch (e) {
+    const message = extractMessage(e) ?? "atomic tool threw"
+    trace.end(buildTraceEnd({ failure: { code: "ATOMIC_TOOL_FAILED", message } }))
     return deps.jobRepo.updateStatus(job.id, {
       status: "failed",
       error_code: "ATOMIC_TOOL_FAILED",
-      error_message: extractMessage(e) ?? "atomic tool threw",
+      error_message: message,
+      langfuse_trace_id: traceIdFor(),
     })!
   }
 
   if (!outcome.ok) {
+    trace.end(buildTraceEnd({ outcome }))
     return deps.jobRepo.updateStatus(job.id, {
       status: "failed",
       error_code: outcome.code,
       error_message: outcome.message,
-      langfuse_trace_id: outcome.langfuse_trace_id ?? null,
+      langfuse_trace_id: traceIdFor(outcome),
     })!
   }
+
+  trace.event("generator.ok", { atomic_tool: outcome.atomic_tool, steps: outcome.steps })
 
   // ---------- Tier 3: write Asset row + finalize ----------
   let written: AssetWriterOutput
@@ -182,18 +224,21 @@ export async function runAssetGeneration(
       ref_urls: outcome.ref_urls,
     })
   } catch (e) {
+    const message = extractMessage(e) ?? "asset writer failed"
+    trace.end(buildTraceEnd({ outcome, failure: { code: "INTERNAL", message } }))
     return deps.jobRepo.updateStatus(job.id, {
       status: "failed",
       error_code: "INTERNAL",
-      error_message: extractMessage(e) ?? "asset writer failed",
-      langfuse_trace_id: outcome.langfuse_trace_id ?? null,
+      error_message: message,
+      langfuse_trace_id: traceIdFor(outcome),
     })!
   }
 
+  trace.end(buildTraceEnd({ outcome, asset_id: written.asset_id }))
   return deps.jobRepo.updateStatus(job.id, {
     status: "succeeded",
     asset_id: written.asset_id,
-    langfuse_trace_id: outcome.langfuse_trace_id ?? null,
+    langfuse_trace_id: traceIdFor(outcome),
   })!
 }
 

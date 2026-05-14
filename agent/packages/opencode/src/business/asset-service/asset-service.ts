@@ -21,6 +21,7 @@ import {
 } from "./run-asset-generation"
 import type { SkillPicker } from "./intent-to-skill"
 import type { AssetJobRow } from "./asset-job.sql"
+import type { Tracer } from "./tracer"
 import type {
   AssetCreateInput,
   AssetJobResult,
@@ -38,6 +39,9 @@ export interface AssetServiceOptions {
   catalog?: Catalog
   skillPicker?: SkillPicker
   maxSteps?: number
+  // Optional Langfuse-shaped tracer; runAssetGeneration defaults to a
+  // no-op when this is omitted.
+  tracer?: Tracer
 }
 
 export class AssetService {
@@ -47,6 +51,7 @@ export class AssetService {
   private readonly catalog: Catalog
   private readonly skillPicker?: SkillPicker
   private readonly maxSteps: number
+  private readonly tracer?: Tracer
 
   constructor(opts: AssetServiceOptions) {
     this.generator = opts.generator
@@ -55,6 +60,7 @@ export class AssetService {
     this.catalog = opts.catalog ?? Catalog.fromDatabase()
     this.skillPicker = opts.skillPicker
     this.maxSteps = opts.maxSteps ?? DEFAULT_MAX_STEPS
+    this.tracer = opts.tracer
   }
 
   // ---------- createJob ----------
@@ -109,6 +115,7 @@ export class AssetService {
         writer: this.writer,
         skillPicker: this.skillPicker,
         maxSteps: this.maxSteps,
+        tracer: this.tracer,
       },
     )
     return this.viewFor(row)
