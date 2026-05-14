@@ -1,0 +1,4 @@
+# upscale dependencies. The actual upscaling runs through the external
+# realesrgan-ncnn-vulkan binary (installed under ~/bin/realesrgan/), so the
+# Python side only needs Pillow for the after-resize step.
+Pillow==11.0.0
