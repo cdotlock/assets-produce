@@ -6,11 +6,14 @@
 import { Hono } from "hono"
 import { validator } from "hono-openapi"
 import z from "zod"
+import * as Log from "@opencode-ai/core/util/log"
 import { AssetService } from "../asset-service"
 import { AssetServiceError } from "../errors"
 import { ASSET_KINDS } from "../types"
 import { tokenCanAccess, type AssetAuthContext } from "./auth"
 import { handle, makeError, zodMessage } from "./envelope"
+
+const log = Log.create({ service: "asset-service.http.create" })
 
 export const AssetCreateBody = z.object({
   project_id: z.string().min(1),
@@ -76,8 +79,21 @@ export function CreateRoute(svc: AssetService) {
         // (not queueMicrotask) so the HTTP response actually flushes before
         // the worker starts; otherwise tests / clients that poll immediately
         // see succeeded on the very first /jobs/:id read instead of queued.
+        //
+        // Most failures inside runAssetGeneration persist to the job row as
+        // status=failed. The only paths that can escape are the job row
+        // vanishing between createJob and runJob (NOT_FOUND) or the repo's
+        // own updateStatus throwing. Without a log sink those leave the job
+        // stuck in "running" with no diagnostic — surface as a structured
+        // error log so operators can spot abandoned jobs.
         setTimeout(() => {
-          void svc.runJob(view.job_id).catch(() => {})
+          svc.runJob(view.job_id).catch((err: unknown) => {
+            log.error("asset-service worker crashed", {
+              job_id: view.job_id,
+              project_id: body.project_id,
+              error: err instanceof Error ? err.message : String(err),
+            })
+          })
         }, 0)
         return view
       }),
