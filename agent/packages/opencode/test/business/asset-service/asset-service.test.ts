@@ -4,6 +4,7 @@ import { Database } from "@/storage/db"
 import { AssetTable } from "@/business/asset/asset.sql"
 import { AssetServiceError } from "@/business/asset-service/errors"
 import { AssetService } from "@/business/asset-service/asset-service"
+import { AssetJobRepo } from "@/business/asset-service/asset-job.repo"
 import type { AssetCreateInput, AssetIntent } from "@/business/asset-service/types"
 import type {
   AssetGenerator,
@@ -113,6 +114,52 @@ describe("AssetService.createJob", () => {
     const a = await s.createJob(createInput(project_id))
     const b = await s.createJob(createInput(project_id))
     expect(a.job_id).not.toBe(b.job_id)
+  })
+
+  test("recovers when concurrent create wins the (project_id, client_request_id) race (H1 regression)", async () => {
+    const project_id = seedProject()
+    const realRepo = AssetJobRepo.fromDatabase()
+    // Pre-insert the "winning racer" row directly to simulate "someone else
+    // committed first while we were between findByClientRequestId and create".
+    const winnerId = ids.job()
+    realRepo.create({
+      id: winnerId,
+      project_id,
+      intent: { kind: "cg", spec_md: "", key: "k" },
+      client_request_id: "race-key",
+    })
+    // Stubbed repo where the first findByClientRequestId returns null
+    // (simulating "winner hasn't committed yet from our perspective"). The
+    // subsequent createJob call must trip the UNIQUE constraint and then
+    // recover by re-fetching the winner's row.
+    let findCalls = 0
+    class RacingRepo extends AssetJobRepo {
+      override findByClientRequestId(
+        project: string,
+        cri: string,
+      ): ReturnType<AssetJobRepo["findByClientRequestId"]> {
+        findCalls++
+        if (findCalls === 1) return null
+        return realRepo.findByClientRequestId(project, cri)
+      }
+      override create(input: Parameters<AssetJobRepo["create"]>[0]) {
+        return realRepo.create(input)
+      }
+      override findById(id: string) {
+        return realRepo.findById(id)
+      }
+      override updateStatus(id: string, fields: Parameters<AssetJobRepo["updateStatus"]>[1]) {
+        return realRepo.updateStatus(id, fields)
+      }
+    }
+    const s = new AssetService({
+      generator: stubGenerator(),
+      writer: dbWriter,
+      jobRepo: new RacingRepo(),
+    })
+    const view = await s.createJob(createInput(project_id, { client_request_id: "race-key" }))
+    expect(view.job_id).toBe(winnerId)
+    expect(findCalls).toBeGreaterThanOrEqual(2)
   })
 })
 

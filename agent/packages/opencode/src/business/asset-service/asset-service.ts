@@ -44,6 +44,18 @@ export interface AssetServiceOptions {
   tracer?: Tracer
 }
 
+// SQLite UNIQUE-constraint detector for the (project_id, client_request_id)
+// partial unique index. bun:sqlite / node:sqlite both surface this as an
+// Error whose message contains "UNIQUE constraint failed". Matching by
+// message is the only stable hook we have — sqlite's extended result code
+// is not exposed through drizzle.
+function isUniqueViolation(err: unknown): boolean {
+  if (err instanceof Error) {
+    return /UNIQUE constraint failed/i.test(err.message)
+  }
+  return false
+}
+
 export class AssetService {
   private readonly generator: AssetGenerator
   private readonly writer: AssetWriter
@@ -80,12 +92,24 @@ export class AssetService {
       ...input.asset_intent,
       __preferences: input.preferences ?? null,
     }
-    const row = this.jobRepo.create({
-      id,
-      project_id: input.project_id,
-      intent: persistedIntent,
-      client_request_id: input.client_request_id ?? null,
-    })
+    let row: AssetJobRow
+    try {
+      row = this.jobRepo.create({
+        id,
+        project_id: input.project_id,
+        intent: persistedIntent,
+        client_request_id: input.client_request_id ?? null,
+      })
+    } catch (err) {
+      // Concurrent create won the (project_id, client_request_id) race —
+      // the partial unique index trips, and we recover by re-fetching the
+      // winner's row. Any other failure surfaces as-is.
+      if (input.client_request_id && isUniqueViolation(err)) {
+        const winner = this.jobRepo.findByClientRequestId(input.project_id, input.client_request_id)
+        if (winner) return this.viewFor(winner)
+      }
+      throw err
+    }
     return this.viewFor(row, {
       key: input.asset_intent.key,
       version: this.nextVersionHint(input.project_id, input.asset_intent.key),

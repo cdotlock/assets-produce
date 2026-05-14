@@ -1,4 +1,5 @@
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core"
+import { sqliteTable, text, integer, index, uniqueIndex } from "drizzle-orm/sqlite-core"
+import { sql } from "drizzle-orm"
 import { BusinessProjectTable } from "@/business/project/project.sql"
 import { AssetTable } from "@/business/asset/asset.sql"
 
@@ -33,9 +34,12 @@ export const AssetJobTable = sqliteTable(
   },
   (t) => [
     index("idx_asset_job_project_status").on(t.project_id, t.status),
-    // dedupe lookup: (project_id, client_request_id) — not unique because
-    // client_request_id can repeat across projects and is also nullable.
-    index("idx_asset_job_project_client_request_id").on(t.project_id, t.client_request_id),
+    // Idempotency contract: same (project_id, client_request_id) must collapse
+    // to one job. Partial unique index keeps NULL client_request_id rows free
+    // (callers without a dedupe key are explicitly opting out).
+    uniqueIndex("uq_asset_job_project_client_request_id")
+      .on(t.project_id, t.client_request_id)
+      .where(sql`${t.client_request_id} is not null`),
     index("idx_asset_job_project_updated").on(t.project_id, t.time_updated),
   ],
 )

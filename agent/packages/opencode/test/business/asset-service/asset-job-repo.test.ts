@@ -37,6 +37,38 @@ describe("AssetJobRepo.create", () => {
     expect(row.client_request_id).toBeNull()
     expect(row.status).toBe("queued")
   })
+
+  test("partial unique index: duplicate (project_id, client_request_id) throws (H1 regression)", () => {
+    const project_id = seedProject()
+    const r = repo()
+    const intent = { kind: "cg", spec_md: "", key: "k" }
+    r.create({ id: ids.job(), project_id, intent, client_request_id: "dup-key" })
+    expect(() =>
+      r.create({ id: ids.job(), project_id, intent, client_request_id: "dup-key" }),
+    ).toThrow(/UNIQUE constraint failed/i)
+  })
+
+  test("partial unique index permits multiple null client_request_id rows", () => {
+    const project_id = seedProject()
+    const r = repo()
+    const intent = { kind: "cg", spec_md: "", key: "k" }
+    expect(() => {
+      r.create({ id: ids.job(), project_id, intent })
+      r.create({ id: ids.job(), project_id, intent })
+      r.create({ id: ids.job(), project_id, intent })
+    }).not.toThrow()
+  })
+
+  test("same client_request_id in different project_id is allowed", () => {
+    const a = seedProject()
+    const b = seedProject()
+    const r = repo()
+    const intent = { kind: "cg", spec_md: "", key: "k" }
+    expect(() => {
+      r.create({ id: ids.job(), project_id: a, intent, client_request_id: "shared" })
+      r.create({ id: ids.job(), project_id: b, intent, client_request_id: "shared" })
+    }).not.toThrow()
+  })
 })
 
 describe("AssetJobRepo.findById", () => {
