@@ -274,5 +274,44 @@ adds zero new flakes.
 ## Sign-off
 
 - Plan §5 acceptance items 1-9 PASS.
-- Item 10 (push) is the last step; will run immediately after this report
-  is committed.
+- Item 10 (push) ran after the report — commits in `052f886..429cb01`
+  landed on `cdotlock/assets-produce` main 2026-05-15.
+
+## Post-review follow-ups
+
+`superpowers:code-reviewer` was run against the 17-commit range and
+returned **WARN** with one HIGH and three MEDIUMs flagged as
+gate-blockers before Phase 10 wires real callers. Three follow-up
+commits cleared them:
+
+| Commit | Code-review tag | What it fixed |
+|---|---|---|
+| (H1 fix) | HIGH | Path traversal in `slug` / `cgName`: tightened `Schema.isPattern(/^[A-Za-z0-9][A-Za-z0-9_-]*$/)` on the TS side, `_assert_safe_ident` + `_assert_inside` on the Python side, 3 regression tests. |
+| (M1 + M4 fix) | MEDIUM | Replaced `parsed as {...}` cast with `Schema.decodeUnknownEffect(CgRenderResult)` / `UpscaleResult` so malformed Python stdout (null path, missing `outputs[]`, etc.) is rejected at the wrapper boundary. Plus M4: cg-render fixture now sets `assets_root: /tmp/_cg_smoke` so smoke runs don't pollute the working tree, and `tools/.gitignore` defensively excludes `**/_assets/`. 5 new regression tests. |
+| (L1 fix) | LOW | Friendlier error message when the legacy book-slug CLIs in `upscale.py` / `oss-sync/sync.py` run from `tools/` — points at the JSON entry instead of just `book dir not found`. |
+
+Skipped from the review:
+- **M2** — duplicated TS pipeline between `cg-render.ts` and
+  `upscale-image.ts`. Reviewer suggested factoring into a shared
+  `runPythonAtomicTool` helper. Deferred until the third Python-backed
+  atomic tool ships (likely scene-bg or character-portrait in Phase
+  10+). Logged here as a known follow-up.
+- **M3** — mock mode writes PNG bytes into a `.webp` filename. Reviewer
+  said "skipping is acceptable if mock mode is only ever consumed by
+  tests that don't decode the file" — that holds today. Real mode emits
+  WebP via render-with-style.py. Logged as cosmetic.
+- **L6** — backend would benefit from a tracked DEPRECATED notice file
+  covering all four migrated tools (the per-file notices in untracked
+  `render-with-style.py` / `upscale.py` won't survive deletion).
+  Deferred until the Phase 10 push window when backend is touched
+  anyway.
+
+Final test counts post-follow-ups:
+
+| Slice | Tests | Pass |
+|---|---|---|
+| asset-service + tool slice (cg-render + upscale-image + asset-service) | 169 | 169 |
+
+Final commit range: `052f886..11fb16e` — 20 commits pushed to
+`cdotlock/assets-produce` main, plus 1 local backend commit `7e7fe42`
+in `~/MobAI/moonshort-backend` waiting on ack for Phase 10 push.
