@@ -1,0 +1,430 @@
+openapi: 3.1.0
+info:
+  title: assets-produce Asset Service
+  version: 0.8.0
+  summary: Asset generation + lookup REST API exposed by `agent serve`.
+  description: |
+    Public surface for Phase 8 of the assets-produce platform. Four
+    operations — create, status, lookup, catalog — back the
+    novels-to-moonscript and moonshort-backend integrations and any
+    future AI-native consumer.
+
+    All endpoints are Bearer-token-gated. Tokens are configured via
+    `ASSETS_API_TOKEN_*` env vars (see `.env.example`); each token
+    carries a project allowlist enforced per-request.
+
+    Reference docs: `docs/superpowers/specs/2026-05-14-three-repo-asset-integration-design.md`
+    §§ 4, 5, 9.
+servers:
+  - url: http://localhost:8001
+    description: Local `agent serve` default port.
+  - url: https://assets.local
+    description: Replace with real production hostname.
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: assets
+    description: |
+      Create, poll, lookup, and incrementally enumerate assets.
+
+paths:
+  /api/v1/assets/create:
+    post:
+      tags: [assets]
+      summary: Create an asset generation job
+      operationId: asset.create
+      description: |
+        Synchronous fast-return. Writes an AssetJob row at
+        `status=queued`, schedules the mini agent loop in the
+        background, returns the queued view. Caller polls
+        `GET /api/v1/assets/jobs/{job_id}` for terminal state.
+
+        `client_request_id` is the dedupe key. Same (project_id,
+        client_request_id) returns the existing job's view; absent
+        or empty key always creates a fresh job.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssetCreateRequest'
+            examples:
+              cg-render:
+                summary: CG with character + scene refs
+                value:
+                  project_id: novel_silver_moon
+                  asset_intent:
+                    kind: cg
+                    key: ep_3/sylvia_glyph
+                    spec_md: |
+                      Sylvia raises hand; silver glyph ignites.
+                    refs:
+                      - { kind: image, url: "oss://bucket/refs/sylvia.png", tag: character }
+                      - { kind: image, url: "oss://bucket/refs/cemetery.png", tag: scene }
+                    constraints:
+                      ratio: "16:9"
+                  preferences:
+                    skill_hint: cg-render-spec
+                  client_request_id: moonshort-backend:remix:42
+      responses:
+        '200':
+          description: Queued (or existing duplicate when client_request_id collides)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetJobView'
+        '400':
+          $ref: '#/components/responses/InvalidInput'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/Internal'
+
+  /api/v1/assets/jobs/{job_id}:
+    get:
+      tags: [assets]
+      summary: Poll the state of an asset job
+      operationId: asset.status
+      description: |
+        Returns the current AssetJobView. When `status=succeeded`
+        the response includes `result.{asset_id, key, version, kind,
+        url, ref_urls, meta.langfuse_trace_id}`. When `status=failed`
+        the response includes `error.{code, message}`. Otherwise the
+        view carries only `status` (queued / running / cancelled).
+      parameters:
+        - in: path
+          name: job_id
+          required: true
+          schema: { type: string }
+          example: asset_job_01HXYZ123ABC
+      responses:
+        '200':
+          description: Job view
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetJobView'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/assets/lookup:
+    post:
+      tags: [assets]
+      summary: Batch lookup by key or name within a project
+      operationId: asset.lookup
+      description: |
+        Each query resolves independently. key-based queries hit
+        the (project_id, key, [version]) exact match. name-based
+        queries try exact match first, then SQL substring fallback,
+        both scoped to `is_current=true`. Every result carries a
+        `match_reason` so callers know which path matched (or that
+        nothing did).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssetLookupRequest'
+      responses:
+        '200':
+          description: Lookup results (one entry per query, in order)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetLookupResponse'
+        '400':
+          $ref: '#/components/responses/InvalidInput'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/assets/catalog:
+    get:
+      tags: [assets]
+      summary: Page through assets by updated_at cursor
+      operationId: asset.catalog.since
+      description: |
+        Paginated enumeration of `is_current=true` assets within a
+        project, ordered by `(time_updated asc, id asc)`. `since` is
+        an opaque cursor returned in the previous page's
+        `next_cursor`. `has_more=false` and `next_cursor=null` mark
+        exhaustion.
+      parameters:
+        - in: query
+          name: project_id
+          required: true
+          schema: { type: string }
+        - in: query
+          name: since
+          schema: { type: string }
+          description: base64url-encoded `${time_updated_ms}/${asset_id}`
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 200
+      responses:
+        '200':
+          description: Catalog page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogPage'
+        '400':
+          $ref: '#/components/responses/InvalidInput'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description: |
+        Tokens are issued statically via `ASSETS_API_TOKEN_*` env
+        vars on the server. Each token has a project allowlist
+        (`ASSETS_API_PROJECTS_*`, CSV or `*`). 401 means
+        wrong/missing token; 403 means the caller's token cannot
+        access the requested project_id.
+
+  schemas:
+    AssetKind:
+      type: string
+      enum:
+        - character_portrait
+        - scene_bg
+        - cg
+        - cover
+        - shot_image
+        - shot_video
+
+    AssetJobStatus:
+      type: string
+      enum: [queued, running, succeeded, failed, cancelled]
+
+    AssetRef:
+      type: object
+      required: [kind, url]
+      properties:
+        kind: { type: string, enum: [image, video] }
+        url: { type: string }
+        tag: { type: string }
+
+    AssetConstraints:
+      type: object
+      additionalProperties: true
+      properties:
+        ratio: { type: string, nullable: true }
+        duration_sec: { type: number, nullable: true }
+        background_kind: { type: string, nullable: true }
+
+    AssetIntent:
+      type: object
+      required: [kind, key, spec_md]
+      properties:
+        kind: { $ref: '#/components/schemas/AssetKind' }
+        key: { type: string }
+        spec_md: { type: string }
+        refs:
+          type: array
+          items: { $ref: '#/components/schemas/AssetRef' }
+        constraints: { $ref: '#/components/schemas/AssetConstraints' }
+        name: { type: string, nullable: true }
+
+    AssetPreferences:
+      type: object
+      properties:
+        atomic_tool_hint: { type: string }
+        skill_hint: { type: string }
+
+    AssetCreateRequest:
+      type: object
+      required: [project_id, asset_intent]
+      properties:
+        project_id: { type: string }
+        asset_intent: { $ref: '#/components/schemas/AssetIntent' }
+        preferences: { $ref: '#/components/schemas/AssetPreferences' }
+        client_request_id: { type: string }
+        callback_url: { type: string, nullable: true }
+
+    AssetJobResultMeta:
+      type: object
+      properties:
+        atomic_tool: { type: string, nullable: true }
+        skill_used: { type: string, nullable: true }
+        langfuse_trace_id: { type: string, nullable: true }
+
+    AssetJobResult:
+      type: object
+      required: [asset_id, key, version, kind, url, ref_urls, meta]
+      properties:
+        asset_id: { type: string }
+        key: { type: string }
+        version: { type: integer }
+        kind:
+          oneOf:
+            - { $ref: '#/components/schemas/AssetKind' }
+            - { type: 'null' }
+        url: { type: string, nullable: true }
+        ref_urls: {}
+        meta: { $ref: '#/components/schemas/AssetJobResultMeta' }
+
+    AssetJobError:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+
+    AssetJobView:
+      type: object
+      required: [job_id, status]
+      properties:
+        job_id: { type: string }
+        status: { $ref: '#/components/schemas/AssetJobStatus' }
+        key: { type: string }
+        version: { type: integer }
+        result: { $ref: '#/components/schemas/AssetJobResult' }
+        error: { $ref: '#/components/schemas/AssetJobError' }
+
+    AssetLookupQuery:
+      type: object
+      properties:
+        key: { type: string }
+        version: { type: integer, minimum: 1 }
+        name: { type: string }
+
+    AssetLookupRequest:
+      type: object
+      required: [project_id, queries]
+      properties:
+        project_id: { type: string }
+        queries:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/AssetLookupQuery' }
+
+    AssetSummary:
+      type: object
+      required: [asset_id, key, version, url, kind, name]
+      properties:
+        asset_id: { type: string }
+        key: { type: string }
+        version: { type: integer }
+        url: { type: string, nullable: true }
+        kind:
+          oneOf:
+            - { $ref: '#/components/schemas/AssetKind' }
+            - { type: 'null' }
+        name: { type: string, nullable: true }
+
+    AssetLookupResult:
+      type: object
+      required: [query, asset, match_reason]
+      properties:
+        query: { $ref: '#/components/schemas/AssetLookupQuery' }
+        asset:
+          oneOf:
+            - { $ref: '#/components/schemas/AssetSummary' }
+            - { type: 'null' }
+        match_reason:
+          type: string
+          enum: [exact_key, key_version, name_exact, name_substring, no_match]
+
+    AssetLookupResponse:
+      type: object
+      required: [results]
+      properties:
+        results:
+          type: array
+          items: { $ref: '#/components/schemas/AssetLookupResult' }
+
+    CatalogItem:
+      type: object
+      required: [asset_id, project_id, key, version, url, kind, name, updated_at]
+      properties:
+        asset_id: { type: string }
+        project_id: { type: string }
+        key: { type: string }
+        version: { type: integer }
+        url: { type: string, nullable: true }
+        kind:
+          oneOf:
+            - { $ref: '#/components/schemas/AssetKind' }
+            - { type: 'null' }
+        name: { type: string, nullable: true }
+        updated_at: { type: integer, description: "epoch milliseconds" }
+
+    CatalogPage:
+      type: object
+      required: [items, has_more, next_cursor]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/CatalogItem' }
+        has_more: { type: boolean }
+        next_cursor: { type: string, nullable: true }
+
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum:
+                - NOT_FOUND
+                - PROJECT_NOT_FOUND
+                - ASSET_NOT_FOUND
+                - INVALID_INPUT
+                - UNAUTHENTICATED
+                - FORBIDDEN
+                - BUDGET_EXCEEDED
+                - GENERATION_REJECTED
+                - ATOMIC_TOOL_FAILED
+                - INTERNAL
+            message: { type: string }
+
+  responses:
+    InvalidInput:
+      description: Request body / query failed validation
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    Unauthenticated:
+      description: Missing / wrong Authorization header
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    Forbidden:
+      description: Token's project allowlist does not include project_id
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    NotFound:
+      description: job_id or asset does not exist
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    Internal:
+      description: Unhandled server-side error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
