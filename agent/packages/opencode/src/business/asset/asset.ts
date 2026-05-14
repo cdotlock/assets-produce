@@ -28,6 +28,9 @@ export interface CreateInput {
   data?: unknown
   prompt?: string | null
   refUrls?: unknown
+  // Phase 8 additions (nullable; older callers can omit).
+  kind?: string | null
+  name?: string | null
 }
 
 export interface ListOpts {
@@ -93,8 +96,17 @@ export const layer = Layer.succeed(
                 project_id: input.projectId,
                 parent_id: input.parentId ?? null,
                 type: input.type,
+                kind: (input.kind ?? null) as
+                  | "character_portrait"
+                  | "scene_bg"
+                  | "cg"
+                  | "cover"
+                  | "shot_image"
+                  | "shot_video"
+                  | null,
                 key: input.key,
                 title: input.title ?? null,
+                name: input.name ?? null,
                 url: input.url ?? null,
                 data: input.data ?? null,
                 prompt: input.prompt ?? null,
