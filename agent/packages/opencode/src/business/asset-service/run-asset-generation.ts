@@ -130,8 +130,16 @@ export async function runAssetGeneration(
   // Mark running so concurrent poll → status reads see queued → running.
   deps.jobRepo.updateStatus(job.id, { status: "running" })
 
-  const intent = job.intent as AssetIntent
-  const preferences = undefined // job.intent already encodes preferences if any
+  // AssetService.createJob persists preferences alongside the intent fields
+  // as `__preferences` (see asset-service.ts:79-82). Recover them here so the
+  // skill picker / generator actually see what the caller asked for, and
+  // strip the carrier field before downstream consumers (writer, generator)
+  // see the intent — they expect the public AssetIntent shape, not the
+  // internal storage shape.
+  const persisted = job.intent as AssetIntent & { __preferences?: AssetPreferences | null }
+  const { __preferences, ...intentFields } = persisted
+  const intent = intentFields as AssetIntent
+  const preferences: AssetPreferences | undefined = __preferences ?? undefined
   const maxSteps = deps.maxSteps ?? DEFAULT_MAX_STEPS
   const tracer = deps.tracer ?? nullTracer
 

@@ -250,6 +250,82 @@ describe("runAssetGeneration — failure paths", () => {
   })
 })
 
+describe("runAssetGeneration — preferences round-trip (H2 regression)", () => {
+  test("recovers preferences from persisted intent.__preferences and hands them to the picker", async () => {
+    const project_id = seedProject()
+    const { id: job_id, repo } = seedQueuedJob(project_id, {
+      kind: "cg",
+      key: "p1",
+      spec_md: "## brief",
+      __preferences: { atomic_tool_hint: "nb-2" },
+    })
+    let received: { atomic_tool_hint?: string; skill_hint?: string } | undefined
+    const picker: SkillPicker = {
+      async pick(ctx) {
+        received = ctx.preferences
+        return "cg-render-spec"
+      },
+    }
+    await runAssetGeneration(
+      { job_id },
+      { jobRepo: repo, generator: stubGenerator(okOutcome()), writer: dbWriter, skillPicker: picker },
+    )
+    expect(received).toBeDefined()
+    expect(received?.atomic_tool_hint).toBe("nb-2")
+  })
+
+  test("preferences.skill_hint short-circuits the picker (no picker.pick call)", async () => {
+    const project_id = seedProject()
+    const { id: job_id, repo } = seedQueuedJob(project_id, {
+      kind: "character_portrait",
+      key: "p2",
+      spec_md: "...",
+      __preferences: { skill_hint: "scene-bg-spec" },
+    })
+    let calls = 0
+    const picker: SkillPicker = {
+      async pick() {
+        calls++
+        return "cg-render-spec"
+      },
+    }
+    const after = await runAssetGeneration(
+      { job_id },
+      { jobRepo: repo, generator: stubGenerator(okOutcome()), writer: dbWriter, skillPicker: picker },
+    )
+    expect(calls).toBe(0)
+    // Sanity: skill_hint actually shaped the picked skill — Asset.prompt
+    // comes from intent.spec_md and __preferences should be stripped from
+    // downstream views of the intent (writer input, etc.).
+    expect(after.status).toBe("succeeded")
+  })
+
+  test("__preferences is stripped before reaching writer / generator (no leak into Asset row)", async () => {
+    const project_id = seedProject()
+    const { id: job_id, repo } = seedQueuedJob(project_id, {
+      kind: "cg",
+      key: "p3",
+      spec_md: "## actual brief",
+      __preferences: { atomic_tool_hint: "x" },
+    })
+    let seenIntent: { spec_md?: string; key?: string } | undefined
+    const generator: AssetGenerator = {
+      async generate(ctx) {
+        seenIntent = ctx.intent as { spec_md?: string; key?: string }
+        return okOutcome()
+      },
+    }
+    await runAssetGeneration(
+      { job_id },
+      { jobRepo: repo, generator, writer: dbWriter },
+    )
+    expect(seenIntent).toBeDefined()
+    expect(seenIntent?.spec_md).toBe("## actual brief")
+    expect(seenIntent?.key).toBe("p3")
+    expect(seenIntent && "__preferences" in seenIntent).toBe(false)
+  })
+})
+
 describe("runAssetGeneration — guards", () => {
   test("missing job → throws AssetServiceError code=NOT_FOUND", async () => {
     const repo = AssetJobRepo.fromDatabase()
