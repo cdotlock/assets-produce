@@ -132,7 +132,13 @@ def main() -> int:
 
     book_dir = BACKEND_ROOT / "moonscripts" / args.book_slug
     if not book_dir.is_dir():
-        sys.exit(f"book dir not found: {book_dir}")
+        sys.exit(
+            f"book dir not found: {book_dir}\n"
+            "Hint: the book-slug-aware CLI is a moonshort-backend relic — this\n"
+            "      file lives in assets-produce/tools/upscale/ now, where the\n"
+            "      moonscripts/<slug>/ layout does not exist. Use the JSON\n"
+            "      entry instead: --input <path-to-json> or --mock for tests."
+        )
     src_root = book_dir / "assets" / "gen-upscale"
     if not src_root.is_dir():
         sys.exit(f"assets/gen-upscale not found: {src_root}  (run render-with-style.py first)")

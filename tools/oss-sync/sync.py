@@ -253,7 +253,14 @@ def main() -> int:
     book_dir = BACKEND_ROOT / "moonscripts" / args.book_slug
     final_root = book_dir / "assets" / "final"
     if not final_root.is_dir():
-        return _exit(f"final/ not found: {final_root} — run to-final.py first")
+        return _exit(
+            f"final/ not found: {final_root}\n"
+            "Hint: the book-slug-aware CLI is a moonshort-backend relic — this\n"
+            "      file lives in assets-produce/tools/oss-sync/ now, where the\n"
+            "      moonscripts/<slug>/ layout does not exist. Use the JSON\n"
+            "      entry instead: --input <path-to-json> with {source_dir,\n"
+            "      oss_prefix, dry_run?}."
+        )
 
     groups = {g.strip() for g in args.groups.split(",") if g.strip()}
     try:
