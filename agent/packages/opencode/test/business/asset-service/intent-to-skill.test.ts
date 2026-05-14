@@ -165,14 +165,14 @@ describe("intentToSkill — sanity asserts on internal tables", () => {
   })
 
   test("ASSET_GENERATION_SKILLS lists exactly the 5 Phase 8 skill bodies", () => {
-    expect([...ASSET_GENERATION_SKILLS].sort()).toEqual(
-      [
-        "character-portrait-spec",
-        "scene-bg-spec",
-        "cg-render-spec",
-        "cover-spec",
-        "shot-image-from-mss",
-      ].sort(),
-    )
+    const actual: string[] = [...ASSET_GENERATION_SKILLS]
+    const expected: string[] = [
+      "character-portrait-spec",
+      "scene-bg-spec",
+      "cg-render-spec",
+      "cover-spec",
+      "shot-image-from-mss",
+    ]
+    expect(actual.sort()).toEqual(expected.sort())
   })
 })
