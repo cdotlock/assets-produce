@@ -1,0 +1,15 @@
+{
+  "task": {
+    "cg_name": "ep03_sylvia_glyph",
+    "render_mode": "image",
+    "model": "gemini-3.1-flash-image-preview",
+    "panel_count": 1,
+    "prompt": "Sylvia raises her hand; silver glyph ignites at her fingertip. Wide shot, dramatic dusk lighting.",
+    "reference_image_urls": [
+      "https://stub.assets.local/styles/ya_impasto.png",
+      "https://stub.assets.local/sprites/sylvia.png"
+    ]
+  },
+  "slug": "silver-moon-manor",
+  "overwrite": false
+}

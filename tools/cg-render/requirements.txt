@@ -1,0 +1,13 @@
+# cg-render dependencies. Pinned to the versions moonshort-backend has been
+# running with — bumps are tracked in Phase 9 verification reports.
+#
+# Style-fetch + rendering (real mode only — `--mock` skips ALL of these):
+google-genai==0.7.0
+sshtunnel==0.4.0
+psycopg[binary]==3.2.3
+keyring==25.4.1
+paramiko<4.0
+
+# Image IO + OSS upload:
+Pillow==11.0.0
+oss2==2.18.6
