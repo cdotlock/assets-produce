@@ -14,3 +14,10 @@ asset pipeline (single-image post-render upscale).
 Use `mock: true` in tests / before the realesrgan-ncnn-vulkan binary is
 installed under `~/bin/realesrgan/`. Use `dryRun: true` to print the
 resolved Python invocation without running it.
+
+**Trust boundary:** `inputPath` and `outputPath` are absolute paths,
+unconstrained by the wrapper. The caller (asset-service mini agent loop
+in Phase 10+) MUST resolve these from server-controlled state — never
+pass user-supplied strings through unchecked. Phase 9 ships this tool
+with no path-traversal guard because the only current caller is server-
+side; tighten this when an LLM-driven loop starts choosing paths.

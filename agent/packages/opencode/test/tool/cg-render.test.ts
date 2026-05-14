@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test"
-import { Effect, Layer, ManagedRuntime } from "effect"
+import { Effect, Layer, ManagedRuntime, Schema } from "effect"
 import { Agent } from "@/agent/agent"
 import { MessageID, SessionID } from "@/session/schema"
 import { Truncate } from "@/tool/truncate"
-import { makeCgRenderTool } from "@/tool/asset/cg-render"
+import { makeCgRenderTool, Parameters as CgRenderParameters } from "@/tool/asset/cg-render"
 import type { PythonRunner } from "@/tool/asset/python-runner"
 import type { Tool } from "@/tool/tool"
 
@@ -171,6 +171,33 @@ describe("cg-render atomic tool", () => {
     })
     await runtime.runPromise(def.execute(baseParams, ctx()))
     expect(receivedArgs).toContain("--mock")
+  })
+
+  test("schema rejects path-traversal slug (H1 regression)", () => {
+    const decode = Schema.decodeUnknownEffect(CgRenderParameters)
+    const tries = [
+      { ...baseParams, slug: "../etc" },
+      { ...baseParams, slug: "../../passwd" },
+      { ...baseParams, slug: "a/b" },
+      { ...baseParams, slug: ".hidden" },
+      { ...baseParams, slug: "" },
+    ]
+    for (const t of tries) {
+      const exit = Effect.runSyncExit(decode(t))
+      expect(exit._tag).toBe("Failure")
+    }
+  })
+
+  test("schema rejects path-traversal cgName (H1 regression)", () => {
+    const decode = Schema.decodeUnknownEffect(CgRenderParameters)
+    const exit = Effect.runSyncExit(decode({ ...baseParams, cgName: "../../etc/passwd" }))
+    expect(exit._tag).toBe("Failure")
+  })
+
+  test("schema accepts well-formed identifiers", () => {
+    const decode = Schema.decodeUnknownEffect(CgRenderParameters)
+    const exit = Effect.runSyncExit(decode(baseParams))
+    expect(exit._tag).toBe("Success")
   })
 
   test("--mock is NOT added when mock=false", async () => {

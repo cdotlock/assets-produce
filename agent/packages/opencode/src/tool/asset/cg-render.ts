@@ -10,12 +10,23 @@ const HttpsUrl = Schema.String.check(Schema.isPattern(/^https:\/\/.+/i)).annotat
   description: "https URL",
 })
 
+// Tight identifier pattern — kills `..` / `/` injection from untrusted
+// callers. The final path is `<assetsRoot>/<slug>/cg/<cgName>.webp`, so
+// anything outside [A-Za-z0-9_-] could escape `assetsRoot`. Python side
+// belt-and-braces validates this too (see render.py:_assert_inside).
+const SafeIdent = Schema.String
+  .check(Schema.isMinLength(1))
+  .check(Schema.isMaxLength(128))
+  .check(Schema.isPattern(/^[A-Za-z0-9][A-Za-z0-9_-]*$/))
+
 export const Parameters = Schema.Struct({
-  slug: Schema.String.check(Schema.isMinLength(1)).annotate({
-    description: "Book / project slug — used to namespace the output directory.",
+  slug: SafeIdent.annotate({
+    description:
+      "Book / project slug — used to namespace the output directory. Must match /^[A-Za-z0-9][A-Za-z0-9_-]*$/ (no slashes, no dots — those would escape assetsRoot).",
   }),
-  cgName: Schema.String.check(Schema.isMinLength(1)).annotate({
-    description: "Unique cg identifier within the slug, e.g. `ep03_sylvia_glyph`.",
+  cgName: SafeIdent.annotate({
+    description:
+      "Unique cg identifier within the slug, e.g. `ep03_sylvia_glyph`. Must match /^[A-Za-z0-9][A-Za-z0-9_-]*$/.",
   }),
   prompt: Schema.String.check(Schema.isMinLength(1)).annotate({
     description: "Render prompt — already in the form render-with-style expects.",

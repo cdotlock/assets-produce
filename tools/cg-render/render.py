@@ -329,8 +329,19 @@ def _run_json_main(argv=None) -> int:
 
     started = _time.monotonic()
     cg_name = task["cg_name"]
+    try:
+        _assert_safe_ident("slug", slug)
+        _assert_safe_ident("task.cg_name", cg_name)
+    except ValueError as e:
+        _emit_error("INVALID_INPUT", str(e))
+        return 2
     if mock:
         out_path = cg_local_path(slug, cg_name, assets_root)
+        try:
+            _assert_inside(out_path, pathlib.Path(assets_root))
+        except ValueError as e:
+            _emit_error("INVALID_INPUT", str(e))
+            return 2
         out_path.parent.mkdir(parents=True, exist_ok=True)
         _write_placeholder_png(out_path)
     else:
@@ -376,6 +387,27 @@ def _emit_error(code: str, message: str) -> None:
     import json as _json
     import sys as _sys
     print(_json.dumps({"error": {"code": code, "message": message}}), file=_sys.stderr)
+
+
+_SAFE_IDENT = __import__("re").compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
+
+
+def _assert_safe_ident(name: str, value: str) -> None:
+    """Reject slug / cg_name values that could escape assets_root via traversal."""
+    if not isinstance(value, str) or not _SAFE_IDENT.match(value):
+        raise ValueError(
+            f"{name!r} must match ^[A-Za-z0-9][A-Za-z0-9_-]*$ — got {value!r}"
+        )
+
+
+def _assert_inside(child: pathlib.Path, parent: pathlib.Path) -> None:
+    """Ensure `child` resolves under `parent` — belt-and-braces against any
+    path traversal that slipped past the regex (e.g. unicode normalisation
+    surprises). `Path.is_relative_to` is 3.9+; we already require ≥ 3.9."""
+    if not child.resolve().is_relative_to(parent.resolve()):
+        raise ValueError(
+            f"resolved output path {child!r} escapes assets_root {parent!r}"
+        )
 
 
 def _write_placeholder_png(out_path: pathlib.Path) -> None:
