@@ -218,5 +218,3 @@ export class Catalog {
   }
 }
 
-// Re-export for ergonomic destructuring in service code.
-export const _internal = { escapeLike, rowToSummary, rowToCatalogItem, sql }
