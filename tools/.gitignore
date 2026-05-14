@@ -11,3 +11,8 @@
 **/_test_out/
 **/_smoke_out/
 **/_local_test_out/
+
+# Mock-mode placeholders written by `--mock` runs (cg-render writes here
+# when assets_root falls back to CWD/_assets — the fixture sets a /tmp
+# path but defensive ignore catches accidental runs from this dir).
+**/_assets/

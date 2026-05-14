@@ -32,6 +32,21 @@ export const Parameters = Schema.Struct({
   }),
 })
 
+// Validated shape of the Python script's stdout — see cg-render.ts for
+// the rationale. Phase 9 code review M1.
+const UpscaleResult = Schema.Struct({
+  output: Schema.Struct({ path: Schema.String }),
+  meta: Schema.optional(
+    Schema.Struct({
+      scale: Schema.optional(Schema.Number),
+      model: Schema.optional(Schema.String),
+      latency_ms: Schema.optional(Schema.Number),
+      atomic_tool: Schema.optional(Schema.String),
+      mock: Schema.optional(Schema.Boolean),
+    }),
+  ),
+})
+
 type UpscaleParams = {
   inputPath: string
   outputPath: string
@@ -138,29 +153,26 @@ export function makeUpscaleImageTool(opts: MakeUpscaleImageToolOpts = {}) {
               }
             }
 
-            const out = parsed as {
-              output?: { path: string }
-              meta?: { scale?: number; latency_ms?: number; mock?: boolean; model?: string }
-            }
-            const outPath = out.output?.path
-            if (!outPath) {
-              return {
-                title: `${TOOL_ID} no output`,
-                output: `${TOOL_ID}: Python returned no output.path`,
-                metadata: { truncated: false, error: true, scriptPath, model, scale, parsed },
-              }
-            }
+            // Runtime-validate the shape (Phase 9 code review M1).
+            const decoded = yield* Schema.decodeUnknownEffect(UpscaleResult)(parsed).pipe(
+              Effect.mapError(
+                (err) =>
+                  new Error(
+                    `${TOOL_ID}: Python stdout did not match expected schema: ${err instanceof Error ? err.message : String(err)}`,
+                  ),
+              ),
+            )
 
             return {
               title: `${TOOL_ID} (${model} x${scale})`,
-              output: outPath,
+              output: decoded.output.path,
               metadata: {
                 truncated: false,
-                outputPath: outPath,
-                scale: out.meta?.scale ?? scale,
-                model: out.meta?.model ?? model,
-                latencyMs: out.meta?.latency_ms,
-                mock: out.meta?.mock ?? params.mock ?? false,
+                outputPath: decoded.output.path,
+                scale: decoded.meta?.scale ?? scale,
+                model: decoded.meta?.model ?? model,
+                latencyMs: decoded.meta?.latency_ms,
+                mock: decoded.meta?.mock ?? params.mock ?? false,
               },
             }
           }).pipe(

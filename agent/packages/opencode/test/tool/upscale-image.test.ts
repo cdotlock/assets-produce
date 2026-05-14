@@ -109,6 +109,27 @@ describe("upscale-image atomic tool", () => {
     expect(meta.stderr).toContain("ATOMIC_TOOL_FAILED")
   })
 
+  test("Python returns null output path → schema validation rejects (M1 regression)", async () => {
+    const def = await buildExec(
+      stubRunner({
+        stdout: JSON.stringify({ output: { path: null }, meta: {} }),
+        exitCode: 0,
+      }),
+    )
+    const out = await runtime.runPromise(def.execute(baseParams, ctx()))
+    expect(out.title).toBe("upscale-image failed")
+    expect((out.metadata as { error?: boolean; message?: string }).error).toBe(true)
+  })
+
+  test("Python returns missing output key → schema validation rejects (M1 regression)", async () => {
+    const def = await buildExec(
+      stubRunner({ stdout: JSON.stringify({ meta: { scale: 2 } }), exitCode: 0 }),
+    )
+    const out = await runtime.runPromise(def.execute(baseParams, ctx()))
+    expect(out.title).toBe("upscale-image failed")
+    expect((out.metadata as { error?: boolean }).error).toBe(true)
+  })
+
   test("non-JSON stdout → parse error metadata", async () => {
     const def = await buildExec(stubRunner({ stdout: "not json", exitCode: 0 }))
     const out = await runtime.runPromise(def.execute(baseParams, ctx()))

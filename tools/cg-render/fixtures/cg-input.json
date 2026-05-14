@@ -11,5 +11,6 @@
     ]
   },
   "slug": "silver-moon-manor",
-  "overwrite": false
+  "assets_root": "/tmp/_cg_smoke",
+  "overwrite": true
 }

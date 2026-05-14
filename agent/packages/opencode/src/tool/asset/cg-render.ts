@@ -61,6 +61,28 @@ export const Parameters = Schema.Struct({
   }),
 })
 
+// Validated shape of the Python script's stdout. Phase 8 review M1
+// flagged that we previously used a bare `parsed as {...}` cast, which
+// silently accepted malformed values (e.g. `outputs: [{path: null}]`).
+// Schema.decodeUnknownEffect enforces the contract at the wrapper
+// boundary so the agent loop never sees garbage.
+const CgRenderResult = Schema.Struct({
+  outputs: Schema.Array(
+    Schema.Struct({
+      path: Schema.String,
+      kind: Schema.String,
+    }),
+  ).check(Schema.isMinLength(1)),
+  meta: Schema.optional(
+    Schema.Struct({
+      model: Schema.optional(Schema.String),
+      latency_ms: Schema.optional(Schema.Number),
+      atomic_tool: Schema.optional(Schema.String),
+      mock: Schema.optional(Schema.Boolean),
+    }),
+  ),
+})
+
 type CgRenderParams = {
   slug: string
   cgName: string
@@ -180,18 +202,16 @@ export function makeCgRenderTool(opts: MakeCgRenderToolOpts = {}) {
               }
             }
 
-            const out = parsed as {
-              outputs?: { path: string; kind: string }[]
-              meta?: { model?: string; latency_ms?: number; mock?: boolean }
-            }
-            const localPath = out.outputs?.[0]?.path
-            if (!localPath) {
-              return {
-                title: `${TOOL_ID} no output`,
-                output: `${TOOL_ID}: Python returned no outputs[]`,
-                metadata: { truncated: false, error: true, scriptPath, model, parsed },
-              }
-            }
+            // Runtime-validate the shape — we never trust the cast alone.
+            const decoded = yield* Schema.decodeUnknownEffect(CgRenderResult)(parsed).pipe(
+              Effect.mapError(
+                (err) =>
+                  new Error(
+                    `${TOOL_ID}: Python stdout did not match expected schema: ${err instanceof Error ? err.message : String(err)}`,
+                  ),
+              ),
+            )
+            const localPath = decoded.outputs[0]!.path
 
             return {
               title: `${TOOL_ID} (${model})`,
@@ -199,9 +219,9 @@ export function makeCgRenderTool(opts: MakeCgRenderToolOpts = {}) {
               metadata: {
                 truncated: false,
                 localPath,
-                model: out.meta?.model ?? model,
-                latencyMs: out.meta?.latency_ms,
-                mock: out.meta?.mock ?? params.mock ?? false,
+                model: decoded.meta?.model ?? model,
+                latencyMs: decoded.meta?.latency_ms,
+                mock: decoded.meta?.mock ?? params.mock ?? false,
                 cgName: params.cgName,
                 refCount: params.referenceImageUrls.length,
               },

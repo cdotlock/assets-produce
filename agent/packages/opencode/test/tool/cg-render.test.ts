@@ -122,14 +122,37 @@ describe("cg-render atomic tool", () => {
     expect(meta.stdout).toContain("definitely")
   })
 
-  test("Python returns no outputs[] → error metadata", async () => {
+  test("Python returns empty outputs[] → schema validation rejects (M1 regression)", async () => {
     const def = await buildExec(
       stubRunner({ stdout: JSON.stringify({ outputs: [], meta: {} }), exitCode: 0 }),
     )
     const out = await runtime.runPromise(def.execute(baseParams, ctx()))
-    expect(out.title).toBe("cg-render no output")
-    const meta = out.metadata as { error?: boolean }
+    expect(out.title).toBe("cg-render failed")
+    const meta = out.metadata as { error?: boolean; message?: string }
     expect(meta.error).toBe(true)
+    expect(meta.message).toContain("schema")
+  })
+
+  test("Python returns null path → schema validation rejects (M1 regression)", async () => {
+    const def = await buildExec(
+      stubRunner({
+        stdout: JSON.stringify({ outputs: [{ path: null, kind: "image" }], meta: {} }),
+        exitCode: 0,
+      }),
+    )
+    const out = await runtime.runPromise(def.execute(baseParams, ctx()))
+    expect(out.title).toBe("cg-render failed")
+    const meta = out.metadata as { error?: boolean; message?: string }
+    expect(meta.error).toBe(true)
+  })
+
+  test("Python returns missing outputs key → schema validation rejects (M1 regression)", async () => {
+    const def = await buildExec(
+      stubRunner({ stdout: JSON.stringify({ meta: { model: "x" } }), exitCode: 0 }),
+    )
+    const out = await runtime.runPromise(def.execute(baseParams, ctx()))
+    expect(out.title).toBe("cg-render failed")
+    expect((out.metadata as { error?: boolean }).error).toBe(true)
   })
 
   test("runner throws → caught by Effect.catch and surfaced as error metadata", async () => {
