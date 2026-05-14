@@ -6,9 +6,13 @@ for hero beats in short videos, comic key panels, or visual novel
 "event CGs".
 
 The cg-render pipeline originally lived in `moonshort-backend` (Python
-`cg_render.py`). Phase 9 migrates the underlying tool to
-`tools/cg-render/`; this skill body wraps the future atomic tool. Until
-Phase 9 lands, the placeholder generator returns a stub URL.
+`cg_render.py`). Phase 9 migrated it to `tools/cg-render/` and registered
+a thin TypeScript wrapper as the atomic tool
+[`cg-render`](../../agent/packages/opencode/src/tool/asset/cg-render.ts).
+The wrapper accepts a single CG task per call, dispatches to the Python
+script via subprocess, and returns the local image path. Phase 9+ wires
+this into the asset-service mini agent loop in place of the Phase 8
+placeholder generator.
 
 ## Intent
 
@@ -24,17 +28,54 @@ short MP4 loop) showing one decisive narrative beat. The output should:
 
 ## Atomic tools (allowed)
 
-- `cg-render` (Phase 9; atomic-tool wrapper around the migrated Python
-  `cg_render.py`) — default.
-- `generate-image-gpt` — used to draft a still keyframe that the
-  cg-render tool then animates / refines.
-- `generate-image-nanobanana` — used for stylised CG stills when the
-  cg-render tool isn't applicable.
-- `oss-put` — upload the final image / mp4 to OSS.
+- **`cg-render` — primary.** Dispatches to `tools/cg-render/render.py`
+  via subprocess. Input: `slug`, `cgName`, `prompt`, `panelCount`,
+  `referenceImageUrls[]` (order matters — first ref is the style anchor),
+  optional `model` / `assetsRoot` / `overwrite` / `mock` / `dryRun`.
+  Output: local file path. Mock mode (`mock: true`) skips ZENMUX entirely
+  and writes a 1×1 placeholder PNG — use it in CI and any time
+  `ZENMUX_API_KEY` is not loaded.
+- `generate-image-nanobanana` — **fallback** when cg-render is
+  unavailable (no ZENMUX creds, Python venv not provisioned, or the
+  caller wants a stylised CG still rather than the render-with-style
+  pipeline output). Stitch refs into the prompt manually since this tool
+  doesn't have the cg-render anchor-ordering convention.
+- `generate-image-gpt` — alternate fallback for stills when both
+  cg-render and nanobanana fall over.
+- `oss-put` — upload the final image / mp4 to OSS (cg-render does NOT
+  upload; the caller owns that step).
 
 **Do not** call `generate-video-*` here unless the spec explicitly says
 "animate this CG". CG short loops have their own pipeline (cg-render) —
 this is not a generic video generation skill.
+
+## Atomic tool input contract (cg-render)
+
+The wrapper expects the loop to assemble this shape per call. The shape
+mirrors `tools/cg-render/render.py`'s JSON entry — keep the keys
+verbatim:
+
+```json
+{
+  "slug": "silver-moon-manor",
+  "cgName": "ep03_sylvia_glyph",
+  "prompt": "Sylvia raises hand; silver glyph ignites at her fingertip.",
+  "panelCount": 1,
+  "referenceImageUrls": [
+    "https://oss/styles/ya_impasto.png",
+    "https://oss/sprites/sylvia.png"
+  ],
+  "model": "gemini-3.1-flash-image-preview",
+  "mock": false
+}
+```
+
+Map intent fields:
+- `slug` ← `intent.key` first path segment (e.g. `ep_3/sylvia_glyph` →
+  the surrounding project slug)
+- `cgName` ← last segment of `intent.key`
+- `prompt` ← composed from `intent.spec_md` + ref descriptors
+- `referenceImageUrls` ← `intent.refs[]` urls, ordered style→character→scene
 
 ## Inputs
 
@@ -95,9 +136,14 @@ The orchestrator picks `Asset.type = "video"` when `asset_type` is
 ## Failure handling
 
 - **Content filter** on any atomic tool → `GENERATION_REJECTED`.
-- **CG-render pipeline failure** (Python tool 5xx, render hang) →
+- **CG-render pipeline failure** (Python tool exit ≠ 0, render hang) →
   `ATOMIC_TOOL_FAILED` with the wrapped error message. Do not retry —
-  cg-render runs are expensive.
+  cg-render runs are expensive. The wrapper surfaces Python's stderr
+  envelope verbatim so the loop sees the structured `{code, message}`.
+- **cg-render unavailable** (script path missing, Python interpreter not
+  found, venv broken) → fall back to `generate-image-nanobanana` with
+  the refs stitched into the prompt. Surface a warning event to Langfuse
+  but do not fail the job.
 - **Effect intent infeasible** (e.g. asked for water-effect on a still
   image of fire-based magic, plus refs are inconsistent) → first attempt
   with relaxed effect, surface as `GENERATION_REJECTED` if the LLM
