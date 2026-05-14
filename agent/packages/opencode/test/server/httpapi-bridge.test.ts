@@ -26,6 +26,22 @@ function effectOpenApi() {
   return (effectSpec ??= OpenApi.fromApi(PublicApi))
 }
 
+// Routes registered on the Hono server but intentionally NOT part of Effect
+// HttpApi `PublicApi`. These are creator-profile / WebUI-internal endpoints
+// (added in Phase 4-6) and the future `/api/v1/*` Asset Service surface
+// (Phase 8+), which have their own OpenAPI contract separate from PublicApi.
+// Listed by URL path; method-agnostic. Update when intentionally excluding
+// new non-public routes.
+// Note: `/auth/{providerID}` is kept inside the PublicApi contract (it's a
+// developer-profile control plane route), so we only exclude the specific
+// WebUI auth endpoints below.
+const NON_PUBLIC_PATH_PREFIXES = ["/auth/login", "/auth/logout", "/auth/me", "/skills", "/assets", "/projects", "/api/v1"]
+
+function isNonPublicRoute(routeKey: string) {
+  const [, urlPath = ""] = routeKey.split(" ", 2)
+  return NON_PUBLIC_PATH_PREFIXES.some((prefix) => urlPath === prefix || urlPath.startsWith(`${prefix}/`))
+}
+
 function app(input?: { password?: string; username?: string }) {
   Flag.OPENCODE_EXPERIMENTAL_HTTPAPI = true
   Flag.OPENCODE_SERVER_PASSWORD = input?.password
@@ -147,7 +163,7 @@ afterEach(async () => {
 
 describe("HttpApi server", () => {
   test("covers every generated OpenAPI route with Effect HttpApi contracts", async () => {
-    const honoRoutes = openApiRouteKeys(await Server.openapi())
+    const honoRoutes = openApiRouteKeys(await Server.openapi()).filter((route) => !isNonPublicRoute(route))
     const effectRoutes = openApiRouteKeys(effectOpenApi())
 
     expect(honoRoutes.filter((route) => !effectRoutes.includes(route))).toEqual([])
@@ -160,6 +176,7 @@ describe("HttpApi server", () => {
 
     expect(
       Object.keys(hono)
+        .filter((route) => !isNonPublicRoute(route))
         .filter((route) => JSON.stringify(hono[route]) !== JSON.stringify(effect[route]))
         .map((route) => ({ route, hono: hono[route], effect: effect[route] })),
     ).toEqual([])
@@ -171,6 +188,7 @@ describe("HttpApi server", () => {
 
     expect(
       Object.keys(hono)
+        .filter((route) => !isNonPublicRoute(route))
         .filter((route) => hono[route] !== effect[route])
         .map((route) => ({ route, hono: hono[route], effect: effect[route] })),
     ).toEqual([])

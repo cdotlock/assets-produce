@@ -1,6 +1,10 @@
+import path from "node:path"
 import { describe, expect, test } from "bun:test"
 import { CLI_COMMAND_DESCRIPTORS, getCatalog, parseEnvExample } from "../../src/cli/cmd/config"
 import { networkOptionDefs } from "../../src/cli/network"
+
+// repo root, relative to this test file (agent/packages/opencode/test/cli/)
+const REPO_ROOT = path.resolve(import.meta.dir, "..", "..", "..", "..", "..")
 
 describe("config: CLI_COMMAND_DESCRIPTORS", () => {
   test("includes all P1 leaf commands", () => {
@@ -145,9 +149,7 @@ describe("config: parseEnvExample", () => {
   })
 
   test("real .env.example yields the expected required keys", async () => {
-    const text = await Bun.file(
-      `${process.env.HOME ?? ""}/moonshort/assets-produce/.env.example`,
-    ).text()
+    const text = await Bun.file(path.join(REPO_ROOT, ".env.example")).text()
     const { required } = parseEnvExample(text)
     // AGENT_PORT and LANGFUSE_HOST/PROJECT have defaults but are still required
     // (per heuristic: line is not commented).

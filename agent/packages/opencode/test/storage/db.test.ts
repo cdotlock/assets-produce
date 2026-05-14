@@ -6,9 +6,9 @@ import { Database } from "@/storage/db"
 
 describe("Database.Path", () => {
   test("returns database path for the current channel", () => {
-    const expected = ["latest", "beta"].includes(InstallationChannel)
-      ? path.join(Global.Path.data, "opencode.db")
-      : path.join(Global.Path.data, `opencode-${InstallationChannel.replace(/[^a-zA-Z0-9._-]/g, "-")}.db`)
+    const expected = ["latest", "beta", "prod"].includes(InstallationChannel)
+      ? path.join(Global.Path.data, "agent.db")
+      : path.join(Global.Path.data, `agent-${InstallationChannel.replace(/[^a-zA-Z0-9._-]/g, "-")}.db`)
     expect(Database.getChannelPath()).toBe(expected)
   })
 })
