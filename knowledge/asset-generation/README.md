@@ -8,9 +8,19 @@ incoming `AssetIntent`.
 
 ## Status
 
-**Draft**. Per master spec § 2 principle 4, skill bodies stay local until
-the user explicitly requests an upload to Langfuse. The `intent-to-skill`
-resolver only needs the skill **names**, which are baked into
+**Draft (Phase 8) → cg-render-spec is Phase 9 production-ready.** Per
+master spec § 2 principle 4, skill bodies stay local until the user
+explicitly requests an upload to Langfuse.
+
+Phase 9 (2026-05-15) shipped the first concrete atomic-tool wiring: the
+`cg-render` atomic tool is registered and the matching `cg-render-spec.md`
+body has been rewritten to reference it (see § "Atomic tool input
+contract" inside that file). The other four bodies still describe the
+intended flow but call into Phase 8's placeholder generator until Phase
+10+ replaces it with the real LLM-driven loop.
+
+The `intent-to-skill` resolver only needs the skill **names**, which are
+baked into
 `agent/packages/opencode/src/business/asset-service/intent-to-skill.ts`
 as `ASSET_GENERATION_SKILLS`:
 

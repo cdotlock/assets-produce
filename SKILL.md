@@ -266,7 +266,29 @@ lives in [`ERRORS.md` § Asset Service](ERRORS.md).
 
 ---
 
-## 9. Links
+## 9. Available asset production tools (Phase 9+)
+
+| Kind | Discovery | Notes |
+|---|---|---|
+| Atomic tools (opencode-registered) | `agent tools list` | LLM-callable via the mini agent loop. |
+| `cg-render` | `agent tools show cg-render` | Phase 9 — wraps `tools/cg-render/render.py` (ZENMUX-backed). `mock: true` runs without creds. |
+| `upscale-image` | `agent tools show upscale-image` | Phase 9 — wraps `tools/upscale/upscale.py` (realesrgan-ncnn-vulkan binary required for non-mock). |
+| `generate-image-nanobanana` | (legacy Phase 3) | Fallback for cg/cover/portrait kinds when cg-render isn't applicable. |
+| `generate-image-gpt` | (legacy Phase 3) | Alternate still fallback. |
+| `generate-video-seedance` / `generate-video-happyhorse` | (legacy Phase 3) | Video generation paths. |
+| `concat-clips` / `crop-video` | (legacy Phase 3) | FFmpeg-style ops, no AI model. |
+| Offline CLIs | `tools/<name>/*.py` | NOT registered as atomic tools by design. |
+| `tools/oss-sync/sync.py` | `python tools/oss-sync/sync.py --input <json>` | Bulk OSS upload of a local directory; supports `dry_run: true`. |
+
+### When the loop should pick each atomic tool
+
+- `intent.kind == "cg"` → `cg-render` (primary), `generate-image-nanobanana` (fallback). See [`knowledge/asset-generation/cg-render-spec.md`](knowledge/asset-generation/cg-render-spec.md).
+- "Sharpen this 1× PNG to 2×" follow-up → `upscale-image`. Single-image
+  in/out; caller is expected to chain it after `cg-render`.
+
+---
+
+## 10. Links
 
 - [Main spec](docs/superpowers/specs/2026-04-29-assets-produce-spec.md) — architecture, phase plan, acceptance criteria
 - [`ERRORS.md`](ERRORS.md) — per-command × per-scenario error catalog
