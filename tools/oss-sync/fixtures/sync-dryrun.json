@@ -1,0 +1,6 @@
+{
+  "source_dir": "/tmp/_oss_sync_smoke",
+  "oss_prefix": "nrbi/cg",
+  "include_glob": "**/*.webp",
+  "dry_run": true
+}

@@ -1,0 +1,3 @@
+# oss-sync dependencies. Pinned to the versions moonshort-backend has been
+# running with — bumps are tracked in Phase 9 verification reports.
+oss2==2.18.6
