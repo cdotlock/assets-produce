@@ -18,6 +18,7 @@ import { GenerateVideoSeedanceTool } from "./asset/generate-video-seedance"
 import { ConcatClipsTool } from "./asset/concat-clips"
 import { CropVideoTool } from "./asset/crop-video"
 import { GenerateVideoHappyHorseTool } from "./asset/generate-video-happyhorse"
+import { CgRenderTool } from "./asset/cg-render"
 import * as Tool from "./tool"
 import { Config } from "@/config/config"
 import { type ToolContext as PluginToolContext, type ToolDefinition } from "@opencode-ai/plugin"
@@ -127,6 +128,7 @@ export const layer: Layer.Layer<
     const concatClips = yield* ConcatClipsTool
     const cropVideo = yield* CropVideoTool
     const generateVideoHappyHorse = yield* GenerateVideoHappyHorseTool
+    const cgRender = yield* CgRenderTool
     const agent = yield* Agent.Service
 
     const state = yield* InstanceState.make<State>(
@@ -222,6 +224,7 @@ export const layer: Layer.Layer<
           concatClips: Tool.init(concatClips),
           cropVideo: Tool.init(cropVideo),
           generateVideoHappyHorse: Tool.init(generateVideoHappyHorse),
+          cgRender: Tool.init(cgRender),
         })
 
         return {
@@ -248,6 +251,7 @@ export const layer: Layer.Layer<
             tool.concatClips,
             tool.cropVideo,
             tool.generateVideoHappyHorse,
+            tool.cgRender,
             ...(Flag.OPENCODE_EXPERIMENTAL_LSP_TOOL ? [tool.lsp] : []),
             ...(Flag.OPENCODE_EXPERIMENTAL_PLAN_MODE && Flag.OPENCODE_CLIENT === "cli" ? [tool.plan] : []),
           ],

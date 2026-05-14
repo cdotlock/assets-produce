@@ -1,0 +1,18 @@
+Render one CG image via ZENMUX (google-genai) — Layer B of the CG pipeline.
+
+- Backed by `tools/cg-render/render.py`. The Python script accepts a single
+  `cg_task` (one render call) and either:
+    - writes the image and returns its local path, OR
+    - in `mock: true` mode, writes a 1×1 placeholder PNG so callers can
+      round-trip without ZENMUX credentials.
+- Input shape: one task = one image. For a batch of CGs the caller iterates
+  this tool once per task; the atomic-tool boundary stays single-task so
+  failures isolate per-CG.
+- References are OSS https URLs; the first reference SHOULD be the style
+  anchor, subsequent references are character / scene anchors. Order matters
+  because the prompt addresses them as "图 1, 图 2, …".
+- Output is a local file path (atomic tool does NOT upload to OSS; the
+  caller is expected to PUT the file using the existing `oss-put` flow).
+
+Use `mock: true` in tests or before ZENMUX_API_KEY is set. Use `dryRun:
+true` to print the resolved Python invocation without running it.
