@@ -1,0 +1,13 @@
+# Per-tool python venvs (one per directory keeps deps isolated)
+**/.venv/
+
+# Python build artefacts
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/.ruff_cache/
+
+# Test / smoke outputs
+**/_test_out/
+**/_smoke_out/
+**/_local_test_out/
