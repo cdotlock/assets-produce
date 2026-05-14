@@ -483,7 +483,7 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 - 新增 `AssetJob` entity + drizzle migration
 - 新增 `agent/packages/opencode/src/business/asset-service/`：`AssetService` 主类、`runAssetGeneration` mini agent loop、`intent-to-skill`、catalog、HTTP routes
 - 4 个 REST 操作：`POST /api/v1/assets/create` / `GET /api/v1/assets/jobs/:id` / `POST /api/v1/assets/lookup` / `GET /api/v1/assets/catalog`
-- 4 个 MCP tools 挂在已有 MCP server：`assets.create` / `assets.status` / `assets.lookup` / `assets.catalog_since`
+- 4 个 MCP tools 挂在已有 MCP server：`assets.create` / `assets.status` / `assets.lookup` / `assets.catalog_since` ⚠ 1.11 — Phase 8 推迟，design doc § 5.6 预设的 inbound MCP skeleton 实际未落地
 - 5 份 skill body 草稿到 `knowledge/asset-generation/`（character-portrait / scene-bg / cg-render / cover / shot-image-from-mss）
 - Bearer token auth；3 个 token 写到 `.env.example`
 - 自动导出 OpenAPI spec 到 `docs/api/openapi.yaml`
@@ -502,7 +502,7 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 - `agent serve` 后 curl 4 个端点全通（stub atomic tool）
 - 单元覆盖 ≥ 80%；HTTP route handler 覆盖错误码矩阵
 - OpenAPI spec 用 `openapi-cli validate` 过
-- MCP tools 在 `agent serve` 后能被 MCP client 列出
+- MCP tools 在 `agent serve` 后能被 MCP client 列出 ⚠ 1.11 — Phase 8 推迟（需另起 phase 实现 inbound MCP server）
 - 5 份 skill body 草稿存在，每份 ≥ 30 行
 - Langfuse trace 在一次 stub job 跑完后可见
 - phase-8 plan + verification report 齐
@@ -676,6 +676,7 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 | 1.8 | 2026-05-11 | 用户要求把 `video-agent-claude-wangbo` 的视频 prompt 生产经验和最新 Agent-Forge 工作流吸收到本项目，并明确补充本次不得尝试任何图片/视频生成，只做 prompt 生成与参考水平对比。新增 Phase 7：`video-agent-test/` 覆盖为 `video-agent-claude-wangbo` 的有效学习样本；`legacy/` 直接同步 `Rydia-China/Agent-Forge` 最新 `main`；CLI 以 agent-native 方式实现 prompt frontmatter/payload dry-run/URL 校验/run-state/review/compare 等确定性能力；保留现有媒体 atomic tools 但本 phase 不调用真实生成。影响范围：新增 prompt-only launch readiness phase；不改变 § 2 原子能力 + skill 编排原则，不允许硬编码视频流水线 service。 | cdotlock + Codex |
 | 1.9 | 2026-05-12 | Phase 7 后续整理：视频业务执行逻辑从 opencode core 外置到顶层 `videoctl/` Go CLI，稳定入口为 `videoctl/bin/videoctl`；新增 `claude-skills/novel-to-video/` 作为 Claude Code skill 源；opencode 不再提供 `agent video` 命令或内置 `videoctl` tool。原因：降低 opencode fork 维护成本，让 Codex/Claude Code 等宿主通过同一 CLI + skill/知识包复用视频工作流。影响范围：Phase 7 runtime boundary；不改变媒体 atomic tools，不引入 MCP。 | cdotlock + Codex |
 | 1.10 | 2026-05-14 | 用户要求把 assets-produce 与 `cdotlock/novels-to-moonscript` 和 `cdotlock/moonshort-backend` 真正接通，并把 backend 内的素材生产能力（CG / sync-to-oss / upscale）迁回 assets-produce。约束：moonshort-backend 不是用户维护，最小改动；novels-to-moonscript 与 assets-produce 由用户维护，可正常改造；技术要 AI-native（mini agent loop + skill 编排，不写新的硬编码 service）。新增 Phase 8 / 9 / 10：Phase 8 在 assets-produce 内立起 4 个对外操作（`asset.create` / `asset.status` / `asset.lookup` / `asset.catalog.since`）REST + MCP 双层；Phase 9 把 CG / OSS-sync / upscale 三件工具搬到 `tools/`，挂上 atomic tools；Phase 10 让 novels-to-moonscript 加 lookup client、moonshort-backend `agent-forge-client.ts` real mode 切到 HTTP to assets-produce（不动 `assets-remix-service.ts` 接口、不动 outbox/BullMQ）。完整设计见 `2026-05-14-three-repo-asset-integration-design.md`。影响范围：assets-produce 对外形态、跨仓集成；不改 § 2 原子能力 + skill 编排原则（mini agent loop 本质就是 LLM + skill body + atomic tools 的运行回路，非硬编码流水线 service），不改 § 11.4 接口稳定（Phase 8 落地后 4 个对外操作即 lock-in 起点）。 | cdotlock + Claude |
+| 1.11 | 2026-05-15 | Phase 8 落地时确认：design doc § 5.6 假设 "opencode 已有 inbound MCP server skeleton（agent/packages/opencode/src/server/mcp/, Phase 5/6 已搭起）"，**实际不存在**。仓内 `src/mcp/` 是 outbound MCP client（连接外部 MCP server），phase-6 plan 只列了 MCP 客户端管理命令，没有 server skeleton 工作。决策：Phase 8 推迟 MCP 暴露 — 4 个 REST 端点已经覆盖 Phase 9 / Phase 10 三仓接通用例；MCP 暴露另起独立 phase，需要先决定 transport（StreamableHTTP vs stdio）和 auth shim。Phase 8 acceptance 第 5 条 "MCP tools 在 agent serve 后能被 MCP client 列出" 改为 "deferred；4 REST 端点已满足 Phase 10 接通需要"。Phase 8 plan 第 244-256 行 Step 5 整段在 verification report 标为 deferred。影响范围：Phase 8 暴露面（仅 REST，无 MCP）；不动 § 2 / § 11.4 / Phase 9 / Phase 10 设计。 | cdotlock + Claude |
 
 > 后续修订请在此追加新行，并在受影响的 phase 章节加 ⚠ 标记 + 引用本表行号。
 
