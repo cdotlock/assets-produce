@@ -1,0 +1,62 @@
+# asset-generation skill bodies (Phase 8 draft)
+
+This directory is the **local source of truth** for the five Phase 8 asset
+generation skill bodies. They drive the mini agent loop that runs inside
+`AssetService.runJob` — the LLM reads the picked skill body, then chooses
+which atomic tool to call based on the spec_md / refs / constraints in the
+incoming `AssetIntent`.
+
+## Status
+
+**Draft**. Per master spec § 2 principle 4, skill bodies stay local until
+the user explicitly requests an upload to Langfuse. The `intent-to-skill`
+resolver only needs the skill **names**, which are baked into
+`agent/packages/opencode/src/business/asset-service/intent-to-skill.ts`
+as `ASSET_GENERATION_SKILLS`:
+
+- `character-portrait-spec`
+- `scene-bg-spec`
+- `cg-render-spec`
+- `cover-spec`
+- `shot-image-from-mss`
+
+When the user runs (in a future phase) `agent skills sync
+asset-generation`, the body markdown here gets pushed to Langfuse under the
+canonical prompt name `skill_<name>` (e.g. `skill_character-portrait-spec`).
+Until then the AssetService loop is wired to the **placeholder generator**
+(see `wire.ts`) and does not actually consume these files at runtime.
+
+## File layout
+
+| File | Skill name | When the picker chooses it |
+|---|---|---|
+| `character-portrait-spec.md` | character-portrait-spec | intent.kind == "character_portrait" |
+| `scene-bg-spec.md` | scene-bg-spec | intent.kind == "scene_bg" |
+| `cg-render-spec.md` | cg-render-spec | intent.kind == "cg" |
+| `cover-spec.md` | cover-spec | intent.kind == "cover" |
+| `shot-image-from-mss.md` | shot-image-from-mss | intent.kind == "shot_image" OR "shot_video" |
+
+## Conventions
+
+Each skill body markdown follows the same shape so the LLM finds what it
+needs in the same place every time:
+
+1. **Intent** — what asset shape this skill produces.
+2. **Atomic tools (allowed)** — explicit allowlist; the LLM must not call
+   tools outside this set when running under this skill.
+3. **Inputs** — what fields of the `AssetIntent` matter (spec_md, refs,
+   constraints), with examples.
+4. **Output shape** — what the loop's terminal `GenerationOutcome` should
+   look like (`url`, `ref_urls`, `atomic_tool`).
+5. **Failure handling** — content filter, atomic-tool failure, spec
+   infeasible.
+6. **Boundary** — when to defer to a different skill instead.
+
+## Cross-references
+
+- Master spec: `docs/superpowers/specs/2026-04-29-assets-produce-spec.md`
+  (§ 5, § 11 Phase 8)
+- Phase 8 design: `docs/superpowers/specs/2026-05-14-three-repo-asset-integration-design.md`
+  (§ 5)
+- Picker registry: `agent/packages/opencode/src/business/asset-service/intent-to-skill.ts`
+- Mini agent loop: `agent/packages/opencode/src/business/asset-service/run-asset-generation.ts`
