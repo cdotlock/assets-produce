@@ -7,7 +7,10 @@
 // INTERNAL — we don't leak raw error messages.
 
 import type { Context } from "hono"
+import * as Log from "@opencode-ai/core/util/log"
 import { AssetServiceError, ASSET_SERVICE_ERROR_HTTP, type AssetServiceErrorCode } from "../errors"
+
+const log = Log.create({ service: "asset-service.http.envelope" })
 
 // hono-openapi's validator passes us its own `Issue` shape that is not
 // 1:1 with zod's `$ZodIssue` (path is widened, code differs by version).
@@ -46,6 +49,10 @@ export function zodMessage(issues: readonly ValidationIssue[]): string {
 
 // Centralized catch — used by handlers so each route doesn't reimplement the
 // "AssetServiceError → envelope, otherwise INTERNAL" pattern.
+//
+// Raw exception messages NEVER reach the client (would leak DB schema
+// fingerprints, internal paths, sqlite constraint names, etc.). Log them
+// server-side with a structured payload so operators can still diagnose.
 export async function handle<T>(c: Context, run: () => Promise<T>): Promise<Response> {
   try {
     const out = await run()
@@ -56,7 +63,13 @@ export async function handle<T>(c: Context, run: () => Promise<T>): Promise<Resp
       c.status(errStatus(code) as 400 | 401 | 403 | 404 | 422 | 500 | 502)
       return c.json(makeError(code, message))
     }
+    log.error("asset-service unhandled exception", {
+      path: c.req.path,
+      method: c.req.method,
+      error: e instanceof Error ? e.message : String(e),
+      stack: e instanceof Error ? e.stack : undefined,
+    })
     c.status(500)
-    return c.json(makeError("INTERNAL", e instanceof Error ? e.message : "internal error"))
+    return c.json(makeError("INTERNAL", "internal error"))
   }
 }
