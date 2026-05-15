@@ -43,29 +43,13 @@ export const Parameters = Schema.Struct({
   }),
 })
 
-interface MediaInput {
-  type: "video" | "reference_image"
-  url: string
-}
-
 export const GenerateVideoHappyHorseTool = Tool.define<typeof Parameters, Record<string, unknown>, never>(
   TOOL_ID,
   Effect.gen(function* () {
     return {
       description: DESCRIPTION,
       parameters: Parameters,
-      execute: (
-        params: {
-          prompt: string
-          media: readonly MediaInput[]
-          resolution?: "1080P" | "720P"
-          ratio?: "16:9" | "9:16" | "1:1" | "4:3" | "3:4"
-          duration?: number
-          model?: string
-          dryRun?: boolean
-        },
-        ctx: Tool.Context,
-      ) =>
+      execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {
           const body: Record<string, unknown> = {
             action: "generate",

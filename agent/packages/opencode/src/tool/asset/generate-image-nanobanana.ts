@@ -31,15 +31,7 @@ export const GenerateImageNanobananaTool = Tool.define<typeof Parameters, Record
     return {
       description: DESCRIPTION,
       parameters: Parameters,
-      execute: (
-        params: {
-          prompt: string
-          model?: string
-          referenceImageUrls?: readonly string[]
-          dryRun?: boolean
-        },
-        ctx: Tool.Context,
-      ) =>
+      execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {
           const model = params.model?.trim() || DEFAULT_MODEL
           const refs = params.referenceImageUrls ?? []

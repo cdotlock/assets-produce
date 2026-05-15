@@ -26,10 +26,7 @@ export const CropVideoTool = Tool.define<typeof Parameters, Record<string, unkno
     return {
       description: DESCRIPTION,
       parameters: Parameters,
-      execute: (
-        params: { videoUrl: string; startTime: number; endTime: number; dryRun?: boolean },
-        ctx: Tool.Context,
-      ) =>
+      execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {
           if (params.endTime <= params.startTime) {
             return {

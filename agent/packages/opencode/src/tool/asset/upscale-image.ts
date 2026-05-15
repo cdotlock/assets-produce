@@ -47,16 +47,6 @@ const UpscaleResult = Schema.Struct({
   ),
 })
 
-type UpscaleParams = {
-  inputPath: string
-  outputPath: string
-  scale?: number
-  model?: string
-  overwrite?: boolean
-  mock?: boolean
-  dryRun?: boolean
-}
-
 export interface MakeUpscaleImageToolOpts {
   runner?: PythonRunner
   scriptPath?: string
@@ -75,7 +65,7 @@ export function makeUpscaleImageTool(opts: MakeUpscaleImageToolOpts = {}) {
       return {
         description: DESCRIPTION,
         parameters: Parameters,
-        execute: (params: UpscaleParams, ctx: Tool.Context) =>
+        execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
           Effect.gen(function* () {
             const model = params.model?.trim() || DEFAULT_MODEL
             const scale = params.scale ?? 2

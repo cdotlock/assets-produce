@@ -26,6 +26,10 @@ export const CodeSearchTool = Tool.define(
     return {
       description: DESCRIPTION,
       parameters: Parameters,
+      // NOTE: not `Schema.Schema.Type<typeof Parameters>` — `tokensNum` uses
+      // `withDecodingDefault`, so the decoded value is always a number at
+      // runtime, but the static schema Type still widens it to
+      // `number | undefined`. The explicit shape is the accurate one here.
       execute: (params: { query: string; tokensNum: number }, ctx: Tool.Context) =>
         Effect.gen(function* () {
           yield* ctx.ask({

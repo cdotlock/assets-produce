@@ -42,21 +42,13 @@ export const Parameters = Schema.Struct({
   }),
 })
 
-type MusicParams = {
-  prompt: string
-  duration_seconds?: number
-  style?: string
-  instrumental?: boolean
-  dryRun?: boolean
-}
-
 export const GenerateMusicSunoTool = Tool.define<typeof Parameters, Record<string, unknown>, never>(
   TOOL_ID,
   Effect.gen(function* () {
     return {
       description: DESCRIPTION,
       parameters: Parameters,
-      execute: (params: MusicParams, _ctx: Tool.Context) =>
+      execute: (params: Schema.Schema.Type<typeof Parameters>, _ctx: Tool.Context) =>
         // The happy path cannot fail upstream (no HTTP / OSS), but the
         // `Effect.catch` tail is kept for structural parity with the other
         // asset tools so the channel matches Tool.define's `never`.

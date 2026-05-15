@@ -48,15 +48,6 @@ export const Parameters = Schema.Struct({
   }),
 })
 
-type SfxParams = {
-  prompt: string
-  duration_seconds?: number
-  prompt_influence?: number
-  model?: string
-  promptSuffix?: string
-  dryRun?: boolean
-}
-
 // HTTP synthesis call, ported from n2m elevenlabs_generator.py generate()
 // (request construction → POST → 200-body-is-mp3-bytes). Injectable so tests
 // never hit the network. Returns the raw status + body; the caller folds
@@ -121,7 +112,7 @@ export function makeGenerateSfxElevenlabsTool(opts: MakeGenerateSfxElevenlabsToo
       return {
         description: DESCRIPTION,
         parameters: Parameters,
-        execute: (params: SfxParams, ctx: Tool.Context) =>
+        execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
           // Whole pipeline may fail (ElevenLabs HTTP error OR OSSError); the
           // `Effect.catch` at the bottom folds that into a uniform
           // `metadata.error: true` result so the channel matches Tool.define's

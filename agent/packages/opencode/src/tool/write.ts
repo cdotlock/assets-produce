@@ -35,7 +35,7 @@ export const WriteTool = Tool.define(
     return {
       description: DESCRIPTION,
       parameters: Parameters,
-      execute: (params: { content: string; filePath: string }, ctx: Tool.Context) =>
+      execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {
           const filepath = path.isAbsolute(params.filePath)
             ? params.filePath

@@ -23,7 +23,7 @@ export const ConcatClipsTool = Tool.define<typeof Parameters, Record<string, unk
     return {
       description: DESCRIPTION,
       parameters: Parameters,
-      execute: (params: { clipUrls: readonly string[]; dryRun?: boolean }, ctx: Tool.Context) =>
+      execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {
           const body: Record<string, unknown> = { clipUrls: params.clipUrls }
 

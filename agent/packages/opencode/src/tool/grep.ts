@@ -29,7 +29,7 @@ export const GrepTool = Tool.define(
     return {
       description: DESCRIPTION,
       parameters: Parameters,
-      execute: (params: { pattern: string; path?: string; include?: string }, ctx: Tool.Context) =>
+      execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {
           const empty = {
             title: params.pattern,

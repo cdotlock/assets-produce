@@ -83,19 +83,6 @@ const CgRenderResult = Schema.Struct({
   ),
 })
 
-type CgRenderParams = {
-  slug: string
-  cgName: string
-  prompt: string
-  panelCount?: number
-  referenceImageUrls: readonly string[]
-  model?: string
-  assetsRoot?: string
-  overwrite?: boolean
-  mock?: boolean
-  dryRun?: boolean
-}
-
 // Factory so tests can swap in a fake runner without hitting Bun.spawn.
 // Production wiring uses `CgRenderTool` directly (default runner =
 // `runPython` from python-runner.ts).
@@ -118,7 +105,7 @@ export function makeCgRenderTool(opts: MakeCgRenderToolOpts = {}) {
       return {
         description: DESCRIPTION,
         parameters: Parameters,
-        execute: (params: CgRenderParams, ctx: Tool.Context) =>
+        execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
           // The whole pipeline below may fail; `Effect.catch` at the bottom
           // converts that into a uniform `metadata.error: true` result so the
           // execute channel matches Tool.define's `never` error type.

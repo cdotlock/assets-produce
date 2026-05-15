@@ -40,18 +40,7 @@ export const GenerateVideoSeedanceTool = Tool.define<typeof Parameters, Record<s
     return {
       description: DESCRIPTION,
       parameters: Parameters,
-      execute: (
-        params: {
-          prompt: string
-          sourceImageUrl?: string
-          styleName?: string
-          model?: string
-          referenceImageUrls?: readonly string[]
-          sourceVideoUrls?: readonly string[]
-          dryRun?: boolean
-        },
-        ctx: Tool.Context,
-      ) =>
+      execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {
           const model = params.model?.trim() || DEFAULT_MODEL
           const body: Record<string, unknown> = {

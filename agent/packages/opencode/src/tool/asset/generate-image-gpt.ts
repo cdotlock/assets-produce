@@ -28,15 +28,7 @@ export const GenerateImageGptTool = Tool.define<typeof Parameters, Record<string
     return {
       description: DESCRIPTION,
       parameters: Parameters,
-      execute: (
-        params: {
-          prompt: string
-          model?: string
-          referenceImageUrls?: readonly string[]
-          dryRun?: boolean
-        },
-        ctx: Tool.Context,
-      ) =>
+      execute: (params: Schema.Schema.Type<typeof Parameters>, ctx: Tool.Context) =>
         Effect.gen(function* () {
           const model = params.model?.trim() || "gpt-image-1"
           const refs = params.referenceImageUrls ?? []
