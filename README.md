@@ -25,6 +25,23 @@ Agent-native multi-format asset production platform — based on opencode.
 - [`CLAUDE.md`](CLAUDE.md) — project rules for any Claude Code session working in this repo
 - [`docs/superpowers/specs/2026-04-29-assets-produce-spec.md`](docs/superpowers/specs/2026-04-29-assets-produce-spec.md) — master spec (architecture, phases, red lines)
 
+## 对外 Asset 服务（三仓接入）
+
+Phase 10 起 assets-produce 对外暴露 4 个 HTTP 操作（mount 在 `/api/v1/assets/`）：
+
+| 操作 | 方法 | 用途 |
+|---|---|---|
+| `create` | POST | 触发一次素材生产 job |
+| `status` | GET | 查 job 状态 |
+| `lookup` | POST | 按 key / name 批量查已生产的 Asset URL |
+| `catalog-since` | GET | 按时间游标增量拉 Asset 目录 |
+
+接入方：
+- **novels-to-moonscript** — 只调 `lookup`（小说阶段不主动 create；按 `mss-resolve-assets` CLI 把 mapping.json 里待解析 key 拉回 URL）
+- **moonshort-backend** — 4 个操作全用；通过 `app/upstream/assets-produce-http.ts` + `agent-forge-client.ts` 的 `ASSETS_REMIX_MODE=real` 分支接通
+
+各仓 token / project_id 治理 + 故障排查见 [`docs/ops/three-repo-token-flow.md`](docs/ops/three-repo-token-flow.md)。OpenAPI 完整 spec 见 `agent/packages/opencode/test/business/asset-service/openapi.test.ts` snapshot。
+
 Single-binary build: `bun run agent:build` writes `agent/dist/agent.mjs`.
 Run with `bun agent/dist/agent.mjs <cmd>` (or `agent/bin/agent <cmd>`).
 
