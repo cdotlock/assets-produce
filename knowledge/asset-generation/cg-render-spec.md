@@ -42,8 +42,11 @@ short MP4 loop) showing one decisive narrative beat. The output should:
   doesn't have the cg-render anchor-ordering convention.
 - `generate-image-gpt` — alternate fallback for stills when both
   cg-render and nanobanana fall over.
-- `oss-put` — upload the final image / mp4 to OSS (cg-render does NOT
-  upload; the caller owns that step).
+- **`oss-put` — REQUIRED final step.** `cg-render` returns a *local
+  file path*, never a URL. You MUST chain `oss-put` on that local path
+  to obtain the permanent OSS https URL that is the actual deliverable.
+  Skipping this step (returning the local path) is a failure — the
+  downstream consumer cannot read a local path.
 
 **Do not** call `generate-video-*` here unless the spec explicitly says
 "animate this CG". CG short loops have their own pipeline (cg-render) —
@@ -105,6 +108,10 @@ style: cinematic painterly with stronger color contrast than scene_bg
 
 ## Output shape
 
+The `url` field below is **always the OSS https URL returned by
+`oss-put`**, never `cg-render`'s local path. The delivery chain is:
+`cg-render` → local path → `oss-put` → OSS https URL → emit below.
+
 Still:
 
 ```json
@@ -140,6 +147,11 @@ The orchestrator picks `Asset.type = "video"` when `asset_type` is
   `ATOMIC_TOOL_FAILED` with the wrapped error message. Do not retry —
   cg-render runs are expensive. The wrapper surfaces Python's stderr
   envelope verbatim so the loop sees the structured `{code, message}`.
+- **`oss-put` upload failure** (OSS auth/network/5xx, surfaced as the
+  tool's `metadata.error`) → `ATOMIC_TOOL_FAILED`. Retry `oss-put`
+  once; if it still fails, fail the job with the wrapped OSS error.
+  NEVER substitute the local path for the URL to "succeed" — a
+  local path is not a deliverable.
 - **cg-render unavailable** (script path missing, Python interpreter not
   found, venv broken) → fall back to `generate-image-nanobanana` with
   the refs stitched into the prompt. Surface a warning event to Langfuse
