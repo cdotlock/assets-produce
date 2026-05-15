@@ -122,9 +122,13 @@ error.
 — `title: "oss-put failed"`, `output: "oss-put error: <message>"`,
 `metadata.error:true` — which the CLI renders as `tool error: <message>`
 (exit 1), where `<message>` is exactly the tool's `output` string.
-Schema-rejected inputs (empty `local_path`) fail earlier as
-`invalid JSON params: <reason>` (exit 2) — see the table above. The
-messages below are byte-accurate to the tool code in
+Schema-constraint rejections of **well-formed** JSON (e.g. empty
+`local_path` failing `isMinLength(1)`) surface as
+`tool error: The oss-put tool was called with invalid arguments:
+SchemaError(...)` (exit **1**) — the tool never runs, but the CLI still
+folds it into the exit-1 path. Only input that is **not parseable JSON**
+yields `invalid JSON params: <reason>` (exit 2) — see the table above.
+The messages below are byte-accurate to the tool code in
 [`agent/.../tool/asset/oss-put.ts`](agent/packages/opencode/src/tool/asset/oss-put.ts).
 
 `oss-put` (local file → permanent OSS https URL):
@@ -138,7 +142,8 @@ messages below are byte-accurate to the tool code in
 | `local_path` exceeds the upload limit (`MAX_UPLOAD_BYTES` = 536870912 = 512 MiB) | `tool error: oss-put error: oss-put: local_path is <size> bytes, exceeds the 536870912-byte upload limit: <resolved>` | 1 |
 | Failed to read the file into memory | `tool error: oss-put error: oss-put: failed to read local_path — <detail>` | 1 |
 | OSS upload failed (auth / network / 5xx) | `tool error: oss-put error: oss-put: OSS upload failed — <detail>` | 1 |
-| Empty `local_path` (`""`) | `invalid JSON params: <reason>` (Schema `isMinLength(1)` rejects before execute — never reaches the tool) | 2 |
+| `local_path` present but empty / fails a Schema constraint (well-formed JSON) | `tool error: The oss-put tool was called with invalid arguments: SchemaError(Expected a value with a length of at least 1, got "" at ["local_path"]). Please rewrite the input so it satisfies the expected schema.` | 1 |
+| Malformed `--json` payload (not parseable JSON) | `invalid JSON params: <reason>` | 2 |
 
 `dryRun: true` is **not an error**: it returns `title: "dry-run oss-put"`
 with the resolved upload plan and `metadata.dryRun:true` (no `error`
