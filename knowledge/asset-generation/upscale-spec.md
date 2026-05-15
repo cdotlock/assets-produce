@@ -8,11 +8,13 @@ input is an image that already exists; the output is the same image at
 2× or 4× the pixel dimensions.
 
 Upscale is deliberately **not its own `AssetKind`** (Phase 12 decision —
-"upscale 是后处理，不单独成 kind"). It is invoked as a skill body, not
-through the kind→skill router, so it does not appear in the
-`ASSET_GENERATION_SKILLS` registry. Discovery is by file: this body
-lives in `knowledge/asset-generation/` alongside its siblings and is
-read on demand when a caller asks to upscale an existing image.
+"upscale 是后处理，不单独成 kind"). It has no `DEFAULT_KIND_SKILL_MAP`
+entry, so it is **never** reached by the tier-3 deterministic
+kind→skill fallback. It *is* registered in the `ASSET_GENERATION_SKILLS`
+picker allowlist, so it is reachable via a tier-1 `skill_hint` or a
+tier-2 picker selection — the picker rejects any skill name not in that
+allowlist. It is not auto-selected from a `kind`; a caller asking to
+upscale an existing image selects it explicitly.
 
 The `upscale-image` pipeline originally lived in `moonshort-backend`
 (Python `upscale.py`, Real-ESRGAN). Phase 9 migrated it to
