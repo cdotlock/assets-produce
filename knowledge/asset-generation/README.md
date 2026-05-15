@@ -30,6 +30,13 @@ returns a fixed placeholder with `metadata.placeholder: true`. The
 `music-spec.md` body documents the placeholder state explicitly so the
 loop treats a music result as "deferred", not as a hard failure.
 
+Phase 12 (2026-05-16) closed asset-delivery URL parity: `cg-render` and
+`upscale-image` now deliver a **permanent OSS https URL** by chaining
+the `oss-put` atomic tool in their skill bodies (`cg-render-spec` /
+`upscale-spec`), instead of returning a local filesystem path. `oss-put`
+reuses the Phase 2 OSS service (no new env), so the loop's terminal
+`url` for cg / upscale outcomes is now an OSS-served URL end to end.
+
 The `intent-to-skill` resolver only needs the skill **names**, which are
 baked into
 `agent/packages/opencode/src/business/asset-service/intent-to-skill.ts`

@@ -115,6 +115,36 @@ deterministic placeholder result is a normal success (exit 0) — callers
 detect "music deferred" via `metadata.placeholder:true`, not via an
 error.
 
+### `tools call <id>` — oss-put (Phase 12)
+
+`oss-put` execution errors surface through the same generic
+`tools call <id>` path: every failure is folded into one uniform shape
+— `title: "oss-put failed"`, `output: "oss-put error: <message>"`,
+`metadata.error:true` — which the CLI renders as `tool error: <message>`
+(exit 1), where `<message>` is exactly the tool's `output` string.
+Schema-rejected inputs (empty `local_path`) fail earlier as
+`invalid JSON params: <reason>` (exit 2) — see the table above. The
+messages below are byte-accurate to the tool code in
+[`agent/.../tool/asset/oss-put.ts`](agent/packages/opencode/src/tool/asset/oss-put.ts).
+
+`oss-put` (local file → permanent OSS https URL):
+
+| Scenario | Error Message | Exit Code |
+|---|---|---|
+| `local_path` is not an absolute path | `tool error: oss-put error: oss-put: local_path must be an absolute path, got "<local_path>"` | 1 |
+| `local_path` does not exist | `tool error: oss-put error: oss-put: local_path does not exist: <resolved>` | 1 |
+| `local_path` is not a regular file (dir, fifo, …) | `tool error: oss-put error: oss-put: local_path is not a regular file: <resolved>` | 1 |
+| `local_path` is empty (0 bytes) | `tool error: oss-put error: oss-put: local_path is empty (0 bytes): <resolved>` | 1 |
+| `local_path` exceeds the upload limit (`MAX_UPLOAD_BYTES` = 536870912 = 512 MiB) | `tool error: oss-put error: oss-put: local_path is <size> bytes, exceeds the 536870912-byte upload limit: <resolved>` | 1 |
+| Failed to read the file into memory | `tool error: oss-put error: oss-put: failed to read local_path — <detail>` | 1 |
+| OSS upload failed (auth / network / 5xx) | `tool error: oss-put error: oss-put: OSS upload failed — <detail>` | 1 |
+| Empty `local_path` (`""`) | `invalid JSON params: <reason>` (Schema `isMinLength(1)` rejects before execute — never reaches the tool) | 2 |
+
+`dryRun: true` is **not an error**: it returns `title: "dry-run oss-put"`
+with the resolved upload plan and `metadata.dryRun:true` (no `error`
+flag, no OSS call), exits 0. It is testing-only and never set in
+production.
+
 ### `tools export-schema [id]`
 
 | Scenario | Error Message | Exit Code |
