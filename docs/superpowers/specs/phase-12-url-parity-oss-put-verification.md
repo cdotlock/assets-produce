@@ -42,7 +42,7 @@ Whole-range diff (`bd83589~1..4584b1b`): **11 files, +716 / −3**. No other fil
 
 - [x] **`phase-12-url-parity-oss-put-verification.md` 完成.** This document.
 
-- [ ] **所有 atomic commit push 到 origin/main.** Pending Task H (push after the final whole-phase `superpowers:code-reviewer`). `main…origin/main` = 8 ahead / 0 behind at report time; ticked on push.
+- [x] **所有 atomic commit push 到 origin/main.** Pushed `88e7d09..5053782 main -> main` (10 Phase 12 commits); `main…origin/main` = **0 / 0 in sync**; `origin/main` HEAD = `5053782`. (A trailing close-out commit ticks this very line.)
 
 ## Durable open items / notes (carry forward)
 
@@ -71,4 +71,4 @@ Reviewer explicitly confirmed: all red lines held, `never` channel sound end-to-
 
 ## Verdict
 
-All §5 acceptance items satisfied with evidence except the push line (Task H). Phase 12 delivered exactly the planned scope — one new `oss-put` atomic tool (thin shell over the Phase 2 OSS service) + skill-orchestration parity for `cg-render` / `upscale-image` — with **no new AssetKind, no `placeholderGenerator` contact, no tool-body or `oss.ts` rewrite**. Ready for the final whole-phase `superpowers:code-reviewer`, then push + `/compact` + user gate before Phase 13.
+All §5 acceptance items satisfied with evidence. Phase 12 delivered exactly the planned scope — one new `oss-put` atomic tool (thin shell over the Phase 2 OSS service) + skill-orchestration parity for `cg-render` / `upscale-image` — with **no new AssetKind, no `placeholderGenerator` contact, no tool-body or `oss.ts` rewrite**. Ready for the final whole-phase `superpowers:code-reviewer`, then push + `/compact` + user gate before Phase 13.
