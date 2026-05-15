@@ -571,6 +571,87 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 
 ---
 
+### Phase 11 — 音频生产（music / sfx）⚠ 1.12
+
+**目标**：给 assets-produce 加音乐、音效两类素材生产能力，严格复刻视频对等模板。详细设计见 [`2026-05-15-audio-and-asset-parity-design.md`](2026-05-15-audio-and-asset-parity-design.md) § 4。
+
+**范围**：
+
+- 新增原子工具 `generate-music-suno`（直连 Suno HTTPS API）+ `generate-sfx-elevenlabs`（仅移植 novels-to-moonscript 的 ElevenLabs 合成调用，不带其归类逻辑）
+- 两工具内部复用 Phase 2 OSS 服务上传音频、返回 OSS URL（**不依赖 Phase 12**）
+- `AssetKind` + `ASSET_KINDS` 加 `music` / `sfx`；`DEFAULT_KIND_SKILL_MAP` 加两条；`defaultAssetTypeForKind()` 映 `audio`
+- 注册到 opencode 工具表；新增 `knowledge/asset-generation/music-spec.md` / `sfx-spec.md`
+
+**不做**：
+
+- 不碰 `placeholderGenerator`；经 REST API 仍 stub（与视频一致，验收按此判定）
+- 不迁 n2m 聚类/归类；不改 novels-to-moonscript 本身
+- 不接真编排循环（Phase 8 旧债，另起独立项目）
+
+**验收**：
+
+- `generate-music-suno` / `generate-sfx-elevenlabs` 在 `agent tools list` 出现，schema 完整
+- 单元/schema/错误矩阵 ≥ 80% 行覆盖；mock 上游 + mock OSS
+- CLI/Session 跑 `music-spec` / `sfx-spec` 出真实 OSS URL（dev key）
+- REST API `create {kind:"music"|"sfx"}` 校验通过、返回 stub（符合非目标）
+- phase-11 plan + verification report 齐
+- commit + push 到 main
+
+---
+
+### Phase 12 — URL 对等 + oss-put ⚠ 1.12
+
+**目标**：补齐 Phase 9 已迁 Python 工具与视频的 OSS URL 输出对等。详细设计见 [`2026-05-15-audio-and-asset-parity-design.md`](2026-05-15-audio-and-asset-parity-design.md) § 5。
+
+**范围**：
+
+- 新增单文件 `oss-put` 原子工具（薄壳复用 Phase 2 OSS 服务，本地路径 → OSS URL）
+- `cg-render` / `upscale-image` 经 skill body 串一步 `oss-put`，输出补成 OSS URL（skill 编排，不在工具硬接）
+- 补 `upscale-image` 专属 skill body
+
+**不做**：
+
+- `oss-sync`（批量目录）维持现状，不注册为原子工具（沿用 Phase 9 决策）
+- 不新增 AssetKind
+- 不碰 `placeholderGenerator`
+
+**验收**：
+
+- `oss-put` 在 `agent tools list` 出现，schema 完整
+- `cg-render` / `upscale-image` 经 skill 编排最终产出 OSS URL（fixture/dev key）
+- 单元覆盖 oss-put happy/错误；≥ 80% 行覆盖
+- phase-12 plan + verification report 齐
+- commit + push 到 main
+
+---
+
+### Phase 13 — 图片处理大套迁移 ⚠ 1.12
+
+**目标**：把 moonshort-backend 图片处理套件迁回 assets-produce 作 Phase 9 式 Python 原子工具。详细设计见 [`2026-05-15-audio-and-asset-parity-design.md`](2026-05-15-audio-and-asset-parity-design.md) § 6。
+
+**范围**：
+
+- `moonshort-backend/generate-upscale-matting/` 内 matting/cutout/hole_fill/spill/格式转 等 → `tools/<name>/`（JSON I/O + `--mock` + `python-runner.ts` 桥）
+- 能产视觉产物者注册为原子工具，输出经 Phase 12 `oss-put` 拿 URL
+- backend 对应文件加 DEPRECATED 注释（不删）
+
+**不做**：
+
+- 不迁全部子目录（按文件评估，只搬纯素材生产件）
+- 不删 backend 侧旧文件（删交 backend 维护方；跨 namespace push 需 ack）
+- 不碰 `placeholderGenerator`
+
+**验收**：
+
+- 迁入工具跑通 fixture（mock 模式无需 GPU/模型权重）
+- 注册的原子工具在 `agent tools list` 出现，schema 完整
+- 单元/mock ≥ 80% 行覆盖
+- backend 对应文件 DEPRECATED 注释单独 commit（不删）
+- phase-13 plan + verification report 齐
+- commit + push 到 main（backend push 必须 backend 维护方 ack）
+
+---
+
 ## 11. 工作流（Claude Code Session 必读）
 
 ### 11.1 进入新 phase 时
@@ -677,6 +758,7 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 | 1.9 | 2026-05-12 | Phase 7 后续整理：视频业务执行逻辑从 opencode core 外置到顶层 `videoctl/` Go CLI，稳定入口为 `videoctl/bin/videoctl`；新增 `claude-skills/novel-to-video/` 作为 Claude Code skill 源；opencode 不再提供 `agent video` 命令或内置 `videoctl` tool。原因：降低 opencode fork 维护成本，让 Codex/Claude Code 等宿主通过同一 CLI + skill/知识包复用视频工作流。影响范围：Phase 7 runtime boundary；不改变媒体 atomic tools，不引入 MCP。 | cdotlock + Codex |
 | 1.10 | 2026-05-14 | 用户要求把 assets-produce 与 `cdotlock/novels-to-moonscript` 和 `cdotlock/moonshort-backend` 真正接通，并把 backend 内的素材生产能力（CG / sync-to-oss / upscale）迁回 assets-produce。约束：moonshort-backend 不是用户维护，最小改动；novels-to-moonscript 与 assets-produce 由用户维护，可正常改造；技术要 AI-native（mini agent loop + skill 编排，不写新的硬编码 service）。新增 Phase 8 / 9 / 10：Phase 8 在 assets-produce 内立起 4 个对外操作（`asset.create` / `asset.status` / `asset.lookup` / `asset.catalog.since`）REST + MCP 双层；Phase 9 把 CG / OSS-sync / upscale 三件工具搬到 `tools/`，挂上 atomic tools；Phase 10 让 novels-to-moonscript 加 lookup client、moonshort-backend `agent-forge-client.ts` real mode 切到 HTTP to assets-produce（不动 `assets-remix-service.ts` 接口、不动 outbox/BullMQ）。完整设计见 `2026-05-14-three-repo-asset-integration-design.md`。影响范围：assets-produce 对外形态、跨仓集成；不改 § 2 原子能力 + skill 编排原则（mini agent loop 本质就是 LLM + skill body + atomic tools 的运行回路，非硬编码流水线 service），不改 § 11.4 接口稳定（Phase 8 落地后 4 个对外操作即 lock-in 起点）。 | cdotlock + Claude |
 | 1.11 | 2026-05-15 | Phase 8 落地时确认：design doc § 5.6 假设 "opencode 已有 inbound MCP server skeleton（agent/packages/opencode/src/server/mcp/, Phase 5/6 已搭起）"，**实际不存在**。仓内 `src/mcp/` 是 outbound MCP client（连接外部 MCP server），phase-6 plan 只列了 MCP 客户端管理命令，没有 server skeleton 工作。决策：Phase 8 推迟 MCP 暴露 — 4 个 REST 端点已经覆盖 Phase 9 / Phase 10 三仓接通用例；MCP 暴露另起独立 phase，需要先决定 transport（StreamableHTTP vs stdio）和 auth shim。Phase 8 acceptance 第 5 条 "MCP tools 在 agent serve 后能被 MCP client 列出" 改为 "deferred；4 REST 端点已满足 Phase 10 接通需要"。Phase 8 plan 第 244-256 行 Step 5 整段在 verification report 标为 deferred。影响范围：Phase 8 暴露面（仅 REST，无 MCP）；不动 § 2 / § 11.4 / Phase 9 / Phase 10 设计。 | cdotlock + Claude |
+| 1.12 | 2026-05-15 | 用户要求把音乐 / 音效 / CG-OSS-图片处理也做成与视频严格对等的素材生产能力（原子工具 + skill body + AssetKind + asset-service API 自动收口），沿用之前视频的完整流程。Brainstorming 核实事实纠正了用户两处前提：(a) 音乐**无现成生成器**可迁（novels-to-moonscript 仅做名字归类 + 替换人工 mp3 的 URL），仅音效有真生成器（n2m 内 ElevenLabs 声效 API，且与其归类管线耦合）；(b) asset-service REST API 路径用 `placeholderGenerator` 返回 stub，**视频经 API 本身也是 stub**，真编排循环是 Phase 8 旧债。用户决策（选项 B）：严格结构对等，**不碰 `placeholderGenerator`**、不接真编排循环（旧债另起独立项目）；音乐新建原子工具调 Suno（商用授权假设用户用带商用权付费计划，记为 ops 风险）、音效仅移植 n2m 的 ElevenLabs 合成调用、n2m 聚类/归类不迁、不改 novels-to-moonscript 本身。新增 Phase 11（音频：`generate-music-suno` + `generate-sfx-elevenlabs`，内联复用 Phase 2 OSS 服务，不依赖 Phase 12）/ Phase 12（单文件 `oss-put` 原子工具 + cg-render/upscale 经 skill 编排补 OSS URL 对等）/ Phase 13（backend 图片处理套件迁回作 Phase 9 式 Python 原子工具），顺序 11→12→13。完整设计见 `2026-05-15-audio-and-asset-parity-design.md`。影响范围：新增三类素材生产能力 + 三 phase；不改 § 2 原子能力 + skill 编排原则（新工具均为 LLM 经 skill 编排调用的原子能力，非硬编码流水线 service），不改 § 11.4 接口稳定（音频 AssetKind 落地后即 lock-in 起点），明确不动 Phase 8 placeholderGenerator / asset-service 注入点。 | cdotlock + Claude |
 
 > 后续修订请在此追加新行，并在受影响的 phase 章节加 ⚠ 标记 + 引用本表行号。
 
