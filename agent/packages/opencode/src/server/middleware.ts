@@ -91,6 +91,13 @@ export function CorsMiddleware(opts?: { cors?: string[] }): MiddlewareHandler {
 
 export const WebAuthMiddleware: MiddlewareHandler = async (c, next) => {
   if (c.req.method === "OPTIONS") return next()
+  // /api/v1/assets/* routes have their own Bearer auth mechanism (the
+  // ntms/msb/dev tokens defined in business/asset-service/http/auth.ts) —
+  // skip the WebUI JWT enforcement here so those opaque tokens reach the
+  // asset-service middleware uniformly. Phase 8 tests targeted the sub-app
+  // via app.request() directly and never exercised this chain, so the
+  // collision only surfaced once Phase 10 ran a real `agent serve`.
+  if (c.req.path.startsWith("/api/v1/assets/")) return next()
   const queryToken = c.req.query("token")
   const authHeader = c.req.header("authorization") ?? (queryToken ? `Bearer ${queryToken}` : null)
   if (!authHeader) return next()
