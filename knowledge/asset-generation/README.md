@@ -19,6 +19,17 @@ contract" inside that file). The other four bodies still describe the
 intended flow but call into Phase 8's placeholder generator until Phase
 10+ replaces it with the real LLM-driven loop.
 
+Phase 11 (2026-05-16) shipped two audio bodies: `sfx-spec` is
+**production-ready**, backed by the real `generate-sfx-elevenlabs`
+atomic tool (real ElevenLabs sound-generation → inline OSS upload →
+permanent OSS mp3 URL). `music-spec` is a **deterministic placeholder**
+per master spec §15 row 1.13 — Suno publishes no official first-party
+API, so the real gateway integration is a deferred open item; the
+backing `generate-music-suno` tool calls nothing, uploads nothing, and
+returns a fixed placeholder with `metadata.placeholder: true`. The
+`music-spec.md` body documents the placeholder state explicitly so the
+loop treats a music result as "deferred", not as a hard failure.
+
 The `intent-to-skill` resolver only needs the skill **names**, which are
 baked into
 `agent/packages/opencode/src/business/asset-service/intent-to-skill.ts`
@@ -29,6 +40,8 @@ as `ASSET_GENERATION_SKILLS`:
 - `cg-render-spec`
 - `cover-spec`
 - `shot-image-from-mss`
+- `sfx-spec`
+- `music-spec`
 
 When the user runs (in a future phase) `agent skills sync
 asset-generation`, the body markdown here gets pushed to Langfuse under the
@@ -45,6 +58,8 @@ Until then the AssetService loop is wired to the **placeholder generator**
 | `cg-render-spec.md` | cg-render-spec | intent.kind == "cg" |
 | `cover-spec.md` | cover-spec | intent.kind == "cover" |
 | `shot-image-from-mss.md` | shot-image-from-mss | intent.kind == "shot_image" OR "shot_video" |
+| `sfx-spec.md` | sfx-spec | intent.kind == "sfx" |
+| `music-spec.md` | music-spec | intent.kind == "music" |
 
 ## Conventions
 
