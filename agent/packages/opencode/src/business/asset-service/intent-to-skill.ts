@@ -19,6 +19,7 @@ export const ASSET_GENERATION_SKILLS = [
   "cg-render-spec",
   "cover-spec",
   "shot-image-from-mss",
+  "sfx-spec",
 ] as const
 
 export type AssetGenerationSkill = (typeof ASSET_GENERATION_SKILLS)[number]
@@ -34,6 +35,7 @@ export const DEFAULT_KIND_SKILL_MAP: Record<AssetKind, AssetGenerationSkill> = {
   cover: "cover-spec",
   shot_image: "shot-image-from-mss",
   shot_video: "shot-image-from-mss",
+  sfx: "sfx-spec",
 }
 
 // Prompt template passed to the picker so its output stays in vocabulary.

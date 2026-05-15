@@ -6,7 +6,14 @@
 
 export type AssetJobStatus = "queued" | "running" | "succeeded" | "failed" | "cancelled"
 
-export type AssetKind = "character_portrait" | "scene_bg" | "cg" | "cover" | "shot_image" | "shot_video"
+export type AssetKind =
+  | "character_portrait"
+  | "scene_bg"
+  | "cg"
+  | "cover"
+  | "shot_image"
+  | "shot_video"
+  | "sfx"
 
 export type AssetRefKind = "image" | "video"
 
@@ -153,6 +160,7 @@ export const ASSET_KINDS = [
   "cover",
   "shot_image",
   "shot_video",
+  "sfx",
 ] as const satisfies readonly AssetKind[]
 
 export const ASSET_JOB_STATUSES: readonly AssetJobStatus[] = [

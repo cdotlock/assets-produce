@@ -103,6 +103,7 @@ export const layer = Layer.succeed(
                   | "cover"
                   | "shot_image"
                   | "shot_video"
+                  | "sfx"
                   | null,
                 key: input.key,
                 title: input.title ?? null,

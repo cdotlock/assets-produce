@@ -25,6 +25,7 @@ type AssetType = "image" | "video" | "audio" | "script" | "metadata"
 
 function defaultAssetTypeForKind(kind: AssetKind): AssetType {
   if (kind === "shot_video") return "video"
+  if (kind === "sfx") return "audio"
   return "image"
 }
 

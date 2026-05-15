@@ -162,6 +162,25 @@ describe("HTTP — POST /api/v1/assets/create", () => {
     expect(first.job_id).toBe(second.job_id)
   })
 
+  test("200 accepts the Phase 11 sfx kind through z.enum(ASSET_KINDS)", async () => {
+    const project_id = seedProject()
+    const app = buildApp(project_id)
+    const res = await app.request("/api/v1/assets/create", {
+      method: "POST",
+      headers: { ...authBearer(TOKEN_NAMED), ...json({}) },
+      body: JSON.stringify({
+        project_id,
+        asset_intent: { kind: "sfx", key: "create/sfx", spec_md: "A brief warm doorbell chime" },
+      }),
+    })
+    // The stub generator returns a canned outcome — the point of this test is
+    // only that `kind:"sfx"` is no longer rejected by zod (the AssetKind 收口).
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.status).toBe("queued")
+    expect(body.key).toBe("create/sfx")
+  })
+
   test("400 when body fails zod validation", async () => {
     const project_id = seedProject()
     const app = buildApp(project_id)

@@ -16,7 +16,7 @@ export const AssetTable = sqliteTable(
     // Phase 8 fine-grained asset_intent kind for Asset Service routing.
     // Nullable: legacy rows + assets created outside the Asset Service path
     // (manual uploads, internal CLI tools) may not carry one.
-    kind: text({ enum: ["character_portrait", "scene_bg", "cg", "cover", "shot_image", "shot_video"] }),
+    kind: text({ enum: ["character_portrait", "scene_bg", "cg", "cover", "shot_image", "shot_video", "sfx"] }),
     key: text().notNull(),
     // `title` stays a human display label (set by creator UI).
     title: text(),
