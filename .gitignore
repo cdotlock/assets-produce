@@ -58,3 +58,6 @@ legacy/dev.pid
 agent/packages/opencode/db/
 .claude/
 db/
+
+# Phase 10 e2e scratch dir — see docs/superpowers/specs/phase-10-e2e-log.md
+.e2e/
