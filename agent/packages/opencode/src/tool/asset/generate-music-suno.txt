@@ -1,0 +1,11 @@
+Generate a background music track from a text description with **Suno**.
+
+- STATUS: deterministic placeholder. Suno has no official first-party public API; every public "Suno API" is a reverse-engineered third-party gateway with a different auth / endpoint / async contract. Per spec section 15 row 1.13 the music path stays a placeholder until a Suno gateway is selected (deferred open item).
+- This tool therefore does NOT call Suno, does NOT upload to OSS, and does NOT return an audio URL. It returns a fixed, plainly-identifiable placeholder message with `metadata.placeholder: true`.
+- Required: `prompt` (1-1000 chars) — describe the music, e.g. "Upbeat lo-fi hip hop background track"
+- Optional `duration_seconds` (0 < d <= 300) targets a length; omit to let the (future) model auto-pick
+- Optional `style` — a free-form genre/style hint, e.g. "lo-fi", "epic orchestral"
+- Optional `instrumental` (boolean) — request a vocal-free track
+- For sound effects / foley (not music) use `generate-sfx-elevenlabs` instead — that tool is the full real implementation
+- `dryRun` is accepted for structural parity with the other asset tools; since there is no real upstream to skip it behaves identically to the default path
+- The resolved params are echoed back in `metadata` so a future revision can wire the real gateway without changing the call shape
