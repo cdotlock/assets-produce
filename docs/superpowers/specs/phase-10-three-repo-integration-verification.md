@@ -127,6 +127,34 @@ Plan didn't anticipate the Phase 8 collision where `WebAuthMiddleware` JWT-verif
 | Old MSS files rejected by new schema | N/A — schema change dropped (§5.1). |
 | backend `assets-remix-service.ts` relying on old `throw` behavior | Verified via 73/73 vitest run; no regression. |
 
+## 6.5 Post-review follow-ups (landed after the initial close)
+
+A `superpowers:code-reviewer` pass on the Phase 10 deltas raised 0 CRITICAL / 2 HIGH / 6 MEDIUM findings. The actionable items were fixed before declaring close:
+
+| ID | Where | Fix |
+|---|---|---|
+| H2 | n2m `assets_produce.py:_redact()` / backend `assets-produce-http.ts:redact()` | Scrub `Bearer <token>` and `token`/`authorization` JSON fields from response bodies **before** they enter exception messages. Two new tests per repo pin both shapes. |
+| M1 | n2m `assets_produce.py:117-119` | Replace string-literal `Optional[callable]` annotation with real `Optional[Callable[[float], None]]`. |
+| M2 | backend `assets-produce-http.ts:baseUrl()/token()` | Missing `ASSETS_PRODUCE_BASE_URL` / `_TOKEN` now throws `AssetsProduceBadRequest` (non-retryable) instead of `AssetsProduceUnavailable` / `AssetsProduceAuthError`. BullMQ outbox treats BadRequest as a give-up, avoiding retry-loops on a misconfig only a deploy can fix. |
+| M3 | backend `agent-forge-client.ts:RealBranch` | Extracted `rethrowAgentForgeError` helper with explicit `throw err` after the inner rethrow + typed `view: AssetJobView` in `pollAsset`. Refactors that loosen the `never` annotation now fail at the type checker rather than silently propagating `undefined`. |
+| M4 | n2m `resolve_assets.py:resolve_mapping` | Pair server results with request keys via a dict lookup on `result.query.key` instead of zip-by-index. Server reordering today wouldn't break correctness, but the contract doesn't pin order. New test exercises a rotated response. |
+| M6 | this report (§ below) | Note that plan §1.1.1 referenced `agent/packages/opencode/src/config/asset-service.ts` which doesn't exist; the actual config lives in `business/asset-service/http/auth.ts` via `loadAssetAuthFromEnv` (env-based, no static project map needed). The `<source>_<slug>` naming convention is documented in `.env.example:112-115` and in `docs/ops/three-repo-token-flow.md`. |
+
+Deferred (won't block close): H1 (test-shape mismatch around the envelope-unwrap fallback — clients tolerate both shapes; real server emits the bare object proven by the e2e), M5 (cosmetic ellipsis), L1-L4 (minor / aesthetic).
+
+Commits landed for post-review fixes:
+
+| Repo | SHA | Subject |
+|---|---|---|
+| n2m | `5703424` | fix(phase-10): code-review follow-ups (typing + redact + reorder) — pushed to origin |
+| backend | LOCAL only | fix(phase-10): code-review follow-ups (M2 non-retryable misconfig, M3 defensive throw, H2 token redaction) |
+
+Updated test totals at close:
+
+- assets-produce: 177/177 (unchanged — middleware fix path already covered)
+- n2m: **38/38** (35 + 3 new: 2 redact + 1 reorder)
+- backend: **47/47** (45 + 2 new redact)
+
 ## 7. Sign-off
 
 Phase 10 closes the **mechanical** integration between assets-produce, novels-to-moonscript, and the moonshort-backend client layer. The remaining production gates (backend repo push, live cross-stack e2e, one-week observation) are tracked as F1 / F2 follow-ups and depend on user-side coordination, not on this Phase 10 work.
