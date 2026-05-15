@@ -64,6 +64,15 @@
 
 ## 4. Phase 11 — 音频生产（详细）
 
+### 4.0 修订 1.13（2026-05-15，执行时 Step 1 survey 后落定）
+
+Phase 11 Step 1 survey 独立核实 **Suno 无官方一方公开 API**（仅 beta 合作方；公开"Suno API"全是第三方网关，合约各异）——这正是 § 9.1 预标的"可能需第三方网关"开放项的落点。用户决策（见主 spec § 15 行 1.13）：
+
+- **`generate-sfx-elevenlabs`：完整真实实现**。移植 n2m `skills/sfx-normalizer/elevenlabs_generator.py::ElevenLabsGenerator.generate()`（`POST https://api.elevenlabs.io/v1/sound-generation`，`xi-api-key` 头，同步 mp3 字节）；**不**带 clusterer / `*_orchestrator` / `dry_run` 占位写盘 等耦合件。内联复用 Phase 2 OSS（`src/oss/oss.ts` `put(key,body)→PutResult.url`，content-type 由 key 后缀 `.mp3` 推断）。
+- **`generate-music-suno`：结构对等脚手架 + 确定性占位**。工具文件 / Effect+Schema+never 通道 / `.txt` / `registry.ts` 注册 / `AssetKind` `music` / `DEFAULT_KIND_SKILL_MAP` / `defaultAssetTypeForKind→audio` / `music-spec.md` 全部到位（视频对等脚手架完整），但生成路径返回 `metadata.placeholder=true` 的确定性结果，**无真实上游 HTTP、不真传 OSS**。真实 Suno 网关接入待用户后续选定网关，另起 § 15 修订接通。
+
+下文 § 4.1–§ 4.4 的 `generate-music-suno` "直连 Suno HTTPS API / 返回 OSS URL" 描述按本节降级为占位；`generate-sfx-elevenlabs` 部分不变。
+
 ### 4.1 新增 2 个原子工具
 
 | 工具 id | 文件 | 调用 | 输出 |

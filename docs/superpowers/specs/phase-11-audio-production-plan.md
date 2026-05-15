@@ -1,18 +1,24 @@
 # Phase 11 — 音频生产（music / sfx）Plan
 
-> Spec ref: [§ 10 Phase 11](2026-04-29-assets-produce-spec.md#phase-11--音频生产music--sfx-112) / [§ 15 row 1.12](2026-04-29-assets-produce-spec.md#15-修订记录)
-> Design doc: [2026-05-15-audio-and-asset-parity-design.md](2026-05-15-audio-and-asset-parity-design.md) § 4
+> Spec ref: [§ 10 Phase 11](2026-04-29-assets-produce-spec.md#phase-11--音频生产music--sfx-112-113) / [§ 15 row 1.12 / 1.13](2026-04-29-assets-produce-spec.md#15-修订记录)
+> Design doc: [2026-05-15-audio-and-asset-parity-design.md](2026-05-15-audio-and-asset-parity-design.md) § 4（含 § 4.0 修订 1.13）
+> Survey: [phase-11-survey.md](phase-11-survey.md)（Step 1 产出，已落定 OSS 接口 / n2m 抽离边界 / Suno 无官方 API）
 > Date: 2026-05-15
-> 前置依赖：Phase 8 完成（AssetService / atomic tool 注册框架 / intent-to-skill / asset-service API 就位）；Phase 2 OSS 服务（`agent/packages/opencode/src/oss/oss.ts`）就位。**不依赖 Phase 12**（音频工具内联复用 Phase 2 OSS 服务，不经 oss-put）。
+> **修订 1.13（执行时落定）**：Suno 无官方一方 API → `generate-sfx-elevenlabs` 完整真实实现；`generate-music-suno` 仅结构对等脚手架 + 确定性占位（`metadata.placeholder=true`，无真实上游 HTTP / 不真传 OSS），真实 Suno 网关接入延后为开放项。下文凡 music 工具"直连 Suno / 返回 OSS URL"按此降级为占位。
+> 前置依赖：Phase 8 完成（AssetService / atomic tool 注册框架 / intent-to-skill / asset-service API 就位）；Phase 2 OSS 服务（`agent/packages/opencode/src/oss/oss.ts`，`put(key,body)→PutResult.url`，content-type 由 key 后缀推断）就位。**不依赖 Phase 12**（SFX 工具内联复用 Phase 2 OSS 服务，不经 oss-put；music 占位不真传 OSS）。
 
 ## 0. Decision Table
 
 | Item | Decision | Reason |
 |---|---|---|
-| 范围 | 两个原子工具：`generate-sfx-elevenlabs`（ElevenLabs）+ `generate-music-suno`（Suno）| 设计 §4.1；音效仅移植 n2m 现成合成调用，音乐无现成生成器→新建薄壳 |
+| 范围 | `generate-sfx-elevenlabs`（**完整真实**，移植 n2m 合成调用）+ `generate-music-suno`（**结构对等脚手架 + 确定性占位**，无真实上游）| §15 行 1.13；Suno 无官方 API，用户决定音乐先留占位 |
 | 工具样板 | 严格复刻 `agent/packages/opencode/src/tool/asset/generate-video-seedance.ts` + `.txt` | 设计 §3「严格对等」；Effect + Schema + `never` 错误通道 |
 | 音频 → OSS | 工具内部**内联复用** Phase 2 OSS 服务（`src/oss/oss.ts`）上传、返回永久 OSS https URL | 设计 §4.2；Suno/ElevenLabs 返回字节/临时链非 OSS；这让 Phase 11 不依赖 Phase 12 |
-| Suno 调用 | 直连 Suno HTTPS API（非 FC 端点）；带 `dryRun` / `--mock` 确定性路径 | 设计 §4.1；FC 端点是图像/视频专用 |
+| Suno 调用 | **不调任何 Suno API**；music 工具生成路径恒返回确定性占位（`metadata.placeholder=true` + 固定说明，无 HTTP、不传 OSS）| §15 行 1.13；Suno 无官方 API，网关待用户后续选定 |
+| Suno 网关选定 | 本 phase **不选**；真实接入作开放项延后，待用户决定后走新 §15 修订 | §15 行 1.13 用户决策"后面再说" |
+| SFX 抽离来源（survey 落定）| n2m `skills/sfx-normalizer/elevenlabs_generator.py::ElevenLabsGenerator.generate()` L139–167（`POST /v1/sound-generation`，`xi-api-key`，同步 mp3 字节）| phase-11-survey.md Block B |
+| OSS 上传（survey 落定）| `OSS.Service` 的 `put(key,body)→PutResult.url`；content-type 由 key 后缀 `.mp3` 推断（无 content-type 入参）；`yield* OSS.Service` + `OSS.defaultLayer` | phase-11-survey.md Block A |
+| 测试命令（survey 落定）| `PATH=$HOME/.bun/bin:$PATH bun --cwd=agent/packages/opencode run test`（根 `agent` test 脚本被 guard 成 exit 1）| phase-11-survey.md Baseline |
 | ElevenLabs 抽离边界 | 只移植 novels-to-moonscript 的「声效合成 HTTP 调用」；**不**带其归类/语义映射 | 设计 §2.2 / §9.2；禁 import n2m |
 | AssetKind 扩展 | `types.ts` 的 `AssetKind` union + `ASSET_KINDS` 元组追加 `"music"` `"sfx"` | 设计 §4.3；asset-service `z.enum(ASSET_KINDS)` 自动收口，API 层零改 |
 | AssetType | 不改类型；music/sfx 经 `defaultAssetTypeForKind()` → 已有的 `"audio"` | 设计 §3；`AssetType` union 已含 audio |
@@ -42,10 +48,11 @@
 
 - `agent/packages/opencode/src/tool/asset/generate-music-suno.ts`
 - `agent/packages/opencode/src/tool/asset/generate-music-suno.txt`
-- 同 §1.2 形状，复用 §1.2 建立的 wrapper 模式
-- 输入 schema：`prompt`、`duration_seconds`（上限）、可选 `style` / `instrumental` flag、`dryRun`
-- 内部：直连 Suno HTTPS API（若 Suno 异步则工具内封装 job poll + 超时）→ 拿音频 → 内联调 Phase 2 OSS 服务上传 → 返回 OSS URL
-- `dryRun` / `--mock`：确定性占位
+- 同 §1.2 **形状**（Effect + Schema + `never` 通道 + `.txt` sidecar），结构对等脚手架完整
+- 输入 schema：`prompt`、`duration_seconds`（上限）、可选 `style` / `instrumental` flag、`dryRun`（schema 卡边界与 SFX 同标准，保证结构对等）
+- 内部（**1.13 占位**）：**不调任何 Suno API、不传 OSS**；恒返回确定性结果 `{ title, output:"<固定说明：music generation pending Suno gateway selection — spec §15 row 1.13>", metadata:{ placeholder:true } }`
+- 不引入"伪装真实"的假音频/假 OSS URL（YAGNI）；占位即占位，明确可识别
+- 真实 Suno 网关接入为开放项，待用户选定网关后走新 §15 修订补真实路径（届时复用 §1.2 wrapper 模式 + Phase 2 OSS）
 
 ### 1.4 工具注册
 
@@ -123,21 +130,21 @@
 - 单元：asset-service `create {kind:"sfx"}` `z.enum` 校验通过（返回 stub，符合非目标）
 - `bun --cwd=agent run test` 全过
 
-### Step 4 — `generate-music-suno` 原子工具（TDD）
+### Step 4 — `generate-music-suno` 原子工具（结构对等脚手架 + 确定性占位，TDD）
 
 预期输出：
 
-- `generate-music-suno.ts` + `.txt` 落盘，复用 Step 2 wrapper 模式
-- Suno 异步 job poll（如适用）在工具内封装 + 超时折叠
-- 内联调 Phase 2 OSS 服务、返回 OSS URL
+- `generate-music-suno.ts` + `.txt` 落盘，形状对齐 seedance / SFX（Effect + Schema + `never` 通道）
+- 输入 schema 与 §1.3 一致（prompt / duration_seconds / style? / instrumental? / dryRun），卡边界标准与 SFX 同
+- 生成路径**恒返回确定性占位**：`metadata.placeholder=true` + 固定说明文案，**无任何 Suno HTTP、不调 OSS**
 
 测试：
 
-- 单元：mock Suno HTTP（含 poll）+ mock OSS → 返回 OSS URL 形状
-- schema 测试：非法 prompt / duration 越界 / 缺参
-- `dryRun` 确定性占位
-- 错误折叠：Suno 鉴权失败 / 5xx / poll 超时 → 折进结果不抛
-- `bun --cwd=agent run typecheck` 全过
+- 单元：调用 → 断言返回 `metadata.placeholder===true` 且 `output` 含固定说明文案，且**未发起任何 HTTP / 未调用 OSS**（注入式断言无副作用）
+- schema 测试：非法 prompt / duration 越界 / 缺参 → schema 拒绝（结构对等校验）
+- `dryRun` 路径：与默认路径一致的确定性占位（无副作用）
+- 确定性：同输入多次调用输出稳定一致
+- `PATH=$HOME/.bun/bin:$PATH bun --cwd=agent run typecheck` 全过
 
 ### Step 5 — `generate-music-suno` 注册 + AssetKind `music`
 
@@ -183,14 +190,15 @@
 
 预期输出：
 
-- `agent` 会话加载 `music-spec` → LLM 调 `generate-music-suno` → 真实 Suno → 真实 OSS URL（dev key）
-- 同 `sfx-spec` → `generate-sfx-elevenlabs` → 真实 OSS URL
+- `agent` 会话加载 `sfx-spec` → LLM 调 `generate-sfx-elevenlabs` → 真实 ElevenLabs（dev key，若用户已配）→ 真实 OSS URL
+- `agent` 会话加载 `music-spec` → LLM 调 `generate-music-suno` → **确定性占位**（`metadata.placeholder=true`，符合 §15 行 1.13，不算缺陷）
 - REST API `create {kind:music|sfx}` 校验通过、返回 stub（符合非目标，记入 verification）
 
 测试：
 
-- 本机：`agent run`（session）跑 `music-spec` / `sfx-spec` 各出 1 个可访问 OSS URL
-- `curl -X POST /api/v1/assets/create {kind:"music"}` → 200 + stub url（kind 校验通过）
+- 本机：`agent run`（session）跑 `sfx-spec` 出 1 个可访问 OSS URL（需 `ELEVENLABS_API_KEY`；无 key 则记为延后 + 跑 mock 路径）
+- 本机：`agent run`（session）跑 `music-spec` → 断言返回占位（`metadata.placeholder=true`）
+- `curl -X POST /api/v1/assets/create {kind:"music"}` / `{kind:"sfx"}` → 200 + stub url（kind 校验通过）
 - 沿用 Phase 10 惯例：CI 不要求 e2e
 
 ### Step 9 — Acceptance 自检 + verification
@@ -224,8 +232,10 @@
 
 | 风险 | 概率 | 影响 | 缓解 |
 |---|---|---|---|
-| Suno 商用授权（音乐随 App 发终端用户）| 中 | 高 | 假设用户用带商用权 Suno 付费计划；记 ops 开放项；Step 1 确认 endpoint/鉴权；非设计阻塞 |
-| Suno API 异步 / 限流 / 可能需第三方网关 | 中 | 中 | Step 1 调研确认；工具内封装 job poll + 超时折叠为错误；endpoint 走 env 不硬编码 |
+| Suno 无官方 API（survey 已落定）| 已发生 | 中 | 用户决策（§15 行 1.13）：music 留确定性占位，不选网关；真实接入延后为开放项，不阻塞本 phase |
+| music 占位被误判"没做完" | 中 | 低 | §15 行 1.13 + 本 plan + verification 写死占位为有意决策；验收按"占位确定性 + 结构对等完整"判定 |
+| 后续接真实 Suno 时脚手架不匹配 | 低 | 中 | 占位工具 schema/形状与 SFX 严格对等，留好 §1.3 wrapper 接入点；真实路径走新 §15 修订增量补 |
+| Suno 商用授权未确认 | 中 | 低 | 用户选"按 ops 风险推进"；记 spec §13 / verification 开放项；商用发布前由用户敲定（非技术阻塞）|
 | 从 n2m 抽 ElevenLabs 误拖归类耦合 | 中 | 中 | 抽离边界在 Step 1 写死（只移植合成 HTTP 调用）；禁 import n2m；grep 全调用面 |
 | 音频二进制体积 / content-type / 时长 | 中 | 中 | 输入 schema 卡时长上限；OSS 上传显式设 content-type；超限折叠为错误 |
 | 经 REST API 仍 stub 被误判「没做完」| 中 | 低 | §2.2 非目标 + Decision Table 写死；验收按 CLI/Session 出真活 + API 校验通过判定 |
@@ -234,6 +244,7 @@
 ## 4. Out-of-Scope（本 phase 不做）
 
 - 碰 `placeholderGenerator` / asset-service 注入的 `deps.generator`（经 REST API 仍 stub，与视频一致）
+- **选定 / 接入任何 Suno 第三方网关**（§15 行 1.13；music 留确定性占位，真实接入延后为开放项，待用户后续决定走新 §15 修订）
 - 接真编排循环（Phase 8 旧债，另起独立项目）
 - 迁 n2m 聚类 / 归类 / 语义映射；改 novels-to-moonscript 本身
 - Phase 12 的 `oss-put`（音频工具内联调 OSS 服务，不依赖 Phase 12）
@@ -241,12 +252,12 @@
 
 ## 5. Acceptance Checklist（对齐 master spec §10 Phase 11）
 
-- [ ] `generate-music-suno` / `generate-sfx-elevenlabs` 在 `agent tools list` 出现，`agent tools show` 输出 schema 完整
-- [ ] 单元 / schema / 错误矩阵 ≥ 80% 行覆盖；mock 上游 + mock OSS
-- [ ] CLI/Session 跑 `music-spec` / `sfx-spec` 出真实 OSS URL（dev key）
+- [ ] `generate-sfx-elevenlabs` / `generate-music-suno` 在 `agent tools list` 出现，`agent tools show` 输出 schema 完整（结构对等）
+- [ ] SFX 单元 / schema / 错误矩阵 ≥ 80% 行覆盖（mock ElevenLabs + mock OSS）；music 占位确定性 + 无副作用测试
+- [ ] CLI/Session 跑 `sfx-spec` 出真实 OSS URL（dev key；无 key 记延后 + mock 路径）；跑 `music-spec` 返回确定性占位 `metadata.placeholder=true`（符合 §15 行 1.13，不算缺陷）
 - [ ] REST API `create {kind:"music"|"sfx"}` 校验通过、返回 stub（符合非目标）
-- [ ] `AssetKind` / `ASSET_KINDS` / `DEFAULT_KIND_SKILL_MAP` / `defaultAssetTypeForKind` 四处收口一致
-- [ ] `bun --cwd=agent run typecheck` / `bun --cwd=agent run test` 全过；`bun --cwd=web run typecheck` / `bun --cwd=web run build` 全过
-- [ ] `knowledge/asset-generation/music-spec.md` / `sfx-spec.md` 各 ≥ 30 行
-- [ ] `phase-11-audio-production-verification.md` 完成
+- [ ] `AssetKind` / `ASSET_KINDS` / `DEFAULT_KIND_SKILL_MAP` / `defaultAssetTypeForKind` 四处 `music`+`sfx` 收口一致
+- [ ] `PATH=$HOME/.bun/bin:$PATH bun --cwd=agent run typecheck` / `bun --cwd=agent/packages/opencode run test` 全过；`bun --cwd=web run typecheck` / `bun --cwd=web run build` 全过
+- [ ] `knowledge/asset-generation/sfx-spec.md` ≥ 30 行；`music-spec.md` ≥ 30 行且明确标注占位态 + §15 行 1.13
+- [ ] `phase-11-audio-production-verification.md` 完成（music 占位 + Suno 接入开放项明确记录）
 - [ ] 所有 atomic commit push 到 origin/main

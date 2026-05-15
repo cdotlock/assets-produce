@@ -571,30 +571,32 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 
 ---
 
-### Phase 11 — 音频生产（music / sfx）⚠ 1.12
+### Phase 11 — 音频生产（music / sfx）⚠ 1.12 ⚠ 1.13
 
-**目标**：给 assets-produce 加音乐、音效两类素材生产能力，严格复刻视频对等模板。详细设计见 [`2026-05-15-audio-and-asset-parity-design.md`](2026-05-15-audio-and-asset-parity-design.md) § 4。
+**目标**：给 assets-produce 加音乐、音效两类素材生产能力，严格复刻视频对等模板。详细设计见 [`2026-05-15-audio-and-asset-parity-design.md`](2026-05-15-audio-and-asset-parity-design.md) § 4。**1.13 调整**：Suno 无官方一方 API，用户决定音乐生成先留占位；SFX 完整真实实现。
 
 **范围**：
 
-- 新增原子工具 `generate-music-suno`（直连 Suno HTTPS API）+ `generate-sfx-elevenlabs`（仅移植 novels-to-moonscript 的 ElevenLabs 合成调用，不带其归类逻辑）
-- 两工具内部复用 Phase 2 OSS 服务上传音频、返回 OSS URL（**不依赖 Phase 12**）
+- `generate-sfx-elevenlabs`（**完整真实实现**）：移植 novels-to-moonscript `skills/sfx-normalizer/elevenlabs_generator.py::ElevenLabsGenerator.generate()` 的合成调用（`POST /v1/sound-generation`，`xi-api-key`，同步 mp3 字节），**不**带其 clusterer/orchestrator/dry_run-占位 等耦合件
+- `generate-music-suno`（**结构对等脚手架 + 确定性占位**）：工具文件 + Effect/Schema/never 通道 + `.txt` + 注册 + AssetKind 全部到位，但生成路径为 `metadata.placeholder=true` 的确定性返回（无真实上游 HTTP）；真实 Suno 网关接入延后（§15 行 1.13 开放项）
+- 两工具内部复用 Phase 2 OSS 服务（`src/oss/oss.ts` `put`，content-type 由 `.mp3` key 后缀推断）上传音频、返回 OSS URL（**不依赖 Phase 12**）；music 占位路径不产真实音频，故不真上传
 - `AssetKind` + `ASSET_KINDS` 加 `music` / `sfx`；`DEFAULT_KIND_SKILL_MAP` 加两条；`defaultAssetTypeForKind()` 映 `audio`
-- 注册到 opencode 工具表；新增 `knowledge/asset-generation/music-spec.md` / `sfx-spec.md`
+- 注册到 opencode 工具表；新增 `knowledge/asset-generation/music-spec.md`（标注占位态）/ `sfx-spec.md`
 
 **不做**：
 
-- 不碰 `placeholderGenerator`；经 REST API 仍 stub（与视频一致，验收按此判定）
+- 不碰 `placeholderGenerator`；经 REST API 仍 stub（与视频一致，验收按此判定）。music 工具内的确定性占位与 asset-service `placeholderGenerator` 无关，是工具自包含返回
+- 不选定 / 不接入任何 Suno 第三方网关（待用户后续决定，走新 §15 修订）
 - 不迁 n2m 聚类/归类；不改 novels-to-moonscript 本身
 - 不接真编排循环（Phase 8 旧债，另起独立项目）
 
 **验收**：
 
-- `generate-music-suno` / `generate-sfx-elevenlabs` 在 `agent tools list` 出现，schema 完整
-- 单元/schema/错误矩阵 ≥ 80% 行覆盖；mock 上游 + mock OSS
-- CLI/Session 跑 `music-spec` / `sfx-spec` 出真实 OSS URL（dev key）
+- `generate-sfx-elevenlabs` / `generate-music-suno` 在 `agent tools list` 出现，schema 完整
+- 单元/schema/错误矩阵 ≥ 80% 行覆盖；SFX mock 上游 + mock OSS；music 占位路径确定性输出测试
+- CLI/Session 跑 `sfx-spec` 出**真实 OSS URL**（dev key）；跑 `music-spec` 返回**确定性占位**（`metadata.placeholder=true`，符合 1.13 决策，不算缺陷）
 - REST API `create {kind:"music"|"sfx"}` 校验通过、返回 stub（符合非目标）
-- phase-11 plan + verification report 齐
+- phase-11 plan + verification report 齐（verification 明确标注 music 占位为 1.13 决策、Suno 接入为开放项）
 - commit + push 到 main
 
 ---
@@ -759,6 +761,8 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 | 1.10 | 2026-05-14 | 用户要求把 assets-produce 与 `cdotlock/novels-to-moonscript` 和 `cdotlock/moonshort-backend` 真正接通，并把 backend 内的素材生产能力（CG / sync-to-oss / upscale）迁回 assets-produce。约束：moonshort-backend 不是用户维护，最小改动；novels-to-moonscript 与 assets-produce 由用户维护，可正常改造；技术要 AI-native（mini agent loop + skill 编排，不写新的硬编码 service）。新增 Phase 8 / 9 / 10：Phase 8 在 assets-produce 内立起 4 个对外操作（`asset.create` / `asset.status` / `asset.lookup` / `asset.catalog.since`）REST + MCP 双层；Phase 9 把 CG / OSS-sync / upscale 三件工具搬到 `tools/`，挂上 atomic tools；Phase 10 让 novels-to-moonscript 加 lookup client、moonshort-backend `agent-forge-client.ts` real mode 切到 HTTP to assets-produce（不动 `assets-remix-service.ts` 接口、不动 outbox/BullMQ）。完整设计见 `2026-05-14-three-repo-asset-integration-design.md`。影响范围：assets-produce 对外形态、跨仓集成；不改 § 2 原子能力 + skill 编排原则（mini agent loop 本质就是 LLM + skill body + atomic tools 的运行回路，非硬编码流水线 service），不改 § 11.4 接口稳定（Phase 8 落地后 4 个对外操作即 lock-in 起点）。 | cdotlock + Claude |
 | 1.11 | 2026-05-15 | Phase 8 落地时确认：design doc § 5.6 假设 "opencode 已有 inbound MCP server skeleton（agent/packages/opencode/src/server/mcp/, Phase 5/6 已搭起）"，**实际不存在**。仓内 `src/mcp/` 是 outbound MCP client（连接外部 MCP server），phase-6 plan 只列了 MCP 客户端管理命令，没有 server skeleton 工作。决策：Phase 8 推迟 MCP 暴露 — 4 个 REST 端点已经覆盖 Phase 9 / Phase 10 三仓接通用例；MCP 暴露另起独立 phase，需要先决定 transport（StreamableHTTP vs stdio）和 auth shim。Phase 8 acceptance 第 5 条 "MCP tools 在 agent serve 后能被 MCP client 列出" 改为 "deferred；4 REST 端点已满足 Phase 10 接通需要"。Phase 8 plan 第 244-256 行 Step 5 整段在 verification report 标为 deferred。影响范围：Phase 8 暴露面（仅 REST，无 MCP）；不动 § 2 / § 11.4 / Phase 9 / Phase 10 设计。 | cdotlock + Claude |
 | 1.12 | 2026-05-15 | 用户要求把音乐 / 音效 / CG-OSS-图片处理也做成与视频严格对等的素材生产能力（原子工具 + skill body + AssetKind + asset-service API 自动收口），沿用之前视频的完整流程。Brainstorming 核实事实纠正了用户两处前提：(a) 音乐**无现成生成器**可迁（novels-to-moonscript 仅做名字归类 + 替换人工 mp3 的 URL），仅音效有真生成器（n2m 内 ElevenLabs 声效 API，且与其归类管线耦合）；(b) asset-service REST API 路径用 `placeholderGenerator` 返回 stub，**视频经 API 本身也是 stub**，真编排循环是 Phase 8 旧债。用户决策（选项 B）：严格结构对等，**不碰 `placeholderGenerator`**、不接真编排循环（旧债另起独立项目）；音乐新建原子工具调 Suno（商用授权假设用户用带商用权付费计划，记为 ops 风险）、音效仅移植 n2m 的 ElevenLabs 合成调用、n2m 聚类/归类不迁、不改 novels-to-moonscript 本身。新增 Phase 11（音频：`generate-music-suno` + `generate-sfx-elevenlabs`，内联复用 Phase 2 OSS 服务，不依赖 Phase 12）/ Phase 12（单文件 `oss-put` 原子工具 + cg-render/upscale 经 skill 编排补 OSS URL 对等）/ Phase 13（backend 图片处理套件迁回作 Phase 9 式 Python 原子工具），顺序 11→12→13。完整设计见 `2026-05-15-audio-and-asset-parity-design.md`。影响范围：新增三类素材生产能力 + 三 phase；不改 § 2 原子能力 + skill 编排原则（新工具均为 LLM 经 skill 编排调用的原子能力，非硬编码流水线 service），不改 § 11.4 接口稳定（音频 AssetKind 落地后即 lock-in 起点），明确不动 Phase 8 placeholderGenerator / asset-service 注入点。 | cdotlock + Claude |
+
+| 1.13 | 2026-05-15 | Phase 11 Step 1 survey 独立核实：**Suno 无官方一方公开 API**（仅 beta 合作方；所有公开"Suno API"均为第三方网关，endpoint/鉴权/异步合约各不相同，且各带自身商用条款）。这正是 § 15 行 1.12 / 设计 § 9.1 预先标注的"可能需第三方网关"ops 开放项的落点。用户决策：**音乐生成先留占位（"后面再说"），不在本轮选定 Suno 网关**；Suno key 先 mock、稍后补；商用授权未确认，按 ops 风险推进。因此 Phase 11 范围调整：(a) `generate-sfx-elevenlabs` 照原计划**完整真实实现**——移植 n2m `skills/sfx-normalizer/elevenlabs_generator.py::ElevenLabsGenerator.generate()`（`POST https://api.elevenlabs.io/v1/sound-generation`，`xi-api-key` 头，同步 mp3 字节），内联复用 Phase 2 OSS 服务（`src/oss/oss.ts` 的 `put(key,body)→PutResult.url`，content-type 由 key 后缀 `.mp3` 推断）；**不**移植 n2m 的 clusterer/orchestrator/dry_run 占位写盘等耦合件。(b) `generate-music-suno` 保留**完整结构对等脚手架**（工具文件 + Effect/Schema/never 通道 + `.txt` + `registry.ts` 注册 + `AssetKind`/`ASSET_KINDS` `music` + `DEFAULT_KIND_SKILL_MAP` + `defaultAssetTypeForKind→audio` + `music-spec.md`），但生成路径为**确定性占位**（`metadata.placeholder=true` + 固定说明，无真实上游 HTTP），真实 Suno 网关接入作为本行开放项延后，待用户后续选定网关再走新 §15 修订接通。影响范围：仅 Phase 11 范围内 music 工具的"生成"深度（结构对等不变、视频对等脚手架完整）；不改 § 2 原子能力 + skill 编排原则，不改 § 11.4（`music` AssetKind 落地后仍为 lock-in 起点），不动 Phase 8 placeholderGenerator / asset-service 注入点（音乐占位是工具内自包含确定性返回，与 asset-service `placeholderGenerator` 无关）。 | cdotlock + Claude |
 
 > 后续修订请在此追加新行，并在受影响的 phase 章节加 ⚠ 标记 + 引用本表行号。
 
