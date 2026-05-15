@@ -9,6 +9,11 @@ import DESCRIPTION from "./oss-put.txt"
 
 const TOOL_ID = "oss-put"
 const DEFAULT_PREFIX = "assets"
+// Upper bound on the local file we will read into memory before uploading.
+// 512 MiB comfortably covers image / short-video / audio assets while turning a
+// runaway path (e.g. /dev/zero) into a clean folded error instead of an OOM.
+// Idiom-consistent with generate-sfx-elevenlabs.ts's MIN_AUDIO_BYTES floor.
+const MAX_UPLOAD_BYTES = 512 * 1024 * 1024
 
 // content_type → key extension. ali-oss infers the HTTP content-type from the
 // object key's file extension; when the local file has no extension we use
@@ -48,6 +53,9 @@ export type OssPutUploader = (key: string, body: Buffer) => Promise<string>
 
 export interface MakeOssPutToolOpts {
   uploader?: OssPutUploader
+  // Override the upload size cap (bytes). Lets tests exercise the limit
+  // without materializing a multi-hundred-MiB temp file.
+  maxUploadBytes?: number
 }
 
 const defaultUploader: OssPutUploader = (key, body) =>
@@ -59,16 +67,29 @@ const defaultUploader: OssPutUploader = (key, body) =>
     }).pipe(Effect.provide(OSS.defaultLayer)) as Effect.Effect<string, unknown, never>,
   )
 
-function chooseExtension(resolved: string, contentType: string | undefined): string {
+interface ChosenExtension {
+  ext: string
+  // True only when the `content_type` hint actually determined the key
+  // extension (local file had none AND the hint mapped to a known ext). When
+  // false, OSS infers content-type purely from the file's own extension, so
+  // echoing the caller's `content_type` would over-promise — see metadata gate.
+  fromContentType: boolean
+}
+
+function chooseExtension(resolved: string, contentType: string | undefined): ChosenExtension {
   // Prefer the local file's own extension; fall back to a content_type hint.
   const ext = path.extname(resolved)
-  if (ext) return ext
-  if (contentType) return CONTENT_TYPE_EXT[contentType.toLowerCase()] ?? ""
-  return ""
+  if (ext) return { ext, fromContentType: false }
+  if (contentType) {
+    const mapped = CONTENT_TYPE_EXT[contentType.toLowerCase()]
+    if (mapped) return { ext: mapped, fromContentType: true }
+  }
+  return { ext: "", fromContentType: false }
 }
 
 export function makeOssPutTool(opts: MakeOssPutToolOpts = {}) {
   const uploader = opts.uploader ?? defaultUploader
+  const maxUploadBytes = opts.maxUploadBytes ?? MAX_UPLOAD_BYTES
 
   return Tool.define<typeof Parameters, Record<string, unknown>, never>(
     TOOL_ID,
@@ -108,9 +129,17 @@ export function makeOssPutTool(opts: MakeOssPutToolOpts = {}) {
             if (stat.size === 0) {
               return yield* Effect.fail(new Error(`${TOOL_ID}: local_path is empty (0 bytes): ${resolved}`))
             }
+            // Reject oversize BEFORE reading the file into memory.
+            if (stat.size > maxUploadBytes) {
+              return yield* Effect.fail(
+                new Error(
+                  `${TOOL_ID}: local_path is ${stat.size} bytes, exceeds the ${maxUploadBytes}-byte upload limit: ${resolved}`,
+                ),
+              )
+            }
 
-            const ext = chooseExtension(resolved, params.content_type)
-            const key = `${prefix}/${randomUUID()}${ext}`
+            const chosen = chooseExtension(resolved, params.content_type)
+            const key = `${prefix}/${randomUUID()}${chosen.ext}`
 
             if (params.dryRun) {
               return {
@@ -140,7 +169,12 @@ export function makeOssPutTool(opts: MakeOssPutToolOpts = {}) {
                 truncated: false,
                 ossUrl,
                 key,
-                content_type: params.content_type,
+                // Only advertise content_type when the hint actually drove
+                // the key extension. If the local file had its own extension,
+                // OSS infers type from that and the caller's content_type was
+                // ignored — echoing it would advertise a type the served
+                // object will not have, which an LLM could wrongly chain on.
+                ...(chosen.fromContentType ? { content_type: params.content_type } : {}),
                 local_path: resolved,
               },
             }

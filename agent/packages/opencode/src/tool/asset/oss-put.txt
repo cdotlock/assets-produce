@@ -3,6 +3,7 @@ Upload a local file to Aliyun OSS and return a permanent public https URL.
 - Use this to turn a LOCAL file path produced by another tool (e.g. `cg-render`, `upscale-image`) into a permanent OSS URL, so the result can be chained into URL-only tools or returned to the user
 - `local_path` must be an absolute path to an existing, non-empty regular file (typically the output of a prior tool in this run)
 - Returns the bare https URL of the uploaded object
-- The object key is a random UUID under `oss_prefix` (default `assets`); content-type is inferred by OSS from the key's file extension, which is taken from the local file's extension (or from `content_type` when the file has none)
-- Failures (path not absolute / missing / empty / OSS upload error) surface as the tool output text — nothing is thrown
+- The object key is a random UUID under `oss_prefix` (default `assets`); OSS infers the served content-type from the key's file extension
+- Content-type precedence: the uploaded file's OWN extension always wins. `content_type` is only a fallback used when the local file has no extension; if the file already has an extension, `content_type` is advisory and ignored (it will not change the served type, and is not echoed back)
+- Failures (path not absolute / missing / empty / over the size limit / OSS upload error) surface as the tool output text — nothing is thrown
 - Set `dryRun: true` to preview the resolved upload key without calling OSS (testing only — never set in production)

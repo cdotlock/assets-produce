@@ -44,8 +44,8 @@ function stubUploader(
   }
 }
 
-async function buildExec(uploader = stubUploader()) {
-  const info = await runtime.runPromise(makeOssPutTool({ uploader }))
+async function buildExec(uploader = stubUploader(), maxUploadBytes?: number) {
+  const info = await runtime.runPromise(makeOssPutTool({ uploader, maxUploadBytes }))
   return Effect.runPromise(info.init())
 }
 
@@ -116,7 +116,7 @@ describe("oss-put atomic tool", () => {
     expect(out.output).toContain("/assets/cg/")
   })
 
-  test("content_type selects key extension when local file has none", async () => {
+  test("content_type selects key extension when local file has none (and is echoed)", async () => {
     const ossCalls: OssCall[] = []
     const def = await buildExec(stubUploader(ossCalls))
     const local = tmpFile("noext", Buffer.alloc(64, 2))
@@ -126,8 +126,55 @@ describe("oss-put atomic tool", () => {
     )
 
     expect(ossCalls[0]!.key).toMatch(/^assets\/.+\.jpg$/)
+    // Hint actually drove the extension → it is advertised.
     const meta = out.metadata as { content_type?: string }
     expect(meta.content_type).toBe("image/jpeg")
+  })
+
+  test("content_type is NOT echoed when the local file already has an extension", async () => {
+    const ossCalls: OssCall[] = []
+    const def = await buildExec(stubUploader(ossCalls))
+    const local = tmpFile("frame.png", Buffer.alloc(64, 4))
+
+    // Contradictory hint: file is .png but caller claims jpeg. OSS infers from
+    // the .png key, so the hint is ignored — metadata must not over-promise.
+    const out = await runtime.runPromise(
+      def.execute({ local_path: local, content_type: "image/jpeg" }, ctx()),
+    )
+
+    expect(ossCalls[0]!.key).toMatch(/^assets\/.+\.png$/)
+    const meta = out.metadata as { content_type?: string; ossUrl?: string; key?: string }
+    expect("content_type" in meta).toBe(false)
+    expect(meta.ossUrl).toBe(out.output)
+    expect(meta.key).toBe(ossCalls[0]!.key)
+  })
+
+  test("oss_prefix of only slashes trims to empty → falls back to assets/ default", async () => {
+    const ossCalls: OssCall[] = []
+    const def = await buildExec(stubUploader(ossCalls))
+    const local = tmpFile("pic.png", Buffer.alloc(64, 6))
+
+    const out = await runtime.runPromise(
+      def.execute({ local_path: local, oss_prefix: "///" }, ctx()),
+    )
+
+    expect(ossCalls[0]!.key).toMatch(/^assets\/.+\.png$/)
+    expect(out.output).toContain("/assets/")
+  })
+
+  test("file over maxUploadBytes → folded error before read, uploader not called, message states limit", async () => {
+    const ossCalls: OssCall[] = []
+    // Inject a tiny cap so a small real temp file trips it (no giant file).
+    const def = await buildExec(stubUploader(ossCalls), 4)
+    const local = tmpFile("big.png", Buffer.alloc(64, 7))
+
+    const out = await runtime.runPromise(def.execute({ local_path: local }, ctx()))
+
+    expect(ossCalls).toHaveLength(0)
+    expect(out.title.endsWith("failed")).toBe(true)
+    expect((out.metadata as { error?: boolean }).error).toBe(true)
+    expect(out.output).toContain("4-byte upload limit")
+    expect(out.output).toContain("64 bytes")
   })
 
   test("non-existent path → folded error, metadata.error true, uploader not called", async () => {
