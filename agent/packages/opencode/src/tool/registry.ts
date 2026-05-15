@@ -16,6 +16,7 @@ import { GenerateImageNanobananaTool } from "./asset/generate-image-nanobanana"
 import { GenerateImageGptTool } from "./asset/generate-image-gpt"
 import { GenerateVideoSeedanceTool } from "./asset/generate-video-seedance"
 import { GenerateSfxElevenlabsTool } from "./asset/generate-sfx-elevenlabs"
+import { GenerateMusicSunoTool } from "./asset/generate-music-suno"
 import { ConcatClipsTool } from "./asset/concat-clips"
 import { CropVideoTool } from "./asset/crop-video"
 import { GenerateVideoHappyHorseTool } from "./asset/generate-video-happyhorse"
@@ -128,6 +129,7 @@ export const layer: Layer.Layer<
     const generateImageGpt = yield* GenerateImageGptTool
     const generateVideoSeedance = yield* GenerateVideoSeedanceTool
     const generateSfxElevenlabs = yield* GenerateSfxElevenlabsTool
+    const generateMusicSuno = yield* GenerateMusicSunoTool
     const concatClips = yield* ConcatClipsTool
     const cropVideo = yield* CropVideoTool
     const generateVideoHappyHorse = yield* GenerateVideoHappyHorseTool
@@ -226,6 +228,7 @@ export const layer: Layer.Layer<
           generateImageGpt: Tool.init(generateImageGpt),
           generateVideoSeedance: Tool.init(generateVideoSeedance),
           generateSfxElevenlabs: Tool.init(generateSfxElevenlabs),
+          generateMusicSuno: Tool.init(generateMusicSuno),
           concatClips: Tool.init(concatClips),
           cropVideo: Tool.init(cropVideo),
           generateVideoHappyHorse: Tool.init(generateVideoHappyHorse),
@@ -255,6 +258,7 @@ export const layer: Layer.Layer<
             tool.generateImageGpt,
             tool.generateVideoSeedance,
             tool.generateSfxElevenlabs,
+            tool.generateMusicSuno,
             tool.concatClips,
             tool.cropVideo,
             tool.generateVideoHappyHorse,

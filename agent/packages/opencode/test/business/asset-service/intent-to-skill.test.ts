@@ -69,6 +69,9 @@ describe("intentToSkill — default kind map", () => {
   test("sfx → sfx-spec (Phase 11 audio kind)", async () => {
     expect(await intentToSkill({ intent: intent({ kind: "sfx" }) })).toBe("sfx-spec")
   })
+  test("music → music-spec (Phase 11 audio kind)", async () => {
+    expect(await intentToSkill({ intent: intent({ kind: "music" }) })).toBe("music-spec")
+  })
 })
 
 describe("intentToSkill — picker injection", () => {
@@ -160,6 +163,7 @@ describe("intentToSkill — sanity asserts on internal tables", () => {
       "shot_image",
       "shot_video",
       "sfx",
+      "music",
     ]
     for (const k of kinds) {
       const skill = DEFAULT_KIND_SKILL_MAP[k]
@@ -168,7 +172,7 @@ describe("intentToSkill — sanity asserts on internal tables", () => {
     }
   })
 
-  test("ASSET_GENERATION_SKILLS lists the Phase 8 skill bodies plus the Phase 11 sfx body", () => {
+  test("ASSET_GENERATION_SKILLS lists the Phase 8 skill bodies plus the Phase 11 sfx + music bodies", () => {
     const actual: string[] = [...ASSET_GENERATION_SKILLS]
     const expected: string[] = [
       "character-portrait-spec",
@@ -177,6 +181,7 @@ describe("intentToSkill — sanity asserts on internal tables", () => {
       "cover-spec",
       "shot-image-from-mss",
       "sfx-spec",
+      "music-spec",
     ]
     expect(actual.sort()).toEqual(expected.sort())
   })

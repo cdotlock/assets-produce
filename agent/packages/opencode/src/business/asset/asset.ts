@@ -104,6 +104,7 @@ export const layer = Layer.succeed(
                   | "shot_image"
                   | "shot_video"
                   | "sfx"
+                  | "music"
                   | null,
                 key: input.key,
                 title: input.title ?? null,

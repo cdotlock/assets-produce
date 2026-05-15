@@ -60,10 +60,10 @@ describe("Phase 8 Step 2 — Asset & AssetJob schema", () => {
     expect(row.time_updated).toBeGreaterThanOrEqual(before)
   })
 
-  test("AssetTable.kind round-trips every Phase 8 sub-type + the Phase 11 sfx kind", () => {
+  test("AssetTable.kind round-trips every Phase 8 sub-type + the Phase 11 sfx & music kinds", () => {
     const pid = seedProject()
     const db = Database.Client()
-    const kinds = ["character_portrait", "scene_bg", "cg", "cover", "shot_image", "shot_video", "sfx"] as const
+    const kinds = ["character_portrait", "scene_bg", "cg", "cover", "shot_image", "shot_video", "sfx", "music"] as const
     for (const k of kinds) {
       const aid = assetIdSeq()
       db.insert(AssetTable)

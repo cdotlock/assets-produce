@@ -14,6 +14,7 @@ export type AssetKind =
   | "shot_image"
   | "shot_video"
   | "sfx"
+  | "music"
 
 export type AssetRefKind = "image" | "video"
 
@@ -161,6 +162,7 @@ export const ASSET_KINDS = [
   "shot_image",
   "shot_video",
   "sfx",
+  "music",
 ] as const satisfies readonly AssetKind[]
 
 export const ASSET_JOB_STATUSES: readonly AssetJobStatus[] = [
