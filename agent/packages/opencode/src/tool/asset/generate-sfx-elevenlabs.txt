@@ -1,0 +1,13 @@
+Generate a single sound effect from a text description with **ElevenLabs sound-generation** and store it.
+
+- Returns a permanent OSS URL of the generated sound effect (an mp3, `mp3_44100_128`)
+- One synthesis call: ElevenLabs synchronously returns the mp3 bytes (no job/polling); the tool then uploads them to OSS and returns the bare https URL
+- Required: `prompt` (1-1000 chars) — describe the sound, e.g. "A brief warm doorbell chime"
+- Optional `duration_seconds` (0 < d <= 30) targets a length; omit to let the model auto-pick a natural one
+- Optional `prompt_influence` (0..1) trades prompt-adherence vs. creativity (default 0.3)
+- Optional `model` overrides the default sound-effects model
+- Optional `promptSuffix` overrides the default foley suffix ("High-quality foley sound effect. No human voice, no music, no speech. Clean, isolated sound."); pass an empty string to send the prompt verbatim
+- This is foley / SFX only — it is not music. There is no music tool yet; do not use this for background music or scoring
+- Failures (bad key, content moderation 422, upstream 5xx, a silent sub-256-byte response, OSS upload failure) surface as the tool output text — nothing is thrown
+- Requires `ELEVENLABS_API_KEY` (and OSS credentials); without the key the tool surfaces a config error in chat instead of throwing
+- Set `dryRun: true` to preview the resolved request without calling ElevenLabs or OSS (testing only — never set in production)
