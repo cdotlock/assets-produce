@@ -277,6 +277,8 @@ lives in [`ERRORS.md` § Asset Service](ERRORS.md).
 | `generate-image-gpt` | (legacy Phase 3) | Alternate still fallback. |
 | `generate-video-seedance` / `generate-video-happyhorse` | (legacy Phase 3) | Video generation paths. |
 | `concat-clips` / `crop-video` | (legacy Phase 3) | FFmpeg-style ops, no AI model. |
+| `generate-sfx-elevenlabs` | `agent tools show generate-sfx-elevenlabs` | Phase 11 — **real** ElevenLabs sound-generation → inline OSS upload → permanent OSS mp3 URL. Needs `ELEVENLABS_API_KEY` (+ OSS creds). |
+| `generate-music-suno` | `agent tools show generate-music-suno` | Phase 11 — **deterministic placeholder** per spec §15 row 1.13 (Suno has no official API; gateway deferred). Returns `metadata.placeholder:true`, no audio, no env. |
 | Offline CLIs | `tools/<name>/*.py` | NOT registered as atomic tools by design. |
 | `tools/oss-sync/sync.py` | `python tools/oss-sync/sync.py --input <json>` | Bulk OSS upload of a local directory; supports `dry_run: true`. |
 
@@ -285,6 +287,13 @@ lives in [`ERRORS.md` § Asset Service](ERRORS.md).
 - `intent.kind == "cg"` → `cg-render` (primary), `generate-image-nanobanana` (fallback). See [`knowledge/asset-generation/cg-render-spec.md`](knowledge/asset-generation/cg-render-spec.md).
 - "Sharpen this 1× PNG to 2×" follow-up → `upscale-image`. Single-image
   in/out; caller is expected to chain it after `cg-render`.
+- `intent.kind == "sfx"` → `generate-sfx-elevenlabs` (real ElevenLabs
+  path; uploads to OSS itself — no `oss-put` follow-up). See
+  [`knowledge/asset-generation/sfx-spec.md`](knowledge/asset-generation/sfx-spec.md).
+- `intent.kind == "music"` → `generate-music-suno` **placeholder** (spec
+  §15 row 1.13 — no official Suno API; gateway deferred; returns
+  `metadata.placeholder:true`, no audio). See
+  [`knowledge/asset-generation/music-spec.md`](knowledge/asset-generation/music-spec.md).
 
 ---
 

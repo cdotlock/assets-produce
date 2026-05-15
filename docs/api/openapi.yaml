@@ -211,6 +211,8 @@ components:
         - cover
         - shot_image
         - shot_video
+        - sfx
+        - music
 
     AssetJobStatus:
       type: string
