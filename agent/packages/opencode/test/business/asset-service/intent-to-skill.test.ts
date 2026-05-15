@@ -172,7 +172,7 @@ describe("intentToSkill — sanity asserts on internal tables", () => {
     }
   })
 
-  test("ASSET_GENERATION_SKILLS lists the Phase 8 skill bodies plus the Phase 11 sfx + music bodies", () => {
+  test("ASSET_GENERATION_SKILLS lists the Phase 8 skill bodies plus the Phase 11 sfx + music bodies and the Phase 12 upscale-spec body", () => {
     const actual: string[] = [...ASSET_GENERATION_SKILLS]
     const expected: string[] = [
       "character-portrait-spec",
@@ -182,7 +182,21 @@ describe("intentToSkill — sanity asserts on internal tables", () => {
       "shot-image-from-mss",
       "sfx-spec",
       "music-spec",
+      "upscale-spec",
     ]
     expect(actual.sort()).toEqual(expected.sort())
+  })
+
+  test("upscale-spec is picker-selectable (Phase 12 post-process body, not rejected as a hallucination)", async () => {
+    // Phase 12: upscale-spec has no AssetKind, so it is reachable only via
+    // tier-1 skill_hint or tier-2 picker. It MUST be in the picker allowlist
+    // (ASSET_GENERATION_SKILLS) or the defensive check rejects it.
+    const picker: SkillPicker = {
+      async pick() {
+        return "upscale-spec"
+      },
+    }
+    const result = await intentToSkill({ intent: intent({ kind: "cg" }), picker })
+    expect(result).toBe("upscale-spec")
   })
 })

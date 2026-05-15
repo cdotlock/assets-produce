@@ -42,6 +42,7 @@ as `ASSET_GENERATION_SKILLS`:
 - `shot-image-from-mss`
 - `sfx-spec`
 - `music-spec`
+- `upscale-spec`
 
 When the user runs (in a future phase) `agent skills sync
 asset-generation`, the body markdown here gets pushed to Langfuse under the
@@ -60,6 +61,7 @@ Until then the AssetService loop is wired to the **placeholder generator**
 | `shot-image-from-mss.md` | shot-image-from-mss | intent.kind == "shot_image" OR "shot_video" |
 | `sfx-spec.md` | sfx-spec | intent.kind == "sfx" |
 | `music-spec.md` | music-spec | intent.kind == "music" |
+| `upscale-spec.md` | upscale-spec | no AssetKind — selected via `skill_hint` / picker only (Phase 12 post-process body) |
 
 ## Conventions
 

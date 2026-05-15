@@ -21,6 +21,11 @@ export const ASSET_GENERATION_SKILLS = [
   "shot-image-from-mss",
   "sfx-spec",
   "music-spec",
+  // Phase 12 post-process body — reachable via skill_hint / picker only;
+  // intentionally has NO AssetKind, so it is absent from
+  // DEFAULT_KIND_SKILL_MAP (no tier-3 kind fallback). Appended at the end
+  // to keep ordinal / snapshot expectations stable.
+  "upscale-spec",
 ] as const
 
 export type AssetGenerationSkill = (typeof ASSET_GENERATION_SKILLS)[number]
