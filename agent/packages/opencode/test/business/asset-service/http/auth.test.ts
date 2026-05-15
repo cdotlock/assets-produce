@@ -7,6 +7,8 @@ import {
   type AssetAuthConfig,
   type AssetAuthContext,
 } from "@/business/asset-service/http/auth"
+import { LookupRoute } from "@/business/asset-service/http/lookup"
+import type { AssetService } from "@/business/asset-service/asset-service"
 
 const cfg = (tokens: AssetAuthConfig["tokens"]): AssetAuthConfig => ({ tokens })
 
@@ -119,5 +121,93 @@ describe("makeAssetServiceAuth middleware", () => {
       headers: { Authorization: "Bearer   tok-dev" },
     })
     expect(res.status).toBe(200)
+  })
+})
+
+// Phase 10 — verify the full middleware + route path returns 403 (not 401) when
+// a valid token is presented but its project allowlist doesn't include the
+// requested `project_id`. The cross-project denial lives in each route handler
+// via `tokenCanAccess`; this test wires up `LookupRoute` end-to-end so a
+// regression in either layer would surface here.
+describe("auth middleware + lookup route (cross-project denial)", () => {
+  const cfg10: AssetAuthConfig = {
+    tokens: [
+      { name: "ntms", token: "tok-ntms", projects: ["novel_allowed"] },
+      { name: "dev", token: "tok-dev", projects: "*" },
+    ],
+  }
+
+  // Minimal stub — the 403 fires before `svc.lookup` runs, so we only need
+  // the type to satisfy the route constructor. A `lookup` call here would
+  // make the test useless (it would mean the guard missed).
+  const stubSvc = {
+    lookup: async () => {
+      throw new Error("svc.lookup should not be called when token is forbidden")
+    },
+  } as unknown as AssetService
+
+  const mkLookupApp = (config: AssetAuthConfig) => {
+    const app = new Hono<{ Variables: { assetToken: AssetAuthContext } }>()
+    app.use("/api/v1/assets/*", makeAssetServiceAuth(config))
+    app.route("/api/v1/assets", LookupRoute(stubSvc))
+    return app
+  }
+
+  test("403 when token is valid but project_id is outside its allowlist", async () => {
+    const res = await mkLookupApp(cfg10).request("/api/v1/assets/lookup", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer tok-ntms",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        project_id: "novel_other_book",
+        queries: [{ key: "anything" }],
+      }),
+    })
+    expect(res.status).toBe(403)
+    const body = (await res.json()) as { error?: { code?: string; message?: string } }
+    expect(body.error?.code).toBe("FORBIDDEN")
+    expect(body.error?.message).toMatch(/novel_other_book/)
+  })
+
+  test("200 path-through when token is valid and project_id is allowed (wildcard)", async () => {
+    const wildcardSvc = {
+      lookup: async () => [{ query: { key: "k" }, status: "no_match" as const }],
+    } as unknown as AssetService
+    const app = new Hono<{ Variables: { assetToken: AssetAuthContext } }>()
+    app.use("/api/v1/assets/*", makeAssetServiceAuth(cfg10))
+    app.route("/api/v1/assets", LookupRoute(wildcardSvc))
+
+    const res = await app.request("/api/v1/assets/lookup", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer tok-dev",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        project_id: "any_project_id",
+        queries: [{ key: "anything" }],
+      }),
+    })
+    expect(res.status).toBe(200)
+  })
+
+  test("403 deny-by-default when token has empty allowlist", async () => {
+    const empty: AssetAuthConfig = {
+      tokens: [{ name: "ntms", token: "tok-empty", projects: [] }],
+    }
+    const res = await mkLookupApp(empty).request("/api/v1/assets/lookup", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer tok-empty",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        project_id: "novel_anything",
+        queries: [{ key: "k" }],
+      }),
+    })
+    expect(res.status).toBe(403)
   })
 })
