@@ -1,0 +1,13 @@
+# hybrid-to-webp dependencies.
+#
+# This tool's sole runtime dependency is Pillow — no heavy ML stack needed.
+# Unlike tools/matting, mock mode ALSO requires Pillow (see below).
+#
+# Mock mode note:
+#   tools/matting can run --mock with zero external packages (uses hand-crafted
+#   PNG bytes via struct+zlib — no Pillow). This tool cannot: there is no
+#   standard-library WebP encoder. Mock mode here uses Pillow to write a tiny
+#   valid 1×1 RGBA WebP — intentionally and correctly so, since Pillow is this
+#   tool's only dep and installing it is unavoidable anyway.
+#
+Pillow==11.0.0

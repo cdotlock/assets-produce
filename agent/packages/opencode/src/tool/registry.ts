@@ -24,6 +24,7 @@ import { CgRenderTool } from "./asset/cg-render"
 import { UpscaleImageTool } from "./asset/upscale-image"
 import { OssPutTool } from "./asset/oss-put"
 import { MattingTool } from "./asset/matting"
+import { HybridToWebpTool } from "./asset/hybrid-to-webp"
 import * as Tool from "./tool"
 import { Config } from "@/config/config"
 import { type ToolContext as PluginToolContext, type ToolDefinition } from "@opencode-ai/plugin"
@@ -139,6 +140,7 @@ export const layer: Layer.Layer<
     const upscaleImage = yield* UpscaleImageTool
     const ossPut = yield* OssPutTool
     const matting = yield* MattingTool
+    const hybridToWebp = yield* HybridToWebpTool
     const agent = yield* Agent.Service
 
     const state = yield* InstanceState.make<State>(
@@ -240,6 +242,7 @@ export const layer: Layer.Layer<
           upscaleImage: Tool.init(upscaleImage),
           ossPut: Tool.init(ossPut),
           matting: Tool.init(matting),
+          hybridToWebp: Tool.init(hybridToWebp),
         })
 
         return {
@@ -272,6 +275,7 @@ export const layer: Layer.Layer<
             tool.upscaleImage,
             tool.ossPut,
             tool.matting,
+            tool.hybridToWebp,
             ...(Flag.OPENCODE_EXPERIMENTAL_LSP_TOOL ? [tool.lsp] : []),
             ...(Flag.OPENCODE_EXPERIMENTAL_PLAN_MODE && Flag.OPENCODE_CLIENT === "cli" ? [tool.plan] : []),
           ],

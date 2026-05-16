@@ -1,0 +1,24 @@
+Convert a MODNet-hybrid chromakey PNG to a delivery WebP — PIL-only, no ML.
+
+- Backed by `tools/hybrid-to-webp/hybrid-to-webp.py`. Net effect: loads the
+  RGBA PNG with Pillow and re-saves it as WebP at the requested output_path
+  using the specified quality / method params.
+- Input is a local image path (the caller is expected to resolve OSS URLs to
+  local files first). Output is the same — atomic tool does NOT upload to
+  OSS; a downstream skill chains `oss-put` to deliver the encoded asset.
+- Why not to-final.py? to-final.py applies a "last-gate" green-spill unspill
+  (G := max(R,B) on every alpha>0 pixel) that re-introduces the exact
+  over-correction the MODNet hybrid was designed to avoid. Hybrid output's
+  RGB is already cleaned by edge_decontaminate, so this step is skipped.
+- Default encoding params match the backend: `quality=90`, `method=6`
+  (method 6 = best/slowest WebP encoder pass).
+
+Use `mock: true` in tests — writes a 1×1 RGBA WebP with Pillow (no real
+source image required, but the venv + Pillow must be installed since there
+is no standard-library WebP encoder). Use `dryRun: true` to print the
+resolved Python invocation without running it.
+
+**Trust boundary:** `inputPath` and `outputPath` are absolute paths,
+unconstrained by the wrapper. The caller (asset-service mini agent loop)
+MUST resolve these from server-controlled state — never pass user-supplied
+strings through unchecked.

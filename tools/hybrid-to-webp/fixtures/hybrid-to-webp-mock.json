@@ -1,0 +1,8 @@
+{
+  "input_path": "/tmp/_hybrid_to_webp_smoke/in.png",
+  "output_path": "/tmp/_hybrid_to_webp_smoke/out.webp",
+  "quality": 90,
+  "method": 6,
+  "mock": true,
+  "overwrite": true
+}
