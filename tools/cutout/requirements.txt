@@ -1,0 +1,19 @@
+# cutout dependencies.
+#
+# This tool's runtime dependencies are numpy and Pillow -- no heavy ML stack
+# (the backend cutout.py uses HSV chromakey thresholding, NOT a matting model;
+# it does NOT import cv2/OpenCV).
+# Mock mode needs NO deps:
+#   mock mode (--mock / "mock":true) writes a stdlib-only hand-crafted 1x1 RGBA
+#   PNG using struct+zlib -- exactly like tools/hole-fill, tools/rgb-unspill
+#   and tools/green-spill-clear. No numpy or Pillow needed for --mock;
+#   plain python3 is sufficient.
+#
+# Real chromakey cutout (HSV thresholding + optional gaussian feather) requires:
+#   numpy  -- pixel array operations (HSV thresholding, np.where, np.minimum,
+#             np.dstack)
+#   Pillow -- image I/O + colour conversion (open RGB/RGBA PNG, RGB->HSV,
+#             ImageFilter.GaussianBlur feather, save RGBA PNG)
+#
+numpy==1.26.4
+Pillow==11.0.0

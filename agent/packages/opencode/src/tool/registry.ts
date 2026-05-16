@@ -28,6 +28,7 @@ import { HybridToWebpTool } from "./asset/hybrid-to-webp"
 import { GreenSpillClearTool } from "./asset/green-spill-clear"
 import { RgbUnspillTool } from "./asset/rgb-unspill"
 import { HoleFillTool } from "./asset/hole-fill"
+import { CutoutTool } from "./asset/cutout"
 import * as Tool from "./tool"
 import { Config } from "@/config/config"
 import { type ToolContext as PluginToolContext, type ToolDefinition } from "@opencode-ai/plugin"
@@ -147,6 +148,7 @@ export const layer: Layer.Layer<
     const greenSpillClear = yield* GreenSpillClearTool
     const rgbUnspill = yield* RgbUnspillTool
     const holeFill = yield* HoleFillTool
+    const cutout = yield* CutoutTool
     const agent = yield* Agent.Service
 
     const state = yield* InstanceState.make<State>(
@@ -252,6 +254,7 @@ export const layer: Layer.Layer<
           greenSpillClear: Tool.init(greenSpillClear),
           rgbUnspill: Tool.init(rgbUnspill),
           holeFill: Tool.init(holeFill),
+          cutout: Tool.init(cutout),
         })
 
         return {
@@ -288,6 +291,7 @@ export const layer: Layer.Layer<
             tool.greenSpillClear,
             tool.rgbUnspill,
             tool.holeFill,
+            tool.cutout,
             ...(Flag.OPENCODE_EXPERIMENTAL_LSP_TOOL ? [tool.lsp] : []),
             ...(Flag.OPENCODE_EXPERIMENTAL_PLAN_MODE && Flag.OPENCODE_CLIENT === "cli" ? [tool.plan] : []),
           ],

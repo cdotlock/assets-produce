@@ -1,0 +1,27 @@
+HSV chromakey green-screen removal -- turns a flat-green-background character / sprite image into a transparent RGBA cutout. numpy + Pillow HSV thresholding, no ML weights.
+
+- Backed by `tools/cutout/cutout.py`. Net effect: opens the image, converts to
+  HSV, builds a binary green mask where hue is in [hueLow, hueHigh] degrees and
+  saturation >= satMin and value >= valMin, sets those pixels to alpha 0 and
+  everything else to alpha 255, then optionally feathers the alpha edge with a
+  gaussian blur of radius `feather` px.
+- RGBA-aware: if the input is already RGBA, the new alpha is min(new, old), so
+  re-running on a previously-cut image cannot resurrect the green screen even
+  if the thresholds change. Effectively idempotent on a clean cutout.
+- HSV thresholds default to the backend's tuned constants (hueLow 80, hueHigh
+  160 degrees; satMin 0.30, valMin 0.25 on a 0..1 scale; feather 0.8 px). All
+  five are optional numeric overrides. They were `CHROMAKEY_*` deployment env
+  vars in the original backend; here they are explicit params -- no environment
+  variables are read.
+- Input is a local PNG path (RGB or RGBA). Output is a local RGBA PNG path --
+  the atomic tool does NOT upload to OSS; a downstream skill chains `oss-put`
+  to deliver the asset.
+
+Use `mock: true` in tests -- writes a 1x1 RGBA placeholder via stdlib
+struct+zlib (no numpy/Pillow required). Use `dryRun: true` to print the
+resolved Python invocation without running it.
+
+**Trust boundary:** `inputPath` and `outputPath` are absolute paths,
+unconstrained by the wrapper. The caller (asset-service mini agent loop)
+MUST resolve these from server-controlled state -- never pass user-supplied
+strings through unchecked.
