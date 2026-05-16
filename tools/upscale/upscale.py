@@ -184,12 +184,21 @@ def _emit_error(code: str, message: str) -> None:
 
 
 def _write_placeholder_png(out_path: pathlib.Path) -> None:
-    """Drop a tiny valid PNG so atomic-tool wrappers can finish in mock mode."""
-    png_bytes = bytes.fromhex(
-        "89504e470d0a1a0a0000000d49484452000000010000000108000000003a7e9b550000000a4944415478"
-        "9c63680000008200016ed24fec0000000049454e44ae426082"
-    )
-    out_path.write_bytes(png_bytes)
+    """Write a tiny deterministic valid 1×1 RGBA PNG.
+
+    Built at runtime (struct + zlib) so chunk lengths/CRCs stay
+    self-consistent; the prior hardcoded hex blob shipped a wrong IDAT CRC,
+    so --mock exited 0 while writing a file Pillow could not open.
+    """
+    import struct, zlib
+    def _chunk(tag: bytes, data: bytes) -> bytes:
+        return (struct.pack(">I", len(data)) + tag + data
+                + struct.pack(">I", zlib.crc32(tag + data) & 0xffffffff))
+    sig = b"\x89PNG\r\n\x1a\n"
+    ihdr = _chunk(b"IHDR", struct.pack(">IIBBBBB", 1, 1, 8, 6, 0, 0, 0))
+    idat = _chunk(b"IDAT", zlib.compress(b"\x00\x00\x00\x00\x00", 9))
+    iend = _chunk(b"IEND", b"")
+    out_path.write_bytes(sig + ihdr + idat + iend)
 
 
 def _run_json_main(argv: "list[str] | None" = None) -> int:
@@ -222,12 +231,20 @@ def _run_json_main(argv: "list[str] | None" = None) -> int:
     if args.input is None or args.input == "-":
         raw = sys.stdin.read()
     else:
-        with open(args.input, "r", encoding="utf-8") as fh:
-            raw = fh.read()
+        try:
+            with open(args.input, "r", encoding="utf-8") as fh:
+                raw = fh.read()
+        except OSError as e:
+            _emit_error("INVALID_INPUT", f"cannot read input file: {e}")
+            return 2
     try:
         payload = _json.loads(raw)
     except _json.JSONDecodeError as e:
         _emit_error("INVALID_INPUT", f"input is not valid JSON: {e}")
+        return 2
+
+    if not isinstance(payload, dict):
+        _emit_error("INVALID_INPUT", f"input JSON must be an object, got {type(payload).__name__}")
         return 2
 
     input_path = payload.get("input_path")
@@ -253,7 +270,11 @@ def _run_json_main(argv: "list[str] | None" = None) -> int:
         _emit_error("INVALID_INPUT", f"output_path already exists (overwrite=false): {dst}")
         return 2
 
-    dst.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        dst.parent.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        _emit_error("INVALID_INPUT", f"cannot create output directory {dst.parent}: {e}")
+        return 2
     started = _time.monotonic()
     if mock:
         _write_placeholder_png(dst)
@@ -293,5 +314,11 @@ def _looks_like_json_entry(argv: list[str]) -> bool:
 
 if __name__ == "__main__":
     if _looks_like_json_entry(sys.argv[1:]):
-        sys.exit(_run_json_main())
+        try:
+            sys.exit(_run_json_main())
+        except SystemExit:
+            raise
+        except BaseException as e:  # noqa: BLE001 — last-resort error envelope
+            _emit_error("INTERNAL", f"{type(e).__name__}: {e}")
+            sys.exit(1)
     sys.exit(main())
