@@ -163,6 +163,26 @@ describe("matting atomic tool", () => {
     expect(receivedInput?.format).toBe("png")
   })
 
+  test("device passes through to the Python input when provided", async () => {
+    let receivedInput: Record<string, unknown> | undefined
+    const def = await buildExec(async (opts) => {
+      receivedInput = opts.input as Record<string, unknown>
+      return { stdout: okStdout, stderr: "", exitCode: 0 }
+    })
+    await runtime.runPromise(def.execute({ ...baseParams, device: "cuda" }, ctx()))
+    expect(receivedInput?.device).toBe("cuda")
+  })
+
+  test("device is omitted from the Python input when the param is absent", async () => {
+    let receivedInput: Record<string, unknown> | undefined
+    const def = await buildExec(async (opts) => {
+      receivedInput = opts.input as Record<string, unknown>
+      return { stdout: okStdout, stderr: "", exitCode: 0 }
+    })
+    await runtime.runPromise(def.execute(baseParams, ctx()))
+    expect(receivedInput && "device" in receivedInput).toBeFalsy()
+  })
+
   test("runner throws → caught by Effect.catch and surfaced as error metadata", async () => {
     const def = await buildExec(async () => {
       throw new Error("ENOENT: no such file")
