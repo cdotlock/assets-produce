@@ -81,9 +81,14 @@ the per-command paths trace back to the cmd files in
 Audio-tool execution errors surface through the generic
 `tools call <id>` path: a folded `metadata.error=true` result becomes
 `tool error: <message>` (exit 1), where `<message>` is exactly the
-tool's `output` string. Schema-rejected inputs fail earlier as
-`invalid JSON params: <reason>` (exit 2) — see the table above. The
-messages below are byte-accurate to the tool code in
+tool's `output` string. Schema-constraint rejections of **well-formed**
+JSON (e.g. empty `prompt` failing `isMinLength(1)`, or an out-of-range
+`duration_seconds`) surface as `tool error: The <id> tool was called
+with invalid arguments: SchemaError(...)` (exit **1**) — the tool never
+runs, but the CLI still folds it into the exit-1 path. Only input that
+is **not parseable JSON** yields `invalid JSON params: <reason>`
+(exit 2) — see the table above. The messages below are byte-accurate to
+the tool code in
 [`agent/.../tool/asset/generate-sfx-elevenlabs.ts`](agent/packages/opencode/src/tool/asset/generate-sfx-elevenlabs.ts)
 and
 [`agent/.../tool/asset/generate-music-suno.ts`](agent/packages/opencode/src/tool/asset/generate-music-suno.ts).
@@ -99,19 +104,23 @@ and
 | Network / request failed | `tool error: generate-sfx-elevenlabs error: generate-sfx-elevenlabs: ElevenLabs request failed — <reason>` | 1 |
 | Silent synthesis (200, body < 256 bytes) | `tool error: generate-sfx-elevenlabs error: ElevenLabs returned <n> bytes (< 256); treating as a silent/failed synthesis` | 1 |
 | OSS upload failure | `tool error: generate-sfx-elevenlabs error: generate-sfx-elevenlabs: OSS upload failed — <detail>` | 1 |
-| `duration_seconds` > 30 / empty / >1000-char `prompt` | `invalid JSON params: <reason>` (Schema rejects before execute — never reaches the tool) | 2 |
+| Empty / >1000-char `prompt`, or `duration_seconds` > 30 — well-formed JSON failing a Schema constraint | `tool error: The generate-sfx-elevenlabs tool was called with invalid arguments: SchemaError(Expected a value with a length of at least 1, got "" at ["prompt"]). Please rewrite the input so it satisfies the expected schema.` | 1 |
+| Malformed `--json` payload (not parseable JSON) | `invalid JSON params: <reason>` | 2 |
 
 `generate-music-suno` (deterministic placeholder, spec §15 row 1.13):
 
 | Scenario | Error Message | Exit Code |
 |---|---|---|
 | Any accepted input | (no error) — returns the placeholder string with `metadata.placeholder:true` (NOT `metadata.error`); not a failure, exits 0 | 0 |
-| Empty / >1000-char `prompt`, or `duration_seconds` > 300 | `invalid JSON params: <reason>` (Schema rejects before execute) | 2 |
+| Empty / >1000-char `prompt`, or `duration_seconds` > 300 — well-formed JSON failing a Schema constraint | `tool error: The generate-music-suno tool was called with invalid arguments: SchemaError(Expected a value with a length of at least 1, got "" at ["prompt"]). Please rewrite the input so it satisfies the expected schema.` | 1 |
+| Malformed `--json` payload (not parseable JSON) | `invalid JSON params: <reason>` | 2 |
 
 `generate-music-suno` has **no execution-error rows**: it performs no
 HTTP and no OSS call, so it never produces `metadata.error=true`. The
-only non-success path is schema rejection of a malformed input. The
-deterministic placeholder result is a normal success (exit 0) — callers
+only non-success paths are the two input-rejection rows above — a
+well-formed JSON value failing a Schema constraint (exit 1) and a
+non-parseable `--json` payload (exit 2). The deterministic placeholder
+result is a normal success (exit 0) — callers
 detect "music deferred" via `metadata.placeholder:true`, not via an
 error.
 
