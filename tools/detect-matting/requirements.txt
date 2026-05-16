@@ -1,0 +1,18 @@
+# detect-matting dependencies.
+#
+# This tool's runtime dependencies are numpy, Pillow, and scipy.
+# Mock mode needs NO deps:
+#   mock mode (--mock / "mock":true) writes a deterministic PASS report
+#   using stdlib only (json, pathlib) -- no numpy/PIL/scipy needed for
+#   --mock; plain python3 is sufficient.
+#
+# Real detection (scipy.ndimage binary_closing + binary_fill_holes + numpy
+# pixel operations + Pillow image I/O) requires:
+#   numpy         -- pixel array operations, ogrid for disk structuring element
+#   Pillow        -- image I/O (open RGBA PNG, extract alpha channel)
+#   scipy         -- ndimage.binary_closing, ndimage.binary_fill_holes
+#                    for interior-hole detection after closing
+#
+numpy==1.26.4
+Pillow==11.0.0
+scipy==1.13.1
