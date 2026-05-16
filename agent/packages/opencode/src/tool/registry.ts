@@ -26,6 +26,7 @@ import { OssPutTool } from "./asset/oss-put"
 import { MattingTool } from "./asset/matting"
 import { HybridToWebpTool } from "./asset/hybrid-to-webp"
 import { GreenSpillClearTool } from "./asset/green-spill-clear"
+import { RgbUnspillTool } from "./asset/rgb-unspill"
 import * as Tool from "./tool"
 import { Config } from "@/config/config"
 import { type ToolContext as PluginToolContext, type ToolDefinition } from "@opencode-ai/plugin"
@@ -143,6 +144,7 @@ export const layer: Layer.Layer<
     const matting = yield* MattingTool
     const hybridToWebp = yield* HybridToWebpTool
     const greenSpillClear = yield* GreenSpillClearTool
+    const rgbUnspill = yield* RgbUnspillTool
     const agent = yield* Agent.Service
 
     const state = yield* InstanceState.make<State>(
@@ -246,6 +248,7 @@ export const layer: Layer.Layer<
           matting: Tool.init(matting),
           hybridToWebp: Tool.init(hybridToWebp),
           greenSpillClear: Tool.init(greenSpillClear),
+          rgbUnspill: Tool.init(rgbUnspill),
         })
 
         return {
@@ -280,6 +283,7 @@ export const layer: Layer.Layer<
             tool.matting,
             tool.hybridToWebp,
             tool.greenSpillClear,
+            tool.rgbUnspill,
             ...(Flag.OPENCODE_EXPERIMENTAL_LSP_TOOL ? [tool.lsp] : []),
             ...(Flag.OPENCODE_EXPERIMENTAL_PLAN_MODE && Flag.OPENCODE_CLIENT === "cli" ? [tool.plan] : []),
           ],

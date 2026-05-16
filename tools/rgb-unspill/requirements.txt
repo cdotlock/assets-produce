@@ -1,0 +1,16 @@
+# rgb-unspill dependencies.
+#
+# This tool's runtime dependencies are numpy and Pillow -- no heavy ML stack.
+# Mock mode for .png output needs NO deps:
+#   mock mode writes a stdlib-only hand-crafted 1x1 RGBA PNG via struct+zlib
+#   -- exactly like tools/matting and tools/green-spill-clear.
+# Mock mode for .webp output DOES need Pillow:
+#   there is no stdlib WebP encoder; Pillow is used to emit a tiny valid WEBP
+#   (precedent set by tools/hybrid-to-webp).
+#
+# Real unspill (applying the Nuke-style G-channel decontamination) requires:
+#   numpy  -- pixel array operations (.astype, np.maximum, masking)
+#   Pillow -- image I/O (open RGBA PNG/WEBP, save cleaned PNG/WEBP)
+#
+numpy==1.26.4
+Pillow==11.0.0

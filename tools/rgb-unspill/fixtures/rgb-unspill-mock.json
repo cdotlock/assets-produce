@@ -1,0 +1,6 @@
+{
+  "input_path": "/tmp/_rgb_unspill_smoke/in.png",
+  "output_path": "/tmp/_rgb_unspill_smoke/out.png",
+  "mock": true,
+  "overwrite": true
+}

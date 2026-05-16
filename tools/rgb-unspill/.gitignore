@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+
+# Scratch / produced output images (test runs, smoke outputs).
+output/
+out/
+*.png
+*.webp
+
+# Never ignore committed fixtures
+!fixtures/*.json
+!fixtures/*.png
+!fixtures/*.webp

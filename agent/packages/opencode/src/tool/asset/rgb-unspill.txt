@@ -1,0 +1,23 @@
+Apply Nuke-style G-channel RGB decontamination (unspill) to a chromakey RGBA image -- numpy + Pillow, no ML.
+
+- Backed by `tools/rgb-unspill/rgb-unspill.py`. Net effect: loads the RGBA
+  image, finds every alpha>0 pixel where G > max(R, B), clamps G to max(R, B),
+  then saves to output_path in the format resolved from the output extension
+  (.png -> PNG; .webp -> WEBP quality=90 method=4). Alpha is never modified,
+  so the silhouette is identical to the input.
+- Input is a local image path. Output is the same -- atomic tool does NOT
+  upload to OSS; a downstream skill chains `oss-put` to deliver the asset.
+- This algorithm has no tunable numeric parameters. The unspill condition
+  (G > max(R, B) for alpha>0 pixels) uses no external thresholds.
+- Idempotent: re-running on a clean image does nothing because no pixel will
+  have G > max(R, B) after the first pass.
+
+Use `mock: true` in tests -- for .png output writes a 1x1 RGBA placeholder
+via stdlib struct+zlib (no numpy or Pillow required); for .webp output Pillow
+is used (no stdlib WebP encoder). Use `dryRun: true` to print the resolved
+Python invocation without running it.
+
+**Trust boundary:** `inputPath` and `outputPath` are absolute paths,
+unconstrained by the wrapper. The caller (asset-service mini agent loop)
+MUST resolve these from server-controlled state -- never pass user-supplied
+strings through unchecked.
