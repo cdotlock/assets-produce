@@ -1434,7 +1434,23 @@ unix(
 
           const run = yield* prompt.loop({ sessionID: chat.id }).pipe(Effect.forkChild)
           yield* llm.wait(1)
-          yield* Effect.sleep(150)
+          // Wait for the deterministic condition rather than guessing with a
+          // fixed sleep: cancel only once the full 4000-line burst (last line
+          // index "03999") has been buffered and the tool is parked in its
+          // `sleep 30`. A fixed delay races the output under full-file load and
+          // intermittently finalizes as an abort instead of a normal
+          // truncation. Mirrors the running-metadata poll used elsewhere here.
+          yield* Effect.promise(async () => {
+            const start = Date.now()
+            while (Date.now() - start < 10_000) {
+              const msgs = await MessageV2.filterCompacted(MessageV2.stream(chat.id))
+              const assistant = msgs.find((item) => item.info.role === "assistant")
+              const tool = assistant ? toolPart(assistant.parts) : undefined
+              if (tool?.state.status === "running" && tool.state.metadata?.output?.includes("03999")) return
+              await new Promise((done) => setTimeout(done, 20))
+            }
+            throw new Error("timed out waiting for interrupted bash output to buffer")
+          })
           yield* prompt.cancel(chat.id)
 
           const exit = yield* Fiber.await(run)
