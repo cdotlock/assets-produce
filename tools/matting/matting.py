@@ -117,7 +117,6 @@ V10_MIN_FG_AREA = 10000
 def load_modnet(device: str = "cpu") -> "nn.Module":  # noqa: F821
     """Load MODNet checkpoint. Heavy deps (torch, torchvision) are imported here."""
     import torch
-    import torch.nn as nn  # noqa: F401 — imported for type clarity
     if not MODNET_CKPT.exists():
         raise FileNotFoundError(
             f"MODNet ckpt missing: {MODNET_CKPT}\n"
@@ -396,7 +395,6 @@ def matte_v10(
       Step 5:  Final orphan cleanup safety net
     """
     import numpy as np
-    import cv2  # noqa: F401 — used in helpers called below
     rgb = rgb.astype(np.int16)
     alpha = alpha.copy()
     R, G, B = rgb[..., 0], rgb[..., 1], rgb[..., 2]
@@ -520,7 +518,6 @@ def matte_one(
         raise ValueError(f"fmt must be 'webp' or 'png', got {fmt!r}")
 
     from PIL import Image
-    import numpy as np  # noqa: F401 — used inside _matte_array
     model = load_modnet()
     rgba = _matte_array(src_path, model)  # numpy uint8 (H, W, 4)
 
@@ -584,29 +581,19 @@ def _emit_error(code: str, message: str) -> None:
 
 
 def _write_placeholder_rgba_png(out_path: pathlib.Path) -> None:
-    """Write a tiny deterministic valid RGBA PNG (1×1, fully transparent).
-
-    The raw bytes encode a 1×1 RGBA PNG with alpha=0 — a real, parseable
-    PNG that downstream tools can open without crashing. Generated with:
-        from PIL import Image; import io
-        img = Image.new("RGBA", (1, 1), (0, 0, 0, 0))
-        buf = io.BytesIO(); img.save(buf, "PNG"); buf.getvalue().hex()
-    """
-    png_bytes = bytes.fromhex(
-        "89504e470d0a1a0a"          # PNG signature
-        "0000000d49484452"          # IHDR chunk length + type
-        "00000001"                  # width = 1
-        "00000001"                  # height = 1
-        "08060000001f15c489"        # bit depth=8, color type=6 (RGBA), ...
-        "0000000b4944415478"        # IDAT chunk
-        "9c6260000000020001"        # compressed RGBA row: (0,0,0,0)
-        "e221bc33"                  # IDAT CRC
-        "0000000049454e44ae426082"  # IEND
-    )
-    out_path.write_bytes(png_bytes)
+    """Write a tiny deterministic valid 1×1 fully-transparent RGBA PNG."""
+    import struct, zlib
+    def _chunk(tag: bytes, data: bytes) -> bytes:
+        return (struct.pack(">I", len(data)) + tag + data
+                + struct.pack(">I", zlib.crc32(tag + data) & 0xffffffff))
+    sig = b"\x89PNG\r\n\x1a\n"
+    ihdr = _chunk(b"IHDR", struct.pack(">IIBBBBB", 1, 1, 8, 6, 0, 0, 0))
+    idat = _chunk(b"IDAT", zlib.compress(b"\x00\x00\x00\x00\x00", 9))
+    iend = _chunk(b"IEND", b"")
+    out_path.write_bytes(sig + ihdr + idat + iend)
 
 
-def _run_json_main(argv: "list[str] | None" = None) -> int:
+def _run_json_main(argv: list[str] | None = None) -> int:
     """JSON entry — single-image matting.
 
     Input shape:
@@ -626,7 +613,7 @@ def _run_json_main(argv: "list[str] | None" = None) -> int:
                 "format": "...",
                 "device": "...",
                 "latency_ms": int,
-                "atomic_tool": "matting",
+                "atomic_tool": "matting",  # always the literal string "matting"
                 "mock": bool
             }
         }
@@ -665,6 +652,10 @@ def _run_json_main(argv: "list[str] | None" = None) -> int:
         _emit_error("INVALID_INPUT", f"input is not valid JSON: {e}")
         return 2
 
+    if not isinstance(payload, dict):
+        _emit_error("INVALID_INPUT", f"input JSON must be an object, got {type(payload).__name__}")
+        return 2
+
     input_path = payload.get("input_path")
     output_path = payload.get("output_path")
     if not input_path or not output_path:
@@ -690,7 +681,11 @@ def _run_json_main(argv: "list[str] | None" = None) -> int:
         _emit_error("INVALID_INPUT", f"output_path already exists (overwrite=false): {dst}")
         return 2
 
-    dst.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        dst.parent.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        _emit_error("INVALID_INPUT", f"cannot create output directory {dst.parent}: {e}")
+        return 2
     started = _time.monotonic()
 
     if mock:
@@ -715,7 +710,6 @@ def _run_json_main(argv: "list[str] | None" = None) -> int:
 
     latency_ms = int((_time.monotonic() - started) * 1000)
 
-    import json as _json
     print(_json.dumps({
         "output": {"path": str(dst)},
         "meta": {
@@ -735,5 +729,11 @@ def _looks_like_json_entry(argv: list[str]) -> bool:
 
 if __name__ == "__main__":
     if _looks_like_json_entry(sys.argv[1:]):
-        sys.exit(_run_json_main())
+        try:
+            sys.exit(_run_json_main())
+        except SystemExit:
+            raise
+        except BaseException as e:  # noqa: BLE001 — last-resort error envelope
+            _emit_error("INTERNAL", f"{type(e).__name__}: {e}")
+            sys.exit(1)
     sys.exit(main())

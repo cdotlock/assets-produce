@@ -2,11 +2,13 @@
 __pycache__/
 *.pyc
 
-# Produced output images (test runs, scratch outputs)
-# Does NOT ignore fixtures/*.json
-/tmp/
+# Scratch / produced output images (test runs, smoke outputs).
+# Scoped to scratch dirs + webp so committed fixtures are never swallowed.
 output/
 out/
+/tmp/
 *.webp
-*.png
+
+# Never ignore committed fixtures
 !fixtures/*.json
+!fixtures/*.png
