@@ -1,0 +1,8 @@
+{
+  "input_path": "/tmp/_matting_smoke/in.png",
+  "output_path": "/tmp/_matting_smoke/out.png",
+  "format": "png",
+  "device": "cpu",
+  "mock": true,
+  "overwrite": true
+}

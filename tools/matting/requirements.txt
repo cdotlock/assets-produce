@@ -1,0 +1,24 @@
+# matting dependencies.
+#
+# Mock mode (--mock / "mock":true) needs NONE of these — it runs on plain
+# python3 with zero external packages (hardcoded RGBA bytes, no torch).
+#
+# Real inference requires:
+#   • torch + torchvision — PyTorch for MODNet model loading + inference.
+#     These are heavy (~2 GB for MPS/CPU wheels). Install per platform:
+#     https://pytorch.org/get-started/locally/
+#   • opencv-python — connected-component analysis in the v10 pipeline.
+#   • numpy + Pillow — array operations and image I/O.
+#
+# One-time host setup (after pip install):
+#   git clone https://github.com/ZHKKKe/MODNet.git ~/modnet
+#   cd ~/modnet && mkdir -p pretrained
+#   pip install gdown
+#   gdown 'https://drive.google.com/uc?id=1mcr7ALciuAsHCpLnrtG_eop5-EYhbCmz' \
+#         -O pretrained/modnet_photographic_portrait_matting.ckpt
+#   # Override repo location: export MODNET_REPO_PATH=/path/to/modnet
+torch
+torchvision
+opencv-python
+numpy
+Pillow==11.0.0

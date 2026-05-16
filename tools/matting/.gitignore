@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+
+# Produced output images (test runs, scratch outputs)
+# Does NOT ignore fixtures/*.json
+/tmp/
+output/
+out/
+*.webp
+*.png
+!fixtures/*.json
