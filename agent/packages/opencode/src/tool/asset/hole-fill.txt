@@ -1,0 +1,26 @@
+Inpaint interior body-leak holes in chromakey RGBA images -- cv2 TELEA inpainting + scipy connected-component analysis, no ML weights.
+
+- Backed by `tools/hole-fill/hole-fill.py`. Net effect: loads the RGBA image,
+  detects interior alpha=0 regions that are NOT touching the image border and
+  whose size falls in [min_size, max_size), then inpaints them using OpenCV's
+  TELEA algorithm (inpaintRadius=3) and sets alpha to 255 over the filled area.
+- Size band (tuned for 1882x3344 delivery resolution): components < min_size
+  (default 200) are noise and skipped; components in [min_size, max_size) are
+  body leaks and inpainted; components >= max_size (default 8000) are legitimate
+  negative space (akimbo arms triangle, between-legs gap) and are kept transparent.
+- Optional dilation (dilate, default 2 px) widens the inpaint region using a
+  MORPH_ELLIPSE kernel to avoid leaving a hairline of dark green-bounce pixels
+  around the hole edge.
+- Input is a local RGBA PNG path. Output is the same -- atomic tool does NOT
+  upload to OSS; a downstream skill chains `oss-put` to deliver the asset.
+- Idempotent: re-running on a hole-free image is a no-op (no interior
+  alpha=0 components in the size band -> mask is all zero -> inpaint does nothing).
+
+Use `mock: true` in tests -- writes a 1x1 RGBA placeholder via stdlib
+struct+zlib (no cv2/scipy/numpy/Pillow required). Use `dryRun: true` to
+print the resolved Python invocation without running it.
+
+**Trust boundary:** `inputPath` and `outputPath` are absolute paths,
+unconstrained by the wrapper. The caller (asset-service mini agent loop)
+MUST resolve these from server-controlled state -- never pass user-supplied
+strings through unchecked.

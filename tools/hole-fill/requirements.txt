@@ -1,0 +1,22 @@
+# hole-fill dependencies.
+#
+# This tool's runtime dependencies are opencv-python, numpy, Pillow, and scipy.
+# Mock mode needs NO deps:
+#   mock mode (--mock / "mock":true) writes a stdlib-only hand-crafted 1x1 RGBA
+#   PNG using struct+zlib -- exactly like tools/green-spill-clear and
+#   tools/rgb-unspill. No cv2/scipy/numpy or Pillow needed for --mock;
+#   plain python3 is sufficient.
+#
+# Real hole-fill (cv2 TELEA inpainting + scipy connected-component labeling)
+# requires:
+#   opencv-python -- cv2.inpaint (TELEA), cv2.dilate, cv2.cvtColor,
+#                    cv2.getStructuringElement
+#   numpy         -- pixel array operations
+#   Pillow        -- image I/O (open RGBA PNG, save inpainted PNG)
+#   scipy         -- ndimage.label, ndimage.sum_labels for connected-component
+#                    analysis (interior hole detection)
+#
+opencv-python==4.9.0.80
+numpy==1.26.4
+Pillow==11.0.0
+scipy==1.13.1

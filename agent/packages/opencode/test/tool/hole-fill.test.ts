@@ -1,0 +1,186 @@
+import { describe, expect, test } from "bun:test"
+import { Effect, Layer, ManagedRuntime } from "effect"
+import { Agent } from "@/agent/agent"
+import { MessageID, SessionID } from "@/session/schema"
+import { Truncate } from "@/tool/truncate"
+import { makeHoleFillTool } from "@/tool/asset/hole-fill"
+import type { PythonRunner } from "@/tool/asset/python-runner"
+import type { Tool } from "@/tool/tool"
+
+const runtime = ManagedRuntime.make(Layer.mergeAll(Truncate.defaultLayer, Agent.defaultLayer))
+
+const ctx = (): Tool.Context => ({
+  sessionID: SessionID.descending(),
+  messageID: MessageID.ascending(),
+  abort: new AbortController().signal,
+  callID: "call_test",
+  agent: "build",
+  messages: [],
+  metadata() {
+    return Effect.void
+  },
+  ask() {
+    return Effect.void
+  },
+})
+
+const okStdout = JSON.stringify({
+  output: { path: "/tmp/_hole_fill_smoke/out.png" },
+  meta: {
+    dilate: 2,
+    min_size: 200,
+    max_size: 8000,
+    latency_ms: 42,
+    atomic_tool: "hole-fill",
+    mock: true,
+  },
+})
+
+const stubRunner = (out: { stdout?: string; stderr?: string; exitCode?: number } = {}): PythonRunner =>
+  async () => ({
+    stdout: out.stdout ?? okStdout,
+    stderr: out.stderr ?? "",
+    exitCode: out.exitCode ?? 0,
+  })
+
+const baseParams = {
+  inputPath: "/tmp/_hole_fill_smoke/in.png",
+  outputPath: "/tmp/_hole_fill_smoke/out.png",
+  mock: true,
+}
+
+async function buildExec(runner: PythonRunner = stubRunner()) {
+  const info = await runtime.runPromise(makeHoleFillTool({ runner }))
+  return Effect.runPromise(info.init())
+}
+
+describe("hole-fill atomic tool", () => {
+  test("dryRun=true returns the resolved Python invocation without calling the runner", async () => {
+    let calls = 0
+    const def = await buildExec(async () => {
+      calls++
+      return { stdout: "", stderr: "", exitCode: 0 }
+    })
+    const out = await runtime.runPromise(def.execute({ ...baseParams, dryRun: true }, ctx()))
+    expect(calls).toBe(0)
+    const parsed = JSON.parse(out.output)
+    expect(parsed.tool).toBe("hole-fill")
+    expect(parsed.input.input_path).toBe("/tmp/_hole_fill_smoke/in.png")
+    expect((out.metadata as { dryRun?: boolean }).dryRun).toBe(true)
+  })
+
+  test("happy path parses stdout JSON and returns output path + meta", async () => {
+    const def = await buildExec()
+    const out = await runtime.runPromise(def.execute(baseParams, ctx()))
+    expect(out.output).toBe("/tmp/_hole_fill_smoke/out.png")
+    const meta = out.metadata as { outputPath?: string; dilate?: number; minSize?: number; maxSize?: number; mock?: boolean }
+    expect(meta.outputPath).toBe("/tmp/_hole_fill_smoke/out.png")
+    expect(meta.dilate).toBe(2)
+    expect(meta.minSize).toBe(200)
+    expect(meta.maxSize).toBe(8000)
+    expect(meta.mock).toBe(true)
+  })
+
+  test("Python exit != 0 -> error metadata, stderr surfaced", async () => {
+    const def = await buildExec(
+      stubRunner({
+        stdout: "",
+        stderr: '{"error":{"code":"ATOMIC_TOOL_FAILED","message":"cv2 inpaint failed"}}',
+        exitCode: 4,
+      }),
+    )
+    const out = await runtime.runPromise(def.execute(baseParams, ctx()))
+    expect(out.title).toBe("hole-fill failed")
+    const meta = out.metadata as { error?: boolean; exitCode?: number; stderr?: string }
+    expect(meta.error).toBe(true)
+    expect(meta.exitCode).toBe(4)
+    expect(meta.stderr).toContain("ATOMIC_TOOL_FAILED")
+  })
+
+  test("Python returns null output path -> schema validation rejects (M1 regression)", async () => {
+    const def = await buildExec(
+      stubRunner({
+        stdout: JSON.stringify({ output: { path: null }, meta: {} }),
+        exitCode: 0,
+      }),
+    )
+    const out = await runtime.runPromise(def.execute(baseParams, ctx()))
+    expect(out.title).toBe("hole-fill failed")
+    expect((out.metadata as { error?: boolean; message?: string }).error).toBe(true)
+  })
+
+  test("Python returns missing output key -> schema validation rejects (M1 regression)", async () => {
+    const def = await buildExec(
+      stubRunner({ stdout: JSON.stringify({ meta: { dilate: 2 } }), exitCode: 0 }),
+    )
+    const out = await runtime.runPromise(def.execute(baseParams, ctx()))
+    expect(out.title).toBe("hole-fill failed")
+    expect((out.metadata as { error?: boolean }).error).toBe(true)
+  })
+
+  test("non-JSON stdout -> parse error metadata", async () => {
+    const def = await buildExec(stubRunner({ stdout: "not json", exitCode: 0 }))
+    const out = await runtime.runPromise(def.execute(baseParams, ctx()))
+    expect(out.title).toBe("hole-fill parse error")
+    expect((out.metadata as { error?: boolean }).error).toBe(true)
+  })
+
+  test("--mock flag is appended when mock=true", async () => {
+    let receivedArgs: readonly string[] | undefined
+    const def = await buildExec(async (opts) => {
+      receivedArgs = opts.extraArgs
+      return { stdout: okStdout, stderr: "", exitCode: 0 }
+    })
+    await runtime.runPromise(def.execute(baseParams, ctx()))
+    expect(receivedArgs).toContain("--mock")
+  })
+
+  test("--mock flag is NOT appended when mock=false", async () => {
+    const noMockStdout = JSON.stringify({
+      output: { path: "/tmp/_hole_fill_smoke/out.png" },
+      meta: { dilate: 2, min_size: 200, max_size: 8000, latency_ms: 5, atomic_tool: "hole-fill", mock: false },
+    })
+    let receivedArgs: readonly string[] | undefined
+    const def = await buildExec(async (opts) => {
+      receivedArgs = opts.extraArgs
+      return { stdout: noMockStdout, stderr: "", exitCode: 0 }
+    })
+    await runtime.runPromise(def.execute({ ...baseParams, mock: false }, ctx()))
+    expect(receivedArgs).not.toContain("--mock")
+  })
+
+  test("dilate/minSize/maxSize pass through to Python input with snake_case keys", async () => {
+    let receivedInput: Record<string, unknown> | undefined
+    const def = await buildExec(async (opts) => {
+      receivedInput = opts.input as Record<string, unknown>
+      return { stdout: okStdout, stderr: "", exitCode: 0 }
+    })
+    await runtime.runPromise(
+      def.execute({ ...baseParams, dilate: 3, minSize: 100, maxSize: 5000 }, ctx()),
+    )
+    expect(receivedInput?.dilate).toBe(3)
+    expect(receivedInput?.min_size).toBe(100)
+    expect(receivedInput?.max_size).toBe(5000)
+  })
+
+  test("overwrite param passes through to Python input", async () => {
+    let receivedInput: Record<string, unknown> | undefined
+    const def = await buildExec(async (opts) => {
+      receivedInput = opts.input as Record<string, unknown>
+      return { stdout: okStdout, stderr: "", exitCode: 0 }
+    })
+    await runtime.runPromise(def.execute({ ...baseParams, overwrite: true }, ctx()))
+    expect(receivedInput?.overwrite).toBe(true)
+  })
+
+  test("runner throws -> caught by Effect.catch and surfaced as error metadata", async () => {
+    const def = await buildExec(async () => {
+      throw new Error("ENOENT: no such file")
+    })
+    const out = await runtime.runPromise(def.execute(baseParams, ctx()))
+    expect(out.title).toBe("hole-fill failed")
+    const meta = out.metadata as { error?: boolean; message?: string }
+    expect(meta.error).toBe(true)
+    expect(meta.message).toContain("ENOENT")
+  })
+})
