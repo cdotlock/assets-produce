@@ -1,0 +1,14 @@
+# green-spill-clear dependencies.
+#
+# This tool's runtime dependencies are numpy and Pillow -- no heavy ML stack.
+# Unlike tools/matting, this tool's mock mode also needs NO deps:
+#   mock mode (--mock / "mock":true) writes a stdlib-only hand-crafted 1x1 RGBA
+#   PNG using struct+zlib -- exactly like tools/matting. No numpy or Pillow needed
+#   for --mock; plain python3 is sufficient.
+#
+# Real inference (actually clearing green-spill pixels) requires:
+#   numpy  -- pixel array operations
+#   Pillow -- image I/O (open RGBA PNG, save cleaned PNG)
+#
+numpy==1.26.4
+Pillow==11.0.0

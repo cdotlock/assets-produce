@@ -1,0 +1,19 @@
+Remove chromakey green-spill leak pixels from an RGBA PNG -- numpy + Pillow, no ML.
+
+- Backed by `tools/green-spill-clear/green-spill-clear.py`. Net effect: loads the
+  RGBA PNG, detects opaque green-leaning pixels (g > r+delta AND g > b+delta AND
+  R+G+B >= bright_sum), zeroes their alpha and RGB, then saves to output_path as PNG.
+- Input is a local image path. Output is the same -- atomic tool does NOT upload to
+  OSS; a downstream skill chains `oss-put` to deliver the cleaned asset.
+- Default params match the backend: `delta=5` (green dominance threshold),
+  `bright_sum=400` (minimum R+G+B sum -- excludes dark green clothing/fabric).
+- Idempotent on already-clean PNGs (no leak pixels found = no change).
+
+Use `mock: true` in tests -- writes a 1x1 RGBA placeholder PNG using stdlib
+struct+zlib only (no numpy or Pillow required). Use `dryRun: true` to print the
+resolved Python invocation without running it.
+
+**Trust boundary:** `inputPath` and `outputPath` are absolute paths,
+unconstrained by the wrapper. The caller (asset-service mini agent loop)
+MUST resolve these from server-controlled state -- never pass user-supplied
+strings through unchecked.
