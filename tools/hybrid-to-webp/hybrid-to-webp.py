@@ -212,8 +212,12 @@ def _run_json_main(argv: list[str] | None = None) -> int:
         _emit_error("INVALID_INPUT", "input.input_path and input.output_path are required")
         return 2
 
-    quality = int(payload.get("quality", DEFAULT_QUALITY))
-    method = int(payload.get("method", DEFAULT_METHOD))
+    try:
+        quality = int(payload.get("quality", DEFAULT_QUALITY))
+        method = int(payload.get("method", DEFAULT_METHOD))
+    except (TypeError, ValueError):
+        _emit_error("INVALID_INPUT", "quality and method must be integers")
+        return 2
     overwrite = bool(payload.get("overwrite", False))
     mock = args.mock or bool(payload.get("mock", False))
 
