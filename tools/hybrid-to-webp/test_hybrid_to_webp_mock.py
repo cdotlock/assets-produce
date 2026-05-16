@@ -161,3 +161,43 @@ def test_negative_unwritable_output_dir(smoke_dir: Path) -> None:
     err = json.loads(proc.stderr)
     assert err["error"]["code"] == "INVALID_INPUT"
     assert proc.stdout.strip() == ""
+
+
+def test_explicit_cli_input_output(smoke_dir: Path) -> None:
+    """The explicit single-file CLI (--input/--output) encodes one file.
+
+    Uses a mock-produced 1×1 WebP as a valid source image (Pillow can open
+    WebP just as well as PNG — the encode path is format-agnostic on input).
+    Round-trip assertion on the produced file is still mandatory.
+    """
+    # Step 1: produce a valid source image via the mock JSON path.
+    src = smoke_dir / "src.webp"
+    seed_payload = {
+        "input_path": str(smoke_dir / "unused.png"),
+        "output_path": str(src),
+        "mock": True,
+        "overwrite": True,
+    }
+    seed = _run(["--input", "-"], stdin=json.dumps(seed_payload))
+    assert seed.returncode == 0, f"seed stderr={seed.stderr!r}"
+    _assert_valid_webp(src)
+
+    # Step 2: explicit CLI encodes src → dst (no JSON, no --mock).
+    dst = smoke_dir / "explicit_out.webp"
+    proc = _run(
+        ["--input", str(src), "--output", str(dst), "--quality", "85", "--method", "4"]
+    )
+    assert proc.returncode == 0, f"stdout={proc.stdout!r} stderr={proc.stderr!r}"
+    assert "✓" in proc.stdout
+    _assert_valid_webp(dst)
+
+
+def test_explicit_cli_missing_input_file(smoke_dir: Path) -> None:
+    """Explicit CLI with a non-existent --input → exit 2, no output written."""
+    dst = smoke_dir / "never.webp"
+    proc = _run(
+        ["--input", str(smoke_dir / "does_not_exist.png"), "--output", str(dst)]
+    )
+    assert proc.returncode == 2, f"stdout={proc.stdout!r} stderr={proc.stderr!r}"
+    assert "ERROR" in proc.stderr
+    assert not dst.exists()

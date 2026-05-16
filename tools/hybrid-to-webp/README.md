@@ -89,12 +89,18 @@ Note: unlike `tools/matting` whose mock runs on plain `python3` (no Pillow),
 mock here still requires Pillow because there is no standard-library WebP
 encoder. This is expected — Pillow is this tool's only runtime dep anyway.
 
-## Legacy CLI (batch back-compat)
+## Explicit single-file CLI (back-compat)
 
-The original batch `main()` is preserved for scripts that invoked
-`hybrid_to_webp.py --book-slug ...` directly. Trigger by NOT passing
-`--input` / `--mock` / `--json`:
+A plain one-input → one-output CLI is also available (no JSON, no backend
+book-slug / `moonscripts` path logic — that batch coupling was removed in
+the Phase-13 migration). Trigger by passing both `--input` and `--output`
+(without `--mock` / `--json`):
 
 ```bash
-python3 hybrid-to-webp.py --book-slug <slug> [--overwrite] [--quality 90] [--method 6]
+python3 hybrid-to-webp.py --input in.png --output out.webp [--quality 90] [--method 6] [--overwrite]
 ```
+
+It calls the same faithful `_encode_webp` helper as the JSON entry, so the
+encode behavior is identical: `Image.open(src).convert("RGBA").save(dst,
+"WEBP", quality, method)`, skipping when the WebP is newer than the source
+PNG unless `--overwrite`.

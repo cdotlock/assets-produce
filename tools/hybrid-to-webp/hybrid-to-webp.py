@@ -1,34 +1,42 @@
 #!/usr/bin/env python3
-"""hybrid-to-webp.py — convert MODNet-hybrid chromakey PNG to delivery WebP.
+"""hybrid-to-webp.py — encode a MODNet-hybrid chromakey PNG to delivery WebP.
 
-Atomic tool: takes ONE explicit input file and writes ONE explicit output file.
-No directory walking, no book-slug logic, no REPO_ROOT — those belonged to the
-original batch script and are intentionally removed here.
+Atomic tool: takes ONE explicit input file and writes ONE explicit output
+file. The original backend batch script discovered files by walking
+repo-relative directory trees keyed off a per-title slug; all of that
+coupling is intentionally removed here. There is no portable legacy batch
+CLI worth preserving for this tool; the only faithful thing carried over is
+the encode behavior.
 
-Why a dedicated tool (vs running to-final.py):
-  to-final.py runs a "last-gate" _inline_unspill before WebP encode that
+Faithful encode behavior (preserved verbatim from the backend):
+    Image.open(src).convert("RGBA").save(dst, "WEBP", quality=<q>, method=<m>)
+  with backend defaults quality=90, method=6, plus skip-if-WebP-newer-than-PNG
+  unless --overwrite.
+
+Why a dedicated encoder (vs running to-final.py):
+  to-final.py runs a "last-gate" inline unspill before WebP encode that
   blindly clamps G := max(R,B) on every alpha>0 pixel. That re-applies the
   exact over-correction the MODNet hybrid was designed to avoid (it would
   destroy dark olive / dark green fabric color). Hybrid output's RGB is
-  already cleaned by edge_decontaminate, so we skip the extra unspill.
+  already cleaned by edge_decontaminate, so we skip the extra inline unspill
+  — do NOT re-apply G := max(R,B) here.
 
-Migrated 2026-05-16 from
-moonshort-backend/generate-upscale-matting/_local_tools/hybrid_to_webp.py.
-Path-walking / batch logic removed. JSON contract aligned with Phase-13 pattern.
+Migrated 2026-05-16 from the moonshort-backend generate-upscale-matting
+helper. Backend path-walking / per-title-slug / batch logic removed entirely.
 
 Usage (JSON entry, preferred):
   python3 hybrid-to-webp.py --input fixtures/hybrid-to-webp-mock.json
   cat fixtures/hybrid-to-webp-mock.json | python3 hybrid-to-webp.py --input -
 
-Legacy CLI (batch, back-compat):
-  python3 hybrid-to-webp.py --book-slug <slug> [--overwrite] [--quality 90] ...
+Usage (explicit single-file CLI, back-compat):
+  python3 hybrid-to-webp.py --input in.png --output out.webp [--quality 90]
+                            [--method 6] [--overwrite]
 """
 from __future__ import annotations
 
 import argparse
 import pathlib
 import sys
-import time
 
 
 # ---------------------------------------------------------------------------
@@ -36,6 +44,36 @@ import time
 # ---------------------------------------------------------------------------
 DEFAULT_QUALITY = 90
 DEFAULT_METHOD = 6  # WebP encoder method (0=fast, 6=best/slowest)
+
+
+# ─── Faithful shared encode ──────────────────────────────────────────────────
+
+def _encode_webp(
+    src: pathlib.Path,
+    dst: pathlib.Path,
+    quality: int = DEFAULT_QUALITY,
+    method: int = DEFAULT_METHOD,
+    overwrite: bool = False,
+) -> bool:
+    """Faithful PNG→WebP encode shared by both entries (DRY).
+
+    Mirrors the backend's exact per-file behavior:
+      - skip if WebP exists and is newer than the source PNG, unless overwrite
+      - else Image.open(src).convert("RGBA").save(dst, "WEBP", quality, method)
+
+    Returns True if a file was (re-)encoded, False if it was skipped.
+    Raises on any I/O / decode / encode error (no silent fallback).
+    """
+    from PIL import Image
+
+    if (not overwrite and dst.exists() and src.exists()
+            and dst.stat().st_mtime > src.stat().st_mtime):
+        return False
+
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    im = Image.open(src).convert("RGBA")
+    im.save(dst, "WEBP", quality=quality, method=method)
+    return True
 
 
 # ─── Shared helpers ──────────────────────────────────────────────────────────
@@ -62,84 +100,44 @@ def _write_mock_webp(out_path: pathlib.Path) -> None:
     img.save(out_path, "WEBP", quality=DEFAULT_QUALITY, method=DEFAULT_METHOD)
 
 
-# ─── Legacy batch CLI (back-compat) ──────────────────────────────────────────
+# ─── Explicit single-file CLI (back-compat, no backend coupling) ─────────────
 
 def main() -> int:
-    """Original batch CLI — directory-walking, book-slug-based.
+    """Explicit single-file CLI — one input PNG → one output WebP.
 
-    Preserved for back-compat with scripts that invoked hybrid_to_webp.py
-    directly with --book-slug. This path is NOT used by the atomic-tool JSON
-    entry. Note: REPO_ROOT and the directory-walking logic live only in this
-    function; the JSON entry has neither.
+    Faithful encode via the shared `_encode_webp` helper. No batch loop, no
+    directory walking, no per-title-slug / repo-root path logic (all removed
+    in the Phase-13 migration). Trigger by passing both --input and --output
+    (without --mock / --json).
     """
-    REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]  # assets-produce root (not backend)
-
     ap = argparse.ArgumentParser(prog="hybrid-to-webp")
-    ap.add_argument("--book-slug", required=True)
-    ap.add_argument("--overwrite", action="store_true",
-                    help="re-encode even if WebP exists and is newer than PNG")
-    ap.add_argument("--only", default="",
-                    help="comma list of sprite_ids to process")
-    ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--input", required=True, help="source PNG path")
+    ap.add_argument("--output", required=True, help="output WebP path")
     ap.add_argument("--quality", type=int, default=DEFAULT_QUALITY)
     ap.add_argument("--method", type=int, default=DEFAULT_METHOD,
                     help="WebP encoder method (0=fast, 6=best/slowest)")
+    ap.add_argument("--overwrite", action="store_true",
+                    help="re-encode even if WebP exists and is newer than PNG")
     args = ap.parse_args()
 
-    from PIL import Image
+    src = pathlib.Path(args.input).expanduser().resolve()
+    dst = pathlib.Path(args.output).expanduser().resolve()
 
-    base = REPO_ROOT / "moonscripts" / args.book_slug / "assets"
-    src_dir = base / "asset-img-chromakey" / "ep_sprites"
-    dst_dir = base / "final" / "ep_sprites"
-
-    if not src_dir.is_dir():
-        print(f"ERROR: src missing: {src_dir}", file=sys.stderr)
+    if not src.is_file():
+        print(f"ERROR: input is not a file: {src}", file=sys.stderr)
         return 2
-    dst_dir.mkdir(parents=True, exist_ok=True)
 
-    if args.only:
-        only_set = {x.strip() for x in args.only.split(",") if x.strip()}
-        srcs = sorted(p for p in src_dir.iterdir()
-                      if p.is_file() and p.suffix == ".png" and p.stem in only_set)
+    try:
+        encoded = _encode_webp(src, dst, args.quality, args.method, args.overwrite)
+    except Exception as e:  # noqa: BLE001 — surface any decode/encode failure
+        print(f"✗ {dst}: {type(e).__name__}: {str(e)[:200]}", file=sys.stderr)
+        return 1
+
+    if encoded:
+        print(f"✓ {dst}: {dst.stat().st_size // 1024} KB")
     else:
-        srcs = sorted(p for p in src_dir.iterdir()
-                      if p.is_file() and p.suffix == ".png")
-    if args.limit:
-        srcs = srcs[:args.limit]
-
-    print(f"[hybrid-to-webp] book={args.book_slug}", flush=True)
-    print(f"  src: {src_dir}", flush=True)
-    print(f"  dst: {dst_dir}", flush=True)
-    print(f"  pngs: {len(srcs)}  overwrite={args.overwrite}  q={args.quality} method={args.method}",
-          flush=True)
-
-    counts = {"ok": 0, "skip": 0, "err": 0}
-    t0 = time.time()
-    for i, src in enumerate(srcs, 1):
-        dst = dst_dir / f"{src.stem}.webp"
-        if (not args.overwrite and dst.exists()
-                and dst.stat().st_mtime > src.stat().st_mtime):
-            counts["skip"] += 1
-            continue
-        try:
-            im = Image.open(src).convert("RGBA")
-            im.save(dst, "WEBP", quality=args.quality, method=args.method)
-            counts["ok"] += 1
-        except Exception as e:
-            counts["err"] += 1
-            print(f"  ERR {src.stem}: {type(e).__name__}: {e}", flush=True)
-
-        if i <= 3 or i % 100 == 0 or i == len(srcs):
-            rate = i / (time.time() - t0)
-            eta_s = (len(srcs) - i) / rate if rate else 0
-            print(f"  [{i:>4}/{len(srcs)}] ok={counts['ok']} skip={counts['skip']} "
-                  f"err={counts['err']}  rate={rate:.1f}/s  eta={eta_s:.0f}s",
-                  flush=True)
-
-    elapsed = time.time() - t0
-    print(f"\n[hybrid-to-webp] done in {elapsed:.1f}s — "
-          f"ok={counts['ok']} skip={counts['skip']} err={counts['err']}", flush=True)
-    return 0 if counts["err"] == 0 else 1
+        print(f"· {dst}: skipped (newer than source; use --overwrite)")
+    return 0
 
 
 # ─── JSON entry (Phase 13 atomic-tool pattern) ───────────────────────────────
@@ -241,9 +239,10 @@ def _run_json_main(argv: list[str] | None = None) -> int:
         _write_mock_webp(dst)
     else:
         try:
-            from PIL import Image
-            im = Image.open(src).convert("RGBA")
-            im.save(dst, "WEBP", quality=quality, method=method)
+            # overwrite=True: the JSON entry already enforced the
+            # output-exists / overwrite policy above; the encode itself
+            # should not re-skip on the mtime check.
+            _encode_webp(src, dst, quality, method, overwrite=True)
         except Exception as e:  # noqa: BLE001 — atomic tool boundary
             _emit_error("ATOMIC_TOOL_FAILED", f"{type(e).__name__}: {e}")
             return 4
@@ -264,7 +263,14 @@ def _run_json_main(argv: list[str] | None = None) -> int:
 
 
 def _looks_like_json_entry(argv: list[str]) -> bool:
-    return any(a in ("--input", "--mock", "--json") for a in argv)
+    """JSON/atomic entry when --mock/--json present, OR --input given without
+    an explicit --output (the explicit CLI requires both --input and --output).
+    """
+    if any(a in ("--mock", "--json") for a in argv):
+        return True
+    has_input = "--input" in argv
+    has_output = "--output" in argv
+    return has_input and not has_output
 
 
 if __name__ == "__main__":
