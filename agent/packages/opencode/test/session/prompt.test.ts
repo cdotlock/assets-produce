@@ -513,6 +513,11 @@ it.live("glob tool keeps instance context during prompt runs", () =>
       }),
     { git: true, config: providerCfg },
   ),
+  // First test in this file to invoke a real ripgrep-backed tool. On a cold
+  // cache (no `rg` on PATH, fresh per-process bin dir) the ripgrep binary is
+  // downloaded from GitHub, which is network-variable and routinely exceeds
+  // bun's default 5s per-test timeout. Use the suite-wide --timeout 30000.
+  { timeout: 30_000 },
 )
 
 it.live("loop continues when finish is stop but assistant has tool parts", () =>
