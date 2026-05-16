@@ -1,0 +1,24 @@
+Produce an alpha-matted transparent cutout from one image via MODNet — Layer C
+of the asset pipeline (portrait / object matting for composite work).
+
+- Backed by `tools/matting/matting.py`. Net effect: MODNet segments the
+  foreground subject, removes the background, and writes a transparent-background
+  WebP or PNG at the requested output_path.
+- Input is a local image path (the caller is expected to resolve OSS URLs to
+  local files first). Output is the same — atomic tool does NOT upload to
+  OSS; a downstream skill chains `oss-put` to deliver the matted asset.
+- Default `format` is `webp` (smaller, lossless alpha). Pass `format: "png"`
+  when a downstream compositor requires PNG.
+- `device` selects the inference backend (`"cpu"` default; pass `"cuda"` or
+  `"mps"` when a GPU is available).
+
+Use `mock: true` in tests / before the MODNet weights are downloaded. Mock
+mode writes a 1×1 RGBA placeholder PNG (no GPU or weight files required). Use
+`dryRun: true` to print the resolved Python invocation without running it.
+
+**Trust boundary:** `inputPath` and `outputPath` are absolute paths,
+unconstrained by the wrapper. The caller (asset-service mini agent loop)
+MUST resolve these from server-controlled state — never pass user-supplied
+strings through unchecked. This tool ships with no path-traversal guard
+because the only current caller is server-side; tighten this when an
+LLM-driven loop starts choosing paths.
