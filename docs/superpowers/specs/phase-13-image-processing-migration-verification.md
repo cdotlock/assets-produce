@@ -114,7 +114,7 @@ CLI environment does not resolve in this context (no OPENCODE runtime). Falling 
   tool.cutout,
   ```
 
-Each tool TS file (`matting.ts`, `cutout.ts`, `hole-fill.ts`, `green-spill-clear.ts`, `rgb-unspill.ts`, `hybrid-to-webp.ts`) exports a `Parameters = Schema.Struct({...})` with non-empty fields (e.g. `matting.ts` has `inputPath`, `outputPath`, `format`, `device`, `overwrite`, `modnetRepoPath`, `dryRun`). Schema is non-empty for all 6.
+Each tool TS file (`matting.ts`, `cutout.ts`, `hole-fill.ts`, `green-spill-clear.ts`, `rgb-unspill.ts`, `hybrid-to-webp.ts`) exports a `Parameters = Schema.Struct({...})` with non-empty fields (e.g. `matting.ts` has `inputPath`, `outputPath`, `format`, `device`, `overwrite`, `mock`, `dryRun`). Schema is non-empty for all 6.
 
 `detect-matting` is **absent** from all 4 sites (grep returns empty; see §5 item 6).
 
