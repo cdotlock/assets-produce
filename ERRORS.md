@@ -282,8 +282,8 @@ invoked directly as:
 
 ```bash
 python tools/detect-matting/detect-matting.py --input <json-file>
-# or piped:
-echo '{"input":"...", "output":"..."}' | python tools/detect-matting/detect-matting.py
+# or piped (the explicit '--input -' is required to route stdin to the JSON path):
+echo '{"input":"...", "output":"..."}' | python tools/detect-matting/detect-matting.py --input -
 ```
 
 It emits a PASS/FAIL quality-judgement JSON report to the output path (stdout

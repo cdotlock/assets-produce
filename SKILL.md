@@ -280,7 +280,7 @@ lives in [`ERRORS.md` § Asset Service](ERRORS.md).
 | `generate-sfx-elevenlabs` | `agent tools show generate-sfx-elevenlabs` | Phase 11 — **real** ElevenLabs sound-generation → inline OSS upload → permanent OSS mp3 URL. Needs `ELEVENLABS_API_KEY` (+ OSS creds). |
 | `generate-music-suno` | `agent tools show generate-music-suno` | Phase 11 — **deterministic placeholder** per spec §15 row 1.13 (Suno has no official API; gateway deferred). Returns `metadata.placeholder:true`, no audio, no env. |
 | `oss-put` | `agent tools show oss-put` | Phase 12 — uploads an absolute `local_path` to OSS → returns a permanent OSS https URL. Mandatory final delivery step after `cg-render` / `upscale-image` (which emit local paths). Reuses Phase 2 OSS creds; no new env. |
-| `matting` | `agent tools show matting` | Phase 13 — wraps `tools/matting/matting.py` (MODNet ML). `mock: true` runs without weights. Needs `MODNET_REPO_PATH`. |
+| `matting` | `agent tools show matting` | Phase 13 — wraps `tools/matting/matting.py` (MODNet ML). `mock: true` runs without weights. Needs `MODNET_REPO_PATH` for non-mock runs. |
 | `cutout` | `agent tools show cutout` | Phase 13 — wraps `tools/cutout/cutout.py` (numpy/PIL HSV chroma-key). `mock: true` runs stdlib-only. |
 | `hole-fill` | `agent tools show hole-fill` | Phase 13 — wraps `tools/hole-fill/hole-fill.py` (cv2 TELEA inpaint). `mock: true` runs stdlib-only. |
 | `green-spill-clear` | `agent tools show green-spill-clear` | Phase 13 — wraps `tools/green-spill-clear/green-spill-clear.py` (numpy/PIL). `mock: true` runs stdlib-only. |
