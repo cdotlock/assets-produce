@@ -301,6 +301,9 @@ def _run_json_main(argv: list[str] | None = None) -> int:
         except OSError as e:
             _emit_error("INVALID_INPUT", f"cannot read input file: {e}")
             return 2
+        except UnicodeDecodeError:
+            _emit_error("INVALID_INPUT", "input file is not valid UTF-8 JSON")
+            return 2
 
     try:
         payload = _json.loads(raw)

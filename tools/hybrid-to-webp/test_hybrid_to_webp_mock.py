@@ -235,3 +235,20 @@ def test_negative_non_string_input_path(smoke_dir: Path) -> None:
     err = json.loads(proc.stderr)
     assert err["error"]["code"] == "INVALID_INPUT"
     assert proc.stdout.strip() == ""
+
+
+# ---------------------------------------------------------------------------
+# Negative: binary (non-UTF-8) file as the JSON payload  (must be
+# INVALID_INPUT/exit 2, not INTERNAL/exit 1 -- UnicodeDecodeError is a
+# ValueError and escapes the `except OSError` around the input-file read)
+# ---------------------------------------------------------------------------
+
+def test_negative_binary_input_file(smoke_dir: Path) -> None:
+    """A binary file passed as --input <path> -> INVALID_INPUT exit 2."""
+    binp = smoke_dir / "binary.bin"
+    binp.write_bytes(b"\x89PNG\r\n\x1a\n\xff\xd8\xff\x00\x01\x02")
+    proc = _run(["--input", str(binp)])
+    assert proc.returncode == 2, f"stdout={proc.stdout!r} stderr={proc.stderr!r}"
+    err = json.loads(proc.stderr)
+    assert err["error"]["code"] == "INVALID_INPUT"
+    assert proc.stdout.strip() == ""
