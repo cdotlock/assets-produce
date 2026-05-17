@@ -73,7 +73,7 @@ background and requires ML-based matting, use `matting-spec` instead.
 
 - **`green-spill-clear` — optional repair sub-step.** Removes residual
   green-spill pixels: opaque pixels where `g > r+delta AND g > b+delta AND
-  R+G+B >= brightSum` are zeroed (alpha and RGB set to 0). Required inputs:
+  a > 0 AND R+G+B >= brightSum` are zeroed (alpha and RGB set to 0). Required inputs:
   `inputPath`, `outputPath`. Optional: `delta` (green dominance threshold,
   default 5), `brightSum` (minimum R+G+B sum — excludes dark green
   clothing/fabric, default 400), `overwrite`, `mock`, `dryRun`. Apply when

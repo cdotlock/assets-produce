@@ -6,10 +6,10 @@ via MODNet. Layer C of the asset pipeline: portrait / object matting for
 composite work (visual novel sprites, key-art overlays, character sticker
 packs, promo composites).
 
-The matting pipeline originally lived in `moonshort-backend`
-(`generate-upscale-matting/matting.py`, MODNet). Phase 13 migrated it to
-`tools/matting/` and registered a thin TypeScript wrapper as the atomic tool
-[`matting`](../../agent/packages/opencode/src/tool/asset/matting.ts).
+The matting pipeline was ported in Phase 13 from
+`moonshort-backend/generate-upscale-matting/matting.py` (MODNet) to
+`tools/matting/matting.py`, with a thin TypeScript wrapper registered as the
+atomic tool [`matting`](../../agent/packages/opencode/src/tool/asset/matting.ts).
 The wrapper dispatches to `tools/matting/matting.py` via subprocess and
 returns a **local file path**. This Phase-13 skill body adds `oss-put`
 delivery parity so the loop's terminal `url` for a matting outcome is an
@@ -67,8 +67,8 @@ wrong skill (see Boundary).
 - **`green-spill-clear` — optional repair sub-step.** Removes residual
   green-spill pixels (opaque pixels where green still dominates R and B).
   Required inputs: `inputPath`, `outputPath`. Optional: `delta` (green
-  dominance threshold; `g > r+delta AND g > b+delta` to qualify as leak,
-  default 5), `brightSum` (minimum R+G+B sum to count as a leak — excludes
+  dominance threshold; `g > r+delta AND g > b+delta AND a > 0` to qualify as
+  leak, default 5), `brightSum` (minimum R+G+B sum to count as a leak — excludes
   dark green clothing/fabric, default 400), `overwrite`, `mock`, `dryRun`.
   Apply when the source had a green-screen backing and residual green leak
   pixels remain after matting.
