@@ -37,6 +37,20 @@ the `oss-put` atomic tool in their skill bodies (`cg-render-spec` /
 reuses the Phase 2 OSS service (no new env), so the loop's terminal
 `url` for cg / upscale outcomes is now an OSS-served URL end to end.
 
+Phase 13 (2026-05-17) migrated the backend image-processing suite from
+`moonshort-backend` to `tools/` atomic tools. Two post-process skill bodies
+are added to this directory: `matting-spec` documents the MODNet ML-based
+alpha-matte pipeline and `cutout-spec` documents the HSV chromakey
+green-screen pipeline; both chain `oss-put` as a mandatory final step for
+OSS-URL delivery parity. Four sub-step tools (`hole-fill`, `green-spill-clear`,
+`rgb-unspill`, `hybrid-to-webp`) are documented as optional chained repair /
+encoding steps inside those two bodies — they have no standalone skill body.
+The `detect-matting` CLI tool is CLI-only and has no skill body. **These two
+bodies are NOT yet added to `ASSET_GENERATION_SKILLS` (picker registration
+deferred / out of Phase-13 scope) — they are documented, not runtime-wired;**
+the loop is still wired to the placeholder generator and does not consume them
+at runtime yet.
+
 The `intent-to-skill` resolver only needs the skill **names**, which are
 baked into
 `agent/packages/opencode/src/business/asset-service/intent-to-skill.ts`
@@ -69,6 +83,8 @@ Until then the AssetService loop is wired to the **placeholder generator**
 | `sfx-spec.md` | sfx-spec | intent.kind == "sfx" |
 | `music-spec.md` | music-spec | intent.kind == "music" |
 | `upscale-spec.md` | upscale-spec | no AssetKind — selected via `skill_hint` / picker only (Phase 12 post-process body) |
+| `matting-spec.md` | matting-spec | not picker-wired — documented Phase-13 post-process body; registration deferred |
+| `cutout-spec.md` | cutout-spec | not picker-wired — documented Phase-13 post-process body; registration deferred |
 
 ## Conventions
 
