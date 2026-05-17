@@ -280,8 +280,15 @@ lives in [`ERRORS.md` § Asset Service](ERRORS.md).
 | `generate-sfx-elevenlabs` | `agent tools show generate-sfx-elevenlabs` | Phase 11 — **real** ElevenLabs sound-generation → inline OSS upload → permanent OSS mp3 URL. Needs `ELEVENLABS_API_KEY` (+ OSS creds). |
 | `generate-music-suno` | `agent tools show generate-music-suno` | Phase 11 — **deterministic placeholder** per spec §15 row 1.13 (Suno has no official API; gateway deferred). Returns `metadata.placeholder:true`, no audio, no env. |
 | `oss-put` | `agent tools show oss-put` | Phase 12 — uploads an absolute `local_path` to OSS → returns a permanent OSS https URL. Mandatory final delivery step after `cg-render` / `upscale-image` (which emit local paths). Reuses Phase 2 OSS creds; no new env. |
+| `matting` | `agent tools show matting` | Phase 13 — wraps `tools/matting/matting.py` (MODNet ML). `mock: true` runs without weights. Needs `MODNET_REPO_PATH`. |
+| `cutout` | `agent tools show cutout` | Phase 13 — wraps `tools/cutout/cutout.py` (numpy/PIL HSV chroma-key). `mock: true` runs stdlib-only. |
+| `hole-fill` | `agent tools show hole-fill` | Phase 13 — wraps `tools/hole-fill/hole-fill.py` (cv2 TELEA inpaint). `mock: true` runs stdlib-only. |
+| `green-spill-clear` | `agent tools show green-spill-clear` | Phase 13 — wraps `tools/green-spill-clear/green-spill-clear.py` (numpy/PIL). `mock: true` runs stdlib-only. |
+| `rgb-unspill` | `agent tools show rgb-unspill` | Phase 13 — wraps `tools/rgb-unspill/rgb-unspill.py` (numpy/PIL G-clamp). `mock: true` runs stdlib-only. |
+| `hybrid-to-webp` | `agent tools show hybrid-to-webp` | Phase 13 — wraps `tools/hybrid-to-webp/hybrid-to-webp.py` (Pillow PNG→WebP). `mock: true` requires Pillow but no source image. |
 | Offline CLIs | `tools/<name>/*.py` | NOT registered as atomic tools by design. |
 | `tools/oss-sync/sync.py` | `python tools/oss-sync/sync.py --input <json>` | Bulk OSS upload of a local directory; supports `dry_run: true`. |
+| `tools/detect-matting/detect-matting.py` | `python tools/detect-matting/detect-matting.py --input <json>` | Phase 13 detection/judgement — NOT a registered atomic tool (PASS/FAIL report). |
 
 ### When the loop should pick each atomic tool
 
@@ -299,6 +306,21 @@ lives in [`ERRORS.md` § Asset Service](ERRORS.md).
   §15 row 1.13 — no official Suno API; gateway deferred; returns
   `metadata.placeholder:true`, no audio). See
   [`knowledge/asset-generation/music-spec.md`](knowledge/asset-generation/music-spec.md).
+- **Phase-13 image-processing tools** — `matting`, `cutout`, `hole-fill`,
+  `green-spill-clear`, `rgb-unspill`, and `hybrid-to-webp` are registered
+  atomic tools (discoverable via `agent tools list`). `matting` and `cutout`
+  have documented skill bodies in
+  [`knowledge/asset-generation/matting-spec.md`](knowledge/asset-generation/matting-spec.md)
+  and [`knowledge/asset-generation/cutout-spec.md`](knowledge/asset-generation/cutout-spec.md)
+  that describe how the tools chain together (including `oss-put` for final
+  delivery). However, **these skill bodies are NOT yet added to the
+  `ASSET_GENERATION_SKILLS` picker allowlist** — picker/kind routing is
+  deferred and out of Phase-13 scope. The four sub-step tools (`hole-fill`,
+  `green-spill-clear`, `rgb-unspill`, `hybrid-to-webp`) have no standalone
+  skill bodies; they are documented as chained sub-steps inside
+  `matting-spec.md` / `cutout-spec.md`. Do NOT route `intent.kind` to any
+  Phase-13 tool at this time — there is no kind mapping wired. `detect-matting`
+  is offline-only and must not be called by the loop.
 
 ---
 

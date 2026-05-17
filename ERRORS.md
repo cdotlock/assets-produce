@@ -159,6 +159,149 @@ with the resolved upload plan and `metadata.dryRun:true` (no `error`
 flag, no OSS call), exits 0. It is testing-only and never set in
 production.
 
+### `tools call <id>` — image tools (Phase 13)
+
+Image-tool execution errors surface through the same generic
+`tools call <id>` path: every Python-side failure is folded into one
+uniform shape — `output: "<id> error: <stderr>"`, `metadata.error:true` —
+which the CLI renders as `tool error: <message>` (exit 1), where
+`<message>` is exactly the tool's `output` string. Schema-constraint
+rejections of **well-formed** JSON (e.g. empty `inputPath` failing
+`isMinLength(1)`) surface as `tool error: The <id> tool was called with
+invalid arguments: SchemaError(...)` (exit **1**) — the tool never runs,
+but the CLI still folds it into the exit-1 path. Only input that is
+**not parseable JSON** yields `invalid JSON params: <reason>` (exit 2) —
+see the table above. The messages below are byte-accurate to the tool
+code in
+[`agent/.../tool/asset/matting.ts`](agent/packages/opencode/src/tool/asset/matting.ts),
+[`agent/.../tool/asset/cutout.ts`](agent/packages/opencode/src/tool/asset/cutout.ts),
+[`agent/.../tool/asset/hole-fill.ts`](agent/packages/opencode/src/tool/asset/hole-fill.ts),
+[`agent/.../tool/asset/green-spill-clear.ts`](agent/packages/opencode/src/tool/asset/green-spill-clear.ts),
+[`agent/.../tool/asset/rgb-unspill.ts`](agent/packages/opencode/src/tool/asset/rgb-unspill.ts), and
+[`agent/.../tool/asset/hybrid-to-webp.ts`](agent/packages/opencode/src/tool/asset/hybrid-to-webp.ts).
+
+All six tools share the same error-output pattern: Python exit≠0 →
+`output: "<id> error: <stderr>"` (stderr trimmed; falls back to
+`"exited <code>"` if empty); JSON parse failure →
+`output: "<id>: could not parse Python stdout as JSON"`; schema mismatch
+→ `output: "<id> error: <id>: Python stdout did not match expected schema:
+<reason>"`; terminal `Effect.catch` → `output: "<id> error: <message>"`.
+
+`matting` has one additional pre-flight guard not present in the other
+five tools: if `format` is passed but is neither `"webp"` nor `"png"`,
+the tool returns early (before calling Python) with
+`output: "matting: format must be \"webp\" or \"png\" (got <fmt>)"`,
+`metadata.error:true`. This never reaches the Python subprocess.
+
+`matting` (MODNet ML background removal → transparent RGBA cutout):
+
+| Scenario | Error Message | Exit Code |
+|---|---|---|
+| `format` not `"webp"` or `"png"` (pre-flight guard, no Python call) | `tool error: matting: format must be "webp" or "png" (got <fmt>)` | 1 |
+| Python subprocess failed to start | `tool error: matting error: matting: python subprocess failed to start — <reason>` | 1 |
+| Python exited non-zero | `tool error: matting error: <stderr>` (or `matting error: exited <code>` if stderr empty) | 1 |
+| Python stdout not parseable as JSON | `tool error: matting: could not parse Python stdout as JSON` | 1 |
+| Python stdout fails schema validation | `tool error: matting error: matting: Python stdout did not match expected schema: <reason>` | 1 |
+| Terminal catch (unexpected) | `tool error: matting error: <message>` | 1 |
+| `inputPath` / `outputPath` empty — well-formed JSON failing Schema constraint | `tool error: The matting tool was called with invalid arguments: SchemaError(...)` | 1 |
+| Malformed `--json` payload | `invalid JSON params: <reason>` | 2 |
+
+`cutout` (HSV chroma-key green-screen removal → RGBA cutout PNG):
+
+| Scenario | Error Message | Exit Code |
+|---|---|---|
+| Python subprocess failed to start | `tool error: cutout error: cutout: python subprocess failed to start -- <reason>` | 1 |
+| Python exited non-zero | `tool error: cutout error: <stderr>` (or `cutout error: exited <code>` if stderr empty) | 1 |
+| Python stdout not parseable as JSON | `tool error: cutout: could not parse Python stdout as JSON` | 1 |
+| Python stdout fails schema validation | `tool error: cutout error: cutout: Python stdout did not match expected schema: <reason>` | 1 |
+| Terminal catch (unexpected) | `tool error: cutout error: <message>` | 1 |
+| `inputPath` / `outputPath` empty — well-formed JSON failing Schema constraint | `tool error: The cutout tool was called with invalid arguments: SchemaError(...)` | 1 |
+| Malformed `--json` payload | `invalid JSON params: <reason>` | 2 |
+
+`hole-fill` (cv2 TELEA inpainting of interior alpha=0 holes):
+
+| Scenario | Error Message | Exit Code |
+|---|---|---|
+| Python subprocess failed to start | `tool error: hole-fill error: hole-fill: python subprocess failed to start -- <reason>` | 1 |
+| Python exited non-zero | `tool error: hole-fill error: <stderr>` (or `hole-fill error: exited <code>` if stderr empty) | 1 |
+| Python stdout not parseable as JSON | `tool error: hole-fill: could not parse Python stdout as JSON` | 1 |
+| Python stdout fails schema validation | `tool error: hole-fill error: hole-fill: Python stdout did not match expected schema: <reason>` | 1 |
+| Terminal catch (unexpected) | `tool error: hole-fill error: <message>` | 1 |
+| `inputPath` / `outputPath` empty — well-formed JSON failing Schema constraint | `tool error: The hole-fill tool was called with invalid arguments: SchemaError(...)` | 1 |
+| Malformed `--json` payload | `invalid JSON params: <reason>` | 2 |
+
+`green-spill-clear` (numpy/PIL green-spill suppression):
+
+| Scenario | Error Message | Exit Code |
+|---|---|---|
+| Python subprocess failed to start | `tool error: green-spill-clear error: green-spill-clear: python subprocess failed to start -- <reason>` | 1 |
+| Python exited non-zero | `tool error: green-spill-clear error: <stderr>` (or `green-spill-clear error: exited <code>` if stderr empty) | 1 |
+| Python stdout not parseable as JSON | `tool error: green-spill-clear: could not parse Python stdout as JSON` | 1 |
+| Python stdout fails schema validation | `tool error: green-spill-clear error: green-spill-clear: Python stdout did not match expected schema: <reason>` | 1 |
+| Terminal catch (unexpected) | `tool error: green-spill-clear error: <message>` | 1 |
+| `inputPath` / `outputPath` empty — well-formed JSON failing Schema constraint | `tool error: The green-spill-clear tool was called with invalid arguments: SchemaError(...)` | 1 |
+| Malformed `--json` payload | `invalid JSON params: <reason>` | 2 |
+
+`rgb-unspill` (numpy/PIL G-channel clamp decontamination):
+
+| Scenario | Error Message | Exit Code |
+|---|---|---|
+| Python subprocess failed to start | `tool error: rgb-unspill error: rgb-unspill: python subprocess failed to start -- <reason>` | 1 |
+| Python exited non-zero | `tool error: rgb-unspill error: <stderr>` (or `rgb-unspill error: exited <code>` if stderr empty) | 1 |
+| Python stdout not parseable as JSON | `tool error: rgb-unspill: could not parse Python stdout as JSON` | 1 |
+| Python stdout fails schema validation | `tool error: rgb-unspill error: rgb-unspill: Python stdout did not match expected schema: <reason>` | 1 |
+| Terminal catch (unexpected) | `tool error: rgb-unspill error: <message>` | 1 |
+| `inputPath` / `outputPath` empty — well-formed JSON failing Schema constraint | `tool error: The rgb-unspill tool was called with invalid arguments: SchemaError(...)` | 1 |
+| Malformed `--json` payload | `invalid JSON params: <reason>` | 2 |
+
+`hybrid-to-webp` (Pillow PNG→WebP re-encode):
+
+| Scenario | Error Message | Exit Code |
+|---|---|---|
+| Python subprocess failed to start | `tool error: hybrid-to-webp error: hybrid-to-webp: python subprocess failed to start — <reason>` | 1 |
+| Python exited non-zero | `tool error: hybrid-to-webp error: <stderr>` (or `hybrid-to-webp error: exited <code>` if stderr empty) | 1 |
+| Python stdout not parseable as JSON | `tool error: hybrid-to-webp: could not parse Python stdout as JSON` | 1 |
+| Python stdout fails schema validation | `tool error: hybrid-to-webp error: hybrid-to-webp: Python stdout did not match expected schema: <reason>` | 1 |
+| Terminal catch (unexpected) | `tool error: hybrid-to-webp error: <message>` | 1 |
+| `inputPath` / `outputPath` empty — well-formed JSON failing Schema constraint | `tool error: The hybrid-to-webp tool was called with invalid arguments: SchemaError(...)` | 1 |
+| Malformed `--json` payload | `invalid JSON params: <reason>` | 2 |
+
+Note: `cutout`, `hole-fill`, `green-spill-clear`, and `rgb-unspill` use `--`
+(double dash, no space after) in the subprocess-failed-to-start message,
+while `matting` and `hybrid-to-webp` use `—` (em dash). This is
+byte-accurate to the `.ts` source.
+
+`dryRun: true` is **not an error** for any of the six tools: it returns
+`title: "dry-run <id>"` with the resolved Python invocation as JSON and
+`metadata.dryRun:true` (no `error` flag, no Python subprocess call), exits 0.
+
+#### `detect-matting` — offline CLI only (Phase 13)
+
+`detect-matting` is **not a registered atomic tool**. It is an offline CLI
+invoked directly as:
+
+```bash
+python tools/detect-matting/detect-matting.py --input <json-file>
+# or piped:
+echo '{"input":"...", "output":"..."}' | python tools/detect-matting/detect-matting.py
+```
+
+It emits a PASS/FAIL quality-judgement JSON report to the output path (stdout
+on success); errors go to stderr as `{"error":{"code":"...","message":"..."}}`.
+
+Exit-code contract (from `tools/detect-matting/detect-matting.py`):
+
+| Exit Code | Meaning |
+|---|---|
+| 0 | Success — report written (a FAIL verdict is NOT an error; exit 0 with `verdict: "FAIL"`) |
+| 2 | `INVALID_INPUT` — bad/missing input fields, non-numeric thresholds, unwritable output dir |
+| 4 | `ATOMIC_TOOL_FAILED` — numpy/PIL/scipy processing error |
+| 1 | `INTERNAL` — unexpected exception |
+
+Because `detect-matting` is not an atomic tool, it does not go through the
+`tools call` CLI envelope and does not produce `tool error: ...` output.
+Shell callers inspect the exit code and stderr JSON directly.
+
 ### `tools export-schema [id]`
 
 | Scenario | Error Message | Exit Code |
