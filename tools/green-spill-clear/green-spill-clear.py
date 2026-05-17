@@ -9,10 +9,15 @@ algorithm core: detect pixels that are opaque AND green-leaning
 (g > r+DELTA, g > b+DELTA, r+g+b >= BRIGHT_SUM) and zero their alpha.
 
 Faithful algorithm (preserved verbatim from the backend clear_one()):
-    arr = np.array(Image.open(src).convert("RGBA")).copy()  -- if not RGBA, skip
+    arr = np.array(Image.open(src).convert("RGBA")).copy()
     leak = (g > r+delta) & (g > b+delta) & (a > 0) & (r+g+b >= bright_sum)
     arr[leak, :] = 0  -- zero all channels of leak pixels
     Image.fromarray(arr, "RGBA").save(dst, "PNG")
+
+Note on non-RGBA input: the backend's clear_one() skipped non-RGBA files because it
+was an in-place batch mutator (no output required per file). As an atomic single-output
+tool this implementation MUST produce an output, so a non-RGBA input is promoted to RGBA
+and written through to dst unchanged (same pixel data, new RGBA mode wrapping).
 
 Migrated 2026-05-16 from moonshort-backend/generate-upscale-matting/green_spill_clear.py.
 Backend batch (--paths, --workers, ThreadPoolExecutor) removed entirely.
@@ -51,8 +56,8 @@ def _clear_green_spill(
     """Clear bright green-leaning pixels (chromakey leak), preserving dark green.
 
     Faithful port of backend clear_one() per-file algorithm:
-      - loads src as RGBA
-      - if not RGBA, writes src unchanged to dst (idempotent skip)
+      - loads src as RGBA (non-RGBA input is promoted to RGBA and written through;
+        the backend's skip was a batch-mutator concern, not an algorithm concern)
       - applies leak mask: g > r+delta AND g > b+delta AND a>0 AND r+g+b>=bright_sum
       - zeroes RGBA of every matching pixel
       - saves result to dst as PNG
@@ -71,7 +76,9 @@ def _clear_green_spill(
 
     with Image.open(src) as im:
         if im.mode != "RGBA":
-            # not RGBA: copy src to dst unchanged (idempotent skip like backend)
+            # non-RGBA: promote to RGBA and write through to dst.
+            # The backend skipped non-RGBA only because it was an in-place batch
+            # mutator; an atomic single-output tool must still emit an output.
             im.convert("RGBA").save(dst, "PNG")
             return
         arr = np.array(im).copy()

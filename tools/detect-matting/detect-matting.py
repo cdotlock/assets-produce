@@ -64,7 +64,7 @@ BODY_BAND_X_HI = 0.70
 
 def _disk_structure(radius: int) -> "np.ndarray":
     """Return a circular boolean structuring element of the given radius."""
-    import numpy as np  # noqa: PLC0415 -- lazy import (heavy dep)
+    import numpy as np  # noqa: PLC0415 -- lazy import
     yy, xx = np.ogrid[-radius:radius + 1, -radius:radius + 1]
     return (yy * yy + xx * xx <= radius * radius)
 

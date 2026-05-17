@@ -5,7 +5,6 @@ __pycache__/
 # Scratch / produced output images (test runs, smoke outputs).
 output/
 out/
-/tmp/
 *.png
 
 # Never ignore committed fixtures

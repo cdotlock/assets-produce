@@ -17,16 +17,11 @@ clothing).  rgb_unspill never zeroes alpha and never changes the silhouette;
 it only desaturates the green tint.  Safe on green clothing (those pixels stay
 green, just less so).
 
-Faithful per-file algorithm ported from backend rgb_unspill.py unspill_one():
-    arr = np.array(Image.open(src)).copy()       # RGBA array
-    a = arr[..., 3]
-    r = arr[..., 0].astype(int)
-    g = arr[..., 1].astype(int)
-    b = arr[..., 2].astype(int)
-    max_rb = np.maximum(r, b)
-    mask = (a > 0) & (g > max_rb)
-    arr[..., 1][mask] = max_rb[mask].astype(np.uint8)
-    # save using output extension (.webp -> WEBP quality=90 method=4; .png -> PNG)
+Behavior (faithful per-file port of backend rgb_unspill.py unspill_one()):
+the source is read and coerced to RGBA, then on every pixel with alpha > 0
+where G exceeds both R and B the G channel is clamped down to max(R, B).
+Alpha and R/B are never modified, so the silhouette is unchanged. Output
+format follows the dst extension: `.png` -> PNG, `.webp` -> WebP q90 m4.
 
 Migrated 2026-05-16 from moonshort-backend/generate-upscale-matting/rgb_unspill.py.
 Backend batch (--root, --paths, --workers, --dry-run, ThreadPoolExecutor,
