@@ -313,3 +313,20 @@ def test_explicit_cli_missing_input_file(smoke_dir: Path) -> None:
     assert proc.returncode == 2, f"stdout={proc.stdout!r} stderr={proc.stderr!r}"
     assert "ERROR" in proc.stderr
     assert not dst.exists()
+
+
+# ---------------------------------------------------------------------------
+# Negative: non-string input_path  (must be INVALID_INPUT/exit 2, not the
+# TypeError-driven INTERNAL/exit 1 from pathlib.Path(<non-str>))
+# ---------------------------------------------------------------------------
+
+def test_negative_non_string_input_path(smoke_dir: Path) -> None:
+    """A non-string input_path -> INVALID_INPUT exit 2.  output_path is a
+    valid string so the required-field falsy check passes; the isinstance
+    guard is what must reject this (Path(123) would otherwise raise TypeError)."""
+    payload = {"input_path": 123, "output_path": str(smoke_dir / "out.png")}
+    proc = _run(["--input", "-"], stdin=json.dumps(payload))
+    assert proc.returncode == 2, f"stdout={proc.stdout!r} stderr={proc.stderr!r}"
+    err = json.loads(proc.stderr)
+    assert err["error"]["code"] == "INVALID_INPUT"
+    assert proc.stdout.strip() == ""

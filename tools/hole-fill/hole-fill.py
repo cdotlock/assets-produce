@@ -308,6 +308,9 @@ def _run_json_main(argv: list[str] | None = None) -> int:
     if not input_path or not output_path:
         _emit_error("INVALID_INPUT", "input.input_path and input.output_path are required")
         return 2
+    if not isinstance(input_path, str) or not isinstance(output_path, str):
+        _emit_error("INVALID_INPUT", "input_path and output_path must be strings")
+        return 2
 
     # HAZARD 2: guard numeric coercion -> INVALID_INPUT/exit 2 (not INTERNAL/exit 1)
     try:

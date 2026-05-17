@@ -269,3 +269,20 @@ def test_negative_unwritable_output_dir(smoke_dir: Path) -> None:
     err = json.loads(proc.stderr)
     assert err["error"]["code"] == "INVALID_INPUT"
     assert proc.stdout.strip() == ""
+
+
+# ---------------------------------------------------------------------------
+# Negative: non-string 'input' field  (already guarded; regression lock so the
+# isinstance guard at the top of _run_json_main is never silently removed)
+# ---------------------------------------------------------------------------
+
+def test_negative_non_string_input_field(smoke_dir: Path) -> None:
+    """A non-string 'input' -> INVALID_INPUT exit 2 (not the TypeError-driven
+    INTERNAL/exit 1 from pathlib.Path(<non-str>)).  'output' is a valid string
+    so the required-field falsy check passes and the isinstance guard rejects."""
+    payload = {"input": 123, "output": str(smoke_dir / "r.json")}
+    proc = _run(["--input", "-"], stdin=json.dumps(payload))
+    assert proc.returncode == 2, f"stdout={proc.stdout!r} stderr={proc.stderr!r}"
+    err = json.loads(proc.stderr)
+    assert err["error"]["code"] == "INVALID_INPUT"
+    assert proc.stdout.strip() == ""
