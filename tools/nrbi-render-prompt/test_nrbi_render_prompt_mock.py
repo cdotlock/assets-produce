@@ -157,3 +157,62 @@ def test_layer_E_requires_reference_images():
     except ValueError as e:
         raised = "series portrait" in str(e).lower() or "reference" in str(e).lower()
     assert raised, "Layer E without refs must fail fast (canonical Don't: series portraits before sprites)"
+
+
+def _run(stdin: str, args=None):
+    args = args or ["--input", "-"]
+    return subprocess.run(
+        [sys.executable, str(RENDER), *args],
+        input=stdin, capture_output=True, text=True,
+    )
+
+
+def test_cli_happy_path_layer_A():
+    g = _json.loads((TOOL_DIR / "fixtures" / "layer_golden.json").read_text())
+    a = next(x for x in g if x["input"]["layer"] == "A")
+    payload = _json.dumps({"layer": "A", "variable_text": {"orig_prompt": a["input"]["orig_prompt"], "subject_id": "demo"}, "reference_image_urls": []})
+    p = _run(payload)
+    assert p.returncode == 0, p.stderr
+    out = _json.loads(p.stdout)
+    assert out["prompt"] == a["expected_prompt"]
+    assert out["meta"]["atomic_tool"] == "nrbi-render-prompt"
+    assert out["meta"]["mock"] is False
+
+
+def test_cli_invalid_json_exit_2_stderr_envelope():
+    p = _run("not json{")
+    assert p.returncode == 2
+    assert p.stdout.strip() == ""
+    assert _json.loads(p.stderr)["error"]["code"] == "INVALID_INPUT"
+
+
+def test_cli_bad_layer_exit_2():
+    p = _run(_json.dumps({"layer": "Z", "variable_text": {}}))
+    assert p.returncode == 2
+    assert _json.loads(p.stderr)["error"]["code"] == "INVALID_INPUT"
+
+
+def test_cli_dryrun_echoes_without_assembling():
+    p = _run(_json.dumps({"layer": "A", "variable_text": {"orig_prompt": "x"}, "dryRun": True}))
+    assert p.returncode == 0
+    out = _json.loads(p.stdout)
+    assert out["dryRun"] is True and "prompt" not in out
+
+
+def test_cli_mock_marks_meta():
+    g = _json.loads((TOOL_DIR / "fixtures" / "layer_golden.json").read_text())
+    a = next(x for x in g if x["input"]["layer"] == "A")
+    p = _run(_json.dumps({"layer": "A", "variable_text": {"orig_prompt": a["input"]["orig_prompt"]}, "mock": True}))
+    assert p.returncode == 0
+    assert _json.loads(p.stdout)["meta"]["mock"] is True
+
+
+def test_roundtrip_shape_feeds_generate_image_gpt():
+    """Output must carry exactly the fields a downstream image tool needs."""
+    g = _json.loads((TOOL_DIR / "fixtures" / "layer_golden.json").read_text())
+    a = next(x for x in g if x["input"]["layer"] == "A")
+    p = _run(_json.dumps({"layer": "A", "variable_text": {"orig_prompt": a["input"]["orig_prompt"]}, "reference_image_urls": ["https://oss.example.com/ref.png"]}))
+    out = _json.loads(p.stdout)
+    assert isinstance(out["prompt"], str) and out["prompt"]
+    assert out["reference_image_urls"] == ["https://oss.example.com/ref.png"]
+    assert isinstance(out["model"], str) and out["model"]

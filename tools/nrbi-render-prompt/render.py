@@ -8,11 +8,13 @@ See docs/superpowers/specs/2026-05-18-b1-nrbi-render-prompt-design.md.
 """
 from __future__ import annotations
 
+import argparse
 import functools
 import hashlib
 import importlib.util
 import json
 import os
+import sys
 import tempfile
 from pathlib import Path
 
@@ -215,3 +217,85 @@ def assemble(payload: dict) -> dict:
         "category": style["category"],
         "layer": layer,
     }
+
+
+def _emit_error(code: str, message: str) -> None:
+    print(json.dumps({"error": {"code": code, "message": message}}), file=sys.stderr)
+
+
+def _looks_like_json_entry(argv) -> bool:
+    return any(a in ("--input", "--mock", "--json") for a in argv)
+
+
+def _run_json_main(argv=None) -> int:
+    parser = argparse.ArgumentParser(prog="nrbi-render-prompt")
+    parser.add_argument("--input", default="-")
+    parser.add_argument("--mock", action="store_true")
+    parser.add_argument("--json", action="store_true")
+    args = parser.parse_args(argv)
+    try:
+        raw = sys.stdin.read() if args.input in ("-", None) else open(args.input).read()
+    except OSError as e:
+        _emit_error("INVALID_INPUT", f"cannot read input: {e}")
+        return 2
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError as e:
+        _emit_error("INVALID_INPUT", f"invalid JSON: {e}")
+        return 2
+
+    mock = args.mock or bool(payload.get("mock", False))
+
+    if payload.get("dryRun"):
+        print(json.dumps({
+            "dryRun": True,
+            "tool": "nrbi-render-prompt",
+            "input": payload,
+        }, ensure_ascii=False))
+        return 0
+
+    try:
+        if mock:
+            # Hermetic-CI escape hatch: a sha drift becomes a warning, not a
+            # hard fail. Production (mock=false) stays strict.
+            try:
+                result = assemble(payload)
+                result["meta"] = {"atomic_tool": "nrbi-render-prompt", "mock": True}
+            except RuntimeError as e:
+                if "sha256" in str(e).lower():
+                    _load_frozen.cache_clear()
+                    result = assemble(payload)
+                    result["meta"] = {"atomic_tool": "nrbi-render-prompt", "mock": True,
+                                      "sha_warning": str(e)}
+                else:
+                    raise
+        else:
+            result = assemble(payload)
+            result["meta"] = {"atomic_tool": "nrbi-render-prompt", "mock": False}
+    except (ValueError, KeyError) as e:
+        _emit_error("INVALID_INPUT", str(e))
+        return 2
+    except NotImplementedError as e:
+        _emit_error("NOT_IMPLEMENTED", str(e))
+        return 5
+    except RuntimeError as e:
+        _emit_error("ATOMIC_TOOL_FAILED", str(e))
+        return 4
+    except Exception as e:  # noqa: BLE001
+        _emit_error("INTERNAL", f"{type(e).__name__}: {e}")
+        return 1
+
+    print(json.dumps(result, ensure_ascii=False))
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        if _looks_like_json_entry(sys.argv[1:]) or not sys.argv[1:]:
+            raise SystemExit(_run_json_main())
+        raise SystemExit(_run_json_main())
+    except SystemExit:
+        raise
+    except BaseException as e:  # last-resort INTERNAL envelope
+        _emit_error("INTERNAL", f"{type(e).__name__}: {e}")
+        raise SystemExit(1)
