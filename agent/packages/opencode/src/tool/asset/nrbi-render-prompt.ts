@@ -6,7 +6,7 @@ import DESCRIPTION from "./nrbi-render-prompt.txt"
 
 const TOOL_ID = "nrbi-render-prompt"
 
-const LayerLiteral = Schema.Literal("A", "A5", "B", "C", "D", "E")
+const LayerLiteral = Schema.Literals(["A", "A5", "B", "C", "D", "E"])
 const HttpsUrl = Schema.String.check(Schema.isPattern(/^https:\/\/.+/i)).annotate({
   description: "https URL",
 })
