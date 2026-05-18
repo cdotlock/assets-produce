@@ -98,4 +98,49 @@ describe("nrbi-render-prompt tool", () => {
     const exit = Effect.runSyncExit(decode({ layer: "Z", variable_text: {} }))
     expect(exit._tag).toBe("Failure")
   })
+
+  test("valid JSON with wrong shape is rejected by the runtime decode (M1)", async () => {
+    // `prompt` is a number — structurally valid JSON, but violates
+    // NrbiResult's `prompt: Schema.String`. The wrapper must not crash:
+    // the decode failure is mapped then caught by the Effect.catch tail.
+    const def = await buildExec(
+      stubRunner({
+        stdout: JSON.stringify({
+          prompt: 123,
+          reference_image_urls: [],
+          model: "m",
+          style_name: "s",
+          category: "c",
+          layer: "A",
+        }),
+      }),
+    )
+    const out = await runtime.runPromise(def.execute({ layer: "A", variable_text: {} }, ctx()))
+    expect((out.metadata as { error?: boolean }).error).toBe(true)
+    expect(out.title).toBe("nrbi-render-prompt failed")
+  })
+
+  test("--mock CLI flag is added to extraArgs when mock=true", async () => {
+    let receivedArgs: readonly string[] | undefined
+    const def = await buildExec(async (opts) => {
+      receivedArgs = opts.extraArgs
+      return { stdout: okStdout, stderr: "", exitCode: 0 }
+    })
+    await runtime.runPromise(
+      def.execute({ layer: "A", variable_text: { orig_prompt: "x" }, mock: true }, ctx()),
+    )
+    expect(receivedArgs).toContain("--mock")
+  })
+
+  test("--mock is NOT added when mock is absent", async () => {
+    let receivedArgs: readonly string[] | undefined
+    const def = await buildExec(async (opts) => {
+      receivedArgs = opts.extraArgs
+      return { stdout: okStdout, stderr: "", exitCode: 0 }
+    })
+    await runtime.runPromise(
+      def.execute({ layer: "A", variable_text: { orig_prompt: "x" } }, ctx()),
+    )
+    expect(receivedArgs).not.toContain("--mock")
+  })
 })
