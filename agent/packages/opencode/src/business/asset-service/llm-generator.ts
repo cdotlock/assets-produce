@@ -106,24 +106,26 @@ const REPO_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), 
  */
 export function parseAllowlist(body: string): string[] {
   const lines = body.split(/\r?\n/)
-  let inSection = false
+  // 0 = not in the section; otherwise the markdown heading level (2-6)
+  // at which the "Atomic tools (allowed)" section was opened.
+  let sectionLevel = 0
   const found = new Set<string>()
   for (const line of lines) {
-    const heading = /^#{2,6}\s+(.*)$/.exec(line)
+    const heading = /^(#{2,6})\s+(.*)$/.exec(line)
     if (heading) {
-      const title = heading[1].trim().toLowerCase()
-      if (inSection) {
-        // Reached the next heading of equal-or-shallower depth — stop.
-        if (/^#{2}\s/.test(line) || line.startsWith("## ")) break
-        // Any other heading also ends a level-2 section.
-        break
+      const level = heading[1].length
+      const title = heading[2].trim().toLowerCase()
+      if (sectionLevel > 0) {
+        // A heading at the section's level or shallower ends it; a
+        // deeper sub-heading stays *inside* the section so a skill
+        // body can structure its allowlist with sub-sections.
+        if (level <= sectionLevel) break
+        continue
       }
-      if (title.startsWith("atomic tools")) {
-        inSection = true
-      }
+      if (title.startsWith("atomic tools")) sectionLevel = level
       continue
     }
-    if (!inSection) continue
+    if (sectionLevel === 0) continue
     // Collect every backtick-wrapped token AND bare kebab tokens; only
     // those exactly equal to a known tool id survive.
     for (const m of line.matchAll(/[`"]?([a-z0-9]+(?:-[a-z0-9]+)*)[`"]?/g)) {
