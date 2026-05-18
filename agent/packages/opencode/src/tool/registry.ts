@@ -21,6 +21,7 @@ import { ConcatClipsTool } from "./asset/concat-clips"
 import { CropVideoTool } from "./asset/crop-video"
 import { GenerateVideoHappyHorseTool } from "./asset/generate-video-happyhorse"
 import { CgRenderTool } from "./asset/cg-render"
+import { NrbiRenderPromptTool } from "./asset/nrbi-render-prompt"
 import { UpscaleImageTool } from "./asset/upscale-image"
 import { OssPutTool } from "./asset/oss-put"
 import { MattingTool } from "./asset/matting"
@@ -141,6 +142,7 @@ export const layer: Layer.Layer<
     const cropVideo = yield* CropVideoTool
     const generateVideoHappyHorse = yield* GenerateVideoHappyHorseTool
     const cgRender = yield* CgRenderTool
+    const nrbiRenderPrompt = yield* NrbiRenderPromptTool
     const upscaleImage = yield* UpscaleImageTool
     const ossPut = yield* OssPutTool
     const matting = yield* MattingTool
@@ -247,6 +249,7 @@ export const layer: Layer.Layer<
           cropVideo: Tool.init(cropVideo),
           generateVideoHappyHorse: Tool.init(generateVideoHappyHorse),
           cgRender: Tool.init(cgRender),
+          nrbiRenderPrompt: Tool.init(nrbiRenderPrompt),
           upscaleImage: Tool.init(upscaleImage),
           ossPut: Tool.init(ossPut),
           matting: Tool.init(matting),
@@ -284,6 +287,7 @@ export const layer: Layer.Layer<
             tool.cropVideo,
             tool.generateVideoHappyHorse,
             tool.cgRender,
+            tool.nrbiRenderPrompt,
             tool.upscaleImage,
             tool.ossPut,
             tool.matting,
