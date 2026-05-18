@@ -85,6 +85,8 @@ Until then the AssetService loop is wired to the **placeholder generator**
 | `upscale-spec.md` | upscale-spec | no AssetKind — selected via `skill_hint` / picker only (Phase 12 post-process body) |
 | `matting-spec.md` | matting-spec | not picker-wired — documented Phase-13 post-process body; registration deferred |
 | `cutout-spec.md` | cutout-spec | not picker-wired — documented Phase-13 post-process body; registration deferred |
+| `outfit-anchor-spec.md` | outfit-anchor-spec | no AssetKind — B1 NRBI Layer A.5; selected via `skill_hint` / picker only |
+| `ep-sprite-spec.md` | ep-sprite-spec | no AssetKind — B1 NRBI Layer E; selected via `skill_hint` / picker only |
 
 ## Conventions
 
