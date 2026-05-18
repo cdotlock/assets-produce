@@ -302,6 +302,9 @@ def _run_json_main(argv=None) -> int:
 
 if __name__ == "__main__":
     try:
+        # Parity with sibling atomic-tool harnesses (cf. matting.py): this
+        # branch is a structural seam for a future positional mode. nrbi has
+        # no positional entry, so both arms intentionally call _run_json_main.
         if _looks_like_json_entry(sys.argv[1:]) or not sys.argv[1:]:
             raise SystemExit(_run_json_main())
         raise SystemExit(_run_json_main())
