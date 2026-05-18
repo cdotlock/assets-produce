@@ -81,10 +81,14 @@ constraint, not an option.
 
 New local-self-contained directory (parallel to `knowledge/asset-generation/`,
 `knowledge/novel-to-video/`, `knowledge/style-prompts/`; CLAUDE.md local-source
-principle). Each in-scope n2m `skills/<name>/SKILL.md` is copied **byte-identical**
-to `knowledge/novel-to-mss/<name>.md`. Any companion reference files the SKILL.md
-depends on are frozen alongside, path-faithfully. Langfuse upload is **not** in
-this track (CLAUDE.md: only on explicit user request).
+principle). Each in-scope n2m skill is copied **byte-identical** into a
+per-skill subdirectory: `knowledge/novel-to-mss/<name>/SKILL.md` (the `SKILL.md`
+filename + its YAML frontmatter `name:`/`description:` are preserved verbatim —
+opencode skill discovery requires both frontmatter keys, see §4.3). Every
+companion file the SKILL.md depends on (`scripts/*.py`, `mss-spec.md`,
+templates, tests, `README.md`) is frozen alongside under the same per-skill
+dir, path-faithfully. Langfuse upload is **not** in this track (CLAUDE.md: only
+on explicit user request).
 
 In-scope frozen skills (10 global + 1 project-scoped):
 
@@ -120,14 +124,40 @@ The agent (CLI `agent run` / chat, developer profile) invokes
 dispatching reviewer sub-agents. **No `*-orchestration` / `*-workflow-service`
 code is written** (§12 red line). Sequencing is knowledge, exactly as in n2m.
 
-### 4.3 Stage skill registration (general skill system)
+### 4.3 Stage skill registration (filesystem discovery, NOT the managed-CLI/Langfuse path)
 
-Each of the 11 skills registered via the existing CLI (`agent skills add
---name <name> --description … --content-file knowledge/novel-to-mss/<name>.md
---scope system`). Stored as `Skill` table metadata; body served from the local
-frozen file (Langfuse out of scope this track). `scope=system` (developer/CLI;
-not creator-WebUI — these are developer-facing authoring tools). They are
-**absent** from `ASSET_GENERATION_SKILLS` / `intent-to-skill.ts` (D4).
+**Resolved during C1 planning (codebase fact, supersedes an earlier CLI-based
+sketch):** opencode's `agent skills add --content-file` path **force-uploads
+the body to Langfuse** (`business/skill/cli.ts` → `LangfuseService.createPrompt`)
+and stores only metadata + `langfuse_prompt_key` in the `Skill` DB table. That
+violates D2/D4 and the CLAUDE.md "local-self-contained, no Langfuse without
+explicit request" red line. It is **not** used by this track.
+
+Instead, registration uses opencode's **local filesystem skill discovery**
+(`agent/packages/opencode/src/skill/index.ts` `discoverSkills`):
+
+- The config key `skills.paths` (`config/skills.ts` `ConfigSkills.Info` =
+  `{ paths?: string[]; urls?: string[] }`) takes extra skill-folder paths.
+  Discovery scans each with glob `**/SKILL.md`, resolving relative paths
+  against the runtime project `directory`.
+- C1 adds `"skills": { "paths": ["knowledge/novel-to-mss"] }` to the loaded
+  opencode config (C1 verifies which file is authoritative — repo-root
+  `opencode.jsonc` vs `agent/.opencode/opencode.jsonc`).
+- Each `knowledge/novel-to-mss/<name>/SKILL.md` is parsed for frontmatter
+  `name`/`description` (`skill/index.ts:98`), served **directly from on-disk
+  `info.content`** by `loadBody` (`skill/index.ts:302` — the non-`langfuse://`
+  branch). No DB row, no Langfuse, no network.
+- `skill <name>` tool resolves them; `session/system.ts` `SystemPrompt.skills()`
+  injects their descriptions. This **is** the general skill system (D4
+  satisfied) and is **absent** from `ASSET_GENERATION_SKILLS` /
+  `intent-to-skill.ts` (D4) and from the Phase-14 asset-service loop.
+- Skill identity = the frozen frontmatter `name` (n2m uses kebab-case, e.g.
+  `novel-evaluator`); the orchestration skill (§4.2) references skills by that
+  exact name. C1 asserts no `duplicate skill name` warning vs existing skills.
+
+No `Skill` DB rows are created for this track; `scope` (system/creator) does
+not apply to filesystem-discovered skills (they are developer/CLI-side by
+nature; WebUI `creator` profile exposure is out of scope).
 
 ### 4.4 Reviewer sub-agents
 
@@ -191,7 +221,7 @@ Each phase follows the project workflow: write `docs/superpowers/specs/phase-CN-
 | Phase | Goal | Key acceptance |
 |---|---|---|
 | **C0** | Design freeze | This design doc committed; master-spec §15 r1.16 added; user review-gate passed. |
-| **C1** | Freeze + register + ingestion model | n2m source survey (exact files, companion refs, exact `NN-stage` dir names) documented; 11 skill bodies byte-frozen into `knowledge/novel-to-mss/`; golden byte-equality tests vs n2m source; 11 skills registered (general system, `scope=system`); `Project`(type=novel) + workspace layout helper; ≥80% line cov on new glue code. |
+| **C1** | Freeze + register + ingestion model | n2m source survey (exact files, companion refs, exact `NN-stage` dir names) documented; 11 skill dirs byte-frozen into `knowledge/novel-to-mss/<name>/SKILL.md` (+ companions); `skills.paths` config wired; golden byte-equality tests vs n2m source; discovery asserts all 11 names visible via `Skill.Service.all()` with no duplicate-name warning, no Langfuse/DB row; `Project`(type=novel) + on-disk workspace layout helper (n2m `NN-stage` contract); ≥80% line cov on new glue code. |
 | **C2** | Orchestration + reviewers | `novel_to_mss` orchestration skill authored; reviewer sub-agent dispatch wired through `task.ts`; gate semantics (PASS/CONDITIONAL/FAIL, loop-until-pass) reproduced; injected-FAIL test proves the gate halts progression. |
 | **C3** | `mss-validate` + end-to-end | `mss-validate` atomic tool (frozen parser) in `agent tools list`, schema complete, mock + real fixture; full novel→MSS run on demo book `no-rules-in-bad-ideas` original novel; produced `.mss` passes `mss-validate`; produced workspace structurally matches n2m's existing `moonscripts/no-rules-in-bad-ideas/` (compat acceptance). |
 | **C4** | n2m retirement + docs | DEPRECATED header on n2m's 10 upstream skills (single commit; push gated on user ack); assets-produce README / SKILL.md / knowledge index updated; track verification report. |
