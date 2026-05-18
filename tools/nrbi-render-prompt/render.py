@@ -233,15 +233,26 @@ def _run_json_main(argv=None) -> int:
     parser.add_argument("--mock", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
-    try:
-        raw = sys.stdin.read() if args.input in ("-", None) else open(args.input).read()
-    except OSError as e:
-        _emit_error("INVALID_INPUT", f"cannot read input: {e}")
-        return 2
+    if args.input in ("-", None):
+        raw = sys.stdin.read()
+    else:
+        try:
+            with open(args.input, "r", encoding="utf-8") as fh:
+                raw = fh.read()
+        except OSError as e:
+            _emit_error("INVALID_INPUT", f"cannot read input: {e}")
+            return 2
+        except UnicodeDecodeError:
+            _emit_error("INVALID_INPUT", "input file is not valid UTF-8 JSON")
+            return 2
     try:
         payload = json.loads(raw)
     except json.JSONDecodeError as e:
         _emit_error("INVALID_INPUT", f"invalid JSON: {e}")
+        return 2
+
+    if not isinstance(payload, dict):
+        _emit_error("INVALID_INPUT", f"input JSON must be an object, got {type(payload).__name__}")
         return 2
 
     mock = args.mock or bool(payload.get("mock", False))

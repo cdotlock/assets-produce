@@ -216,3 +216,19 @@ def test_roundtrip_shape_feeds_generate_image_gpt():
     assert isinstance(out["prompt"], str) and out["prompt"]
     assert out["reference_image_urls"] == ["https://oss.example.com/ref.png"]
     assert isinstance(out["model"], str) and out["model"]
+
+
+def test_cli_non_object_json_exit_2():
+    for body in ("42", '"x"', "[1, 2]", "null"):
+        p = _run(body)
+        assert p.returncode == 2, (body, p.stdout, p.stderr)
+        assert p.stdout.strip() == ""
+        assert _json.loads(p.stderr)["error"]["code"] == "INVALID_INPUT"
+
+
+def test_cli_input_file_not_utf8(tmp_path):
+    bad = tmp_path / "bad.json"
+    bad.write_bytes(b'\xff\xfe{"layer": "A"}')
+    p = _run("", args=["--input", str(bad)])
+    assert p.returncode == 2
+    assert _json.loads(p.stderr)["error"]["code"] == "INVALID_INPUT"
