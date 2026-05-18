@@ -54,3 +54,25 @@ def test_sha_mismatch_raises(monkeypatch):
     finally:
         mod._load_frozen.cache_clear()
     assert raised, "tampered frozen reference must fail fast"
+
+
+import json as _json
+import subprocess
+
+
+def test_fixtures_are_regenerable_and_pinned():
+    """Re-running gen_fixtures.py must byte-reproduce the committed fixtures.
+    This locks the frozen reference's assembly behavior."""
+    fx = TOOL_DIR / "fixtures"
+    before_anchor = (fx / "anchor_golden.json").read_text()
+    before_layer = (fx / "layer_golden.json").read_text()
+    proc = subprocess.run(
+        [sys.executable, str(TOOL_DIR / "gen_fixtures.py")],
+        capture_output=True, text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert (fx / "anchor_golden.json").read_text() == before_anchor
+    assert (fx / "layer_golden.json").read_text() == before_layer
+    anchors = _json.loads(before_anchor)
+    assert len(anchors) == 73
+    assert len(_json.loads(before_layer)) == 5

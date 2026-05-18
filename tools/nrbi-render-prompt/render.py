@@ -18,6 +18,12 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 FROZEN_PATH = REPO_ROOT / "knowledge" / "style-prompts" / "source-of-record" / "render-with-style.py"
 FROZEN_SHA256 = "35f55d9be989f208edf8ff59fb9fc95ba79bcfb6f680a1379ca2846272b53e06"
 
+# Frozen category constants (mirror render-with-style.py).
+CHAR_SERIES_CATEGORY = "character series illustration"
+SCENE_GRID_CATEGORY = "scene grid illustration"
+SCENE_SERIES_CATEGORY = "scene series illustration"
+CHAR_EP_CATEGORY = "character ep illustration"
+
 
 @functools.lru_cache(maxsize=1)
 def _load_frozen():
