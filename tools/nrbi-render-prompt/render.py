@@ -11,6 +11,9 @@ from __future__ import annotations
 import functools
 import hashlib
 import importlib.util
+import json
+import pathlib
+import tempfile
 from pathlib import Path
 
 # tools/nrbi-render-prompt/render.py -> parents[2] == repo root
@@ -39,3 +42,102 @@ def _load_frozen():
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
+
+
+SOR_DIR = REPO_ROOT / "knowledge" / "style-prompts" / "source-of-record"
+STYLES_JSON = SOR_DIR / "styles.json"
+
+_LAYER_CATEGORY = {
+    "A": CHAR_SERIES_CATEGORY,
+    "A5": CHAR_SERIES_CATEGORY,  # anchor has no styles row; reuse char-series for model+family
+    "B": SCENE_GRID_CATEGORY,
+    "C": SCENE_SERIES_CATEGORY,
+    "D": SCENE_SERIES_CATEGORY,
+    "E": CHAR_EP_CATEGORY,
+}
+
+
+@functools.lru_cache(maxsize=1)
+def _styles_by_category():
+    rows = json.loads(STYLES_JSON.read_text())
+    return {r["category"]: r for r in rows}, {r["name"]: r for r in rows}
+
+
+def _resolve_style(layer: str, category: str | None, style_name: str | None) -> dict:
+    by_cat, by_name = _styles_by_category()
+    if style_name:
+        if style_name not in by_name:
+            raise ValueError(f"unknown style_name '{style_name}'")
+        return by_name[style_name]
+    cat = category or _LAYER_CATEGORY.get(layer)
+    if cat not in by_cat:
+        raise ValueError(f"unknown category '{cat}' for layer '{layer}'")
+    return by_cat[cat]
+
+
+def _norm(frozen, prompt: str, style_row: dict) -> str:
+    # Reproduces render_image L636: normalize_prompt_for_style(prompt, family).
+    return frozen.normalize_prompt_for_style(prompt, style_row["name"])
+
+
+def assemble(payload: dict) -> dict:
+    layer = payload.get("layer")
+    if layer not in _LAYER_CATEGORY:
+        raise ValueError(f"layer must be one of {sorted(_LAYER_CATEGORY)}; got {layer!r}")
+    vt = payload.get("variable_text") or {}
+    refs = list(payload.get("reference_image_urls") or [])
+    frozen = _load_frozen()
+    style = _resolve_style(layer, payload.get("category"), payload.get("style_name"))
+    tmp = pathlib.Path("/tmp")
+
+    if layer == "A":
+        orig = vt.get("orig_prompt")
+        if not orig:
+            raise ValueError("layer A requires variable_text.orig_prompt")
+        sid = vt.get("subject_id") or "subject"
+        tasks = frozen._build_series_character_tasks(
+            {"series_character_prompts": {sid: {"prompt": orig}}},
+            {"out_character": tmp}, {CHAR_SERIES_CATEGORY: style}, {}, None,
+        )
+        prompt = _norm(frozen, tasks[0]["prompt"], style)
+        model = tasks[0]["model"]
+
+    elif layer == "A5":
+        char_id = vt.get("char_id")
+        outfit_id = vt.get("outfit_id")
+        raw = vt.get("prompt")
+        if not (char_id and outfit_id and raw):
+            raise ValueError("layer A5 requires variable_text.char_id, .outfit_id, .prompt")
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as fh:
+            json.dump({"outfit_anchors": [
+                {"char_id": char_id, "outfit_id": outfit_id, "prompt": raw}
+            ]}, fh, ensure_ascii=False)
+            anchor_path = pathlib.Path(fh.name)
+        try:
+            tasks = frozen._build_outfit_anchor_tasks(
+                {"anchor_file": anchor_path, "out_anchors": tmp, "out_character": tmp},
+                {CHAR_SERIES_CATEGORY: {"model": style["model"], "name": style["name"]}},
+                None,
+            )
+        finally:
+            anchor_path.unlink(missing_ok=True)
+        if not tasks:
+            raise ValueError("anchor builder produced no task (check char_id/outfit_id/prompt)")
+        base = tasks[0]["prompt"]
+        # Binder rule: _ANCHOR_HEADER prepended iff a ref image is bound.
+        if refs:
+            base = frozen._ANCHOR_HEADER + base
+        prompt = _norm(frozen, base, style)
+        model = tasks[0]["model"]
+
+    else:
+        raise NotImplementedError(f"layer {layer} implemented in a later task")
+
+    return {
+        "prompt": prompt,
+        "reference_image_urls": refs,
+        "model": model,
+        "style_name": style["name"],
+        "category": style["category"],
+        "layer": layer,
+    }

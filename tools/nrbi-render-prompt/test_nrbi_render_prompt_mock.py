@@ -76,3 +76,50 @@ def test_fixtures_are_regenerable_and_pinned():
     anchors = _json.loads(before_anchor)
     assert len(anchors) == 73
     assert len(_json.loads(before_layer)) == 5
+
+
+def test_layer_A_matches_golden():
+    mod = _load_render_module()
+    g = _json.loads((TOOL_DIR / "fixtures" / "layer_golden.json").read_text())
+    a = next(x for x in g if x["input"]["layer"] == "A")
+    res = mod.assemble({
+        "layer": "A",
+        "variable_text": {"orig_prompt": a["input"]["orig_prompt"], "subject_id": "demo"},
+        "reference_image_urls": [],
+    })
+    assert res["prompt"] == a["expected_prompt"]
+    assert res["model"] == a["model"]
+    assert res["style_name"] == "YA_Impasto_character"
+    assert res["category"] == "character series illustration"
+
+
+def test_layer_A5_anchor_no_ref_and_with_ref_match_golden():
+    mod = _load_render_module()
+    anchors = _json.loads((TOOL_DIR / "fixtures" / "anchor_golden.json").read_text())
+    a0 = anchors[0]
+    no_ref = mod.assemble({
+        "layer": "A5",
+        "variable_text": {"char_id": a0["char_id"], "outfit_id": a0["outfit_id"], "prompt": a0["raw_prompt"]},
+        "reference_image_urls": [],
+    })
+    assert no_ref["prompt"] == a0["expected_prompt_no_ref"]
+    with_ref = mod.assemble({
+        "layer": "A5",
+        "variable_text": {"char_id": a0["char_id"], "outfit_id": a0["outfit_id"], "prompt": a0["raw_prompt"]},
+        "reference_image_urls": ["https://oss.example.com/character_selena.png"],
+    })
+    assert with_ref["prompt"] == a0["expected_prompt_with_ref"]
+    assert with_ref["prompt"].startswith(mod._load_frozen()._ANCHOR_HEADER) or \
+        mod._load_frozen()._ANCHOR_HEADER[:8] in with_ref["prompt"]
+
+
+def test_all_73_anchors_byte_identical():
+    mod = _load_render_module()
+    anchors = _json.loads((TOOL_DIR / "fixtures" / "anchor_golden.json").read_text())
+    for a in anchors:
+        res = mod.assemble({
+            "layer": "A5",
+            "variable_text": {"char_id": a["char_id"], "outfit_id": a["outfit_id"], "prompt": a["raw_prompt"]},
+            "reference_image_urls": [],
+        })
+        assert res["prompt"] == a["expected_prompt_no_ref"], f"drift at {a['sprite_id']}"
