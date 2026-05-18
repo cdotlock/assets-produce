@@ -1,13 +1,16 @@
-// Production wiring for the Phase 8 Asset Service:
+// Production wiring for the Asset Service:
 //  - defaultAssetWriter goes through Asset.Service so we inherit its
 //    transactional version-bump (one Asset row per (project_id, key, version))
 //    instead of reimplementing it.
-//  - placeholderGenerator returns a deterministic stub URL so `agent serve`
-//    smoke-tests work end-to-end without a real LLM. Phase 9+ replaces it
-//    with an LLM-driven implementation that consumes the picked skill body
-//    and atomic tools.
-//  - assetServiceSingleton lazily builds the AssetService so the HTTP mount
-//    is cheap until first use.
+//  - assetServiceSingleton injects the real LLM-driven generator
+//    (createLlmGenerator, Phase 14 / spec §15 row 1.14): it loads the
+//    picked skill body, runs a generic tool-calling loop over that
+//    skill's allowlisted atomic tools, and surfaces the resulting OSS
+//    url. It lazily builds the AssetService so the HTTP mount is cheap
+//    until first use.
+//  - placeholderGenerator is the retired Phase 8 deterministic stub. It
+//    is kept exported (not injected) for offline `agent serve`
+//    smoke-tests and its own unit test; production no longer uses it.
 //
 // Kept separate from asset-service.ts so tests can inject their own
 // generator/writer pair without pulling in Effect + Asset.Service.
@@ -16,6 +19,7 @@ import { Effect, Layer } from "effect"
 import { lazy } from "@/util/lazy"
 import { Service as AssetSvc, defaultLayer as assetLayer } from "@/business/asset/asset"
 import { AssetService } from "./asset-service"
+import { createLlmGenerator } from "./llm-generator"
 import { createLangfuseTracer } from "./tracer"
 import { loadAssetAuthFromEnv } from "./http/auth"
 import { buildAssetServiceApp } from "./http"
@@ -60,12 +64,11 @@ export const defaultAssetWriter: AssetWriter = {
   },
 }
 
-// ---------- generator: Phase 8 stub ----------
+// ---------- generator: retired Phase 8 stub (kept for offline smoke) ----------
 //
 // Returns a synthetic OSS URL keyed off intent.key so every call is
-// deterministic + immediately testable via curl. Real generator (Phase 9+)
-// will run the mini agent loop: read skill body, pick atomic tool, drive
-// the LLM through it, surface the resulting OSS url.
+// deterministic. Superseded in production by createLlmGenerator (Phase 14);
+// retained only for offline `agent serve` smoke-tests + its unit test.
 
 export const placeholderGenerator: AssetGenerator = {
   async generate(input): Promise<GenerationOutcome> {
@@ -86,7 +89,7 @@ export const placeholderGenerator: AssetGenerator = {
 export const assetServiceSingleton = lazy(
   () =>
     new AssetService({
-      generator: placeholderGenerator,
+      generator: createLlmGenerator(),
       writer: defaultAssetWriter,
       // Falls back to nullTracer if LANGFUSE_PUBLIC_KEY / SECRET_KEY are
       // not set (dev / CI without LF credentials still completes jobs).
