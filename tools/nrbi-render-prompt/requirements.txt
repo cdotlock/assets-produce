@@ -1,0 +1,3 @@
+# nrbi-render-prompt assembles prompts from the sha256-pinned frozen
+# render-with-style.py, which depends ONLY on the Python 3 stdlib (`re`).
+# No external packages. Hermetic by design.
