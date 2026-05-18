@@ -457,3 +457,15 @@ describe("model resolution", () => {
     }
   })
 })
+
+// ---------- nrbi-render-prompt registration ----------
+
+describe("nrbi-render-prompt atomic tool", () => {
+  test("nrbi-render-prompt is a known atomic tool and parses in an allowlist", () => {
+    const body =
+      "## Atomic tools (allowed)\n\n- `nrbi-render-prompt` — assembler\n- `generate-image-gpt` — render\n- `oss-put` — upload\n"
+    const allow = parseAllowlist(body)
+    expect(allow).toContain("nrbi-render-prompt")
+    expect(allow).toContain("generate-image-gpt")
+  })
+})

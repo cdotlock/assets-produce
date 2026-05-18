@@ -36,6 +36,7 @@ import { ConcatClipsTool } from "@/tool/asset/concat-clips"
 import { CropVideoTool } from "@/tool/asset/crop-video"
 import { GenerateVideoHappyHorseTool } from "@/tool/asset/generate-video-happyhorse"
 import { CgRenderTool } from "@/tool/asset/cg-render"
+import { NrbiRenderPromptTool } from "@/tool/asset/nrbi-render-prompt"
 import { UpscaleImageTool } from "@/tool/asset/upscale-image"
 import { OssPutTool } from "@/tool/asset/oss-put"
 import { MattingTool } from "@/tool/asset/matting"
@@ -74,6 +75,7 @@ const ATOMIC_TOOLS: Readonly<Record<string, AnyToolInfoEffect>> = {
   "crop-video": asInfoEffect(CropVideoTool),
   "generate-video-happyhorse": asInfoEffect(GenerateVideoHappyHorseTool),
   "cg-render": asInfoEffect(CgRenderTool),
+  "nrbi-render-prompt": asInfoEffect(NrbiRenderPromptTool),
   "upscale-image": asInfoEffect(UpscaleImageTool),
   "oss-put": asInfoEffect(OssPutTool),
   matting: asInfoEffect(MattingTool),
