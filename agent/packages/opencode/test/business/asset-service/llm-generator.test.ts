@@ -21,6 +21,7 @@ import {
   type DriveLoopArgs,
   type BuildTools,
 } from "@/business/asset-service/llm-generator"
+import { ASSET_GENERATION_SKILLS } from "@/business/asset-service/intent-to-skill"
 import type { AssetGeneratorInput } from "@/business/asset-service/run-asset-generation"
 
 // Stub ToolSet assembly — keeps the allowlist→exposed-tool mapping (so
@@ -380,6 +381,61 @@ describe("T9 — atomic tool failure", () => {
     const out = await gen.generate(input({ maxSteps: 30 }))
     expect(out.ok).toBe(false)
     if (!out.ok) expect(out.code).toBe("GENERATION_REJECTED")
+  })
+})
+
+// ---------- default disk skill loader against the REAL shipped bodies ----------
+//
+// Exercises the production `defaultLoadSkill` (no loadSkill override) +
+// parseAllowlist against the actual knowledge/asset-generation/*.md files.
+// Hermetic: only disk read of in-repo files; model/tools/loop injected.
+// Directly de-risks "全部落地" — every registered skill the picker can
+// route to MUST be loadable by the production loop with a non-empty
+// allowlist of *known* atomic-tool ids.
+
+describe("default disk loader — real shipped skill bodies", () => {
+  test.each([...ASSET_GENERATION_SKILLS])(
+    "%s loads via defaultLoadSkill with a non-empty known-tool allowlist",
+    async (skill) => {
+      const capture: { allowlist?: string[] } = {}
+      const recordingBuildTools: BuildTools = async ({ allowlist }) => {
+        capture.allowlist = allowlist
+        return await fakeBuildTools({ allowlist } as Parameters<BuildTools>[0])
+      }
+      const gen = createLlmGenerator({
+        // NO loadSkill override → real defaultLoadSkill reads the repo file.
+        resolveModel: fakeResolveModel,
+        buildTools: recordingBuildTools,
+        driveLoop: scriptedDriver({
+          toolResults: [
+            {
+              toolName: "oss-put",
+              output: execResult("https://oss.example.com/ok.png", {
+                ossUrl: "https://oss.example.com/ok.png",
+              }),
+            },
+          ],
+        }),
+      })
+      const out = await gen.generate(input({ skill }))
+      // Loader resolved (not GENERATION_REJECTED for a missing/empty body).
+      expect(out.ok).toBe(true)
+      expect(capture.allowlist && capture.allowlist.length).toBeGreaterThan(0)
+    },
+  )
+
+  test("a skill name with no body file → GENERATION_REJECTED via defaultLoadSkill", async () => {
+    const gen = createLlmGenerator({
+      resolveModel: fakeResolveModel,
+      buildTools: fakeBuildTools,
+      driveLoop: scriptedDriver({ toolResults: [] }),
+    })
+    const out = await gen.generate(input({ skill: "definitely-not-a-real-skill-xyz" }))
+    expect(out.ok).toBe(false)
+    if (!out.ok) {
+      expect(out.code).toBe("GENERATION_REJECTED")
+      expect(out.message).toContain("definitely-not-a-real-skill-xyz")
+    }
   })
 })
 
