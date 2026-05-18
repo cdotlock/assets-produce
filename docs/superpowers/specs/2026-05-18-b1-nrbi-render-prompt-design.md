@@ -202,6 +202,16 @@ TDD, ≥80% coverage (project rule).
    `nrbi-render-prompt`; assert the produced `prompt` is **byte-for-byte
    equal** to the recorded `prompt`. All 73 must pass → anchor path proven
    faithful by construction.
+   > **Clarification (plan-time, ground-truth):** the recorded
+   > `outfit_anchors[].prompt` is the *raw upstream input* to
+   > `clean_anchor_prompt`, not the assembled output. The byte-identity
+   > target is therefore the frozen `_build_outfit_anchor_tasks` **output**
+   > over those 73 real inputs (→ `#00FF00`, stripped CHARACTER LOCK,
+   > `+_ANCHOR_CHROMAKEY`, optional `_ANCHOR_HEADER`, final
+   > `normalize_prompt_for_style`), captured once into the committed
+   > `anchor_golden.json` and regenerable via `gen_fixtures.py`. This is
+   > the §7.2 principle applied to the anchor layer; the 73 real inputs
+   > make it genuine NRBI reproduction, not synthetic.
 2. **Golden fixtures — non-anchor layers (A/B/C/D/E):** no pre-materialized
    golden file exists. One-time: run the frozen assembly path in `--dryRun`
    prompt-only mode over representative per-layer inputs; freeze the outputs as
