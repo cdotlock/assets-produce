@@ -64,6 +64,10 @@ as `ASSET_GENERATION_SKILLS`:
 - `sfx-spec`
 - `music-spec`
 - `upscale-spec`
+- `matting-spec`
+- `cutout-spec`
+- `outfit-anchor-spec`
+- `ep-sprite-spec`
 
 When the user runs (in a future phase) `agent skills sync
 asset-generation`, the body markdown here gets pushed to Langfuse under the
