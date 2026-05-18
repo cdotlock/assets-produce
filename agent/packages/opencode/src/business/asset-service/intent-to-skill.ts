@@ -32,6 +32,12 @@ export const ASSET_GENERATION_SKILLS = [
   // to keep ordinal / snapshot expectations stable.
   "matting-spec",
   "cutout-spec",
+  // B1 (spec §15 r1.15) — NRBI Phase-1 render-prompt bodies. Like
+  // upscale-spec these have NO AssetKind — reachable via skill_hint /
+  // picker only, absent from DEFAULT_KIND_SKILL_MAP. Appended at the end
+  // to keep ordinal / snapshot expectations stable.
+  "outfit-anchor-spec",
+  "ep-sprite-spec",
 ] as const
 
 export type AssetGenerationSkill = (typeof ASSET_GENERATION_SKILLS)[number]

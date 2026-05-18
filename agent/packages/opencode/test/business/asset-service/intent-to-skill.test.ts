@@ -185,6 +185,8 @@ describe("intentToSkill — sanity asserts on internal tables", () => {
       "upscale-spec",
       "matting-spec",
       "cutout-spec",
+      "outfit-anchor-spec",
+      "ep-sprite-spec",
     ]
     expect(actual.sort()).toEqual(expected.sort())
   })
@@ -216,6 +218,28 @@ describe("intentToSkill — sanity asserts on internal tables", () => {
 
   test("matting-spec / cutout-spec are reachable via skill_hint", async () => {
     for (const skill of ["matting-spec", "cutout-spec"] as const) {
+      const result = await intentToSkill({
+        intent: intent({ kind: "cg" }),
+        preferences: { skill_hint: skill },
+      })
+      expect(result).toBe(skill)
+    }
+  })
+
+  test("outfit-anchor-spec / ep-sprite-spec are picker-selectable (B1 no-kind bodies)", async () => {
+    for (const skill of ["outfit-anchor-spec", "ep-sprite-spec"] as const) {
+      const picker: SkillPicker = {
+        async pick() {
+          return skill
+        },
+      }
+      const result = await intentToSkill({ intent: intent({ kind: "cg" }), picker })
+      expect(result).toBe(skill)
+    }
+  })
+
+  test("outfit-anchor-spec / ep-sprite-spec are reachable via skill_hint", async () => {
+    for (const skill of ["outfit-anchor-spec", "ep-sprite-spec"] as const) {
       const result = await intentToSkill({
         intent: intent({ kind: "cg" }),
         preferences: { skill_hint: skill },
