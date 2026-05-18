@@ -654,6 +654,39 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 
 ---
 
+### Phase 14 — 真·素材编排循环（asset-orchestration-loop）⚠ 1.14
+
+**目标**：解开 §15 行 1.12 推迟的 Phase 8 旧债——在 assets-produce 内实现真·LLM 编排循环（mini agent loop），让所有素材类型经 REST API 真端到端产出（music 除外，按 1.13 仍占位但走成功 deferred 终态）。
+
+**范围**：
+
+- 在既有 `asset-service/wire.ts` 的 `deps.generator` 注入缝，用真实现替换 `placeholderGenerator`（新文件，如 `asset-service/llm-generator.ts`）
+- loop = LLM(Claude 主脑开 prompt cache / DeepSeek fallback) 读 `knowledge/asset-generation/<skill>.md` body → 按 body "Atomic tools (allowed)" 段约束的 per-skill allowlist → 选并执行原子工具 → 终态 `GenerationOutcome`（真 OSS URL）
+- 程序化原子工具调用桥（合成最小 `Tool.Context`，复用 `ToolRegistry` 的 tool→LLM schema 转换 + `ProviderTransform` prompt cache）
+- skill body 磁盘 loader（从 `knowledge/asset-generation/` 读，本地源材料原则）
+- `ASSETS_SERVICE_MAX_STEPS_PER_JOB` / `ASSETS_SERVICE_MAX_TOKENS_PER_JOB` 真实读取 + step/token 双预算兜底（超额 → `BUDGET_EXCEEDED`）
+- `matting-spec` / `cutout-spec` 注册进 `ASSET_GENERATION_SKILLS`（Phase 13 推迟项收口）
+
+**不做**：
+
+- 不改 `AssetService`/`runAssetGeneration` 状态机契约、4 REST 端点、`AssetKind`、DB schema、`AssetServiceErrorCode`(10)、`GenerationOutcome` 形状与 code 集合、OpenAPI（§ 11.4 全不变）
+- 不选定 / 不接入任何 Suno 网关（1.13 不变）；music 占位为成功 deferred 终态，非失败
+- 不写硬编码流水线 service（新素材类型 = 加 skill body，零 loop 代码改动）
+- 不动 novels-to-moonscript / moonshort-backend
+
+**验收**：
+
+- typecheck + 全测试通过；新 loop 单元/集成 ≥ 80% 行覆盖（mock LLM + dryRun 原子工具）
+- 经 REST `asset.create` 跑一个非 music intent → 真 OSS https URL 终态（凭据已配时）；mock 模式下 loop 选对 skill + allowlist 内工具 + 终态结构正确
+- music intent 经 loop → `ok:true` + 占位 url（`metadata.placeholder` 语义），job 状态 `succeeded` 非 `failed`
+- 越界工具调用被 per-skill allowlist 拒绝；step/token 超预算 → `BUDGET_EXCEEDED`
+- `matting`/`cutout` intent 能解析到对应 skill
+- Langfuse trace 一次 job 运行后可见，根 span `asset_job_<id>`
+- phase-14 plan + verification report 齐
+- commit + push 到 `claude/explore-agent-features-Or0ap`（本 session 指定分支，§15/1.14 记录的 git 偏离）
+
+---
+
 ## 11. 工作流（Claude Code Session 必读）
 
 ### 11.1 进入新 phase 时
@@ -763,6 +796,8 @@ CLI 创建的 skill 默认 `scope=system`（WebUI 不可见），可加 `--scope
 | 1.12 | 2026-05-15 | 用户要求把音乐 / 音效 / CG-OSS-图片处理也做成与视频严格对等的素材生产能力（原子工具 + skill body + AssetKind + asset-service API 自动收口），沿用之前视频的完整流程。Brainstorming 核实事实纠正了用户两处前提：(a) 音乐**无现成生成器**可迁（novels-to-moonscript 仅做名字归类 + 替换人工 mp3 的 URL），仅音效有真生成器（n2m 内 ElevenLabs 声效 API，且与其归类管线耦合）；(b) asset-service REST API 路径用 `placeholderGenerator` 返回 stub，**视频经 API 本身也是 stub**，真编排循环是 Phase 8 旧债。用户决策（选项 B）：严格结构对等，**不碰 `placeholderGenerator`**、不接真编排循环（旧债另起独立项目）；音乐新建原子工具调 Suno（商用授权假设用户用带商用权付费计划，记为 ops 风险）、音效仅移植 n2m 的 ElevenLabs 合成调用、n2m 聚类/归类不迁、不改 novels-to-moonscript 本身。新增 Phase 11（音频：`generate-music-suno` + `generate-sfx-elevenlabs`，内联复用 Phase 2 OSS 服务，不依赖 Phase 12）/ Phase 12（单文件 `oss-put` 原子工具 + cg-render/upscale 经 skill 编排补 OSS URL 对等）/ Phase 13（backend 图片处理套件迁回作 Phase 9 式 Python 原子工具），顺序 11→12→13。完整设计见 `2026-05-15-audio-and-asset-parity-design.md`。影响范围：新增三类素材生产能力 + 三 phase；不改 § 2 原子能力 + skill 编排原则（新工具均为 LLM 经 skill 编排调用的原子能力，非硬编码流水线 service），不改 § 11.4 接口稳定（音频 AssetKind 落地后即 lock-in 起点），明确不动 Phase 8 placeholderGenerator / asset-service 注入点。 | cdotlock + Claude |
 
 | 1.13 | 2026-05-15 | Phase 11 Step 1 survey 独立核实：**Suno 无官方一方公开 API**（仅 beta 合作方；所有公开"Suno API"均为第三方网关，endpoint/鉴权/异步合约各不相同，且各带自身商用条款）。这正是 § 15 行 1.12 / 设计 § 9.1 预先标注的"可能需第三方网关"ops 开放项的落点。用户决策：**音乐生成先留占位（"后面再说"），不在本轮选定 Suno 网关**；Suno key 先 mock、稍后补；商用授权未确认，按 ops 风险推进。因此 Phase 11 范围调整：(a) `generate-sfx-elevenlabs` 照原计划**完整真实实现**——移植 n2m `skills/sfx-normalizer/elevenlabs_generator.py::ElevenLabsGenerator.generate()`（`POST https://api.elevenlabs.io/v1/sound-generation`，`xi-api-key` 头，同步 mp3 字节），内联复用 Phase 2 OSS 服务（`src/oss/oss.ts` 的 `put(key,body)→PutResult.url`，content-type 由 key 后缀 `.mp3` 推断）；**不**移植 n2m 的 clusterer/orchestrator/dry_run 占位写盘等耦合件。(b) `generate-music-suno` 保留**完整结构对等脚手架**（工具文件 + Effect/Schema/never 通道 + `.txt` + `registry.ts` 注册 + `AssetKind`/`ASSET_KINDS` `music` + `DEFAULT_KIND_SKILL_MAP` + `defaultAssetTypeForKind→audio` + `music-spec.md`），但生成路径为**确定性占位**（`metadata.placeholder=true` + 固定说明，无真实上游 HTTP），真实 Suno 网关接入作为本行开放项延后，待用户后续选定网关再走新 §15 修订接通。影响范围：仅 Phase 11 范围内 music 工具的"生成"深度（结构对等不变、视频对等脚手架完整）；不改 § 2 原子能力 + skill 编排原则，不改 § 11.4（`music` AssetKind 落地后仍为 lock-in 起点），不动 Phase 8 placeholderGenerator / asset-service 注入点（音乐占位是工具内自包含确定性返回，与 asset-service `placeholderGenerator` 无关）。 | cdotlock + Claude |
+
+| 1.14 | 2026-05-18 | 用户要求"全部落地"：把素材生产从 stub 变成真端到端。Blocker survey 确认头号卡点是 §15 行 1.12 用户自己定的"不接真编排循环（Phase 8 旧债，另起独立项目）"——经 REST API 所有素材都走 `placeholderGenerator` 返回 stub。用户决策（推翻 1.12 该条）：**现在就在 assets-produce 内实现真·LLM 编排循环（mini agent loop）**，在既有 `deps.generator` 注入缝（`asset-service/wire.ts`）用真实现替换 `placeholderGenerator`，**不改** `AssetService`/`runAssetGeneration` 状态机契约、不改 4 个 REST 端点 / `AssetKind` / DB schema / `AssetServiceErrorCode`(10) / `GenerationOutcome` 形状与 code 集合 / OpenAPI（§ 11.4 全部不变，仅注入缝后的 generator 实现变）。**§15 行 1.13 继续尊重**：`generate-music-suno` 仍为确定性占位、不选 Suno 网关；loop 必须把 music 占位结果当**成功的 deferred 终态**（`ok:true` + 占位 url），**不**映射成 `GENERATION_REJECTED`/失败。新建 loop 严格为「LLM + skill body + 原子工具的运行回路」：runtime 从本地 `knowledge/asset-generation/<name>.md` 读 skill body（CLAUDE.md 本地源材料原则，Langfuse 仍按需上传不在本 phase），按 body "Atomic tools (allowed)" 段强制 per-skill 工具 allowlist，新素材类型 = 加一个 skill body、零 loop 代码改动（§ 2 原则 1 / § 12 红线不变，非硬编码流水线 service）。附带：把 `matting-spec`/`cutout-spec` 注册进 `ASSET_GENERATION_SKILLS`（Phase 13 推迟项，本 phase 收口）；`ASSETS_SERVICE_MAX_STEPS_PER_JOB` / `ASSETS_SERVICE_MAX_TOKENS_PER_JOB`（此前仅在 `.env.example` 声明、代码未读取）落实为真实读取 + 预算兜底；新增 Claude 主脑(开 prompt cache) / DeepSeek fallback 模型选择策略（asset-service 内此前不存在）。新增 Phase 14（asset-orchestration-loop）。Git：依本 session 指令，Phase 14 提交推 `claude/explore-agent-features-Or0ap` 分支（非 main），为 § 11.5 / CLAUDE.md trunk-based 规则的 session 级偏离，经用户指令授权。影响范围：注入缝后 generator 实现 + skill-body 磁盘 loader + 程序化原子工具调用桥 + 预算执行 + 模型选择策略 + 两个 skill 注册；不改 § 2 原子能力 + skill 编排原则、不改 § 11.4 任何对外接口。 | cdotlock + Claude |
 
 > 后续修订请在此追加新行，并在受影响的 phase 章节加 ⚠ 标记 + 引用本表行号。
 
