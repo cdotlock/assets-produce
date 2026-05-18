@@ -100,7 +100,7 @@ In-scope frozen skills (10 global + 1 project-scoped):
 | `rename-reviewer` | reviewer | `skills/rename-reviewer/SKILL.md` |
 | `episode-writer` | producer | `skills/episode-writer/SKILL.md` |
 | `episode-writer-reviewer` | reviewer | `skills/episode-writer-reviewer/SKILL.md` |
-| `arc-reviewer` | reviewer (per-book) | n2m project-scoped `moonscripts/<book>/skills/arc-reviewer/` — freeze the canonical version; orchestration notes it is invoked per-book after a full route arc passes |
+| `arc-reviewer` | reviewer (per-book) | n2m project-scoped `moonscripts/<book>/skills/arc-reviewer/`. **Freeze the demo book `no-rules-in-bad-ideas` copy as the reference template** into `knowledge/novel-to-mss/arc-reviewer.md`; C1 survey must confirm whether the body is book-invariant (if book-specific parts exist, they are parameterized in the orchestration skill, not the frozen body). Invoked per-book after a full route arc passes. |
 
 ### 4.2 Orchestration skill — `novel_to_mss`
 
