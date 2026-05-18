@@ -13,12 +13,8 @@ import { AssetTable, type AssetRow } from "@/business/asset/asset.sql"
 import { AssetJobRepo } from "./asset-job.repo"
 import { Catalog, type CatalogSinceInput } from "./catalog"
 import { AssetServiceError } from "./errors"
-import {
-  runAssetGeneration,
-  type AssetGenerator,
-  type AssetWriter,
-  DEFAULT_MAX_STEPS,
-} from "./run-asset-generation"
+import { runAssetGeneration, type AssetGenerator, type AssetWriter } from "./run-asset-generation"
+import { resolveMaxStepsPerJob } from "./budget"
 import type { SkillPicker } from "./intent-to-skill"
 import type { AssetJobRow } from "./asset-job.sql"
 import type { Tracer } from "./tracer"
@@ -71,7 +67,7 @@ export class AssetService {
     this.jobRepo = opts.jobRepo ?? AssetJobRepo.fromDatabase()
     this.catalog = opts.catalog ?? Catalog.fromDatabase()
     this.skillPicker = opts.skillPicker
-    this.maxSteps = opts.maxSteps ?? DEFAULT_MAX_STEPS
+    this.maxSteps = opts.maxSteps ?? resolveMaxStepsPerJob()
     this.tracer = opts.tracer
   }
 

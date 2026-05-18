@@ -15,6 +15,7 @@
 
 import { AssetServiceError } from "./errors"
 import { AssetJobRepo } from "./asset-job.repo"
+import { DEFAULT_MAX_STEPS, resolveMaxStepsPerJob } from "./budget"
 import { intentToSkill, type SkillPicker } from "./intent-to-skill"
 import { buildTraceEnd, nullTracer, type Tracer } from "./tracer"
 import type { AssetIntent, AssetKind, AssetPreferences } from "./types"
@@ -111,7 +112,9 @@ export interface RunAssetGenerationDeps {
   tracer?: Tracer
 }
 
-export const DEFAULT_MAX_STEPS = 30
+// Re-exported from ./budget so existing importers (asset-service.ts) keep
+// working; budget.ts is now the single source of truth for the default.
+export { DEFAULT_MAX_STEPS }
 
 const TERMINAL_STATUSES: ReadonlySet<AssetJobRow["status"]> = new Set(["succeeded", "failed", "cancelled"])
 
@@ -142,7 +145,7 @@ export async function runAssetGeneration(
   const { __preferences, ...intentFields } = persisted
   const intent = intentFields as AssetIntent
   const preferences: AssetPreferences | undefined = __preferences ?? undefined
-  const maxSteps = deps.maxSteps ?? DEFAULT_MAX_STEPS
+  const maxSteps = deps.maxSteps ?? resolveMaxStepsPerJob()
   const tracer = deps.tracer ?? nullTracer
 
   // Helper that picks tracer.id when present, else generator-supplied id.

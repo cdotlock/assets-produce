@@ -172,7 +172,7 @@ describe("intentToSkill — sanity asserts on internal tables", () => {
     }
   })
 
-  test("ASSET_GENERATION_SKILLS lists the Phase 8 skill bodies plus the Phase 11 sfx + music bodies and the Phase 12 upscale-spec body", () => {
+  test("ASSET_GENERATION_SKILLS lists the Phase 8 skill bodies plus the Phase 11 sfx + music bodies, the Phase 12 upscale-spec body and the Phase 13 matting/cutout bodies (registered in Phase 14)", () => {
     const actual: string[] = [...ASSET_GENERATION_SKILLS]
     const expected: string[] = [
       "character-portrait-spec",
@@ -183,6 +183,8 @@ describe("intentToSkill — sanity asserts on internal tables", () => {
       "sfx-spec",
       "music-spec",
       "upscale-spec",
+      "matting-spec",
+      "cutout-spec",
     ]
     expect(actual.sort()).toEqual(expected.sort())
   })
@@ -198,5 +200,27 @@ describe("intentToSkill — sanity asserts on internal tables", () => {
     }
     const result = await intentToSkill({ intent: intent({ kind: "cg" }), picker })
     expect(result).toBe("upscale-spec")
+  })
+
+  test("matting-spec / cutout-spec are picker-selectable (Phase 13 post-process bodies, registered Phase 14)", async () => {
+    for (const skill of ["matting-spec", "cutout-spec"] as const) {
+      const picker: SkillPicker = {
+        async pick() {
+          return skill
+        },
+      }
+      const result = await intentToSkill({ intent: intent({ kind: "cg" }), picker })
+      expect(result).toBe(skill)
+    }
+  })
+
+  test("matting-spec / cutout-spec are reachable via skill_hint", async () => {
+    for (const skill of ["matting-spec", "cutout-spec"] as const) {
+      const result = await intentToSkill({
+        intent: intent({ kind: "cg" }),
+        preferences: { skill_hint: skill },
+      })
+      expect(result).toBe(skill)
+    }
   })
 })

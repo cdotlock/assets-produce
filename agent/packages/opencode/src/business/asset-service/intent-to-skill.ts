@@ -26,6 +26,12 @@ export const ASSET_GENERATION_SKILLS = [
   // DEFAULT_KIND_SKILL_MAP (no tier-3 kind fallback). Appended at the end
   // to keep ordinal / snapshot expectations stable.
   "upscale-spec",
+  // Phase 13 post-process bodies, registered in Phase 14 (spec §15/1.14).
+  // Like upscale-spec these have NO AssetKind — reachable via skill_hint /
+  // picker only, absent from DEFAULT_KIND_SKILL_MAP. Appended at the end
+  // to keep ordinal / snapshot expectations stable.
+  "matting-spec",
+  "cutout-spec",
 ] as const
 
 export type AssetGenerationSkill = (typeof ASSET_GENERATION_SKILLS)[number]
