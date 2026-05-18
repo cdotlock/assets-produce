@@ -109,8 +109,7 @@ def test_layer_A5_anchor_no_ref_and_with_ref_match_golden():
         "reference_image_urls": ["https://oss.example.com/character_selena.png"],
     })
     assert with_ref["prompt"] == a0["expected_prompt_with_ref"]
-    assert with_ref["prompt"].startswith(mod._load_frozen()._ANCHOR_HEADER) or \
-        mod._load_frozen()._ANCHOR_HEADER[:8] in with_ref["prompt"]
+    assert with_ref["prompt"].startswith(mod._load_frozen()._ANCHOR_HEADER)
 
 
 def test_all_73_anchors_byte_identical():
@@ -123,3 +122,38 @@ def test_all_73_anchors_byte_identical():
             "reference_image_urls": [],
         })
         assert res["prompt"] == a["expected_prompt_no_ref"], f"drift at {a['sprite_id']}"
+
+
+def test_layers_B_C_D_E_match_golden():
+    mod = _load_render_module()
+    g = _json.loads((TOOL_DIR / "fixtures" / "layer_golden.json").read_text())
+    by_layer = {x["input"]["layer"]: x for x in g}
+
+    b = by_layer["B"]
+    rb = mod.assemble({"layer": "B", "variable_text": {"location_name": b["input"]["location_name"], "location_id": b["input"]["location_id"]}, "reference_image_urls": []})
+    assert rb["prompt"] == b["expected_prompt"]
+    assert rb["style_name"] == "YA_Impasto_grid"
+
+    c = by_layer["C"]
+    rc = mod.assemble({"layer": "C", "variable_text": {"sub_location_name": c["input"]["sub_location_name"], "scene_id": c["input"]["scene_id"]}, "reference_image_urls": ["https://oss.example.com/grid.png"]})
+    assert rc["prompt"] == c["expected_prompt"]
+    assert rc["style_name"] == "YA_Impasto_scene"
+
+    d = by_layer["D"]
+    rd = mod.assemble({"layer": "D", "variable_text": {"variant_id": d["input"]["variant_id"], "base_scene_id": d["input"]["base_scene_id"], "prompt": d["input"]["prompt"]}, "reference_image_urls": ["https://oss.example.com/square.png"]})
+    assert rd["prompt"] == d["expected_prompt"]
+
+    e = by_layer["E"]
+    re_ = mod.assemble({"layer": "E", "variable_text": {"char_id": e["input"]["char_id"], "sprite_id": e["input"]["sprite_id"], "prompt": e["input"]["prompt"]}, "reference_image_urls": ["https://oss.example.com/series_selena.png", "https://oss.example.com/anchor_selena_casual.png"]})
+    assert re_["prompt"] == e["expected_prompt"]
+    assert re_["style_name"] == "update_character"
+
+
+def test_layer_E_requires_reference_images():
+    mod = _load_render_module()
+    try:
+        mod.assemble({"layer": "E", "variable_text": {"char_id": "selena", "sprite_id": "sp1", "prompt": "x"}, "reference_image_urls": []})
+        raised = False
+    except ValueError as e:
+        raised = "series portrait" in str(e).lower() or "reference" in str(e).lower()
+    assert raised, "Layer E without refs must fail fast (canonical Don't: series portraits before sprites)"

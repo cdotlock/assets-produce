@@ -12,7 +12,7 @@ import functools
 import hashlib
 import importlib.util
 import json
-import pathlib
+import os
 import tempfile
 from pathlib import Path
 
@@ -88,7 +88,7 @@ def assemble(payload: dict) -> dict:
     refs = list(payload.get("reference_image_urls") or [])
     frozen = _load_frozen()
     style = _resolve_style(layer, payload.get("category"), payload.get("style_name"))
-    tmp = pathlib.Path("/tmp")
+    tmp = Path("/tmp")
 
     if layer == "A":
         orig = vt.get("orig_prompt")
@@ -112,7 +112,7 @@ def assemble(payload: dict) -> dict:
             json.dump({"outfit_anchors": [
                 {"char_id": char_id, "outfit_id": outfit_id, "prompt": raw}
             ]}, fh, ensure_ascii=False)
-            anchor_path = pathlib.Path(fh.name)
+            anchor_path = Path(fh.name)
         try:
             tasks = frozen._build_outfit_anchor_tasks(
                 {"anchor_file": anchor_path, "out_anchors": tmp, "out_character": tmp},
@@ -130,8 +130,82 @@ def assemble(payload: dict) -> dict:
         prompt = _norm(frozen, base, style)
         model = tasks[0]["model"]
 
+    elif layer == "B":
+        name = vt.get("location_name") or vt.get("location_id")
+        if not name:
+            raise ValueError("layer B requires variable_text.location_name (or .location_id)")
+        task = {"id": vt.get("location_id") or "loc", "has_sub_locations": True, "location_name": name}
+        if vt.get("grid_prompt"):
+            task["grid"] = {"prompt": vt["grid_prompt"]}
+        tasks = frozen._build_scene_grid_tasks(
+            {"scene_tasks": [task]}, {"out_series": tmp},
+            {SCENE_GRID_CATEGORY: style}, {}, None,
+        )
+        if not tasks:
+            raise ValueError("scene grid builder produced no task")
+        prompt = _norm(frozen, tasks[0]["prompt"], style)
+        model = tasks[0]["model"]
+
+    elif layer == "C":
+        sub = vt.get("sub_location_name")
+        if not sub:
+            raise ValueError("layer C requires variable_text.sub_location_name")
+        tasks = frozen._build_scene_square_tasks_template(
+            {"scene_tasks": [{"id": vt.get("location_id") or "loc",
+                              "scenes": [{"scene_id": vt.get("scene_id") or "sc", "sub_location_name": sub}]}]},
+            {"out_scene": tmp}, {SCENE_SERIES_CATEGORY: style}, {}, None,
+        )
+        if not tasks:
+            raise ValueError("scene square builder produced no task")
+        prompt = _norm(frozen, tasks[0]["prompt"], style)
+        model = tasks[0]["model"]
+
+    elif layer == "D":
+        vid = vt.get("variant_id")
+        base = vt.get("base_scene_id")
+        if not (vid and base):
+            raise ValueError("layer D requires variable_text.variant_id and .base_scene_id")
+        variant = {"variant_id": vid, "base_scene_id": base}
+        if vt.get("prompt"):
+            variant["prompt"] = vt["prompt"]
+        tasks = frozen._build_scene_variant_tasks_template(
+            {"scene_variants": [variant]}, {"out_scene": tmp},
+            {SCENE_SERIES_CATEGORY: style}, {}, None,
+        )
+        if not tasks:
+            raise ValueError("scene variant builder produced no task")
+        prompt = _norm(frozen, tasks[0]["prompt"], style)
+        model = tasks[0]["model"]
+
+    elif layer == "E":
+        if not refs:
+            raise ValueError(
+                "layer E (ep sprite) requires reference_image_urls "
+                "(series portrait as image-1 + anchor i2i); none supplied"
+            )
+        char_id = vt.get("char_id")
+        sid = vt.get("sprite_id")
+        if not (char_id and sid):
+            raise ValueError("layer E requires variable_text.char_id and .sprite_id")
+        sprite: dict = {"sprite_id": sid}
+        if vt.get("prompt"):
+            sprite["prompt"] = vt["prompt"]
+        elif vt.get("orig_prompt"):
+            sprite["orig_prompt"] = vt["orig_prompt"]
+        else:
+            raise ValueError("layer E requires variable_text.prompt or .orig_prompt")
+        os.environ.pop("__SPRITE_MODEL_OVERRIDE__", None)  # keep model deterministic
+        tasks = frozen._build_ep_sprite_tasks_template(
+            {"ep_character_sprites": {"ep1": {char_id: {"sprites": [sprite]}}}},
+            {"out_sprites": tmp}, {CHAR_EP_CATEGORY: style}, {}, None,
+        )
+        if not tasks:
+            raise ValueError("ep sprite builder produced no task (update_character style required)")
+        prompt = _norm(frozen, tasks[0]["prompt"], style)
+        model = tasks[0]["model"]
+
     else:
-        raise NotImplementedError(f"layer {layer} implemented in a later task")
+        raise ValueError(f"unhandled layer {layer!r}")
 
     return {
         "prompt": prompt,
