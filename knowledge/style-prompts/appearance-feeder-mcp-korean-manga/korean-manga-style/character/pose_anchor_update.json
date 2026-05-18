@@ -1,0 +1,47 @@
+{
+  "raw": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"id\": 7,\n  \"style_name\": \"korean-manga-style\",\n  \"category\": \"character\",\n  \"prompt_key\": \"pose_anchor_update\",\n  \"template\": \"参考图 1 是该角色在该套服装下的 anchor 立绘。\\n画风：韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，无文字。\\n\\n【硬锁，与参考图 1 完全一致，禁止重新设计】\\n- 面部五官、发型、发色、肤色\\n- 身高比例、体型\\n- 着装：服装款式、颜色、材质、层次、鞋子、所有配饰（项链/手表/戒指/腰带/纹身/印花等）\\n\\n【可变，仅替换为下列内容】\\n神态与动作：{{expression_pose}}\\n\\n背景必须是纯色 chromakey green（数字绿 #00B140，RGB 0,177,64），整张背景严格统一——无渐变、无纹理、无杂色、无阴影、无 vignette。人物身上不得出现任何绿色或绿色调配色（衣物、饰品、瞳色、发色一律避开绿色及青绿、黄绿、橄榄绿）；如果参考图本身的 outfit 含绿色，请保留参考图的精确色值。人物四周必须有清晰可辨的边缘——头发、衣物、皮肤的轮廓与绿色背景之间不得有 green spill、绿色光晕或半透明过渡区，每根发丝、衣物褶皱、手指轮廓务必干净锐利。整张图除人物本身外，画面其他位置不得出现任何绿色像素。\",\n  \"placeholders\": [\n    \"expression_pose\"\n  ],\n  \"reference_image_source\": \"dynamic_series_portrait\",\n  \"reference_image_url\": null,\n  \"model\": \"nano-banana-2\",\n  \"notes\": \"EP 级 sprite 的 anchor-locked 模板（v3 anchor-pipeline）。\\n\\n【运行时 reference 实际是 anchor 而非 series_portrait】\\n- spec 字段 reference_image_source 标记为 `dynamic_outfit_anchor`，由 asset-renderer.resolve_reference() 路由到 `asset-img/<book>/anchors/<char>_<outfit_id>.png`\\n- MCP 的 reference_image_source 这里填 dynamic_series_portrait 仅因为 server enum 尚未加 dynamic_outfit_anchor，不影响实际渲染\\n- 真正的契约：消费方（asset-renderer）按 spec 字段路由，MCP 这里只是模板存储\\n\\n【为什么不写 outfit】\\nanchor 已经显式渲过该角色穿这套衣服的样子（neutral pose）；prompt 再写 outfit 等于双重信号，不一致就会 drift。最严重场景见 2026-05-02 模型对比 case 7 (selena/sleepwear)：prompt \\\"着装：睡衣\\\" 过于宽泛 → flash 渲成牛仔布、gpt-image-2 渲成白礼服。\\n\\n【适用条件】\\nsprite.reference_image_source == \\\"dynamic_outfit_anchor\\\" 时使用本模板。\\n对照：update_portrait_style v2 走 series character_card reference，outfit + pose 都得写。\",\n  \"version\": 1,\n  \"created_at\": \"2026-05-03T02:38:47.271523+08:00\",\n  \"updated_at\": \"2026-05-03T02:38:47.271523+08:00\"\n}"
+      }
+    ],
+    "structuredContent": {
+      "result": {
+        "id": 7,
+        "style_name": "korean-manga-style",
+        "category": "character",
+        "prompt_key": "pose_anchor_update",
+        "template": "参考图 1 是该角色在该套服装下的 anchor 立绘。\n画风：韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，无文字。\n\n【硬锁，与参考图 1 完全一致，禁止重新设计】\n- 面部五官、发型、发色、肤色\n- 身高比例、体型\n- 着装：服装款式、颜色、材质、层次、鞋子、所有配饰（项链/手表/戒指/腰带/纹身/印花等）\n\n【可变，仅替换为下列内容】\n神态与动作：{{expression_pose}}\n\n背景必须是纯色 chromakey green（数字绿 #00B140，RGB 0,177,64），整张背景严格统一——无渐变、无纹理、无杂色、无阴影、无 vignette。人物身上不得出现任何绿色或绿色调配色（衣物、饰品、瞳色、发色一律避开绿色及青绿、黄绿、橄榄绿）；如果参考图本身的 outfit 含绿色，请保留参考图的精确色值。人物四周必须有清晰可辨的边缘——头发、衣物、皮肤的轮廓与绿色背景之间不得有 green spill、绿色光晕或半透明过渡区，每根发丝、衣物褶皱、手指轮廓务必干净锐利。整张图除人物本身外，画面其他位置不得出现任何绿色像素。",
+        "placeholders": [
+          "expression_pose"
+        ],
+        "reference_image_source": "dynamic_series_portrait",
+        "reference_image_url": null,
+        "model": "nano-banana-2",
+        "notes": "EP 级 sprite 的 anchor-locked 模板（v3 anchor-pipeline）。\n\n【运行时 reference 实际是 anchor 而非 series_portrait】\n- spec 字段 reference_image_source 标记为 `dynamic_outfit_anchor`，由 asset-renderer.resolve_reference() 路由到 `asset-img/<book>/anchors/<char>_<outfit_id>.png`\n- MCP 的 reference_image_source 这里填 dynamic_series_portrait 仅因为 server enum 尚未加 dynamic_outfit_anchor，不影响实际渲染\n- 真正的契约：消费方（asset-renderer）按 spec 字段路由，MCP 这里只是模板存储\n\n【为什么不写 outfit】\nanchor 已经显式渲过该角色穿这套衣服的样子（neutral pose）；prompt 再写 outfit 等于双重信号，不一致就会 drift。最严重场景见 2026-05-02 模型对比 case 7 (selena/sleepwear)：prompt \"着装：睡衣\" 过于宽泛 → flash 渲成牛仔布、gpt-image-2 渲成白礼服。\n\n【适用条件】\nsprite.reference_image_source == \"dynamic_outfit_anchor\" 时使用本模板。\n对照：update_portrait_style v2 走 series character_card reference，outfit + pose 都得写。",
+        "version": 1,
+        "created_at": "2026-05-03T02:38:47.271523+08:00",
+        "updated_at": "2026-05-03T02:38:47.271523+08:00"
+      }
+    },
+    "isError": false
+  },
+  "parsed": {
+    "id": 7,
+    "style_name": "korean-manga-style",
+    "category": "character",
+    "prompt_key": "pose_anchor_update",
+    "template": "参考图 1 是该角色在该套服装下的 anchor 立绘。\n画风：韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，无文字。\n\n【硬锁，与参考图 1 完全一致，禁止重新设计】\n- 面部五官、发型、发色、肤色\n- 身高比例、体型\n- 着装：服装款式、颜色、材质、层次、鞋子、所有配饰（项链/手表/戒指/腰带/纹身/印花等）\n\n【可变，仅替换为下列内容】\n神态与动作：{{expression_pose}}\n\n背景必须是纯色 chromakey green（数字绿 #00B140，RGB 0,177,64），整张背景严格统一——无渐变、无纹理、无杂色、无阴影、无 vignette。人物身上不得出现任何绿色或绿色调配色（衣物、饰品、瞳色、发色一律避开绿色及青绿、黄绿、橄榄绿）；如果参考图本身的 outfit 含绿色，请保留参考图的精确色值。人物四周必须有清晰可辨的边缘——头发、衣物、皮肤的轮廓与绿色背景之间不得有 green spill、绿色光晕或半透明过渡区，每根发丝、衣物褶皱、手指轮廓务必干净锐利。整张图除人物本身外，画面其他位置不得出现任何绿色像素。",
+    "placeholders": [
+      "expression_pose"
+    ],
+    "reference_image_source": "dynamic_series_portrait",
+    "reference_image_url": null,
+    "model": "nano-banana-2",
+    "notes": "EP 级 sprite 的 anchor-locked 模板（v3 anchor-pipeline）。\n\n【运行时 reference 实际是 anchor 而非 series_portrait】\n- spec 字段 reference_image_source 标记为 `dynamic_outfit_anchor`，由 asset-renderer.resolve_reference() 路由到 `asset-img/<book>/anchors/<char>_<outfit_id>.png`\n- MCP 的 reference_image_source 这里填 dynamic_series_portrait 仅因为 server enum 尚未加 dynamic_outfit_anchor，不影响实际渲染\n- 真正的契约：消费方（asset-renderer）按 spec 字段路由，MCP 这里只是模板存储\n\n【为什么不写 outfit】\nanchor 已经显式渲过该角色穿这套衣服的样子（neutral pose）；prompt 再写 outfit 等于双重信号，不一致就会 drift。最严重场景见 2026-05-02 模型对比 case 7 (selena/sleepwear)：prompt \"着装：睡衣\" 过于宽泛 → flash 渲成牛仔布、gpt-image-2 渲成白礼服。\n\n【适用条件】\nsprite.reference_image_source == \"dynamic_outfit_anchor\" 时使用本模板。\n对照：update_portrait_style v2 走 series character_card reference，outfit + pose 都得写。",
+    "version": 1,
+    "created_at": "2026-05-03T02:38:47.271523+08:00",
+    "updated_at": "2026-05-03T02:38:47.271523+08:00"
+  }
+}

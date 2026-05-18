@@ -1,0 +1,47 @@
+{
+  "raw": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"history_id\": 6,\n  \"version\": 1,\n  \"template\": \"参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，白色背景，注视着镜头微笑，无文字。{{appearance}}\",\n  \"placeholders\": [\n    \"appearance\"\n  ],\n  \"reference_image_source\": \"static\",\n  \"reference_image_url\": \"https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/character/portrait_style.png\",\n  \"model\": \"nano-banana-2\",\n  \"notes\": \"作品级立绘。appearance 必须包含：年龄、性别、发色+发型+发长、瞳色、体型、代表性穿搭（含品牌风格锚点）。禁止情绪词、叙事解释、多套形象。reference_image_url 指向外部挑选的韩漫风格定调图。\",\n  \"snapshot_at\": \"2026-04-26T02:46:06.008613+08:00\",\n  \"changed_by\": \"claude-no-rules-vn\",\n  \"change_note\": \"switch white BG → chromakey green (#00B140) + anti-spill clauses, per Google DevRel sticker pipeline; pairs with new HSV chromakey cutout in asset-renderer\"\n}"
+      }
+    ],
+    "structuredContent": {
+      "result": [
+        {
+          "history_id": 6,
+          "version": 1,
+          "template": "参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，白色背景，注视着镜头微笑，无文字。{{appearance}}",
+          "placeholders": [
+            "appearance"
+          ],
+          "reference_image_source": "static",
+          "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/character/portrait_style.png",
+          "model": "nano-banana-2",
+          "notes": "作品级立绘。appearance 必须包含：年龄、性别、发色+发型+发长、瞳色、体型、代表性穿搭（含品牌风格锚点）。禁止情绪词、叙事解释、多套形象。reference_image_url 指向外部挑选的韩漫风格定调图。",
+          "snapshot_at": "2026-04-26T02:46:06.008613+08:00",
+          "changed_by": "claude-no-rules-vn",
+          "change_note": "switch white BG → chromakey green (#00B140) + anti-spill clauses, per Google DevRel sticker pipeline; pairs with new HSV chromakey cutout in asset-renderer"
+        }
+      ]
+    },
+    "isError": false
+  },
+  "parsed": [
+    {
+      "history_id": 6,
+      "version": 1,
+      "template": "参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，白色背景，注视着镜头微笑，无文字。{{appearance}}",
+      "placeholders": [
+        "appearance"
+      ],
+      "reference_image_source": "static",
+      "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/character/portrait_style.png",
+      "model": "nano-banana-2",
+      "notes": "作品级立绘。appearance 必须包含：年龄、性别、发色+发型+发长、瞳色、体型、代表性穿搭（含品牌风格锚点）。禁止情绪词、叙事解释、多套形象。reference_image_url 指向外部挑选的韩漫风格定调图。",
+      "snapshot_at": "2026-04-26T02:46:06.008613+08:00",
+      "changed_by": "claude-no-rules-vn",
+      "change_note": "switch white BG → chromakey green (#00B140) + anti-spill clauses, per Google DevRel sticker pipeline; pairs with new HSV chromakey cutout in asset-renderer"
+    }
+  ]
+}

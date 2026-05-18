@@ -1,0 +1,49 @@
+{
+  "raw": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"id\": 3,\n  \"style_name\": \"korean-manga-style\",\n  \"category\": \"scene\",\n  \"prompt_key\": \"location_style\",\n  \"template\": \"参照图 1 的画风，生成 1:1 方形尺寸的场景空镜图，韩漫画风，电影级氛围与精致质感。精细的线稿，丰富的材质与环境陈设细节（家具纹理、窗棂、装饰小物、墙面质感、地面反射等）。电影级光影：明确主光源方向，大面积深色阴影中点缀局部高光（三分打七分遮），搭配逆光、边缘光或透射光营造戏剧层次感。电影调色板，色彩和谐且有统一氛围色贯穿画面，避免过饱和纯色平涂，阴影带环境色反射，高光带微妙渐变。景深与大气透视：近景锐利，中景柔化，远景略微褪色。面向北美 18-24 岁成人女性审美：精致、氛围感强、情绪性明确，严禁儿童绘本感、严禁均匀扁平光。{{location_name}}：{{visual_prompt}}。画面中没有任何文字和人物。\",\n  \"placeholders\": [\n    \"location_name\",\n    \"visual_prompt\"\n  ],\n  \"reference_image_source\": \"static\",\n  \"reference_image_url\": \"https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_style.png\",\n  \"model\": \"nano-banana-pro\",\n  \"notes\": \"n=1 的 step_1 单图 prompt（C 方案 · 电影感）。1:1 方形尺寸。\",\n  \"version\": 1,\n  \"created_at\": \"2026-04-15T12:42:46.801726+08:00\",\n  \"updated_at\": \"2026-04-15T12:42:46.801726+08:00\"\n}"
+      }
+    ],
+    "structuredContent": {
+      "result": {
+        "id": 3,
+        "style_name": "korean-manga-style",
+        "category": "scene",
+        "prompt_key": "location_style",
+        "template": "参照图 1 的画风，生成 1:1 方形尺寸的场景空镜图，韩漫画风，电影级氛围与精致质感。精细的线稿，丰富的材质与环境陈设细节（家具纹理、窗棂、装饰小物、墙面质感、地面反射等）。电影级光影：明确主光源方向，大面积深色阴影中点缀局部高光（三分打七分遮），搭配逆光、边缘光或透射光营造戏剧层次感。电影调色板，色彩和谐且有统一氛围色贯穿画面，避免过饱和纯色平涂，阴影带环境色反射，高光带微妙渐变。景深与大气透视：近景锐利，中景柔化，远景略微褪色。面向北美 18-24 岁成人女性审美：精致、氛围感强、情绪性明确，严禁儿童绘本感、严禁均匀扁平光。{{location_name}}：{{visual_prompt}}。画面中没有任何文字和人物。",
+        "placeholders": [
+          "location_name",
+          "visual_prompt"
+        ],
+        "reference_image_source": "static",
+        "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_style.png",
+        "model": "nano-banana-pro",
+        "notes": "n=1 的 step_1 单图 prompt（C 方案 · 电影感）。1:1 方形尺寸。",
+        "version": 1,
+        "created_at": "2026-04-15T12:42:46.801726+08:00",
+        "updated_at": "2026-04-15T12:42:46.801726+08:00"
+      }
+    },
+    "isError": false
+  },
+  "parsed": {
+    "id": 3,
+    "style_name": "korean-manga-style",
+    "category": "scene",
+    "prompt_key": "location_style",
+    "template": "参照图 1 的画风，生成 1:1 方形尺寸的场景空镜图，韩漫画风，电影级氛围与精致质感。精细的线稿，丰富的材质与环境陈设细节（家具纹理、窗棂、装饰小物、墙面质感、地面反射等）。电影级光影：明确主光源方向，大面积深色阴影中点缀局部高光（三分打七分遮），搭配逆光、边缘光或透射光营造戏剧层次感。电影调色板，色彩和谐且有统一氛围色贯穿画面，避免过饱和纯色平涂，阴影带环境色反射，高光带微妙渐变。景深与大气透视：近景锐利，中景柔化，远景略微褪色。面向北美 18-24 岁成人女性审美：精致、氛围感强、情绪性明确，严禁儿童绘本感、严禁均匀扁平光。{{location_name}}：{{visual_prompt}}。画面中没有任何文字和人物。",
+    "placeholders": [
+      "location_name",
+      "visual_prompt"
+    ],
+    "reference_image_source": "static",
+    "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_style.png",
+    "model": "nano-banana-pro",
+    "notes": "n=1 的 step_1 单图 prompt（C 方案 · 电影感）。1:1 方形尺寸。",
+    "version": 1,
+    "created_at": "2026-04-15T12:42:46.801726+08:00",
+    "updated_at": "2026-04-15T12:42:46.801726+08:00"
+  }
+}

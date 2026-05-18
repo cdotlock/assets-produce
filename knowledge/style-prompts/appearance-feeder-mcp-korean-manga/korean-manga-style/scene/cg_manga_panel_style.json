@@ -1,0 +1,49 @@
+{
+  "raw": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"id\": 9,\n  \"style_name\": \"korean-manga-style\",\n  \"category\": \"scene\",\n  \"prompt_key\": \"cg_manga_panel_style\",\n  \"template\": \"参考图 1 风格,生成 1 张韩漫风格 {{panel_count}} 格分镜大图。\\n\\n阅读顺序:按 shot_index 顺序垂直阅读(上到下);所有格子画风严格统一,\\n人物外貌、服装、光照、调色全部一致。\\n\\n格子布局:可不均等 — 重要镜头大格、过渡镜头小格,保留漫画的电影节奏感。\\n允许\\\"出血\\\"边缘构图与对角线视线引导。\\n\\n每格内容(按顺序排列):\\n{{panel_lines}}\\n\\n严格硬禁令:画面中绝对不得出现任何文字、字母、汉字、单词、标注、\\ncaption、场景名称、人名、地名、品牌字、数字、符号、标牌文字、\\n旗帜文字、对话气泡、拟声词。所有 banner / 标语 / 牌匾 / 旗帜必须\\n为纯色或抽象图案。所有格子均无文字标注、无下方标签、无标题。\",\n  \"placeholders\": [\n    \"panel_count\",\n    \"panel_lines\"\n  ],\n  \"reference_image_source\": \"static\",\n  \"reference_image_url\": \"https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_grid_style.png\",\n  \"model\": \"nano-banana-pro\",\n  \"notes\": \"CG Phase 2 (multi-panel) 漫画分镜大图 — 用于 panel_count >= 2 的 CG。参考图复用 scene/location_grid_style.png 作为风格锚(已用于 scene_tasks 的 N 宫格,有量产验证)。\\npanel_lines 由 Layer A (cg_collector._build_prompt) 渲染:每行格式 \\\"  【格 N】<prompt_segment> (主体:<focus>)\\\"\\n设计文档: docs/superpowers/specs/2026-05-13-cg-pipeline-design.md §6.4\\n实际渲染时 Layer B 使用 task[\\\"prompt\\\"] 字段(Layer A 已构建好);本模板做文档化 + 将来潜在直接调用。\\nNB: category=\\\"scene\\\" 而非 \\\"cg\\\" 因为 MCP server enum 限制 — prompt_key=\\\"cg_*_style\\\" 标识用途。\",\n  \"version\": 1,\n  \"created_at\": \"2026-05-13T14:28:48.918131+08:00\",\n  \"updated_at\": \"2026-05-13T14:28:48.918131+08:00\"\n}"
+      }
+    ],
+    "structuredContent": {
+      "result": {
+        "id": 9,
+        "style_name": "korean-manga-style",
+        "category": "scene",
+        "prompt_key": "cg_manga_panel_style",
+        "template": "参考图 1 风格,生成 1 张韩漫风格 {{panel_count}} 格分镜大图。\n\n阅读顺序:按 shot_index 顺序垂直阅读(上到下);所有格子画风严格统一,\n人物外貌、服装、光照、调色全部一致。\n\n格子布局:可不均等 — 重要镜头大格、过渡镜头小格,保留漫画的电影节奏感。\n允许\"出血\"边缘构图与对角线视线引导。\n\n每格内容(按顺序排列):\n{{panel_lines}}\n\n严格硬禁令:画面中绝对不得出现任何文字、字母、汉字、单词、标注、\ncaption、场景名称、人名、地名、品牌字、数字、符号、标牌文字、\n旗帜文字、对话气泡、拟声词。所有 banner / 标语 / 牌匾 / 旗帜必须\n为纯色或抽象图案。所有格子均无文字标注、无下方标签、无标题。",
+        "placeholders": [
+          "panel_count",
+          "panel_lines"
+        ],
+        "reference_image_source": "static",
+        "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_grid_style.png",
+        "model": "nano-banana-pro",
+        "notes": "CG Phase 2 (multi-panel) 漫画分镜大图 — 用于 panel_count >= 2 的 CG。参考图复用 scene/location_grid_style.png 作为风格锚(已用于 scene_tasks 的 N 宫格,有量产验证)。\npanel_lines 由 Layer A (cg_collector._build_prompt) 渲染:每行格式 \"  【格 N】<prompt_segment> (主体:<focus>)\"\n设计文档: docs/superpowers/specs/2026-05-13-cg-pipeline-design.md §6.4\n实际渲染时 Layer B 使用 task[\"prompt\"] 字段(Layer A 已构建好);本模板做文档化 + 将来潜在直接调用。\nNB: category=\"scene\" 而非 \"cg\" 因为 MCP server enum 限制 — prompt_key=\"cg_*_style\" 标识用途。",
+        "version": 1,
+        "created_at": "2026-05-13T14:28:48.918131+08:00",
+        "updated_at": "2026-05-13T14:28:48.918131+08:00"
+      }
+    },
+    "isError": false
+  },
+  "parsed": {
+    "id": 9,
+    "style_name": "korean-manga-style",
+    "category": "scene",
+    "prompt_key": "cg_manga_panel_style",
+    "template": "参考图 1 风格,生成 1 张韩漫风格 {{panel_count}} 格分镜大图。\n\n阅读顺序:按 shot_index 顺序垂直阅读(上到下);所有格子画风严格统一,\n人物外貌、服装、光照、调色全部一致。\n\n格子布局:可不均等 — 重要镜头大格、过渡镜头小格,保留漫画的电影节奏感。\n允许\"出血\"边缘构图与对角线视线引导。\n\n每格内容(按顺序排列):\n{{panel_lines}}\n\n严格硬禁令:画面中绝对不得出现任何文字、字母、汉字、单词、标注、\ncaption、场景名称、人名、地名、品牌字、数字、符号、标牌文字、\n旗帜文字、对话气泡、拟声词。所有 banner / 标语 / 牌匾 / 旗帜必须\n为纯色或抽象图案。所有格子均无文字标注、无下方标签、无标题。",
+    "placeholders": [
+      "panel_count",
+      "panel_lines"
+    ],
+    "reference_image_source": "static",
+    "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_grid_style.png",
+    "model": "nano-banana-pro",
+    "notes": "CG Phase 2 (multi-panel) 漫画分镜大图 — 用于 panel_count >= 2 的 CG。参考图复用 scene/location_grid_style.png 作为风格锚(已用于 scene_tasks 的 N 宫格,有量产验证)。\npanel_lines 由 Layer A (cg_collector._build_prompt) 渲染:每行格式 \"  【格 N】<prompt_segment> (主体:<focus>)\"\n设计文档: docs/superpowers/specs/2026-05-13-cg-pipeline-design.md §6.4\n实际渲染时 Layer B 使用 task[\"prompt\"] 字段(Layer A 已构建好);本模板做文档化 + 将来潜在直接调用。\nNB: category=\"scene\" 而非 \"cg\" 因为 MCP server enum 限制 — prompt_key=\"cg_*_style\" 标识用途。",
+    "version": 1,
+    "created_at": "2026-05-13T14:28:48.918131+08:00",
+    "updated_at": "2026-05-13T14:28:48.918131+08:00"
+  }
+}

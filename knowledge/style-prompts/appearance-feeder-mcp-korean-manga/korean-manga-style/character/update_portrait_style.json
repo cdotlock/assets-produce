@@ -1,0 +1,49 @@
+{
+  "raw": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"id\": 2,\n  \"style_name\": \"korean-manga-style\",\n  \"category\": \"character\",\n  \"prompt_key\": \"update_portrait_style\",\n  \"template\": \"参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，无文字。严格保持与参考图 1 完全一致的人物面部五官、发型发色、身高比例和体型，仅更换以下着装和姿态：着装：{{outfit}}。神态与动作：{{expression_pose}}。\\n\\n背景必须是纯色 chromakey green（数字绿 #00B140，RGB 0,177,64），整张背景严格统一——无渐变、无纹理、无杂色、无阴影、无 vignette。人物身上不得出现任何绿色或绿色调配色（衣物、饰品、瞳色、发色一律避开绿色及青绿、黄绿、橄榄绿）；如果 outfit 提到绿色，请替换成最接近的非绿色（深蓝/灰/米色）。人物四周必须有清晰可辨的边缘——头发、衣物、皮肤的轮廓与绿色背景之间不得有 green spill、绿色光晕或半透明过渡区，每根发丝、衣物褶皱、手指轮廓务必干净锐利。整张图除人物本身外，画面其他位置不得出现任何绿色像素。\",\n  \"placeholders\": [\n    \"outfit\",\n    \"expression_pose\"\n  ],\n  \"reference_image_source\": \"dynamic_series_portrait\",\n  \"reference_image_url\": null,\n  \"model\": \"nano-banana-pro\",\n  \"notes\": \"EP 级立绘。运行时参考图 = 目标角色的 series-level 立绘。outfit 只写衣服+饰品（含品牌锚点），禁止面部/发型/体型。expression_pose = 一个神态词 + 一个动作词，标准化词库见 asset-prompt-generator skill。\\n\\n背景：chromakey green (#00B140)，与 portrait_style v2 一致。配合 asset-renderer Layer 6 的 HSV chromakey 抠图换透明背景。注意 outfit 里出现\\\"green\\\"/\\\"绿\\\"等字样时，prompt 已显式要求替换，但 prompt-generator 端最好也避免在 outfit 输入里出现绿色配色。\",\n  \"version\": 2,\n  \"created_at\": \"2026-04-15T12:42:46.800486+08:00\",\n  \"updated_at\": \"2026-04-26T02:46:13.308172+08:00\"\n}"
+      }
+    ],
+    "structuredContent": {
+      "result": {
+        "id": 2,
+        "style_name": "korean-manga-style",
+        "category": "character",
+        "prompt_key": "update_portrait_style",
+        "template": "参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，无文字。严格保持与参考图 1 完全一致的人物面部五官、发型发色、身高比例和体型，仅更换以下着装和姿态：着装：{{outfit}}。神态与动作：{{expression_pose}}。\n\n背景必须是纯色 chromakey green（数字绿 #00B140，RGB 0,177,64），整张背景严格统一——无渐变、无纹理、无杂色、无阴影、无 vignette。人物身上不得出现任何绿色或绿色调配色（衣物、饰品、瞳色、发色一律避开绿色及青绿、黄绿、橄榄绿）；如果 outfit 提到绿色，请替换成最接近的非绿色（深蓝/灰/米色）。人物四周必须有清晰可辨的边缘——头发、衣物、皮肤的轮廓与绿色背景之间不得有 green spill、绿色光晕或半透明过渡区，每根发丝、衣物褶皱、手指轮廓务必干净锐利。整张图除人物本身外，画面其他位置不得出现任何绿色像素。",
+        "placeholders": [
+          "outfit",
+          "expression_pose"
+        ],
+        "reference_image_source": "dynamic_series_portrait",
+        "reference_image_url": null,
+        "model": "nano-banana-pro",
+        "notes": "EP 级立绘。运行时参考图 = 目标角色的 series-level 立绘。outfit 只写衣服+饰品（含品牌锚点），禁止面部/发型/体型。expression_pose = 一个神态词 + 一个动作词，标准化词库见 asset-prompt-generator skill。\n\n背景：chromakey green (#00B140)，与 portrait_style v2 一致。配合 asset-renderer Layer 6 的 HSV chromakey 抠图换透明背景。注意 outfit 里出现\"green\"/\"绿\"等字样时，prompt 已显式要求替换，但 prompt-generator 端最好也避免在 outfit 输入里出现绿色配色。",
+        "version": 2,
+        "created_at": "2026-04-15T12:42:46.800486+08:00",
+        "updated_at": "2026-04-26T02:46:13.308172+08:00"
+      }
+    },
+    "isError": false
+  },
+  "parsed": {
+    "id": 2,
+    "style_name": "korean-manga-style",
+    "category": "character",
+    "prompt_key": "update_portrait_style",
+    "template": "参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，无文字。严格保持与参考图 1 完全一致的人物面部五官、发型发色、身高比例和体型，仅更换以下着装和姿态：着装：{{outfit}}。神态与动作：{{expression_pose}}。\n\n背景必须是纯色 chromakey green（数字绿 #00B140，RGB 0,177,64），整张背景严格统一——无渐变、无纹理、无杂色、无阴影、无 vignette。人物身上不得出现任何绿色或绿色调配色（衣物、饰品、瞳色、发色一律避开绿色及青绿、黄绿、橄榄绿）；如果 outfit 提到绿色，请替换成最接近的非绿色（深蓝/灰/米色）。人物四周必须有清晰可辨的边缘——头发、衣物、皮肤的轮廓与绿色背景之间不得有 green spill、绿色光晕或半透明过渡区，每根发丝、衣物褶皱、手指轮廓务必干净锐利。整张图除人物本身外，画面其他位置不得出现任何绿色像素。",
+    "placeholders": [
+      "outfit",
+      "expression_pose"
+    ],
+    "reference_image_source": "dynamic_series_portrait",
+    "reference_image_url": null,
+    "model": "nano-banana-pro",
+    "notes": "EP 级立绘。运行时参考图 = 目标角色的 series-level 立绘。outfit 只写衣服+饰品（含品牌锚点），禁止面部/发型/体型。expression_pose = 一个神态词 + 一个动作词，标准化词库见 asset-prompt-generator skill。\n\n背景：chromakey green (#00B140)，与 portrait_style v2 一致。配合 asset-renderer Layer 6 的 HSV chromakey 抠图换透明背景。注意 outfit 里出现\"green\"/\"绿\"等字样时，prompt 已显式要求替换，但 prompt-generator 端最好也避免在 outfit 输入里出现绿色配色。",
+    "version": 2,
+    "created_at": "2026-04-15T12:42:46.800486+08:00",
+    "updated_at": "2026-04-26T02:46:13.308172+08:00"
+  }
+}

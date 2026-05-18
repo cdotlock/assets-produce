@@ -1,0 +1,49 @@
+{
+  "raw": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"history_id\": 5,\n  \"version\": 1,\n  \"template\": \"请生成一张 {{grid_size}} 宫格图片，每格比例 1:1 方形尺寸，所有格子风格必须严格统一。\\n统一风格：参照图 1 的画风，韩漫画风，电影级氛围与精致质感。精细的线稿，丰富的材质与环境陈设细节（家具纹理、窗棂、装饰小物、墙面质感、地面反射等）。电影级光影：明确主光源方向，大面积深色阴影中点缀局部高光（三分打七分遮），搭配逆光、边缘光或透射光营造戏剧层次感。电影调色板，色彩和谐且有统一氛围色贯穿画面，避免过饱和纯色平涂，阴影带环境色反射，高光带微妙渐变。景深与大气透视：近景锐利，中景柔化，远景略微褪色。面向北美 18-24 岁成人女性审美：精致、氛围感强、情绪性明确，严禁儿童绘本感、严禁均匀扁平光。无任何人物，无文字。\\n请在每格底部标注场景名称：\\n{{grid_cells}}\",\n  \"placeholders\": [\n    \"grid_size\",\n    \"grid_cells\"\n  ],\n  \"reference_image_source\": \"static\",\n  \"reference_image_url\": \"https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_grid_style.png\",\n  \"model\": \"nano-banana-pro\",\n  \"notes\": \"n>1 的 step_1 宫格 prompt（C 方案 · 电影感）。grid_size = n+1（父场景 + 真实子场景数）。grid_cells = 多行，每行格式【格 k】名称：visual_prompt。1:1 方形尺寸。\",\n  \"snapshot_at\": \"2026-04-21T15:48:40.202495+08:00\",\n  \"changed_by\": \"asset-reviewer V5 rework (via Claude)\",\n  \"change_note\": \"V5 rework: removed '请在每格底部标注场景名称' (which was leaking Chinese labels into panels), added ABSOLUTE NO-TEXT/NO-LABEL hard ban covering all banner/sign/board elements inside panels\"\n}"
+      }
+    ],
+    "structuredContent": {
+      "result": [
+        {
+          "history_id": 5,
+          "version": 1,
+          "template": "请生成一张 {{grid_size}} 宫格图片，每格比例 1:1 方形尺寸，所有格子风格必须严格统一。\n统一风格：参照图 1 的画风，韩漫画风，电影级氛围与精致质感。精细的线稿，丰富的材质与环境陈设细节（家具纹理、窗棂、装饰小物、墙面质感、地面反射等）。电影级光影：明确主光源方向，大面积深色阴影中点缀局部高光（三分打七分遮），搭配逆光、边缘光或透射光营造戏剧层次感。电影调色板，色彩和谐且有统一氛围色贯穿画面，避免过饱和纯色平涂，阴影带环境色反射，高光带微妙渐变。景深与大气透视：近景锐利，中景柔化，远景略微褪色。面向北美 18-24 岁成人女性审美：精致、氛围感强、情绪性明确，严禁儿童绘本感、严禁均匀扁平光。无任何人物，无文字。\n请在每格底部标注场景名称：\n{{grid_cells}}",
+          "placeholders": [
+            "grid_size",
+            "grid_cells"
+          ],
+          "reference_image_source": "static",
+          "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_grid_style.png",
+          "model": "nano-banana-pro",
+          "notes": "n>1 的 step_1 宫格 prompt（C 方案 · 电影感）。grid_size = n+1（父场景 + 真实子场景数）。grid_cells = 多行，每行格式【格 k】名称：visual_prompt。1:1 方形尺寸。",
+          "snapshot_at": "2026-04-21T15:48:40.202495+08:00",
+          "changed_by": "asset-reviewer V5 rework (via Claude)",
+          "change_note": "V5 rework: removed '请在每格底部标注场景名称' (which was leaking Chinese labels into panels), added ABSOLUTE NO-TEXT/NO-LABEL hard ban covering all banner/sign/board elements inside panels"
+        }
+      ]
+    },
+    "isError": false
+  },
+  "parsed": [
+    {
+      "history_id": 5,
+      "version": 1,
+      "template": "请生成一张 {{grid_size}} 宫格图片，每格比例 1:1 方形尺寸，所有格子风格必须严格统一。\n统一风格：参照图 1 的画风，韩漫画风，电影级氛围与精致质感。精细的线稿，丰富的材质与环境陈设细节（家具纹理、窗棂、装饰小物、墙面质感、地面反射等）。电影级光影：明确主光源方向，大面积深色阴影中点缀局部高光（三分打七分遮），搭配逆光、边缘光或透射光营造戏剧层次感。电影调色板，色彩和谐且有统一氛围色贯穿画面，避免过饱和纯色平涂，阴影带环境色反射，高光带微妙渐变。景深与大气透视：近景锐利，中景柔化，远景略微褪色。面向北美 18-24 岁成人女性审美：精致、氛围感强、情绪性明确，严禁儿童绘本感、严禁均匀扁平光。无任何人物，无文字。\n请在每格底部标注场景名称：\n{{grid_cells}}",
+      "placeholders": [
+        "grid_size",
+        "grid_cells"
+      ],
+      "reference_image_source": "static",
+      "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_grid_style.png",
+      "model": "nano-banana-pro",
+      "notes": "n>1 的 step_1 宫格 prompt（C 方案 · 电影感）。grid_size = n+1（父场景 + 真实子场景数）。grid_cells = 多行，每行格式【格 k】名称：visual_prompt。1:1 方形尺寸。",
+      "snapshot_at": "2026-04-21T15:48:40.202495+08:00",
+      "changed_by": "asset-reviewer V5 rework (via Claude)",
+      "change_note": "V5 rework: removed '请在每格底部标注场景名称' (which was leaking Chinese labels into panels), added ABSOLUTE NO-TEXT/NO-LABEL hard ban covering all banner/sign/board elements inside panels"
+    }
+  ]
+}

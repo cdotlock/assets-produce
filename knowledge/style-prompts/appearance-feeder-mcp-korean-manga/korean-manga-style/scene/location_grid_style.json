@@ -1,0 +1,49 @@
+{
+  "raw": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"id\": 4,\n  \"style_name\": \"korean-manga-style\",\n  \"category\": \"scene\",\n  \"prompt_key\": \"location_grid_style\",\n  \"template\": \"请生成一张 {{grid_size}} 宫格图片，每格比例 1:1 方形尺寸，所有格子风格必须严格统一。\\n统一风格：参照图 1 的画风，韩漫画风，电影级氛围与精致质感。精细的线稿，丰富的材质与环境陈设细节（家具纹理、窗棂、装饰小物、墙面质感、地面反射等）。电影级光影：明确主光源方向，大面积深色阴影中点缀局部高光（三分打七分遮），搭配逆光、边缘光或透射光营造戏剧层次感。电影调色板，色彩和谐且有统一氛围色贯穿画面，避免过饱和纯色平涂，阴影带环境色反射，高光带微妙渐变。景深与大气透视：近景锐利，中景柔化，远景略微褪色。面向北美 18-24 岁成人女性审美：精致、氛围感强、情绪性明确，严禁儿童绘本感、严禁均匀扁平光。\\n\\n严格硬禁令：画面中绝对不得出现任何文字、字母、汉字、单词、标注、caption、场景名称、学校名、品牌名、数字、符号、标牌文字、旗帜文字、黑板字、墙贴文字。所有 banner/标语/牌匾/旗帜必须为纯色或抽象图案。所有格子均无文字标注、无下方标签、无标题。无任何人物、动物、人影剪影。\\n\\n每格内容（按顺序排列，仅作内容指引，不作画面文字）：\\n{{grid_cells}}\",\n  \"placeholders\": [\n    \"grid_size\",\n    \"grid_cells\"\n  ],\n  \"reference_image_source\": \"static\",\n  \"reference_image_url\": \"https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_grid_style.png\",\n  \"model\": \"nano-banana-pro\",\n  \"notes\": null,\n  \"version\": 2,\n  \"created_at\": \"2026-04-15T12:42:46.802961+08:00\",\n  \"updated_at\": \"2026-04-21T15:48:40.202495+08:00\"\n}"
+      }
+    ],
+    "structuredContent": {
+      "result": {
+        "id": 4,
+        "style_name": "korean-manga-style",
+        "category": "scene",
+        "prompt_key": "location_grid_style",
+        "template": "请生成一张 {{grid_size}} 宫格图片，每格比例 1:1 方形尺寸，所有格子风格必须严格统一。\n统一风格：参照图 1 的画风，韩漫画风，电影级氛围与精致质感。精细的线稿，丰富的材质与环境陈设细节（家具纹理、窗棂、装饰小物、墙面质感、地面反射等）。电影级光影：明确主光源方向，大面积深色阴影中点缀局部高光（三分打七分遮），搭配逆光、边缘光或透射光营造戏剧层次感。电影调色板，色彩和谐且有统一氛围色贯穿画面，避免过饱和纯色平涂，阴影带环境色反射，高光带微妙渐变。景深与大气透视：近景锐利，中景柔化，远景略微褪色。面向北美 18-24 岁成人女性审美：精致、氛围感强、情绪性明确，严禁儿童绘本感、严禁均匀扁平光。\n\n严格硬禁令：画面中绝对不得出现任何文字、字母、汉字、单词、标注、caption、场景名称、学校名、品牌名、数字、符号、标牌文字、旗帜文字、黑板字、墙贴文字。所有 banner/标语/牌匾/旗帜必须为纯色或抽象图案。所有格子均无文字标注、无下方标签、无标题。无任何人物、动物、人影剪影。\n\n每格内容（按顺序排列，仅作内容指引，不作画面文字）：\n{{grid_cells}}",
+        "placeholders": [
+          "grid_size",
+          "grid_cells"
+        ],
+        "reference_image_source": "static",
+        "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_grid_style.png",
+        "model": "nano-banana-pro",
+        "notes": null,
+        "version": 2,
+        "created_at": "2026-04-15T12:42:46.802961+08:00",
+        "updated_at": "2026-04-21T15:48:40.202495+08:00"
+      }
+    },
+    "isError": false
+  },
+  "parsed": {
+    "id": 4,
+    "style_name": "korean-manga-style",
+    "category": "scene",
+    "prompt_key": "location_grid_style",
+    "template": "请生成一张 {{grid_size}} 宫格图片，每格比例 1:1 方形尺寸，所有格子风格必须严格统一。\n统一风格：参照图 1 的画风，韩漫画风，电影级氛围与精致质感。精细的线稿，丰富的材质与环境陈设细节（家具纹理、窗棂、装饰小物、墙面质感、地面反射等）。电影级光影：明确主光源方向，大面积深色阴影中点缀局部高光（三分打七分遮），搭配逆光、边缘光或透射光营造戏剧层次感。电影调色板，色彩和谐且有统一氛围色贯穿画面，避免过饱和纯色平涂，阴影带环境色反射，高光带微妙渐变。景深与大气透视：近景锐利，中景柔化，远景略微褪色。面向北美 18-24 岁成人女性审美：精致、氛围感强、情绪性明确，严禁儿童绘本感、严禁均匀扁平光。\n\n严格硬禁令：画面中绝对不得出现任何文字、字母、汉字、单词、标注、caption、场景名称、学校名、品牌名、数字、符号、标牌文字、旗帜文字、黑板字、墙贴文字。所有 banner/标语/牌匾/旗帜必须为纯色或抽象图案。所有格子均无文字标注、无下方标签、无标题。无任何人物、动物、人影剪影。\n\n每格内容（按顺序排列，仅作内容指引，不作画面文字）：\n{{grid_cells}}",
+    "placeholders": [
+      "grid_size",
+      "grid_cells"
+    ],
+    "reference_image_source": "static",
+    "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_grid_style.png",
+    "model": "nano-banana-pro",
+    "notes": null,
+    "version": 2,
+    "created_at": "2026-04-15T12:42:46.802961+08:00",
+    "updated_at": "2026-04-21T15:48:40.202495+08:00"
+  }
+}

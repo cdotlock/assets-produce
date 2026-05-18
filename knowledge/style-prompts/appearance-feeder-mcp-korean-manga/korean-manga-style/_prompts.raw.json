@@ -1,0 +1,174 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"id\": 1,\n  \"style_name\": \"korean-manga-style\",\n  \"category\": \"character\",\n  \"prompt_key\": \"portrait_style\",\n  \"placeholders\": [\n    \"appearance\"\n  ],\n  \"reference_image_source\": \"static\",\n  \"reference_image_url\": \"https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/character/portrait_style.png\",\n  \"model\": \"nano-banana-2\",\n  \"version\": 2,\n  \"template_preview\": \"参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，注视着镜头微笑，无文字。{{appearance}}\\n\\n背景必须是纯色 chromakey\",\n  \"notes\": \"作品级立绘。appearance 必须包含：年龄、性别、发色+发型+发长、瞳色、体型、代表性穿搭（含品牌风格锚点）。禁止情绪词、叙事解释、多套形象。reference_image_url 指向外部挑选的韩漫风格定调图。\\n\\n背景：chromakey green (#00B140) — 配合 asset-renderer Layer 6 的 HSV chromakey 抠图（H∈[40°,80°]，S>30%，V>30%），换 alpha 透明输出。Google DevRel philschmid Gemini-3 sticker pipeline 路线，比白底+rembg 边缘干净。如要换回白底，保留旧版本 v1（请先评估抠图链路）。\",\n  \"updated_at\": \"2026-04-26T02:46:06.008613+08:00\"\n}"
+    },
+    {
+      "type": "text",
+      "text": "{\n  \"id\": 7,\n  \"style_name\": \"korean-manga-style\",\n  \"category\": \"character\",\n  \"prompt_key\": \"pose_anchor_update\",\n  \"placeholders\": [\n    \"expression_pose\"\n  ],\n  \"reference_image_source\": \"dynamic_series_portrait\",\n  \"reference_image_url\": null,\n  \"model\": \"nano-banana-2\",\n  \"version\": 1,\n  \"template_preview\": \"参考图 1 是该角色在该套服装下的 anchor 立绘。\\n画风：韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，无文字。\\n\\n【硬锁，与参考图 1 完全一致，禁\",\n  \"notes\": \"EP 级 sprite 的 anchor-locked 模板（v3 anchor-pipeline）。\\n\\n【运行时 reference 实际是 anchor 而非 series_portrait】\\n- spec 字段 reference_image_source 标记为 `dynamic_outfit_anchor`，由 asset-renderer.resolve_reference() 路由到 `asset-img/<book>/anchors/<char>_<outfit_id>.png`\\n- MCP 的 reference_image_source 这里填 dynamic_series_portrait 仅因为 server enum 尚未加 dynamic_outfit_anchor，不影响实际渲染\\n- 真正的契约：消费方（asset-renderer）按 spec 字段路由，MCP 这里只是模板存储\\n\\n【为什么不写 outfit】\\nanchor 已经显式渲过该角色穿这套衣服的样子（neutral pose）；prompt 再写 outfit 等于双重信号，不一致就会 drift。最严重场景见 2026-05-02 模型对比 case 7 (selena/sleepwear)：prompt \\\"着装：睡衣\\\" 过于宽泛 → flash 渲成牛仔布、gpt-image-2 渲成白礼服。\\n\\n【适用条件】\\nsprite.reference_image_source == \\\"dynamic_outfit_anchor\\\" 时使用本模板。\\n对照：update_portrait_style v2 走 series character_card reference，outfit + pose 都得写。\",\n  \"updated_at\": \"2026-05-03T02:38:47.271523+08:00\"\n}"
+    },
+    {
+      "type": "text",
+      "text": "{\n  \"id\": 2,\n  \"style_name\": \"korean-manga-style\",\n  \"category\": \"character\",\n  \"prompt_key\": \"update_portrait_style\",\n  \"placeholders\": [\n    \"outfit\",\n    \"expression_pose\"\n  ],\n  \"reference_image_source\": \"dynamic_series_portrait\",\n  \"reference_image_url\": null,\n  \"model\": \"nano-banana-pro\",\n  \"version\": 2,\n  \"template_preview\": \"参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，无文字。严格保持与参考图 1 完全一致的人物面部五官、发型发色、身高比例和体型，仅更换以下\",\n  \"notes\": \"EP 级立绘。运行时参考图 = 目标角色的 series-level 立绘。outfit 只写衣服+饰品（含品牌锚点），禁止面部/发型/体型。expression_pose = 一个神态词 + 一个动作词，标准化词库见 asset-prompt-generator skill。\\n\\n背景：chromakey green (#00B140)，与 portrait_style v2 一致。配合 asset-renderer Layer 6 的 HSV chromakey 抠图换透明背景。注意 outfit 里出现\\\"green\\\"/\\\"绿\\\"等字样时，prompt 已显式要求替换，但 prompt-generator 端最好也避免在 outfit 输入里出现绿色配色。\",\n  \"updated_at\": \"2026-04-26T02:46:13.308172+08:00\"\n}"
+    },
+    {
+      "type": "text",
+      "text": "{\n  \"id\": 9,\n  \"style_name\": \"korean-manga-style\",\n  \"category\": \"scene\",\n  \"prompt_key\": \"cg_manga_panel_style\",\n  \"placeholders\": [\n    \"panel_count\",\n    \"panel_lines\"\n  ],\n  \"reference_image_source\": \"static\",\n  \"reference_image_url\": \"https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_grid_style.png\",\n  \"model\": \"nano-banana-pro\",\n  \"version\": 1,\n  \"template_preview\": \"参考图 1 风格,生成 1 张韩漫风格 {{panel_count}} 格分镜大图。\\n\\n阅读顺序:按 shot_index 顺序垂直阅读(上到下);所有格子画风\",\n  \"notes\": \"CG Phase 2 (multi-panel) 漫画分镜大图 — 用于 panel_count >= 2 的 CG。参考图复用 scene/location_grid_style.png 作为风格锚(已用于 scene_tasks 的 N 宫格,有量产验证)。\\npanel_lines 由 Layer A (cg_collector._build_prompt) 渲染:每行格式 \\\"  【格 N】<prompt_segment> (主体:<focus>)\\\"\\n设计文档: docs/superpowers/specs/2026-05-13-cg-pipeline-design.md §6.4\\n实际渲染时 Layer B 使用 task[\\\"prompt\\\"] 字段(Layer A 已构建好);本模板做文档化 + 将来潜在直接调用。\\nNB: category=\\\"scene\\\" 而非 \\\"cg\\\" 因为 MCP server enum 限制 — prompt_key=\\\"cg_*_style\\\" 标识用途。\",\n  \"updated_at\": \"2026-05-13T14:28:48.918131+08:00\"\n}"
+    },
+    {
+      "type": "text",
+      "text": "{\n  \"id\": 8,\n  \"style_name\": \"korean-manga-style\",\n  \"category\": \"scene\",\n  \"prompt_key\": \"cg_single_panel_style\",\n  \"placeholders\": [\n    \"content\",\n    \"focus\"\n  ],\n  \"reference_image_source\": \"static\",\n  \"reference_image_url\": \"https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_style.png\",\n  \"model\": \"nano-banana-pro\",\n  \"version\": 1,\n  \"template_preview\": \"参考图 1 风格,生成 1 张韩漫风格全屏 CG (single panel),电影级氛围。\\n画面内容:{{content}}\\n主体:{{focus}}\\n\\n要求\",\n  \"notes\": \"CG Phase 1 (single-panel) template — 用于 panel_count == 1 的 CG。参考图复用 scene/location_style.png 作为风格锚(电影感空镜风格)。后续如需 CG 专属 anchor 图,可换 reference_image_url。\\n设计文档: docs/superpowers/specs/2026-05-13-cg-pipeline-design.md §6.4\\n实际渲染时 Layer B (cg_render.py) 使用 task[\\\"prompt\\\"] 字段(Layer A 已构建好);本模板主要做文档化 + 将来潜在直接调用。\\nNB: category=\\\"scene\\\" 而非 \\\"cg\\\" 因为 MCP server enum 限制 — prompt_key=\\\"cg_*_style\\\" 标识用途。\",\n  \"updated_at\": \"2026-05-13T14:28:42.373603+08:00\"\n}"
+    },
+    {
+      "type": "text",
+      "text": "{\n  \"id\": 4,\n  \"style_name\": \"korean-manga-style\",\n  \"category\": \"scene\",\n  \"prompt_key\": \"location_grid_style\",\n  \"placeholders\": [\n    \"grid_size\",\n    \"grid_cells\"\n  ],\n  \"reference_image_source\": \"static\",\n  \"reference_image_url\": \"https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_grid_style.png\",\n  \"model\": \"nano-banana-pro\",\n  \"version\": 2,\n  \"template_preview\": \"请生成一张 {{grid_size}} 宫格图片，每格比例 1:1 方形尺寸，所有格子风格必须严格统一。\\n统一风格：参照图 1 的画风，韩漫画风，电影级氛围与精\",\n  \"notes\": null,\n  \"updated_at\": \"2026-04-21T15:48:40.202495+08:00\"\n}"
+    },
+    {
+      "type": "text",
+      "text": "{\n  \"id\": 3,\n  \"style_name\": \"korean-manga-style\",\n  \"category\": \"scene\",\n  \"prompt_key\": \"location_style\",\n  \"placeholders\": [\n    \"location_name\",\n    \"visual_prompt\"\n  ],\n  \"reference_image_source\": \"static\",\n  \"reference_image_url\": \"https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_style.png\",\n  \"model\": \"nano-banana-pro\",\n  \"version\": 1,\n  \"template_preview\": \"参照图 1 的画风，生成 1:1 方形尺寸的场景空镜图，韩漫画风，电影级氛围与精致质感。精细的线稿，丰富的材质与环境陈设细节（家具纹理、窗棂、装饰小物、墙面质感\",\n  \"notes\": \"n=1 的 step_1 单图 prompt（C 方案 · 电影感）。1:1 方形尺寸。\",\n  \"updated_at\": \"2026-04-15T12:42:46.801726+08:00\"\n}"
+    },
+    {
+      "type": "text",
+      "text": "{\n  \"id\": 5,\n  \"style_name\": \"korean-manga-style\",\n  \"category\": \"scene\",\n  \"prompt_key\": \"sub_location_style\",\n  \"placeholders\": [\n    \"sub_location_name\"\n  ],\n  \"reference_image_source\": \"dynamic_grid_step1\",\n  \"reference_image_url\": null,\n  \"model\": \"nano-banana-pro\",\n  \"version\": 1,\n  \"template_preview\": \"参考图 1 生成 1:1 方形尺寸的场景图：韩漫画风，电影级氛围与精致质感，将【{{sub_location_name}}】的场景图放大并强化电影级光影层次、材\",\n  \"notes\": \"n>1 的 step_2 放大高清 prompt（C 方案 · 电影感）。运行时参考图 = step_1 生成的宫格图。1:1 方形尺寸。\",\n  \"updated_at\": \"2026-04-15T12:42:46.804714+08:00\"\n}"
+    }
+  ],
+  "structuredContent": {
+    "result": [
+      {
+        "id": 1,
+        "style_name": "korean-manga-style",
+        "category": "character",
+        "prompt_key": "portrait_style",
+        "placeholders": [
+          "appearance"
+        ],
+        "reference_image_source": "static",
+        "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/character/portrait_style.png",
+        "model": "nano-banana-2",
+        "version": 2,
+        "template_preview": "参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，注视着镜头微笑，无文字。{{appearance}}\n\n背景必须是纯色 chromakey",
+        "notes": "作品级立绘。appearance 必须包含：年龄、性别、发色+发型+发长、瞳色、体型、代表性穿搭（含品牌风格锚点）。禁止情绪词、叙事解释、多套形象。reference_image_url 指向外部挑选的韩漫风格定调图。\n\n背景：chromakey green (#00B140) — 配合 asset-renderer Layer 6 的 HSV chromakey 抠图（H∈[40°,80°]，S>30%，V>30%），换 alpha 透明输出。Google DevRel philschmid Gemini-3 sticker pipeline 路线，比白底+rembg 边缘干净。如要换回白底，保留旧版本 v1（请先评估抠图链路）。",
+        "updated_at": "2026-04-26T02:46:06.008613+08:00"
+      },
+      {
+        "id": 7,
+        "style_name": "korean-manga-style",
+        "category": "character",
+        "prompt_key": "pose_anchor_update",
+        "placeholders": [
+          "expression_pose"
+        ],
+        "reference_image_source": "dynamic_series_portrait",
+        "reference_image_url": null,
+        "model": "nano-banana-2",
+        "version": 1,
+        "template_preview": "参考图 1 是该角色在该套服装下的 anchor 立绘。\n画风：韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，无文字。\n\n【硬锁，与参考图 1 完全一致，禁",
+        "notes": "EP 级 sprite 的 anchor-locked 模板（v3 anchor-pipeline）。\n\n【运行时 reference 实际是 anchor 而非 series_portrait】\n- spec 字段 reference_image_source 标记为 `dynamic_outfit_anchor`，由 asset-renderer.resolve_reference() 路由到 `asset-img/<book>/anchors/<char>_<outfit_id>.png`\n- MCP 的 reference_image_source 这里填 dynamic_series_portrait 仅因为 server enum 尚未加 dynamic_outfit_anchor，不影响实际渲染\n- 真正的契约：消费方（asset-renderer）按 spec 字段路由，MCP 这里只是模板存储\n\n【为什么不写 outfit】\nanchor 已经显式渲过该角色穿这套衣服的样子（neutral pose）；prompt 再写 outfit 等于双重信号，不一致就会 drift。最严重场景见 2026-05-02 模型对比 case 7 (selena/sleepwear)：prompt \"着装：睡衣\" 过于宽泛 → flash 渲成牛仔布、gpt-image-2 渲成白礼服。\n\n【适用条件】\nsprite.reference_image_source == \"dynamic_outfit_anchor\" 时使用本模板。\n对照：update_portrait_style v2 走 series character_card reference，outfit + pose 都得写。",
+        "updated_at": "2026-05-03T02:38:47.271523+08:00"
+      },
+      {
+        "id": 2,
+        "style_name": "korean-manga-style",
+        "category": "character",
+        "prompt_key": "update_portrait_style",
+        "placeholders": [
+          "outfit",
+          "expression_pose"
+        ],
+        "reference_image_source": "dynamic_series_portrait",
+        "reference_image_url": null,
+        "model": "nano-banana-pro",
+        "version": 2,
+        "template_preview": "参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，无文字。严格保持与参考图 1 完全一致的人物面部五官、发型发色、身高比例和体型，仅更换以下",
+        "notes": "EP 级立绘。运行时参考图 = 目标角色的 series-level 立绘。outfit 只写衣服+饰品（含品牌锚点），禁止面部/发型/体型。expression_pose = 一个神态词 + 一个动作词，标准化词库见 asset-prompt-generator skill。\n\n背景：chromakey green (#00B140)，与 portrait_style v2 一致。配合 asset-renderer Layer 6 的 HSV chromakey 抠图换透明背景。注意 outfit 里出现\"green\"/\"绿\"等字样时，prompt 已显式要求替换，但 prompt-generator 端最好也避免在 outfit 输入里出现绿色配色。",
+        "updated_at": "2026-04-26T02:46:13.308172+08:00"
+      },
+      {
+        "id": 9,
+        "style_name": "korean-manga-style",
+        "category": "scene",
+        "prompt_key": "cg_manga_panel_style",
+        "placeholders": [
+          "panel_count",
+          "panel_lines"
+        ],
+        "reference_image_source": "static",
+        "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_grid_style.png",
+        "model": "nano-banana-pro",
+        "version": 1,
+        "template_preview": "参考图 1 风格,生成 1 张韩漫风格 {{panel_count}} 格分镜大图。\n\n阅读顺序:按 shot_index 顺序垂直阅读(上到下);所有格子画风",
+        "notes": "CG Phase 2 (multi-panel) 漫画分镜大图 — 用于 panel_count >= 2 的 CG。参考图复用 scene/location_grid_style.png 作为风格锚(已用于 scene_tasks 的 N 宫格,有量产验证)。\npanel_lines 由 Layer A (cg_collector._build_prompt) 渲染:每行格式 \"  【格 N】<prompt_segment> (主体:<focus>)\"\n设计文档: docs/superpowers/specs/2026-05-13-cg-pipeline-design.md §6.4\n实际渲染时 Layer B 使用 task[\"prompt\"] 字段(Layer A 已构建好);本模板做文档化 + 将来潜在直接调用。\nNB: category=\"scene\" 而非 \"cg\" 因为 MCP server enum 限制 — prompt_key=\"cg_*_style\" 标识用途。",
+        "updated_at": "2026-05-13T14:28:48.918131+08:00"
+      },
+      {
+        "id": 8,
+        "style_name": "korean-manga-style",
+        "category": "scene",
+        "prompt_key": "cg_single_panel_style",
+        "placeholders": [
+          "content",
+          "focus"
+        ],
+        "reference_image_source": "static",
+        "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_style.png",
+        "model": "nano-banana-pro",
+        "version": 1,
+        "template_preview": "参考图 1 风格,生成 1 张韩漫风格全屏 CG (single panel),电影级氛围。\n画面内容:{{content}}\n主体:{{focus}}\n\n要求",
+        "notes": "CG Phase 1 (single-panel) template — 用于 panel_count == 1 的 CG。参考图复用 scene/location_style.png 作为风格锚(电影感空镜风格)。后续如需 CG 专属 anchor 图,可换 reference_image_url。\n设计文档: docs/superpowers/specs/2026-05-13-cg-pipeline-design.md §6.4\n实际渲染时 Layer B (cg_render.py) 使用 task[\"prompt\"] 字段(Layer A 已构建好);本模板主要做文档化 + 将来潜在直接调用。\nNB: category=\"scene\" 而非 \"cg\" 因为 MCP server enum 限制 — prompt_key=\"cg_*_style\" 标识用途。",
+        "updated_at": "2026-05-13T14:28:42.373603+08:00"
+      },
+      {
+        "id": 4,
+        "style_name": "korean-manga-style",
+        "category": "scene",
+        "prompt_key": "location_grid_style",
+        "placeholders": [
+          "grid_size",
+          "grid_cells"
+        ],
+        "reference_image_source": "static",
+        "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_grid_style.png",
+        "model": "nano-banana-pro",
+        "version": 2,
+        "template_preview": "请生成一张 {{grid_size}} 宫格图片，每格比例 1:1 方形尺寸，所有格子风格必须严格统一。\n统一风格：参照图 1 的画风，韩漫画风，电影级氛围与精",
+        "notes": null,
+        "updated_at": "2026-04-21T15:48:40.202495+08:00"
+      },
+      {
+        "id": 3,
+        "style_name": "korean-manga-style",
+        "category": "scene",
+        "prompt_key": "location_style",
+        "placeholders": [
+          "location_name",
+          "visual_prompt"
+        ],
+        "reference_image_source": "static",
+        "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/scene/location_style.png",
+        "model": "nano-banana-pro",
+        "version": 1,
+        "template_preview": "参照图 1 的画风，生成 1:1 方形尺寸的场景空镜图，韩漫画风，电影级氛围与精致质感。精细的线稿，丰富的材质与环境陈设细节（家具纹理、窗棂、装饰小物、墙面质感",
+        "notes": "n=1 的 step_1 单图 prompt（C 方案 · 电影感）。1:1 方形尺寸。",
+        "updated_at": "2026-04-15T12:42:46.801726+08:00"
+      },
+      {
+        "id": 5,
+        "style_name": "korean-manga-style",
+        "category": "scene",
+        "prompt_key": "sub_location_style",
+        "placeholders": [
+          "sub_location_name"
+        ],
+        "reference_image_source": "dynamic_grid_step1",
+        "reference_image_url": null,
+        "model": "nano-banana-pro",
+        "version": 1,
+        "template_preview": "参考图 1 生成 1:1 方形尺寸的场景图：韩漫画风，电影级氛围与精致质感，将【{{sub_location_name}}】的场景图放大并强化电影级光影层次、材",
+        "notes": "n>1 的 step_2 放大高清 prompt（C 方案 · 电影感）。运行时参考图 = step_1 生成的宫格图。1:1 方形尺寸。",
+        "updated_at": "2026-04-15T12:42:46.804714+08:00"
+      }
+    ]
+  },
+  "isError": false
+}

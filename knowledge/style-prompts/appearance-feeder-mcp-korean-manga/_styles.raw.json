@@ -1,0 +1,21 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"style_name\": \"korean-manga-style\",\n  \"prompt_count\": 8,\n  \"categories\": [\n    \"character\",\n    \"scene\"\n  ]\n}"
+    }
+  ],
+  "structuredContent": {
+    "result": [
+      {
+        "style_name": "korean-manga-style",
+        "prompt_count": 8,
+        "categories": [
+          "character",
+          "scene"
+        ]
+      }
+    ]
+  },
+  "isError": false
+}

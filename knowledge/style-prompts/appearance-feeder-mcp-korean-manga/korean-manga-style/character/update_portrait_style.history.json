@@ -1,0 +1,49 @@
+{
+  "raw": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"history_id\": 7,\n  \"version\": 1,\n  \"template\": \"参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，白色背景，无文字。严格保持与参考图 1 完全一致的人物面部五官、发型发色、身高比例和体型，仅更换以下着装和姿态：着装：{{outfit}}。神态与动作：{{expression_pose}}。\",\n  \"placeholders\": [\n    \"outfit\",\n    \"expression_pose\"\n  ],\n  \"reference_image_source\": \"dynamic_series_portrait\",\n  \"reference_image_url\": null,\n  \"model\": \"nano-banana-pro\",\n  \"notes\": \"EP 级立绘。运行时参考图 = 目标角色的 series-level 立绘。outfit 只写衣服+饰品（含品牌锚点），禁止面部/发型/体型。expression_pose = 一个神态词 + 一个动作词，标准化词库见 asset-prompt-generator skill。\",\n  \"snapshot_at\": \"2026-04-26T02:46:13.308172+08:00\",\n  \"changed_by\": \"claude-no-rules-vn\",\n  \"change_note\": \"switch white BG → chromakey green (#00B140) + anti-spill clauses; pairs with new HSV chromakey cutout\"\n}"
+      }
+    ],
+    "structuredContent": {
+      "result": [
+        {
+          "history_id": 7,
+          "version": 1,
+          "template": "参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，白色背景，无文字。严格保持与参考图 1 完全一致的人物面部五官、发型发色、身高比例和体型，仅更换以下着装和姿态：着装：{{outfit}}。神态与动作：{{expression_pose}}。",
+          "placeholders": [
+            "outfit",
+            "expression_pose"
+          ],
+          "reference_image_source": "dynamic_series_portrait",
+          "reference_image_url": null,
+          "model": "nano-banana-pro",
+          "notes": "EP 级立绘。运行时参考图 = 目标角色的 series-level 立绘。outfit 只写衣服+饰品（含品牌锚点），禁止面部/发型/体型。expression_pose = 一个神态词 + 一个动作词，标准化词库见 asset-prompt-generator skill。",
+          "snapshot_at": "2026-04-26T02:46:13.308172+08:00",
+          "changed_by": "claude-no-rules-vn",
+          "change_note": "switch white BG → chromakey green (#00B140) + anti-spill clauses; pairs with new HSV chromakey cutout"
+        }
+      ]
+    },
+    "isError": false
+  },
+  "parsed": [
+    {
+      "history_id": 7,
+      "version": 1,
+      "template": "参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，白色背景，无文字。严格保持与参考图 1 完全一致的人物面部五官、发型发色、身高比例和体型，仅更换以下着装和姿态：着装：{{outfit}}。神态与动作：{{expression_pose}}。",
+      "placeholders": [
+        "outfit",
+        "expression_pose"
+      ],
+      "reference_image_source": "dynamic_series_portrait",
+      "reference_image_url": null,
+      "model": "nano-banana-pro",
+      "notes": "EP 级立绘。运行时参考图 = 目标角色的 series-level 立绘。outfit 只写衣服+饰品（含品牌锚点），禁止面部/发型/体型。expression_pose = 一个神态词 + 一个动作词，标准化词库见 asset-prompt-generator skill。",
+      "snapshot_at": "2026-04-26T02:46:13.308172+08:00",
+      "changed_by": "claude-no-rules-vn",
+      "change_note": "switch white BG → chromakey green (#00B140) + anti-spill clauses; pairs with new HSV chromakey cutout"
+    }
+  ]
+}

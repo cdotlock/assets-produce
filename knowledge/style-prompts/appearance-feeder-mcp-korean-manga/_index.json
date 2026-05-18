@@ -1,0 +1,83 @@
+{
+  "exported_at": "2026-05-18T18:34:24",
+  "source_host": "style-config.mob-ai.cn",
+  "source_endpoint": "https://style-config.mob-ai.cn/mcp-style/sse",
+  "note": "Raw MCP results captured losslessly. Key was the shared style-prompts bearer (read-only).",
+  "styles": [
+    {
+      "style_name": "korean-manga-style",
+      "categories": [
+        "character",
+        "scene"
+      ],
+      "prompt_count": 8
+    }
+  ],
+  "prompts": [
+    {
+      "style_name": "korean-manga-style",
+      "category": "character",
+      "prompt_key": "portrait_style",
+      "template_len": 341,
+      "model": "nano-banana-2",
+      "has_reference": true
+    },
+    {
+      "style_name": "korean-manga-style",
+      "category": "character",
+      "prompt_key": "pose_anchor_update",
+      "template_len": 479,
+      "model": "nano-banana-2",
+      "has_reference": false
+    },
+    {
+      "style_name": "korean-manga-style",
+      "category": "character",
+      "prompt_key": "update_portrait_style",
+      "template_len": 409,
+      "model": "nano-banana-pro",
+      "has_reference": false
+    },
+    {
+      "style_name": "korean-manga-style",
+      "category": "scene",
+      "prompt_key": "cg_manga_panel_style",
+      "template_len": 334,
+      "model": "nano-banana-pro",
+      "has_reference": true
+    },
+    {
+      "style_name": "korean-manga-style",
+      "category": "scene",
+      "prompt_key": "cg_single_panel_style",
+      "template_len": 175,
+      "model": "nano-banana-pro",
+      "has_reference": true
+    },
+    {
+      "style_name": "korean-manga-style",
+      "category": "scene",
+      "prompt_key": "location_grid_style",
+      "template_len": 495,
+      "model": "nano-banana-pro",
+      "has_reference": true
+    },
+    {
+      "style_name": "korean-manga-style",
+      "category": "scene",
+      "prompt_key": "location_style",
+      "template_len": 317,
+      "model": "nano-banana-pro",
+      "has_reference": true
+    },
+    {
+      "style_name": "korean-manga-style",
+      "category": "scene",
+      "prompt_key": "sub_location_style",
+      "template_len": 114,
+      "model": "nano-banana-pro",
+      "has_reference": false
+    }
+  ],
+  "errors": []
+}

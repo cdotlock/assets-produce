@@ -1,0 +1,47 @@
+{
+  "raw": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"id\": 1,\n  \"style_name\": \"korean-manga-style\",\n  \"category\": \"character\",\n  \"prompt_key\": \"portrait_style\",\n  \"template\": \"参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，注视着镜头微笑，无文字。{{appearance}}\\n\\n背景必须是纯色 chromakey green（数字绿 #00B140，RGB 0,177,64），整张背景严格统一——无渐变、无纹理、无杂色、无阴影、无 vignette。人物身上不得出现任何绿色或绿色调配色（衣物、饰品、瞳色、发色一律避开绿色及青绿、黄绿、橄榄绿）；如果原本人物有绿色元素，请替换成最接近的非绿色（深蓝/灰/米色）。人物四周必须有清晰可辨的边缘——头发、衣物、皮肤的轮廓与绿色背景之间不得有 green spill、绿色光晕或半透明过渡区，每根发丝、衣物褶皱、手指轮廓务必干净锐利。整张图除人物本身外，画面其他位置不得出现任何绿色像素。\",\n  \"placeholders\": [\n    \"appearance\"\n  ],\n  \"reference_image_source\": \"static\",\n  \"reference_image_url\": \"https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/character/portrait_style.png\",\n  \"model\": \"nano-banana-2\",\n  \"notes\": \"作品级立绘。appearance 必须包含：年龄、性别、发色+发型+发长、瞳色、体型、代表性穿搭（含品牌风格锚点）。禁止情绪词、叙事解释、多套形象。reference_image_url 指向外部挑选的韩漫风格定调图。\\n\\n背景：chromakey green (#00B140) — 配合 asset-renderer Layer 6 的 HSV chromakey 抠图（H∈[40°,80°]，S>30%，V>30%），换 alpha 透明输出。Google DevRel philschmid Gemini-3 sticker pipeline 路线，比白底+rembg 边缘干净。如要换回白底，保留旧版本 v1（请先评估抠图链路）。\",\n  \"version\": 2,\n  \"created_at\": \"2026-04-15T12:42:46.796149+08:00\",\n  \"updated_at\": \"2026-04-26T02:46:06.008613+08:00\"\n}"
+      }
+    ],
+    "structuredContent": {
+      "result": {
+        "id": 1,
+        "style_name": "korean-manga-style",
+        "category": "character",
+        "prompt_key": "portrait_style",
+        "template": "参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，注视着镜头微笑，无文字。{{appearance}}\n\n背景必须是纯色 chromakey green（数字绿 #00B140，RGB 0,177,64），整张背景严格统一——无渐变、无纹理、无杂色、无阴影、无 vignette。人物身上不得出现任何绿色或绿色调配色（衣物、饰品、瞳色、发色一律避开绿色及青绿、黄绿、橄榄绿）；如果原本人物有绿色元素，请替换成最接近的非绿色（深蓝/灰/米色）。人物四周必须有清晰可辨的边缘——头发、衣物、皮肤的轮廓与绿色背景之间不得有 green spill、绿色光晕或半透明过渡区，每根发丝、衣物褶皱、手指轮廓务必干净锐利。整张图除人物本身外，画面其他位置不得出现任何绿色像素。",
+        "placeholders": [
+          "appearance"
+        ],
+        "reference_image_source": "static",
+        "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/character/portrait_style.png",
+        "model": "nano-banana-2",
+        "notes": "作品级立绘。appearance 必须包含：年龄、性别、发色+发型+发长、瞳色、体型、代表性穿搭（含品牌风格锚点）。禁止情绪词、叙事解释、多套形象。reference_image_url 指向外部挑选的韩漫风格定调图。\n\n背景：chromakey green (#00B140) — 配合 asset-renderer Layer 6 的 HSV chromakey 抠图（H∈[40°,80°]，S>30%，V>30%），换 alpha 透明输出。Google DevRel philschmid Gemini-3 sticker pipeline 路线，比白底+rembg 边缘干净。如要换回白底，保留旧版本 v1（请先评估抠图链路）。",
+        "version": 2,
+        "created_at": "2026-04-15T12:42:46.796149+08:00",
+        "updated_at": "2026-04-26T02:46:06.008613+08:00"
+      }
+    },
+    "isError": false
+  },
+  "parsed": {
+    "id": 1,
+    "style_name": "korean-manga-style",
+    "category": "character",
+    "prompt_key": "portrait_style",
+    "template": "参考图 1 的画风，韩漫画风，欧美五官，9:16 尺寸的全身人物立绘，注视着镜头微笑，无文字。{{appearance}}\n\n背景必须是纯色 chromakey green（数字绿 #00B140，RGB 0,177,64），整张背景严格统一——无渐变、无纹理、无杂色、无阴影、无 vignette。人物身上不得出现任何绿色或绿色调配色（衣物、饰品、瞳色、发色一律避开绿色及青绿、黄绿、橄榄绿）；如果原本人物有绿色元素，请替换成最接近的非绿色（深蓝/灰/米色）。人物四周必须有清晰可辨的边缘——头发、衣物、皮肤的轮廓与绿色背景之间不得有 green spill、绿色光晕或半透明过渡区，每根发丝、衣物褶皱、手指轮廓务必干净锐利。整张图除人物本身外，画面其他位置不得出现任何绿色像素。",
+    "placeholders": [
+      "appearance"
+    ],
+    "reference_image_source": "static",
+    "reference_image_url": "https://moonshort-resource.oss-us-west-1.aliyuncs.com/assets/styles/korean-manga-style/character/portrait_style.png",
+    "model": "nano-banana-2",
+    "notes": "作品级立绘。appearance 必须包含：年龄、性别、发色+发型+发长、瞳色、体型、代表性穿搭（含品牌风格锚点）。禁止情绪词、叙事解释、多套形象。reference_image_url 指向外部挑选的韩漫风格定调图。\n\n背景：chromakey green (#00B140) — 配合 asset-renderer Layer 6 的 HSV chromakey 抠图（H∈[40°,80°]，S>30%，V>30%），换 alpha 透明输出。Google DevRel philschmid Gemini-3 sticker pipeline 路线，比白底+rembg 边缘干净。如要换回白底，保留旧版本 v1（请先评估抠图链路）。",
+    "version": 2,
+    "created_at": "2026-04-15T12:42:46.796149+08:00",
+    "updated_at": "2026-04-26T02:46:06.008613+08:00"
+  }
+}
