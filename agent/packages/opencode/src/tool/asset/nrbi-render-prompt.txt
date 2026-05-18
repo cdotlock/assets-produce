@@ -1,0 +1,10 @@
+Assemble a byte-faithful NRBI Phase-1 prompt for one asset layer.
+
+This tool emits a PROMPT (not an image). It reproduces the frozen NRBI
+render-with-style.py prompt assembly exactly. Pass `layer` (A=series
+character, A5=outfit anchor, B=scene grid, C=scene square, D=scene
+variant, E=ep sprite), `variable_text` (the per-layer variable fields),
+and caller-resolved `reference_image_urls` in dependency order. The
+returned `prompt` + `reference_image_urls` + `model` feed
+`generate-image-gpt` verbatim. Layer E requires reference_image_urls
+(series portrait as image-1). Never tweak the returned prompt wording.
