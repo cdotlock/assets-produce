@@ -21,6 +21,12 @@ to compose multiple characters and a background.
 
 ## Atomic tools (allowed)
 
+- `nrbi-render-prompt` — when the request is an NRBI series character
+  (Layer A), assemble the prompt with `layer: "A"`,
+  `variable_text: { orig_prompt: <upstream appearance prompt>, subject_id:
+  <char_id> }`. Use the returned `prompt`/`model` verbatim, then
+  `generate-image-gpt`. For non-NRBI portraits, skip this and use the
+  image-gen tools directly.
 - `generate-image-nanobanana` — default first choice; cheaper and faster.
   Good for stylised illustration. Pass `style_refs` from
   `refs[].kind=="image"` entries that carry `tag=="style"`.

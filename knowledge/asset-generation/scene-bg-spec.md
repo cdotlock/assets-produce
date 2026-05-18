@@ -19,6 +19,13 @@ You are producing **one wide environment image**. The output should:
 
 ## Atomic tools (allowed)
 
+- `nrbi-render-prompt` — for NRBI scenes: Layer B (scene grid,
+  `variable_text: { location_name }`), Layer C (scene square,
+  `variable_text: { sub_location_name }`, ref = grid url), Layer D (scene
+  variant, `variable_text: { variant_id, base_scene_id, prompt }`, ref =
+  square url). The grid (Layer B) is an internal intermediate — do NOT
+  `oss-put` it as a delivered asset; only C/D outputs are delivered. Use
+  returned `prompt`/`model` verbatim → `generate-image-gpt`.
 - `generate-image-nanobanana` — first choice for stylised painterly
   backgrounds.
 - `generate-image-gpt` — fallback / alternate model when nanobanana
