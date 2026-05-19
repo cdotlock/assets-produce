@@ -13,6 +13,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 TOOL_DIR = Path(__file__).resolve().parent
 BRIDGE = TOOL_DIR / "mss_validate.py"
 MANIFEST = TOOL_DIR / "FROZEN_MANIFEST.sha256"
@@ -186,6 +188,31 @@ def test_nonexistent_script_path_returns_operational_error():
     assert "error" in err, "stderr must contain error envelope"
     # Must NOT produce a verdict
     assert "verdict" not in str(p.stdout)
+
+
+# ---------------------------------------------------------------------------
+# Test 6b — existing-but-unreadable script_path -> INVALID_INPUT (not a verdict)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.skipif(
+    os.geteuid() == 0,
+    reason="root bypasses file mode bits, so an unreadable file is still readable",
+)
+def test_unreadable_script_path_returns_invalid_input(tmp_path):
+    """A file that exists but cannot be read must map to INVALID_INPUT per the
+    documented contract — NOT reach the Go binary and become a verdict:FAIL."""
+    p = tmp_path / "locked.md"
+    p.write_text("@episode main:01 \"X\" { @gate { @next main:02 } }")
+    p.chmod(0o000)
+    try:
+        proc = _run(json.dumps({"script_path": str(p)}))
+        assert proc.returncode == 2, f"expected exit 2, got {proc.returncode}; stdout={proc.stdout!r}"
+        assert proc.stdout.strip() == "", f"stdout must be empty; got: {proc.stdout!r}"
+        err = json.loads(proc.stderr)
+        assert err["error"]["code"] == "INVALID_INPUT"
+        assert "readable" in err["error"]["message"].lower()
+    finally:
+        p.chmod(0o600)  # restore so tmp_path cleanup can unlink it
 
 
 # ---------------------------------------------------------------------------

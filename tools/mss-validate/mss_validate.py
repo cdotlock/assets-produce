@@ -280,6 +280,9 @@ def _run_json_main(argv: list[str] | None = None) -> int:
             if not target.is_file():
                 _emit_error("INVALID_INPUT", f"script_path is not a regular file: {target}")
                 return 2
+            if not os.access(target, os.R_OK):
+                _emit_error("INVALID_INPUT", f"script_path is not readable: {target}")
+                return 2
 
         # 3. Build binary (cached)
         try:
