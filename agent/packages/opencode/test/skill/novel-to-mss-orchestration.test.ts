@@ -151,6 +151,15 @@ function gateContractDataRows(gateSection: string): string[][] {
   return rows
 }
 
+// LOCK-STEP NOTE (C3 Task 5): the section-set assertion below pins the body's
+// `## ` headings by EXACT equality (`.toEqual`). C3 Task 5 additively wires the
+// registered `mss-validate` tool as the post-stage-5 `.mss` quality gate, which
+// requires its own `## .mss quality gate` section. Adding that heading to the
+// body without adding it here would make the exact-equality assertion fail, so
+// this single entry is appended in lock-step with that additive body edit —
+// nothing else in this list is reordered or removed. The dedicated
+// `## .mss quality gate` content guard (its own describe block further down)
+// is the actual new TDD assertion for the wired gate.
 const REQUIRED_SECTIONS = [
   "Stage DAG",
   "Gate contract",
@@ -158,6 +167,7 @@ const REQUIRED_SECTIONS = [
   "Workspace writes",
   "Per-route fan-out",
   "Halt & surface",
+  ".mss quality gate",
 ] as const
 
 // Authoritative gated-stage → reviewer-skill mapping (the literal kebab-case
@@ -173,12 +183,14 @@ describe("novel_to_mss body encodes the full stage + gate contract", () => {
   const body = readFileSync(BODY_PATH, "utf8")
   const sections = parseSections(body)
 
-  test("all 6 required `## ` sections are present (exact headings)", () => {
+  test("all required `## ` sections are present (exact headings)", () => {
     for (const h of REQUIRED_SECTIONS) {
       expect(sections.has(h), `missing required section: ## ${h}`).toBe(true)
       expect((sections.get(h) ?? "").trim().length, `section ## ${h} is empty`).toBeGreaterThan(0)
     }
-    // Exactly the 6 expected level-2 headings — no stray/renamed sections.
+    // Exactly the expected level-2 headings — no stray/renamed sections.
+    // (REQUIRED_SECTIONS is the single source of truth for the count; it grew
+    // by one in lock-step with C3 Task 5's additive `## .mss quality gate`.)
     expect([...sections.keys()].sort()).toEqual([...REQUIRED_SECTIONS].sort())
   })
 
@@ -259,6 +271,119 @@ describe("novel_to_mss body encodes the full stage + gate contract", () => {
       expect(ws.includes(dir), `Workspace writes must contain dir literal ${JSON.stringify(dir)}`).toBe(true)
     }
     expect(AUTHORING_STAGE_DIRS.length).toBe(6)
+  })
+})
+
+// ── .mss QUALITY GATE WIRING GUARD (C3 Task 5) ─────────────────────────────
+//
+// C3 froze the upstream MSS validator as the registered atomic tool
+// `mss-validate` (tool id "mss-validate"; returns {verdict:"PASS"|"FAIL",
+// errors, raw?, meta}; a `verdict:"FAIL"` is a successful judgement that the
+// script is invalid, NOT a tool error). Task 5 wires that tool into THIS
+// orchestration body as the post-stage-5 per-episode `.mss` quality gate,
+// ADDITIVELY (its own `## .mss quality gate` section) so no prior C2 invariant
+// breaks. This guard pins the wired contract the body must encode:
+//
+//   - the section names the registered `mss-validate` tool by id;
+//   - it is positioned as the gate AFTER stage-5 `episode-writer` writes
+//     `05-episode-writer/scripts/<ep>.mss`;
+//   - `verdict:"PASS"` is required before an episode/route may be declared
+//     FINAL; a non-PASS verdict (FAIL, or a tool `metadata.error`) drives a
+//     producer-fix loop with the SAME shape as a reviewer CONDITIONAL and
+//     BLOCKS FINAL until PASS;
+//   - it cites the C1-frozen `episode-writer` SKILL's hard gate
+//     (「每集 FINAL 之前必须 `mss compile` exit 0」) as the upstream source
+//     authority this gate enforces;
+//   - it stays KNOWLEDGE: it directs use of the already-registered
+//     `mss-validate` tool and introduces no code / engine / service.
+//
+// Non-vacuity: every assertion is scoped to the `## .mss quality gate` section
+// (via the same TEST-ONLY parseSections) — not a whole-file grep. A body that
+// omitted the section, failed to name the tool, let a non-PASS verdict reach
+// FINAL, or dropped the frozen-source citation would fail here. The
+// pre-existing C2 assertions remain unchanged and green; the only lock-step
+// edit was appending ".mss quality gate" to REQUIRED_SECTIONS (documented at
+// its definition), because the C2 section-set assertion pins headings by exact
+// `.toEqual` equality and would otherwise reject the additive section.
+
+describe("novel_to_mss body wires mss-validate as the post-episode .mss quality gate (C3 Task 5)", () => {
+  const body = readFileSync(BODY_PATH, "utf8")
+  const sections = parseSections(body)
+
+  test("a dedicated `## .mss quality gate` section exists and is non-empty", () => {
+    expect(sections.has(".mss quality gate"), "body must add a `## .mss quality gate` section").toBe(true)
+    expect(
+      (sections.get(".mss quality gate") ?? "").trim().length,
+      "`## .mss quality gate` section must not be empty",
+    ).toBeGreaterThan(0)
+  })
+
+  test("the section names the registered `mss-validate` tool as the post-stage-5 `.mss` gate", () => {
+    const gate = sections.get(".mss quality gate")!
+    // Names the registered atomic tool by its exact id.
+    expect(gate, "must reference the registered `mss-validate` tool by id").toContain("`mss-validate`")
+    // Anchored to stage-5 episode-writer's produced `.mss` under the C1 dir.
+    expect(gate, "must tie the gate to stage-5 episode-writer").toContain("episode-writer")
+    expect(
+      gate.includes("05-episode-writer/scripts"),
+      "must anchor the gate to the C1 `05-episode-writer/scripts` output dir",
+    ).toBe(true)
+    expect(gate.toLowerCase(), "must talk about the produced episode `.mss`").toContain(".mss")
+  })
+
+  test("PASS is mandatory before FINAL; a non-PASS verdict drives a CONDITIONAL-shaped fix loop that blocks FINAL", () => {
+    const gate = sections.get(".mss quality gate")!
+    const g = gate.toLowerCase()
+    // PASS verdict is the advance condition (verbatim tool verdict value).
+    expect(gate, "must require the tool's `verdict:\"PASS\"`").toContain('verdict:"PASS"')
+    // A non-PASS verdict: FAIL, or a tool metadata.error, both handled.
+    expect(gate, "must handle the tool's `verdict:\"FAIL\"`").toContain('verdict:"FAIL"')
+    expect(g, "must also treat a tool metadata.error as non-PASS").toContain("metadata.error")
+    // Same shape as a reviewer CONDITIONAL: producer fixes + re-run + loop.
+    expect(g, "non-PASS must be treated like a reviewer CONDITIONAL").toContain("conditional")
+    expect(g, "non-PASS must trigger a producer fix").toContain("fix")
+    expect(g, "the fixed script must be re-validated").toContain("re-run")
+    expect(g, "the fix cycle must loop until PASS").toContain("loop")
+    // FINAL is blocked until PASS — this is the whole point of the gate.
+    expect(g, "the section must talk about FINAL").toContain("final")
+    // Collapse whitespace (incl. newlines) + strip markdown emphasis so the
+    // semantic check is robust to prose reflow, not brittle on exact wording.
+    const flat = g.replace(/[*`]/g, "").replace(/\s+/g, " ")
+    expect(
+      /must not be declared final/.test(flat) || /final is blocked/.test(flat) || /blocks? final/.test(flat),
+      "a non-PASS verdict must block the episode/route from being declared FINAL",
+    ).toBe(true)
+  })
+
+  test("the section cites the C1-frozen episode-writer hard gate as the upstream source authority", () => {
+    const gate = sections.get(".mss quality gate")!
+    // Cite the frozen episode-writer SKILL by name as source authority.
+    expect(gate, "must cite the frozen `episode-writer` SKILL as source authority").toContain("episode-writer")
+    // The frozen rule it enforces: 「每集 FINAL 之前必须 `mss compile` exit 0」.
+    expect(
+      gate.includes("mss compile") && gate.includes("exit 0"),
+      "must quote the frozen episode-writer hard gate (`mss compile` exit 0)",
+    ).toBe(true)
+  })
+
+  test("the section stays knowledge: declares it adds no code / engine / service", () => {
+    const gate = sections.get(".mss quality gate")!.toLowerCase()
+    // The body's house style elsewhere asserts "no code / no orchestration
+    // service"; the wired gate must self-declare the same to stay on the
+    // knowledge side of the project red line.
+    expect(gate, "must state it is knowledge, not code").toContain("knowledge")
+    expect(
+      gate.includes("no code") || gate.includes("introduces no code") || gate.includes("not code"),
+      "must self-declare it introduces no code",
+    ).toBe(true)
+    expect(
+      gate.includes("no engine") ||
+        gate.includes("no orchestration service") ||
+        gate.includes("defines no engine") ||
+        gate.includes("already-registered") ||
+        gate.includes("already registered"),
+      "must make clear it only directs the already-registered tool (no new engine/service)",
+    ).toBe(true)
   })
 })
 
