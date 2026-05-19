@@ -44,9 +44,8 @@ describe("novel-to-mss corpus discovery", () => {
       for (const name of EXPECTED) {
         const info = byName.get(name)
         expect(info, `discovery missing skill: ${name}`).toBeTruthy()
-        expect(String(info!.location).startsWith("langfuse://")).toBe(false)
-        expect(String(info!.location)).toContain(path.join("knowledge", "novel-to-mss", name))
-        expect(typeof info!.content).toBe("string")
+        expect(info!.location.startsWith("langfuse://")).toBe(false)
+        expect(info!.location).toContain(path.join("knowledge", "novel-to-mss", name))
         expect(info!.content.length).toBeGreaterThan(0)
       }
     }).pipe(provideInstance(REPO)),
