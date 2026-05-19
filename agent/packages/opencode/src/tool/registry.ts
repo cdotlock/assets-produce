@@ -22,6 +22,7 @@ import { CropVideoTool } from "./asset/crop-video"
 import { GenerateVideoHappyHorseTool } from "./asset/generate-video-happyhorse"
 import { CgRenderTool } from "./asset/cg-render"
 import { NrbiRenderPromptTool } from "./asset/nrbi-render-prompt"
+import { MssValidateTool } from "./asset/mss-validate"
 import { UpscaleImageTool } from "./asset/upscale-image"
 import { OssPutTool } from "./asset/oss-put"
 import { MattingTool } from "./asset/matting"
@@ -143,6 +144,7 @@ export const layer: Layer.Layer<
     const generateVideoHappyHorse = yield* GenerateVideoHappyHorseTool
     const cgRender = yield* CgRenderTool
     const nrbiRenderPrompt = yield* NrbiRenderPromptTool
+    const mssValidate = yield* MssValidateTool
     const upscaleImage = yield* UpscaleImageTool
     const ossPut = yield* OssPutTool
     const matting = yield* MattingTool
@@ -250,6 +252,7 @@ export const layer: Layer.Layer<
           generateVideoHappyHorse: Tool.init(generateVideoHappyHorse),
           cgRender: Tool.init(cgRender),
           nrbiRenderPrompt: Tool.init(nrbiRenderPrompt),
+          mssValidate: Tool.init(mssValidate),
           upscaleImage: Tool.init(upscaleImage),
           ossPut: Tool.init(ossPut),
           matting: Tool.init(matting),
@@ -288,6 +291,7 @@ export const layer: Layer.Layer<
             tool.generateVideoHappyHorse,
             tool.cgRender,
             tool.nrbiRenderPrompt,
+            tool.mssValidate,
             tool.upscaleImage,
             tool.ossPut,
             tool.matting,

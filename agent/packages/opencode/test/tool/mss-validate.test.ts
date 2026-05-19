@@ -1,11 +1,16 @@
-import { describe, expect, test } from "bun:test"
+import { afterEach, describe, expect, test } from "bun:test"
 import { Effect, Layer, ManagedRuntime, Schema } from "effect"
+import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
 import { Agent } from "@/agent/agent"
 import { Truncate } from "@/tool/truncate"
+import { ToolRegistry } from "@/tool/registry"
 import { makeMssValidateTool, Parameters } from "@/tool/asset/mss-validate"
 import type { PythonRunner } from "@/tool/asset/python-runner"
 import type { Tool } from "@/tool/tool"
 import { MessageID, SessionID } from "@/session/schema"
+import { Instance } from "../../src/project/instance"
+import { provideTmpdirInstance } from "../fixture/fixture"
+import { testEffect } from "../lib/effect"
 
 // ─── Schema exported from the wrapper (for case-9 parity test) ─────────────
 import { MssValidateResult } from "@/tool/asset/mss-validate"
@@ -211,4 +216,25 @@ describe("mss-validate tool", () => {
       expect(exit.value.meta?.mock).toBe(true)
     }
   })
+})
+
+// Mirrors nrbi-render-prompt.test.ts exactly: the real builtin-id enumeration
+// uses `ToolRegistry.Service` + `registry.ids()`. `ids()` = `[...builtin, ...custom].map(t => t.id)`,
+// and the registry needs an Instance context via `provideTmpdirInstance`.
+const registryIt = testEffect(Layer.mergeAll(ToolRegistry.defaultLayer, CrossSpawnSpawner.defaultLayer))
+
+afterEach(async () => {
+  await Instance.disposeAll()
+})
+
+describe("mss-validate registration", () => {
+  registryIt.live("mss-validate is registered as a builtin tool", () =>
+    provideTmpdirInstance(() =>
+      Effect.gen(function* () {
+        const registry = yield* ToolRegistry.Service
+        const ids = yield* registry.ids()
+        expect(ids).toContain("mss-validate")
+      }),
+    ),
+  )
 })
