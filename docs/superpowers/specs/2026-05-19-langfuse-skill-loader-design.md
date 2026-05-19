@@ -1,7 +1,7 @@
 # assets-produce — Langfuse Skill-Body Loader 设计
 
 > 设计文档（非 phase plan）。2026-05-19。
-> 治理：主 spec [§15 行 1.16](2026-04-29-assets-produce-spec.md#15-修订记录)。回归并落地 §2 原则 4 / §5.2。
+> 治理：主 spec [§15 行 1.17](2026-04-29-assets-produce-spec.md#15-修订记录)。回归并落地 §2 原则 4 / §5.2。
 > 实施：[`2026-05-19-langfuse-skill-loader-plan.md`](2026-05-19-langfuse-skill-loader-plan.md)。
 
 ---
@@ -25,7 +25,7 @@
 四声独立评审（Architect/Skeptic/Pragmatist/Critic）+ brainstorming：
 
 - **采纳**：(a) Langfuse 的 staging/production label + 版本历史，确实消解「即时无审查上线、无回滚、无版本管理」——这是 §5.2 本就规定的机制；(b) sync 命令尚不存在是真实排序问题 → 列为计划第一步；(c) skill body = 带 allowlist 的控制流 → 必须有 promote 前防灾闸。
-- **采纳为开放后续项（不阻塞本轮）**：内容质量回归闸（golden-asset eval）——staging 人眼只挡得住「整张废」，挡不住「静默变差」。记入 §15 r1.16 开放项，另起独立计划。
+- **采纳为开放后续项（不阻塞本轮）**：内容质量回归闸（golden-asset eval）——staging 人眼只挡得住「整张废」，挡不住「静默变差」。记入 §15 r1.17 开放项，另起独立计划。
 - **据 spec 纠正 council**：council 未持有 spec 文本（反锚定），其「削弱架构不变量」论点事实上反了——不变量是 *Langfuse 存储*，本地-only 才是临时偏离。
 
 ## 5. 决策（D1–D8）
@@ -55,12 +55,12 @@
 | Langfuse 宕机 → 阻断生产 | D1 永不 hard-fail，回退本地 git 正本 |
 | git 与 Langfuse 漂移、git 变虚构 | D2 git 仍正本 + D3 parity-check 显式标记 |
 | 每 job Langfuse 往返拖慢/耦合 | D6 TTL 缓存 |
-| 静默质量变差（人眼漏检） | 记为 §15 r1.16 开放后续项（golden-asset eval），D5 仅挡灾难 |
+| 静默质量变差（人眼漏检） | 记为 §15 r1.17 开放后续项（golden-asset eval），D5 仅挡灾难 |
 | 凭据缺失（`LANGFUSE_PUBLIC_KEY`/`SECRET_KEY`） | D1 退化为「纯本地」（= 现状），不回归、不崩 |
 
 ## 8. 关联
 
-- 主 spec：§2 原则 4、§5.2、§11.4、§15 r1.14（本债来源）、r1.16（本决策）。
+- 主 spec：§2 原则 4、§5.2、§11.4、§15 r1.14（本债来源）、r1.17（本决策）。
 - 注入缝：`agent/packages/opencode/src/business/asset-service/llm-generator.ts`（`LlmGeneratorOverrides.loadSkill` / `defaultLoadSkill`）。
 - Langfuse 客户端：`src/langfuse/langfuse.ts`（`getPrompt(name,{label,version})` / `createPrompt(name,body,{label})`，默认 label `production`，已具备）。
 - 实施计划：`2026-05-19-langfuse-skill-loader-plan.md`。

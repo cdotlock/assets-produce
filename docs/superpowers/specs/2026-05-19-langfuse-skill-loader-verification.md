@@ -1,7 +1,7 @@
 # Langfuse Skill-Body Loader — 验证报告
 
 > 对 [`2026-05-19-langfuse-skill-loader-plan.md`](2026-05-19-langfuse-skill-loader-plan.md) 验收清单逐条核验。2026-05-19。
-> 治理：主 spec §15 r1.16。设计：[`2026-05-19-langfuse-skill-loader-design.md`](2026-05-19-langfuse-skill-loader-design.md)（D1–D8）。
+> 治理：主 spec §15 r1.17。设计：[`2026-05-19-langfuse-skill-loader-design.md`](2026-05-19-langfuse-skill-loader-design.md)（D1–D8）。
 > 实现 commits（branch `claude/beautiful-feistel-d80d5f`，基于 `b216a7b`）：
 > `8ca8826` docs / `1de76cb` refactor(skill-source) / `a1d4fd1` feat(loader) / `d59c581` feat(sync) / `fac8f81` docs(S4) / 本报告。
 
@@ -30,7 +30,7 @@
   - 无新增/改动 AssetKind、REST 路由、DB schema、error code。`GenerationOutcome` 码集不变（坏 body 仍归 `GENERATION_REJECTED`）。loop / 原子工具 / `wire.ts` 注入形态（lazy AssetService，generator/writer/tracer 三字段）不变 —— 仅 generator 的 `loadSkill` 注入了 Langfuse-first 实现。
 - [x] **`.env.example`/README/CLAUDE.md 同步**（commit `fac8f81`）
   - `.env.example`：新增 `ASSETS_SKILL_LANGFUSE_TTL_MS=60000` + 无凭据降级注释；确认 `LANGFUSE_HOST/PROJECT/PUBLIC_KEY/SECRET_KEY` 在位。
-  - 项目 `CLAUDE.md` Langfuse 节：§15 r1.16 加载模型、label 约定、promote 闸、`--check` 漂移哨兵 + 回灌纪律。
+  - 项目 `CLAUDE.md` Langfuse 节：§15 r1.17 加载模型、label 约定、promote 闸、`--check` 漂移哨兵 + 回灌纪律。
   - `knowledge/asset-generation/README.md`：纠正过时 Phase-8 草稿（曾误称 loop 仍接 placeholder、只列 8/12 skill、称 matting/cutout 未注册）→ 现 Phase-14 + Langfuse-first 真实态；ep-sprite-spec 缺体显式标注。
 - [~] **bootstrap 完成：production label 齐 + 端到端通** —— **本环境不可执行（无凭据），转 runbook（见下）**。另：clean bootstrap 还被预存的 `ep-sprite-spec.md` 缺体阻塞（已独立 spawn 修复任务）。非本计划代码缺陷。
 
@@ -49,5 +49,5 @@
 ## 偏差与遗留
 
 - **`ep-sprite-spec.md` 缺体**：预存 B1 债（commit `fd30d52` 注册名、`b216a7b` 只补了 outfit-anchor 体）。clean HEAD 复现，**非本改动引入**。已通过 spawn 开独立修复任务；README 已标注。
-- **golden-asset 内容质量 eval**：D8 / §15 r1.16 开放后续项，本计划明确不覆盖，另起。
+- **golden-asset 内容质量 eval**：D8 / §15 r1.17 开放后续项，本计划明确不覆盖，另起。
 - **production promote / 实时 bootstrap**：需凭据环境 + 人工 go-live 判断（D7 设计即如此），不在无凭据环境自动执行。

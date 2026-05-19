@@ -1,7 +1,7 @@
 # Langfuse Skill-Body Loader — 实施计划
 
 > 计划文档（步骤 / 预计输出 / 测试项 / 风险，**不含代码**，遵项目 CLAUDE.md「phase plan 不写实现」）。2026-05-19。
-> 治理：主 spec §15 r1.16。设计：[`2026-05-19-langfuse-skill-loader-design.md`](2026-05-19-langfuse-skill-loader-design.md)（决策 D1–D8）。
+> 治理：主 spec §15 r1.17。设计：[`2026-05-19-langfuse-skill-loader-design.md`](2026-05-19-langfuse-skill-loader-design.md)（决策 D1–D8）。
 
 ## 目标
 
@@ -62,7 +62,7 @@ asset-generation skill body 的正本来源：本地-only → Langfuse `producti
 ## 风险（承计划期）
 
 - 漂移：git 与 Langfuse production 不一致 → S3 `--check` + 回灌纪律；不做自动双向同步（避免隐式权威翻转）。
-- 质量静默退化：D8，本计划**不覆盖**，记 §15 r1.16 开放后续项（golden-asset eval 另起）。
+- 质量静默退化：D8，本计划**不覆盖**，记 §15 r1.17 开放后续项（golden-asset eval 另起）。
 - Langfuse 延迟/抖动：D6 TTL 缓存；超时即回退本地。
 - 部分推送失败：S1 须逐条报告 + 整体非零，不静默半成功。
 

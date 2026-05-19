@@ -6,7 +6,7 @@ They drive the real Phase-14 LLM mini agent loop inside
 which allowlisted atomic tool to call based on the spec_md / refs /
 constraints in the incoming `AssetIntent`.
 
-## Loading model (spec §15 r1.16 — Langfuse-`production`-first)
+## Loading model (spec §15 r1.17 — Langfuse-`production`-first)
 
 The production loader (`langfuse-skill-loader.ts`, wired in `wire.ts`)
 resolves a picked skill body as:

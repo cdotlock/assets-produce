@@ -4,7 +4,7 @@
 //    instead of reimplementing it.
 //  - assetServiceSingleton injects the real LLM-driven generator
 //    (createLlmGenerator, Phase 14 / spec §15 row 1.14) wired with the
-//    Langfuse-`production`-first skill loader (spec §15 r1.16 / design
+//    Langfuse-`production`-first skill loader (spec §15 r1.17 / design
 //    D1): it loads the picked skill body from Langfuse with a
 //    git-canonical local fallback, runs a generic tool-calling loop over
 //    that skill's allowlisted atomic tools, and surfaces the resulting
@@ -93,7 +93,7 @@ export const assetServiceSingleton = lazy(
   () =>
     new AssetService({
       // Langfuse-`production`-first skill loader with git-canonical local
-      // fallback (spec §15 r1.16 / design D1). Langfuse unreachable or
+      // fallback (spec §15 r1.17 / design D1). Langfuse unreachable or
       // missing creds → local body, job never hard-fails. The function
       // default of createLlmGenerator stays local-only so hermetic unit
       // tests never touch Langfuse; production opts in here.
