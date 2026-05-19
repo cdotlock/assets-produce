@@ -13,3 +13,14 @@ frozen: 2026-05-19T01:58:11Z
 - episode-writer  <=  $N2M/skills/episode-writer/
 - episode-writer-reviewer  <=  $N2M/skills/episode-writer-reviewer/
 - arc-reviewer  <=  $N2M/moonscripts/no-rules-in-bad-ideas/skills/arc-reviewer/
+
+## C4 — n2m upstream retired (master-spec §15 r1.16)
+
+As of the C-track close, n2m's 10 upstream authoring `skills/<name>/SKILL.md`
+carry a comment-only DEPRECATED header pointing here; assets-produce is the
+single source of truth. n2m copies are **retained, not deleted** (D7). From
+this point the assets-produce frozen copy and the live n2m source intentionally
+diverge by exactly that header — this is designed retirement, not drift. The
+n2m commit's push status (committed locally vs pushed) is recorded in
+`phase-C4-n2m-retire-docs-verification.md` (push is gated on explicit user ack
+— global git red line, non-user namespace).
