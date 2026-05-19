@@ -14,8 +14,6 @@
 // type = drop a `knowledge/asset-generation/<name>.md` + register its
 // name; this loop is untouched.
 
-import * as fs from "fs"
-import * as path from "path"
 import { Effect } from "effect"
 import { tool, jsonSchema, generateText, stepCountIs, type LanguageModel, type ToolSet } from "ai"
 
@@ -47,7 +45,20 @@ import { HoleFillTool } from "@/tool/asset/hole-fill"
 import { CutoutTool } from "@/tool/asset/cutout"
 
 import { resolveMaxTokensPerJob } from "./budget"
+import {
+  ATOMIC_TOOL_IDS,
+  parseAllowlist,
+  loadLocalSkill,
+  SkillInfeasibleError,
+  type LoadedSkill,
+} from "./skill-source"
 import type { AssetGenerator, AssetGeneratorInput, GenerationOutcome } from "./run-asset-generation"
+
+// Re-exported so existing importers (tests, callers) keep resolving these
+// from "@/business/asset-service/llm-generator" unchanged after the
+// skill-source extraction. The canonical home is ./skill-source.
+export { parseAllowlist, SkillInfeasibleError }
+export type { LoadedSkill }
 
 // ---------- static atomic-tool registry (kebab id → Tool effect) ----------
 //
@@ -86,80 +97,32 @@ const ATOMIC_TOOLS: Readonly<Record<string, AnyToolInfoEffect>> = {
   cutout: asInfoEffect(CutoutTool),
 }
 
-const KNOWN_TOOL_IDS = new Set(Object.keys(ATOMIC_TOOLS))
-
-// ---------- skill body loader ----------
-
-export interface LoadedSkill {
-  body: string
-  allowlist: string[]
-}
-
-// llm-generator.ts lives at src/business/asset-service/ — the same 6-up
-// depth that src/tool/asset/cg-render.ts:95 uses to reach the repo root
-// (/home/user/assets-produce). Resolve identically so the knowledge dir
-// is found regardless of cwd.
-const REPO_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../../../../..")
-
-/**
- * Parse the `## Atomic tools (allowed)` section of a skill body and return
- * every kebab-case token that exactly matches a known atomic-tool id.
- * Case-insensitive on the heading; collection stops at the next `##`.
- */
-export function parseAllowlist(body: string): string[] {
-  const lines = body.split(/\r?\n/)
-  // 0 = not in the section; otherwise the markdown heading level (2-6)
-  // at which the "Atomic tools (allowed)" section was opened.
-  let sectionLevel = 0
-  const found = new Set<string>()
-  for (const line of lines) {
-    const heading = /^(#{2,6})\s+(.*)$/.exec(line)
-    if (heading) {
-      const level = heading[1].length
-      const title = heading[2].trim().toLowerCase()
-      if (sectionLevel > 0) {
-        // A heading at the section's level or shallower ends it; a
-        // deeper sub-heading stays *inside* the section so a skill
-        // body can structure its allowlist with sub-sections.
-        if (level <= sectionLevel) break
-        continue
-      }
-      if (title.startsWith("atomic tools")) sectionLevel = level
-      continue
-    }
-    if (sectionLevel === 0) continue
-    // Collect every backtick-wrapped token AND bare kebab tokens; only
-    // those exactly equal to a known tool id survive.
-    for (const m of line.matchAll(/[`"]?([a-z0-9]+(?:-[a-z0-9]+)*)[`"]?/g)) {
-      const token = m[1]
-      if (KNOWN_TOOL_IDS.has(token)) found.add(token)
-    }
-  }
-  return [...found]
-}
-
-const defaultLoadSkill = async (skill: string): Promise<LoadedSkill> => {
-  const file = path.join(REPO_ROOT, "knowledge", "asset-generation", `${skill}.md`)
-  let body: string
-  try {
-    body = await fs.promises.readFile(file, "utf8")
-  } catch {
-    throw new SkillInfeasibleError(`skill body not found for "${skill}" (${file})`)
-  }
-  const allowlist = parseAllowlist(body)
-  if (allowlist.length === 0) {
-    throw new SkillInfeasibleError(
-      `skill "${skill}" declares no usable atomic tools in its "Atomic tools (allowed)" section`,
+// Drift guard: the effect map MUST stay keyed by exactly the canonical id
+// list (skill-source owns that list so the allowlist parser + the promote
+// gate can validate without importing this heavy module). Fail fast at
+// module load if the two ever diverge.
+{
+  const have = Object.keys(ATOMIC_TOOLS).slice().sort()
+  const want = [...ATOMIC_TOOL_IDS].sort()
+  if (have.length !== want.length || have.some((k, i) => k !== want[i])) {
+    throw new Error(
+      `ATOMIC_TOOLS keys drifted from skill-source.ATOMIC_TOOL_IDS: have=[${have.join(",")}] want=[${want.join(",")}]`,
     )
   }
-  return { body, allowlist }
 }
 
-// Distinguishes "the skill spec is infeasible / missing" (→ GENERATION_REJECTED,
-// not a 500) from genuine internal/tool failures.
-export class SkillInfeasibleError extends Error {
-  readonly _tag = "SkillInfeasibleError"
-}
+// `parseAllowlist`, `SkillInfeasibleError`, `LoadedSkill` and the local
+// body reader now live in ./skill-source (extracted so the Langfuse loader
+// + `skills sync` promote gate reuse the EXACT same parser the loop runs).
+// They are imported above and re-exported for backward compatibility.
+
+// ---------- skill body loader ----------
+//
+// `defaultLoadSkill` = git-canonical local read (unchanged behaviour). It
+// stays the function-level default so hermetic unit tests that pass no
+// `loadSkill` override never touch Langfuse. Production wiring (wire.ts)
+// injects the Langfuse-first loader, which falls back to exactly this.
+const defaultLoadSkill: (skill: string) => Promise<LoadedSkill> = loadLocalSkill
 
 // ---------- model resolution (Claude primary, DeepSeek fallback) ----------
 
