@@ -261,3 +261,250 @@ describe("novel_to_mss body encodes the full stage + gate contract", () => {
     expect(AUTHORING_STAGE_DIRS.length).toBe(6)
   })
 })
+
+// ── INJECTED-FAIL GATE PROOF (C2 Task 4) ───────────────────────────────────
+//
+// Satisfies design acceptance line 225: prove the orchestration body's gate
+// contract, when mechanically followed, HALTS on a FAIL verdict (and loops on
+// CONDITIONAL, advances on PASS).
+//
+// DETERMINISTIC vs LIVE proof split (intentional, do not "fix" by adding a
+// production engine):
+//   - The runtime gate is NOT a production gate engine. The project red line
+//     forbids orchestration/gate code in src/; the body itself states the
+//     driving agent owns the loop and "There is no orchestration service".
+//   - The DETERMINISTIC proof here is a contract-DERIVATION: a TEST-ONLY pure
+//     helper reads the body's documented `## Gate contract` and mechanically
+//     derives {verdict → action}, then applies that derived map to real
+//     reviewer-verdict fixtures. This proves the *documented contract* a
+//     conforming driving agent must follow halts on FAIL.
+//   - The LIVE behavioral proof — a real driving agent following THIS SAME
+//     body and actually halting end-to-end — is deferred to C3's real
+//     demo-book e2e (the agent at runtime reads this same body; this test
+//     pins the contract that run is judged against).
+//
+// Non-vacuity: deriveGateActions parses the body off disk per-cell (reusing
+// Task 3's parseSections/gateContractDataRows/rowCells — NO duplicated
+// parser). We assert the derived map is LITERALLY {PASS:ADVANCE,
+// CONDITIONAL:FIX_AND_REREVIEW, FAIL:HALT}: a body that mis-specified the
+// FAIL cell would derive a different map (or, because classifyVerdictCell is
+// per-token-prefix strict, fail to derive at all). A documented in-test
+// reverted tamper additionally proves the helper genuinely reads the body
+// rather than returning a hardcoded map: ANY rewording of the FAIL cell away
+// from its documented halt semantics makes deriveGateActions throw — i.e. the
+// helper structurally CANNOT emit a gate where FAIL advances or loops; a
+// mis-specified FAIL contract is a hard error, not a silent regression. All
+// tampering is on an in-memory string copy; BODY_PATH on disk is never
+// written (self-reverting). The helper is TEST-ONLY (must NOT live in src/).
+
+type GateAction = "ADVANCE" | "FIX_AND_REREVIEW" | "HALT"
+type Verdict = "PASS" | "CONDITIONAL" | "FAIL"
+
+const VERDICTS_FIXTURE_DIR = path.join(
+  import.meta.dir,
+  "..",
+  "fixture",
+  "novel-to-mss",
+  "reviewer-verdicts",
+)
+
+/** Classify ONE token-prefixed verdict cell from the Gate-contract table into
+ *  the action the body documents for it. Per-cell only — honoring the body's
+ *  parser-contract note (the PASS cell legitimately contains "advance" and the
+ *  FAIL cell "halt" on the SAME physical Markdown line, so whole-row grep is
+ *  forbidden). Returns null if the cell text does not unambiguously match one
+ *  documented action (caller treats that as "body under-specified" and fails
+ *  loudly rather than guessing). TEST-ONLY. */
+function classifyVerdictCell(cell: string): GateAction | null {
+  const c = cell.toLowerCase()
+  if (c.startsWith("pass:")) {
+    // PASS → advance to the next stage (must NOT also say "halt").
+    if (c.includes("advance") && !c.includes("halt")) return "ADVANCE"
+    return null
+  }
+  if (c.startsWith("conditional:")) {
+    // CONDITIONAL → producer applies fixes, SAME reviewer re-reviews (loop).
+    if (c.includes("fix") && c.includes("same reviewer") && c.includes("re-review") && c.includes("loop"))
+      return "FIX_AND_REREVIEW"
+    return null
+  }
+  if (c.startsWith("fail:")) {
+    // FAIL → halt + surface, and crucially NOT "advance"/"next stage".
+    if (c.includes("halt") && c.includes("surface") && !c.includes("advance") && !c.includes("next stage"))
+      return "HALT"
+    return null
+  }
+  return null
+}
+
+/** Derive the {verdict → action} map purely from the body's documented
+ *  `## Gate contract` table. Reuses Task 3's parseSections +
+ *  gateContractDataRows + rowCells (single source of the per-cell parse — no
+ *  duplicated parser). The body guarantees all gated rows carry IDENTICAL
+ *  action cells (it says they "are intentionally identical across all
+ *  gated-stage rows"); we derive per row and require every row to agree, so a
+ *  body that reworded one row's FAIL cell out of sync with the others would
+ *  make this throw. Throws (test fails loudly) if any cell is unclassifiable
+ *  or rows disagree — i.e. if the body's contract is under-specified. This
+ *  helper is the deterministic encoding of the body's documented gate rule;
+ *  it adds NO new gate policy of its own. TEST-ONLY. */
+function deriveGateActions(body: string): Map<Verdict, GateAction> {
+  const gate = parseSections(body).get("Gate contract")
+  if (!gate) throw new Error("body has no `## Gate contract` section — cannot derive gate actions")
+  const rows = gateContractDataRows(gate)
+  if (rows.length === 0) throw new Error("`## Gate contract` has no data rows — cannot derive gate actions")
+
+  const tokens: ReadonlyArray<Verdict> = ["PASS", "CONDITIONAL", "FAIL"]
+  let derived: Map<Verdict, GateAction> | null = null
+
+  for (const cells of rows) {
+    const rowMap = new Map<Verdict, GateAction>()
+    for (const token of tokens) {
+      const cell = cells.find((c) => c.startsWith(`${token}:`))
+      if (!cell) throw new Error(`Gate-contract row ${JSON.stringify(cells[0])} has no ${token}: cell`)
+      const action = classifyVerdictCell(cell)
+      if (action === null)
+        throw new Error(
+          `Gate-contract ${token} cell is under-specified / unclassifiable: ${JSON.stringify(cell)}`,
+        )
+      rowMap.set(token, action)
+    }
+    if (derived === null) {
+      derived = rowMap
+    } else {
+      // Every gated row's action cells must agree (body's "identical across
+      // all rows" invariant). Disagreement = silent drift → fail loudly.
+      for (const token of tokens) {
+        if (rowMap.get(token) !== derived.get(token))
+          throw new Error(
+            `Gate-contract rows disagree on ${token}: ${derived.get(token)} vs ${rowMap.get(token)} ` +
+              `(row ${JSON.stringify(cells[0])}) — the four action cells must be edited together`,
+          )
+      }
+    }
+  }
+  return derived!
+}
+
+/** Extract the canonical bible-reviewer verdict token from a real
+ *  bible-review-report.md. bible-reviewer writes its final verdict as a
+ *  standalone line under the `## 总结论` section (its real output template,
+ *  knowledge/novel-to-mss/bible-reviewer/SKILL.md `## 输出格式` / `## 总结论`:
+ *  the line is exactly one of `PASS` / `CONDITIONAL` / `FAIL`). We read that
+ *  section's first standalone verdict-token line. TEST-ONLY. */
+function bibleReviewerVerdict(report: string): Verdict {
+  const conclusion = parseSections(report).get("总结论")
+  if (!conclusion) throw new Error("reviewer report has no `## 总结论` section")
+  for (const raw of conclusion.split("\n")) {
+    const line = raw.trim()
+    if (line === "PASS" || line === "CONDITIONAL" || line === "FAIL") return line
+  }
+  throw new Error("`## 总结论` has no standalone PASS/CONDITIONAL/FAIL verdict line")
+}
+
+describe("novel_to_mss gate halts on injected FAIL verdict", () => {
+  const body = readFileSync(BODY_PATH, "utf8")
+  const gateActions = deriveGateActions(body)
+
+  test("derived gate map is exactly {PASS→ADVANCE, CONDITIONAL→FIX_AND_REREVIEW, FAIL→HALT}", () => {
+    // Literal-map assertion: a body that mis-specified ANY verdict cell (most
+    // critically: a FAIL cell that advanced) would derive a different map and
+    // fail right here. This is the structural half of the non-vacuity proof.
+    expect(Object.fromEntries(gateActions)).toEqual({
+      PASS: "ADVANCE",
+      CONDITIONAL: "FIX_AND_REREVIEW",
+      FAIL: "HALT",
+    })
+  })
+
+  // The core acceptance: mechanically following the body's documented gate,
+  // each REAL bible-reviewer verdict token maps to the documented action.
+  // fail.md MUST resolve to HALT (pipeline does NOT advance).
+  const cases: ReadonlyArray<{ fixture: string; verdict: Verdict; action: GateAction }> = [
+    { fixture: "pass.md", verdict: "PASS", action: "ADVANCE" },
+    { fixture: "conditional.md", verdict: "CONDITIONAL", action: "FIX_AND_REREVIEW" },
+    { fixture: "fail.md", verdict: "FAIL", action: "HALT" },
+  ]
+
+  for (const { fixture, verdict, action } of cases) {
+    test(`${fixture}: bible-reviewer ${verdict} → gate action ${action}`, () => {
+      const report = readFileSync(path.join(VERDICTS_FIXTURE_DIR, fixture), "utf8")
+      const got = bibleReviewerVerdict(report)
+      // Fixture really emits the real token we expect (no paraphrase drift).
+      expect(got, `${fixture} must emit real bible-reviewer token ${verdict}`).toBe(verdict)
+      // Applying the body-derived gate map to that real verdict.
+      expect(
+        gateActions.get(got),
+        `${fixture} verdict ${got} must map to ${action} per the body's Gate contract`,
+      ).toBe(action)
+    })
+  }
+
+  test("fail.md does NOT advance the pipeline (the acceptance: FAIL halts)", () => {
+    const report = readFileSync(path.join(VERDICTS_FIXTURE_DIR, "fail.md"), "utf8")
+    const resolved = gateActions.get(bibleReviewerVerdict(report))
+    expect(resolved).toBe("HALT")
+    expect(resolved).not.toBe("ADVANCE")
+  })
+
+  test("non-vacuity: any tamper to the body's FAIL cell breaks derivation (helper reads the body, never silently yields a non-halting FAIL)", () => {
+    // Behavioral half of the non-vacuity proof: prove deriveGateActions truly
+    // derives from body TEXT (not a hardcoded constant) AND that it can never
+    // emit a map where FAIL does not HALT — it fails loudly instead. All
+    // tampers are on an in-memory copy ONLY (BODY_PATH on disk is never
+    // written, so this self-reverts; every other test reads the untouched
+    // disk body).
+    //
+    // classifyVerdictCell is intentionally per-token-prefix strict: a `FAIL:`
+    // cell is only ever matched against the documented halt pattern (halt +
+    // surface + NOT advance/next-stage). So ANY rewording of the FAIL cell
+    // away from its documented halt semantics — toward "advance", toward the
+    // CONDITIONAL loop text, anything — makes that cell unclassifiable and
+    // deriveGateActions THROWS. This is strictly stronger than "FAIL flips to
+    // ADVANCE": the helper structurally refuses to produce a gate where a
+    // FAIL verdict advances or loops; a mis-specified FAIL contract is a hard
+    // error, not a silent regression. That throwing behavior is exactly what
+    // protects design-acceptance line 225.
+    const FAIL_CELL = "FAIL: halt the pipeline and surface the reviewer report to the operator; run no further stages"
+    const COND_LOOP =
+      "CONDITIONAL: producer applies the reviewer's listed fixes, then the SAME reviewer re-reviews (loop until PASS or FAIL)"
+    expect(body.includes(FAIL_CELL), "real body must contain the documented FAIL cell verbatim").toBe(true)
+
+    // Tamper variants — each keeps the `FAIL:` token prefix (so it's still
+    // located as the FAIL cell) but strips the documented halt semantics.
+    const failCellTampers: ReadonlyArray<{ label: string; cell: string }> = [
+      { label: "FAIL says 'advance'", cell: "FAIL: advance to the next stage" },
+      { label: "FAIL reworded to the CONDITIONAL loop text", cell: COND_LOOP.replace(/^CONDITIONAL:/, "FAIL:") },
+      { label: "FAIL no longer mentions halt", cell: "FAIL: surface the reviewer report to the operator" },
+    ]
+    for (const { label, cell } of failCellTampers) {
+      const tampered = body.split(FAIL_CELL).join(cell)
+      expect(tampered, `tamper (${label}) must actually change the body`).not.toBe(body)
+      expect(
+        () => deriveGateActions(tampered),
+        `tamper (${label}): a FAIL cell stripped of its documented halt semantics must be rejected, ` +
+          `never silently turned into an advancing/looping gate`,
+      ).toThrow(/under-specified \/ unclassifiable/)
+    }
+
+    // And the helper genuinely reads the body for OTHER tokens too: blanking
+    // the PASS cell's advance verb makes the PASS cell unclassifiable and
+    // also throws (so the map is not a hardcoded constant ignoring body text).
+    const passBlanked = body
+      .split("PASS: advance to the next stage")
+      .join("PASS: proceed somehow")
+    expect(passBlanked, "PASS-cell tamper must change the body").not.toBe(body)
+    expect(
+      () => deriveGateActions(passBlanked),
+      "a PASS cell without the documented advance verb must be rejected too — derivation is body-driven",
+    ).toThrow(/under-specified \/ unclassifiable/)
+
+    // Revert is implicit: `body` (disk-read) is untouched; re-derive from it
+    // and confirm the canonical contract is intact and unchanged.
+    expect(Object.fromEntries(deriveGateActions(body))).toEqual({
+      PASS: "ADVANCE",
+      CONDITIONAL: "FIX_AND_REREVIEW",
+      FAIL: "HALT",
+    })
+  })
+})
