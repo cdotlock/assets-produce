@@ -25,8 +25,11 @@ import { AUTHORING_STAGE_DIRS, ensureNovelWorkspace } from "../../src/business/n
 
 // ─── Frozen n2m reference constant (workspace NN-stage parity) ────────────────
 //
-// Recorded from: n2m repo `moonscripts/no-rules-in-bad-ideas/` directory listing,
-// HEAD sha 8049ac772f7350ea593519fbeb891ccaee488c9c.
+// Recorded from the n2m authoring subset of `moonscripts/no-rules-in-bad-ideas/`
+// at HEAD sha 8049ac772f7350ea593519fbeb891ccaee488c9c — downstream music/sfx/asset
+// stages (`05.5-music-normalizer`, `05.5c-sfx-normalizer`, `06-asset-prompt-generator`)
+// and asset-side `02.5-outfit-anchor` are excluded per C-track scope; `05-episode-writer`
+// is narrowed to its `scripts/` .mss output dir. See workspace.ts:4-6 for the rationale.
 // n2m is absent in CI — this constant is the recorded equivalent (C1 precedent).
 // Do NOT read the n2m repo at test time.
 const N2M_DEMO_BOOK_AUTHORING_STAGE_DIRS = [
