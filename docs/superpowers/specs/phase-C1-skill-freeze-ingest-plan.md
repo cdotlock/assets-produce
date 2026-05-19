@@ -418,7 +418,7 @@ export function ensureNovelWorkspace(root: string, slug: string): NovelWorkspace
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `cd agent/packages/opencode && PATH=$HOME/.bun/bin:$PATH bun test test/business/novel-workspace.test.ts --timeout 30000`
-Expected: all 3 tests PASS.
+Expected: both tests PASS (2 `test()` blocks).
 
 - [ ] **Step 5: Commit**
 
