@@ -1,0 +1,19 @@
+Validate a MoonShort Script (.mss) file against the frozen upstream parser.
+
+This tool delegates to the vendored moonshort-script Go binary (sha256-pinned,
+Phase C3). Pass `script_path` — the absolute path to the produced .mss file to
+validate. The tool returns a `verdict` of "PASS" or "FAIL".
+
+Verdict semantics:
+  PASS — the script is structurally valid; proceed to the next pipeline step.
+  FAIL — the script is invalid; `errors` lists the diagnostics. Fix the script
+         and re-validate before marking the episode FINAL.
+
+Error distinction:
+  `verdict:"FAIL"` is a SUCCESSFUL JUDGEMENT — the validator ran and found
+  problems in the script. It is NOT a tool error.
+  `metadata.error:true` means the validator could not run at all (operational
+  failure: Go unavailable, drift detected, unreadable file). These are distinct.
+
+Call this on every produced episode .mss before that episode or route is
+declared final. Use `mock:true` in tests (hermetic, no Go toolchain required).
