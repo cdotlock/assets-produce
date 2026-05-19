@@ -239,6 +239,60 @@ its arc gate (downstream segments depend on the common arc being stable).
 
 ---
 
+## .mss quality gate
+
+Stage 5's `episode-writer-reviewer` / `arc-reviewer` gates judge **craft**. They
+do **not** prove the produced `.mss` actually parses. The C1-frozen
+`episode-writer` SKILL makes that a hard, non-negotiable delivery门槛 in its own
+body — `### 交付硬门槛:每集 FINAL 之前必须 `mss compile` exit 0`:「光读 spec /
+跑 review 都不够 …… 只有 mss 编译器的判决是真理。退出码非 0 = 不能 FINAL」. This
+section wires that upstream-source-authority rule into this orchestration as a
+mechanical gate the driving agent must apply; it does not weaken or reinterpret
+the frozen rule, only enforces it.
+
+The enforcement uses the **already-registered** atomic tool `mss-validate`
+(opencode tool id `mss-validate` — the C3-frozen wrapper around the upstream MSS
+validator). It returns `{verdict:"PASS"|"FAIL", errors, raw?, meta}`; a
+`verdict:"FAIL"` is a **successful judgement that the script is invalid** (the
+validator ran and found problems — it is NOT a tool error), and a genuine tool
+failure surfaces instead as `metadata.error`.
+
+**Where it sits:** after stage-5 `episode-writer` writes an episode's script to
+`05-episode-writer/scripts/<ep>.mss` (the C1 `05-episode-writer/scripts` dir —
+see `## Workspace writes`) and that episode has reached PASS under its
+`episode-writer-reviewer` craft gate, the driving agent MUST call the registered
+`mss-validate` tool on that produced episode `.mss`. Every produced episode
+`.mss` is gated this way — no sampling.
+
+**Verdict → action (same shape as a reviewer CONDITIONAL — see `## Gate
+contract`):**
+
+- `verdict:"PASS"` → the `.mss` parses; that episode may proceed toward FINAL
+  (subject to the still-required arc gate — this gate is additive to, not a
+  replacement for, `episode-writer-reviewer` / `arc-reviewer`).
+- A **non-PASS** verdict — `verdict:"FAIL"`, or a tool `metadata.error` — is
+  treated **exactly like a reviewer CONDITIONAL**: the producer applies fixes to
+  the script (the `errors` / `raw` payload localizes them), then the driving
+  agent **re-runs** `mss-validate` on the corrected `.mss`; this is a **loop**
+  that repeats until `verdict:"PASS"`. The episode/route **MUST NOT be declared
+  FINAL** while any non-PASS verdict stands — FINAL is blocked until
+  `verdict:"PASS"`. If the loop never converges (the validator keeps returning
+  `verdict:"FAIL"`, or a `metadata.error` cannot be cleared), escalate to
+  `## Halt & surface` exactly as a non-converging CONDITIONAL does.
+
+This gate is **AND-composed** with the stage-5 craft gates: an episode is FINAL
+only when it has BOTH passed `episode-writer-reviewer` (and the arc passed
+`arc-reviewer`) AND obtained an `mss-validate` `verdict:"PASS"`. Never present a
+craft-passed but unparseable episode as FINAL.
+
+This section is **connective knowledge, not code**. It introduces **no code**
+and **defines no engine or orchestration service** — it directs the driving
+agent to call the **already-registered** `mss-validate` tool and to apply its
+verdict with the gate-contract loop semantics above. The driving agent owns the
+loop, exactly as everywhere else in this body.
+
+---
+
 ## Halt & surface
 
 On any **FAIL** verdict, any unresolved `arc-reviewer` **P0**, a `novel-evaluator`
