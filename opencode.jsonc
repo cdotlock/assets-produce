@@ -22,5 +22,8 @@
         "claude-opus-4-7:free": { "name": "Claude Opus 4.7 (mob-ai, free)" }
       }
     }
+  },
+  "skills": {
+    "paths": ["knowledge/novel-to-mss"]
   }
 }
