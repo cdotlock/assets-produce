@@ -12,7 +12,7 @@
  */
 
 import { describe, expect, test } from "bun:test"
-import { existsSync, mkdtempSync, rmSync } from "fs"
+import { existsSync, mkdtempSync, rmSync, statSync } from "fs"
 import { tmpdir } from "os"
 import path from "path"
 import { Effect, Layer, ManagedRuntime, Schema } from "effect"
@@ -108,7 +108,6 @@ describe("mss-golden input-contract (hermetic mock mode)", () => {
 
     test(`${filename} — fixture exists and is non-empty`, () => {
       expect(existsSync(fixturePath)).toBe(true)
-      const { statSync } = require("fs")
       const stat = statSync(fixturePath)
       expect(stat.size).toBeGreaterThan(0)
     })
