@@ -2,6 +2,7 @@
 
 > **Status:** approved design (brainstorming complete). Next: writing-plans.
 > **Spec linkage:** main spec `2026-04-29-assets-produce-spec.md` §15 revision **r1.16**.
+> **⚠ Merge-time §15 reconcile (2026-05-19, post-C4, design §9):** when the C-track branch was merged into `main`, `main` had independently consumed §15 **r1.16** (Claude 主脑→`mob-ai` 网关) and **r1.17** (asset-generation Langfuse skill-loader). Per the append-only §15 rule the C-track entry was renumbered **r1.16 → §15 r1.18** and appended after r1.17 (the master-spec §15 table is authoritative). Per the user-approved minimal reconcile (Option A), this design doc, the C0–C4 phase plans/verifications, the `knowledge/novel-to-mss/` indices, and the n2m `DEPRECATED` headers retain the original **"r1.16"** wording as historical records — read every C-track "§15 r1.16" reference as "**the C-track entry = master-spec §15 r1.18**".
 > **New track, not a single phase** — decomposed into phases **C0–C4**.
 > **Source repo:** `cdotlock/novels-to-moonscript` (local `/Users/august/MobAI/novels-to-moonscript`).
 

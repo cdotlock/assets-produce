@@ -117,6 +117,27 @@ This step depends on B1's current state on `main` and requires the user's go-ahe
 
 **Branch sync (pre-closeout commit):** `git rev-list --left-right --count origin/claude/admiring-wilson-5d9f34...HEAD` = `0 0` (fully synced; all C4 commits pushed).
 
+### 6a. Merge-time outcome (executed 2026-05-19, user-coordinated)
+
+The forward-looking bullets 1–4 above are retained verbatim as the pre-merge plan. What actually happened on execution:
+
+- **`main` was not B1.** B1 had already merged earlier; since the worktree branched from `main@659fbdb`, `main` advanced by 20 commits on two unrelated tracks — Claude 主脑→`mob-ai` 网关 and the asset-generation Langfuse skill-loader. (Bullet 1's "concurrent B1" premise was the pre-merge expectation; the rebase target was the actual `origin/main` regardless.)
+- **Rebase:** `git rebase origin/main` replayed all 51 C-track commits onto `origin/main` (linear, 51/0). Only **1** commit (`f62aa0e`, the C0 design) conflicted on the master-spec; `opencode.jsonc` auto-merged cleanly (main's `model`+`mob-ai` provider ∪ C-track's `skills.paths` — non-overlapping regions).
+- **§15 reconcile (the one judgement call):** bullet 2's "r1.16 append-only, trivial" was **inaccurate** — `main` had independently taken **r1.16** (mob-ai) and **r1.17** (Langfuse), a number collision. Per the append-only rule and the user-approved **minimal reconcile (Option A)**, the C-track row was renumbered **r1.16 → §15 r1.18** byte-verbatim (only the leading `| 1.16 |` cell changed) and appended after r1.17. All other C-track docs + n2m `DEPRECATED` headers retain "r1.16" as historical records; read them as "the C-track entry = master-spec §15 r1.18" (see the design doc header callout and master-spec §15).
+- **Bullet 3 / 4:** no `.env.example` / registry contention (D4 held — code overlap ≈0); full test suite re-run on the rebased state (see §6b).
+
+### 6b. Post-rebase regression (re-run on merged state, 2026-05-19)
+
+Design §9 requires re-running tests on the merged state. Re-run from the rebased worktree (`HEAD` = C4 tip replayed onto `origin/main@48e6eb9`); same commands as §5:
+
+| Suite | Command | C4 (§5) | Post-rebase merged | Result |
+|---|---|---|---|---|
+| `test/skill` + `test/business` | `bun test test/skill test/business --timeout 60000` | 232/0, 20 files | **252 pass / 0 fail** / 961 expect() / 22 files | ✅ |
+| `test/tool/mss-validate.test.ts` | `bun test test/tool/mss-validate.test.ts --timeout 60000` | 14/0 | **14 pass / 0 fail** / 29 expect() / 1 file | ✅ |
+| Typecheck | `cd agent && bun run typecheck` | 4/4 | **4 successful, 4 total** (3 cached + `opencode` fresh) | ✅ |
+
+**Reading:** the `+20` skill/business delta (232 → 252, 20 → 22 files) is exactly `main`'s independently-merged additions — `test/business/asset-service/langfuse-skill-loader.test.ts` + `test/business/skill/sync-asset-generation.test.ts` (the Langfuse skill-loader / `skills sync` track). All 252 pass: the C-track suites and `main`'s Langfuse/mob-ai suites are mutually green on the merged tree. `mss-validate` (the only C-track-added tool test) and typecheck are unchanged from C4. The §15 renumber, the `opencode.jsonc` union, and `skills.paths` wiring did not regress either side.
+
 ---
 
 ## 7. Deferred Non-Blocking Items
