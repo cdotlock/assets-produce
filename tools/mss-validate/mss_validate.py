@@ -164,13 +164,14 @@ def _validate_with_binary(target: Path) -> tuple[str, list[str], str]:
     except (OSError, subprocess.TimeoutExpired) as e:
         raise RuntimeError(f"mss subprocess failed: {e}") from e
 
-    combined = (proc.stdout or "") + (proc.stderr or "")
-    raw = combined
+    # raw preserves natural stdout-then-stderr order for the caller's record.
+    raw = (proc.stdout or "") + (proc.stderr or "")
 
     if proc.returncode == 0:
         return "PASS", [], raw
 
-    # FAIL: collect diagnostic lines from both streams
+    # FAIL: errors deliberately leads with stderr (diagnostics first), since
+    # validate writes its plain-text diagnostic to stderr.
     all_lines = (proc.stderr + "\n" + proc.stdout).splitlines()
     errors = [line.strip() for line in all_lines if line.strip()]
     return "FAIL", errors, raw
