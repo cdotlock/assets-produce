@@ -1,11 +1,24 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "model": "mob-ai/claude-sonnet-4-6",
   "provider": {
     "deepseek": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "DeepSeek (OpenAI-compatible)",
       "options": {
         "baseURL": "https://api.deepseek.com"
+      }
+    },
+    "mob-ai": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "mob-ai (OpenAI-compatible LLM gateway)",
+      "env": ["MOB_AI_API_KEY"],
+      "options": {
+        "baseURL": "https://ai.mob-ai.cn/v1"
+      },
+      "models": {
+        "claude-sonnet-4-6": { "name": "Claude Sonnet 4.6 (via mob-ai)" },
+        "claude-opus-4-7": { "name": "Claude Opus 4.7 (via mob-ai)" }
       }
     }
   }
