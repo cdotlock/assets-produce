@@ -86,7 +86,16 @@ const BODY_PATH = path.join(REPO, "knowledge", "novel-to-mss", "novel_to_mss", "
 /** Split the body into `## `-delimited sections. Key = the exact heading text
  *  after `## ` (trimmed); value = the section's body text up to the next
  *  `## ` (or EOF). The pre-`## ` preamble is intentionally dropped — every
- *  asserted fact lives inside a `## ` section. TEST-ONLY. */
+ *  asserted fact lives inside a `## ` section. TEST-ONLY.
+ *
+ *  ASSUMPTION: no `## `-prefixed line ever appears inside a fenced code block
+ *  (```), which holds for the current body by construction (its only fenced
+ *  block — the Stage DAG diagram — contains no `## ` lines). This is a line
+ *  scanner, not a Markdown parser (fence-tracking logic would be YAGNI and
+ *  risks the no-production-parser red line). If a future body edit ever puts
+ *  a `## ` line inside a code fence, the `.toEqual` section-set assertion
+ *  below will fail — read THIS note rather than the misleading
+ *  "stray/renamed section" message. */
 function parseSections(body: string): Map<string, string> {
   const sections = new Map<string, string>()
   const lines = body.split("\n")
