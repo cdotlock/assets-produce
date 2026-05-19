@@ -1,5 +1,6 @@
 import { test, expect } from "bun:test"
 import { readdirSync, readFileSync, existsSync } from "fs"
+import { createHash } from "crypto"
 import path from "path"
 
 const REPO = path.resolve(import.meta.dir, "../../../../..")
@@ -36,5 +37,20 @@ test("every frozen SKILL.md has name + description frontmatter", () => {
     const fm = frontmatter(readFileSync(path.join(CORPUS, name, "SKILL.md"), "utf8"))
     expect(fm.name, `${name}: missing frontmatter name`).toBeTruthy()
     expect(fm.description, `${name}: missing frontmatter description`).toBeTruthy()
+  }
+})
+
+test("frozen corpus matches FREEZE_MANIFEST.sha256 (no drift)", () => {
+  const manifestPath = path.join(CORPUS, "FREEZE_MANIFEST.sha256")
+  expect(existsSync(manifestPath)).toBe(true)
+  const lines = readFileSync(manifestPath, "utf8").split("\n").filter(Boolean)
+  expect(lines.length).toBeGreaterThanOrEqual(14)
+  for (const line of lines) {
+    const sha = line.slice(0, 64)
+    const rel = line.slice(66) // "<sha>  <relpath>"
+    const abs = path.join(CORPUS, rel)
+    expect(existsSync(abs), `manifest references missing file: ${rel}`).toBe(true)
+    const got = createHash("sha256").update(readFileSync(abs)).digest("hex")
+    expect(got, `drift in ${rel}`).toBe(sha)
   }
 })
