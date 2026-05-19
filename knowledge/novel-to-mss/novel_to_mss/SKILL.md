@@ -243,9 +243,10 @@ its arc gate (downstream segments depend on the common arc being stable).
 
 Stage 5's `episode-writer-reviewer` / `arc-reviewer` gates judge **craft**. They
 do **not** prove the produced `.mss` actually parses. The C1-frozen
-`episode-writer` SKILL makes that a hard, non-negotiable delivery门槛 in its own
-body — `### 交付硬门槛:每集 FINAL 之前必须 `mss compile` exit 0`:「光读 spec /
-跑 review 都不够 …… 只有 mss 编译器的判决是真理。退出码非 0 = 不能 FINAL」. This
+`episode-writer` SKILL makes that a hard, non-negotiable delivery gate (交付硬门槛)
+in its own body, in its `### 交付硬门槛` section ("每集 FINAL 之前必须
+`mss compile` exit 0"): 「光读 spec / 跑 review 都不够 …… 只有 mss 编译器的判决是真理。
+退出码非 0 = 不能 FINAL」. This
 section wires that upstream-source-authority rule into this orchestration as a
 mechanical gate the driving agent must apply; it does not weaken or reinterpret
 the frozen rule, only enforces it.
