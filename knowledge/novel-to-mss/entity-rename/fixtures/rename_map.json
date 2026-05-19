@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "book_slug": "mini-project",
+  "approved_at": "2026-04-24",
+  "approved_by": "test-fixtures",
+  "decisions_doc": "rename_candidates.md",
+  "characters": {
+    "alice": {
+      "new_id": "nova",
+      "new_full_name": "Nova Celeste Vega",
+      "alias_mapping": {
+        "Ally": "Novy",
+        "Heart": null,
+        "Sparrow": "Sparrow"
+      },
+      "preserve_metaphor": false
+    },
+    "ben": {
+      "new_id": "reid",
+      "new_full_name": "Reid Kade",
+      "alias_mapping": { "Taylor": "Kade" },
+      "preserve_metaphor": true
+    },
+    "mrs_hart": {
+      "new_id": "mrs_hart",
+      "new_full_name": "Mrs. Vega",
+      "alias_mapping": { "Mrs. Hart": null }
+    }
+  },
+  "locations": {
+    "school": {
+      "new_id": "school",
+      "new_full_name": "Oakridge Academy",
+      "sub_location_ids": {
+        "school_quad": "school_quad",
+        "school_pool": "school_pool"
+      },
+      "alias_mapping": { "Willow High": "Oakridge High" }
+    },
+    "alice_house": {
+      "new_id": "nova_house",
+      "new_full_name": "Vega family home",
+      "sub_location_ids": { "alice_house_kitchen": "nova_house_kitchen" },
+      "alias_mapping": { "Hart home": "Vega home" }
+    }
+  },
+  "free_tokens": { "Marie": null }
+}

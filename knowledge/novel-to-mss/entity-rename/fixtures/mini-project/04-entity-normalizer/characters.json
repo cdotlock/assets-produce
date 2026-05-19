@@ -1,0 +1,22 @@
+{
+  "characters": {
+    "alice": {
+      "full_name": "Alice Marie Hart",
+      "role": "MC",
+      "aliases": ["Ally", "Heart", "Sparrow"],
+      "bible_file": "mc-bible-alice.md"
+    },
+    "ben": {
+      "full_name": "Ben Taylor",
+      "role": "LI",
+      "aliases": ["Taylor"],
+      "bible_file": "li-bible-ben.md"
+    },
+    "mrs_hart": {
+      "full_name": "Mrs. Hart",
+      "role": "supporting",
+      "aliases": ["Mrs. Hart"],
+      "relation": "Alice's mother"
+    }
+  }
+}

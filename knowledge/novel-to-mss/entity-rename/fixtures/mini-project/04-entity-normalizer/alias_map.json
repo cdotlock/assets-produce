@@ -1,0 +1,13 @@
+{
+  "character_aliases": {
+    "Ally": "alice",
+    "Heart": "alice",
+    "Sparrow": "alice",
+    "Taylor": "ben",
+    "Mrs. Hart": "mrs_hart"
+  },
+  "location_aliases": {
+    "Willow High": "school",
+    "Hart home": "alice_house"
+  }
+}
