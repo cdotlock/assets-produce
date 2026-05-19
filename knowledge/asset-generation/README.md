@@ -1,81 +1,69 @@
-# asset-generation skill bodies (Phase 8 draft)
+# asset-generation skill bodies
 
-This directory is the **local source of truth** for the five Phase 8 asset
-generation skill bodies. They drive the mini agent loop that runs inside
+This directory holds the **git-canonical** asset-generation skill bodies.
+They drive the real Phase-14 LLM mini agent loop inside
 `AssetService.runJob` — the LLM reads the picked skill body, then chooses
-which atomic tool to call based on the spec_md / refs / constraints in the
-incoming `AssetIntent`.
+which allowlisted atomic tool to call based on the spec_md / refs /
+constraints in the incoming `AssetIntent`.
 
-## Status
+## Loading model (spec §15 r1.16 — Langfuse-`production`-first)
 
-**Draft (Phase 8) → cg-render-spec is Phase 9 production-ready.** Per
-master spec § 2 principle 4, skill bodies stay local until the user
-explicitly requests an upload to Langfuse.
+The production loader (`langfuse-skill-loader.ts`, wired in `wire.ts`)
+resolves a picked skill body as:
 
-Phase 9 (2026-05-15) shipped the first concrete atomic-tool wiring: the
-`cg-render` atomic tool is registered and the matching `cg-render-spec.md`
-body has been rewritten to reference it (see § "Atomic tool input
-contract" inside that file). The other four bodies still describe the
-intended flow but call into Phase 8's placeholder generator until Phase
-10+ replaces it with the real LLM-driven loop.
+1. **Langfuse `production` label** for `skill_<name>` — if present, used
+   (its allowlist is parsed by the EXACT same `skill-source.parseAllowlist`
+   the loop runs);
+2. **miss / error / timeout / missing creds → this directory** —
+   `knowledge/asset-generation/<name>.md` is the git-canonical source,
+   offline fallback, and first-push seed. **Langfuse being unreachable
+   NEVER hard-fails a job.**
 
-Phase 11 (2026-05-16) shipped two audio bodies: `sfx-spec` is
-**production-ready**, backed by the real `generate-sfx-elevenlabs`
-atomic tool (real ElevenLabs sound-generation → inline OSS upload →
-permanent OSS mp3 URL). `music-spec` is a **deterministic placeholder**
-per master spec §15 row 1.13 — Suno publishes no official first-party
-API, so the real gateway integration is a deferred open item; the
-backing `generate-music-suno` tool calls nothing, uploads nothing, and
-returns a fixed placeholder with `metadata.placeholder: true`. The
-`music-spec.md` body documents the placeholder state explicitly so the
-loop treats a music result as "deferred", not as a hard failure.
+A short in-process TTL cache (`ASSETS_SKILL_LANGFUSE_TTL_MS`, default
+60000ms) keeps Langfuse off the per-job hot path; a Langfuse hot-edit to
+`production` propagates in ~1 TTL.
 
-Phase 12 (2026-05-16) closed asset-delivery URL parity: `cg-render` and
-`upscale-image` now deliver a **permanent OSS https URL** by chaining
-the `oss-put` atomic tool in their skill bodies (`cg-render-spec` /
-`upscale-spec`), instead of returning a local filesystem path. `oss-put`
-reuses the Phase 2 OSS service (no new env), so the loop's terminal
-`url` for cg / upscale outcomes is now an OSS-served URL end to end.
+This realigns with master spec §2 原则 4 / §5.2 (Langfuse storage was the
+original design; the earlier local-only state was §15 r1.14 deferred
+debt) — it is **not** an overturn. The Phase-14 real loop is unchanged;
+only the body *source* gained a Langfuse-first layer.
 
-Phase 13 (2026-05-17) migrated the backend image-processing suite from
-`moonshort-backend` to `tools/` atomic tools. Two post-process skill bodies
-are added to this directory: `matting-spec` documents the MODNet ML-based
-alpha-matte pipeline and `cutout-spec` documents the HSV chromakey
-green-screen pipeline; both chain `oss-put` as a mandatory final step for
-OSS-URL delivery parity. Four sub-step tools (`hole-fill`, `green-spill-clear`,
-`rgb-unspill`, `hybrid-to-webp`) are documented as optional chained repair /
-encoding steps inside those two bodies — they have no standalone skill body.
-The `detect-matting` CLI tool is CLI-only and has no skill body. **Both
-bodies are registered in `ASSET_GENERATION_SKILLS` (Phase 14, master spec
-§15 r1.14) — no AssetKind (absent from `DEFAULT_KIND_SKILL_MAP`), selected
-via `skill_hint` / picker only, the same status as `upscale-spec` /
-`outfit-anchor-spec` / `ep-sprite-spec`.** As with every body here, the
-loop is still wired to the placeholder generator and does not consume them
-at runtime yet.
+### label convention + promote gate (D5/D7)
 
-The `intent-to-skill` resolver only needs the skill **names**, which are
-baked into
+- `production` = what the runtime loader reads. `staging` = where edits
+  land first. promote = repoint `production` at a validated version
+  inside Langfuse (native, no code change — §5.2).
+- `agent skills sync asset-generation --label staging|production` pushes
+  these git bodies to Langfuse. Pushing `--label production` runs a
+  **promote gate**: a body whose allowlist parses to 0 known atomic tools
+  is refused *before any write* (pointing production at an infeasible
+  body would reject every creator of that kind).
+
+### git is still canonical — re-flow discipline (D2/D3)
+
+Editing in Langfuse counts as a hotfix: the change MUST be re-flowed back
+into this directory's git file. CI / local runs
+`agent skills sync asset-generation --check` as a drift sentinel — it
+compares git vs Langfuse `production`, writes nothing, and exits non-zero
+on any drift or unreachable Langfuse.
+
+## Registered skills
+
 `agent/packages/opencode/src/business/asset-service/intent-to-skill.ts`
-as `ASSET_GENERATION_SKILLS`:
+`ASSET_GENERATION_SKILLS` (12 entries; the loop only needs the names):
 
-- `character-portrait-spec`
-- `scene-bg-spec`
-- `cg-render-spec`
-- `cover-spec`
-- `shot-image-from-mss`
-- `sfx-spec`
-- `music-spec`
-- `upscale-spec`
-- `matting-spec`
-- `cutout-spec`
-- `outfit-anchor-spec`
-- `ep-sprite-spec`
+- `character-portrait-spec`, `scene-bg-spec`, `cg-render-spec`,
+  `cover-spec`, `shot-image-from-mss`, `sfx-spec`, `music-spec`
+- `upscale-spec` (Phase 12 post-process — no AssetKind)
+- `matting-spec`, `cutout-spec` (Phase 13 bodies, **registered in
+  Phase 14** per spec §15 r1.14 — reachable via skill_hint / picker)
+- `outfit-anchor-spec`, `ep-sprite-spec` (B1 NRBI render bodies,
+  spec §15 r1.15 — no AssetKind)
 
-When the user runs (in a future phase) `agent skills sync
-asset-generation`, the body markdown here gets pushed to Langfuse under the
-canonical prompt name `skill_<name>` (e.g. `skill_character-portrait-spec`).
-Until then the AssetService loop is wired to the **placeholder generator**
-(see `wire.ts`) and does not actually consume these files at runtime.
+`music-spec` is a deterministic placeholder (spec §15 r1.13 — Suno has
+no official API; `generate-music-suno` returns `metadata.placeholder:
+true`, treated as deferred success, never a hard failure). All other
+registered bodies drive real atomic tools end to end.
 
 ## File layout
 
@@ -88,11 +76,11 @@ Until then the AssetService loop is wired to the **placeholder generator**
 | `shot-image-from-mss.md` | shot-image-from-mss | intent.kind == "shot_image" OR "shot_video" |
 | `sfx-spec.md` | sfx-spec | intent.kind == "sfx" |
 | `music-spec.md` | music-spec | intent.kind == "music" |
-| `upscale-spec.md` | upscale-spec | no AssetKind — selected via `skill_hint` / picker only (Phase 12 post-process body) |
-| `matting-spec.md` | matting-spec | no AssetKind — Phase-13 post-process body, registered Phase 14 (spec §15 r1.14); selected via `skill_hint` / picker only |
-| `cutout-spec.md` | cutout-spec | no AssetKind — Phase-13 post-process body, registered Phase 14 (spec §15 r1.14); selected via `skill_hint` / picker only |
-| `outfit-anchor-spec.md` | outfit-anchor-spec | no AssetKind — B1 NRBI Layer A.5; selected via `skill_hint` / picker only |
-| `ep-sprite-spec.md` | ep-sprite-spec | no AssetKind — B1 NRBI Layer E; selected via `skill_hint` / picker only |
+| `upscale-spec.md` | upscale-spec | no AssetKind — `skill_hint` / picker only (Phase 12 post-process) |
+| `matting-spec.md` | matting-spec | no AssetKind — `skill_hint` / picker only (Phase 13 body, registered Phase 14) |
+| `cutout-spec.md` | cutout-spec | no AssetKind — `skill_hint` / picker only (Phase 13 body, registered Phase 14) |
+| `outfit-anchor-spec.md` | outfit-anchor-spec | no AssetKind — `skill_hint` / picker only (B1 NRBI, spec §15 r1.15) |
+| `ep-sprite-spec.md` | ep-sprite-spec | no AssetKind — `skill_hint` / picker only (B1 NRBI; **body file missing on HEAD — see backlog**) |
 
 ## Conventions
 

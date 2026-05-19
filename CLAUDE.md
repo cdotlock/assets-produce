@@ -95,6 +95,10 @@ docs/superpowers/specs/       主 spec + phase plans + verification reports
 - project: `assets-produce`
 - base url: `https://prompt.mobai-game.com`
 - skill body 命名空间：`skill_<name>`
+- **asset-generation skill body 加载（spec §15 r1.16）**：运行时 loader 先读 Langfuse `production` label，miss/error/timeout/无凭据 → 回退 `knowledge/asset-generation/<name>.md`（git 正本 + 兜底 + 首推种子）。**Langfuse 不可达绝不 hard-fail job**。进程内 TTL 缓存 `ASSETS_SKILL_LANGFUSE_TTL_MS`（默认 60000ms）。
+- **label 约定**：`production` = 线上 loader 读的；`staging` = 编辑先落点。promote = 在 Langfuse 把 `production` 指向校验过的版本（Langfuse 原生，无需改代码）。
+- **回灌纪律**：在 Langfuse 改完即算 hotfix，必须把改动回灌 `knowledge/asset-generation/` git 正本。`agent skills sync asset-generation --label staging|production` 推送；`--label production` 前强制 `parseAllowlist` 防灾闸（解析 0 工具直接拒推）。
+- **漂移哨兵（CI）**：`agent skills sync asset-generation --check` 只比对、零写、漂移即非零退出。本地/CI 跑它守「git 正本 vs Langfuse production」一致。
 
 ### Permission Profiles
 - `developer`：CLI / TUI / 外部 agent — 全部工具
