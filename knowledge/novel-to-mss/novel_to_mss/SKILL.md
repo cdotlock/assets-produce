@@ -63,6 +63,17 @@ One row per gated stage. The driving agent applies the verdict's action
 literally. Verdict tokens are each reviewer's **real** vocabulary (confirmed
 from the frozen C1 reviewer bodies — do not paraphrase).
 
+This table is the **authoritative machine-parsed source** of the gate rule; the
+`### Verdict semantics` prose and the per-reviewer normalization table below
+mirror it for humans and must stay in sync with it. Parsers MUST split each row
+into pipe-delimited cells and classify per-cell — never whole-row grep, because
+the PASS cell ("advance") and the FAIL cell ("halt") share one physical Markdown
+table line.
+
+Note: the four action cells (PASS / CONDITIONAL / FAIL) are intentionally
+identical across all gated-stage rows; they MUST be edited together or not at
+all (rewording one FAIL cell without the others is a silent drift hazard).
+
 | stage | producer skill | reviewer skill | PASS→ | CONDITIONAL→ | FAIL→ |
 |---|---|---|---|---|---|
 | 2 | `character-architect` | `bible-reviewer` | PASS: advance to the next stage | CONDITIONAL: producer applies the reviewer's listed fixes, then the SAME reviewer re-reviews (loop until PASS or FAIL) | FAIL: halt the pipeline and surface the reviewer report to the operator; run no further stages |
