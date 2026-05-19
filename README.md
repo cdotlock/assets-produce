@@ -15,6 +15,7 @@ Agent-native multi-format asset production platform — based on opencode.
 - [`web/`](web) — creator workstation (Next.js + shadcn/ui, scaffolded in Phase 5)
 - [`videoctl/`](videoctl) — standalone Go CLI for video upload/payload/validate/submit/postprocess
 - [`knowledge/novel-to-video/`](knowledge/novel-to-video/) — self-contained prompt workflow knowledge pack
+- [`knowledge/novel-to-mss/`](knowledge/novel-to-mss/) — self-contained **byte-frozen** novel→`.mss` authoring corpus (11 skills + `novel_to_mss` orchestration; migrated from n2m, now authoritative — §15 r1.16)
 - [`claude-skills/novel-to-video/`](claude-skills/novel-to-video/) — Claude skill source that drives the knowledge pack through `videoctl`
 - [`video-agent-test/`](video-agent-test) — prompt-only scripts/assets fixture workspace
 - [`docs/superpowers/specs/`](docs/superpowers/specs) — master spec, phase plans, verification reports
@@ -37,7 +38,7 @@ Phase 10 起 assets-produce 对外暴露 4 个 HTTP 操作（mount 在 `/api/v1/
 | `catalog-since` | GET | 按时间游标增量拉 Asset 目录 |
 
 接入方：
-- **novels-to-moonscript** — 只调 `lookup`（小说阶段不主动 create；按 `mss-resolve-assets` CLI 把 mapping.json 里待解析 key 拉回 URL）
+- **novels-to-moonscript** — 上游写作流水线（选小说→`.mss`）已迁入本仓自维护（C-track，§15 r1.16），n2m 上游退役（DEPRECATED 注释，未删）。n2m 侧只保留**下游**（asset-prompt-generator / dramatizer 等），仍按 `lookup` 拉已生产 Asset URL
 - **moonshort-backend** — 4 个操作全用；通过 `app/upstream/assets-produce-http.ts` + `agent-forge-client.ts` 的 `ASSETS_REMIX_MODE=real` 分支接通
 
 各仓 token / project_id 治理 + 故障排查见 [`docs/ops/three-repo-token-flow.md`](docs/ops/three-repo-token-flow.md)。OpenAPI 完整 spec 见 `agent/packages/opencode/test/business/asset-service/openapi.test.ts` snapshot。

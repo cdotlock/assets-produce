@@ -204,7 +204,11 @@ SKILL/CLI/MCP/API four-layer. Production SKILL bodies are uploaded to Langfuse
 novel-to-video source of truth is local and self-contained under
 [`knowledge/novel-to-video/`](knowledge/novel-to-video/). The opencode CLI is
 the generic agent entry point; video execution is delegated to the external
-`videoctl` CLI; orchestration is by skills, never by hardcoded service code. See
+`videoctl` CLI; orchestration is by skills, never by hardcoded service code.
+The novel→`.mss` authoring pipeline is likewise local and self-contained under
+[`knowledge/novel-to-mss/`](knowledge/novel-to-mss/) (byte-frozen from n2m,
+runtime-discovered via `skills.paths`; n2m's upstream retired — §15 r1.16).
+See
 [`docs/superpowers/specs/2026-04-29-assets-produce-spec.md`](docs/superpowers/specs/2026-04-29-assets-produce-spec.md)
 § 2 for the full design.
 
@@ -286,6 +290,7 @@ lives in [`ERRORS.md` § Asset Service](ERRORS.md).
 | `green-spill-clear` | `agent tools show green-spill-clear` | Phase 13 — wraps `tools/green-spill-clear/green-spill-clear.py` (numpy/PIL). `mock: true` runs stdlib-only. |
 | `rgb-unspill` | `agent tools show rgb-unspill` | Phase 13 — wraps `tools/rgb-unspill/rgb-unspill.py` (numpy/PIL G-clamp). `mock: true` runs stdlib-only. |
 | `hybrid-to-webp` | `agent tools show hybrid-to-webp` | Phase 13 — wraps `tools/hybrid-to-webp/hybrid-to-webp.py` (Pillow PNG→WebP). `mock: true` requires Pillow but no source image. |
+| `mss-validate` | `agent tools show mss-validate` | C-track — wraps `tools/mss-validate/` (frozen `cdotlock/moonshort-script@b36a407` Go MSS parser, sha256 drift-guarded). `mock: true` runs without a Go toolchain. The `.mss` quality gate for the `novel_to_mss` authoring pipeline (NOT asset generation; NOT in `ASSET_GENERATION_SKILLS`). |
 | Offline CLIs | `tools/<name>/*.py` | NOT registered as atomic tools by design. |
 | `tools/oss-sync/sync.py` | `python tools/oss-sync/sync.py --input <json>` | Bulk OSS upload of a local directory; supports `dry_run: true`. |
 | `tools/detect-matting/detect-matting.py` | `python tools/detect-matting/detect-matting.py --input <json>` | Phase 13 detection/judgement — NOT a registered atomic tool (PASS/FAIL report). |
@@ -321,6 +326,13 @@ lives in [`ERRORS.md` § Asset Service](ERRORS.md).
   `matting-spec.md` / `cutout-spec.md`. Do NOT route `intent.kind` to any
   Phase-13 tool at this time — there is no kind mapping wired. `detect-matting`
   is offline-only and must not be called by the loop.
+- **Novel→`.mss` authoring (C-track)** — not part of the asset-generation
+  loop. An agent (developer profile) drives it via the `novel_to_mss`
+  orchestration skill in [`knowledge/novel-to-mss/`](knowledge/novel-to-mss/):
+  walk the stage DAG, dispatch fresh-context reviewer sub-agents
+  (PASS/CONDITIONAL/FAIL gate), and gate each `.mss` with the `mss-validate`
+  tool before declaring an episode/route FINAL. See
+  [`knowledge/novel-to-mss/README.md`](knowledge/novel-to-mss/README.md).
 
 ---
 
