@@ -272,6 +272,64 @@ Each phase follows the project workflow: write `docs/superpowers/specs/phase-CN-
   silent advance). The *live behavioral* proof — a real driving agent halting
   end-to-end — is deferred to C3's demo-book e2e. No red-line or scope change.
 
+### 8.2 Design refinements recorded during C3 planning
+
+- **D6 premise correction — the MSS validator is the upstream
+  `cdotlock/moonshort-script`, not "n2m's".** C3 survey + mob-wiki
+  (`entities/moonshort-script`) established that n2m contains **zero** Go
+  source; `scripts/validate_scripts.sh` clones the external canonical repo
+  `cdotlock/moonshort-script` (`./cmd/mss`) and builds it at runtime. That `mss`
+  binary is a **platform-wide single source of truth** (validator ~98.9%
+  coverage, 200+ tests, two audits; consumed by Dramatizer / Remix Executor /
+  the frontend player). D6's "freeze n2m's MSS validator" wording is corrected:
+  the artifact frozen is the **upstream `cdotlock/moonshort-script` Go source**,
+  pinned to the project-convention commit **`@b36a407`** (n2m's
+  `validate_scripts.sh` floats to upstream HEAD; assets-produce improves on it
+  by pinning). D6's *intent* — reuse the real parser verbatim, no rewrite,
+  assets-produce self-contained — is preserved exactly; only the source
+  location is corrected. A Python re-implementation from the C1-frozen
+  `mss-spec.md` was explicitly **rejected** (user-confirmed): it would
+  functionally duplicate a canonical heavily-tested tool, inevitably drift from
+  ground truth (the spec is documentation; the Go binary is authority), and
+  violate Research-&-Reuse + D2/D6 no-rewrite.
+- **`mss-validate` freeze form — vendored, sha256-pinned Go source
+  (user-confirmed).** Per the established `cg-render` / `nrbi-render-prompt`
+  frozen-subprocess pattern: the upstream Go source `@b36a407` is vendored into
+  `tools/mss-validate/`, sha256-pinned with a drift guard (nrbi's
+  `FROZEN_SHA256` precedent), built once by the Python/subprocess bridge
+  (Go 1.22+ is a *build-time* dependency only, exercised solely by the C3
+  compat-golden real run), JSON I/O, `--mock`. **Registered in the opencode
+  tool registry** (the 3 registry sites; per §4.6 the orchestration skill calls
+  it, so — unlike `detect-matting` — it IS a registered atomic tool). All
+  automated tests run `--mock` (CI needs no Go toolchain).
+- **`mss-validate` gate seam wired into the C2 orchestration body.** The
+  C2-authored `novel_to_mss/SKILL.md` stops at `.mss scripts` and does not yet
+  reference the validator. C3 amends that **authored** body (authored, not
+  C1-frozen — absent from `FREEZE_MANIFEST.sha256`, so editing is in-scope) to
+  add `mss-validate` as the per-episode `.mss` quality gate **after** stage-5
+  `episode-writer` writes `05-episode-writer/scripts/` and **before** that
+  episode/route is declared FINAL — mirroring the C1-frozen
+  `episode-writer/SKILL.md` hard门槛 「每集 FINAL 之前必须 `mss compile` exit
+  0」. This makes design §4.6 concrete (the design always intended the
+  orchestration skill to call mss-validate); the gate sits **at** the `.mss`
+  boundary (inside C-track scope), not past it.
+- **C3 e2e acceptance interpretation — compat-golden + minimal-live slice
+  (user-confirmed).** §6 C3 / §7 "full novel→MSS run on demo book original
+  novel" is discharged as: **(a) downstream-compat golden** — the C1 workspace
+  helper reproduces n2m's exact `moonscripts/no-rules-in-bad-ideas/`
+  `NN-stage` structure, and the demo book's **real existing** produced
+  `ep_*_final.md` scripts pass the frozen `mss-validate` (validator fidelity +
+  compat proven on real data, deterministic / reproducible); **(b) minimal live
+  slice** — a tiny self-supplied public-domain / synthetic micro-novel really
+  drives the orchestration through **one** episode with real reviewer `task`
+  dispatch and a real injected-FAIL halt, producing one real `.mss` that passes
+  `mss-validate` (discharges the C2→C3 live behavioural watch-item). The
+  literal full-book-from-original-novel run is **infeasible from repo state**
+  (n2m `.gitignore`s `novels/`; the source text is absent) and disproportionate
+  (multi-hour 6-stage creative-LLM spend); recorded as a transparent,
+  user-authorized scope interpretation (C1/C2 transparent-deviation precedent),
+  not an unstated gap. No change to the migration scope or any red line.
+
 ## 9. Worktree / git strategy
 
 - This track runs in worktree `claude/admiring-wilson-5d9f34`, branched from
