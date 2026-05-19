@@ -395,6 +395,23 @@ export interface SyncAssetGenerationResult {
 const SYNC_LABELS = new Set(["staging", "production"])
 
 /**
+ * Resolve the Langfuse label for a `skills sync` invocation.
+ *
+ * Push edits land in `staging` first (the editor scratch layer), so a
+ * bare push defaults there. But `--check` is the drift sentinel that
+ * MUST guard **`production`** — the label the runtime loader actually
+ * reads (spec §15 r1.17 / design D3). A sentinel defaulted to `staging`
+ * would report "matched" while `production` silently drifted from the
+ * git-canonical bodies, defeating its entire purpose. An explicit
+ * `--label` always wins in either mode; an unrecognised explicit value
+ * is passed through so the downstream `SYNC_LABELS` guard rejects it.
+ */
+export function resolveSyncLabel(explicit: string | undefined, check: boolean): string {
+  if (explicit !== undefined && explicit !== "") return explicit
+  return check ? "production" : "staging"
+}
+
+/**
  * Push (or `--check`) every asset-generation skill body to Langfuse.
  *
  * - `--label production` runs the **promote gate (D5)**: a body whose

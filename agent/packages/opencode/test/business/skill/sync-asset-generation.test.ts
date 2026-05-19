@@ -224,3 +224,25 @@ describe("syncAssetGeneration", () => {
     expect(exit.value.statuses.some((s) => s.name === "cg-render-spec")).toBe(true)
   })
 })
+
+describe("resolveSyncLabel — `--check` drift sentinel must guard production", () => {
+  test("bare push ⇒ staging (edits land in the scratch layer first)", () => {
+    expect(SkillCli.resolveSyncLabel(undefined, false)).toBe("staging")
+  })
+
+  test("bare --check ⇒ production (the label the loader reads — D3)", () => {
+    // The defect this fixes: a sentinel defaulted to `staging` reports
+    // "matched" while production silently drifts from git.
+    expect(SkillCli.resolveSyncLabel(undefined, true)).toBe("production")
+    expect(SkillCli.resolveSyncLabel("", true)).toBe("production")
+  })
+
+  test("explicit --label always wins, in either mode", () => {
+    expect(SkillCli.resolveSyncLabel("staging", true)).toBe("staging")
+    expect(SkillCli.resolveSyncLabel("production", false)).toBe("production")
+  })
+
+  test("unrecognised explicit value passes through (downstream guard rejects it)", () => {
+    expect(SkillCli.resolveSyncLabel("prod", false)).toBe("prod")
+  })
+})

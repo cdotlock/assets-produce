@@ -480,8 +480,8 @@ export const SkillsExportSchemaCommand = cmd({
 const skillsSyncOptions: OptionDef[] = [
   {
     flag: "--label",
-    description: "Langfuse label to push/compare against",
-    extra: { choices: ["staging", "production"] as const, default: "staging" },
+    description: "Langfuse label (default: push ⇒ staging, --check ⇒ production)",
+    extra: { choices: ["staging", "production"] as const },
   },
   {
     flag: "--check",
@@ -511,7 +511,6 @@ export const SkillsSyncCommand = cmd({
       skillsSyncOptions,
     ),
   async handler(args) {
-    const label = String(args.label)
     let check = Boolean(args.check)
 
     // A non-check sync WRITES to Langfuse — honor global --dry-run by
@@ -520,6 +519,14 @@ export const SkillsSyncCommand = cmd({
       warnDryRunIgnored("skills sync (writing) — running as --check instead")
       check = true
     }
+
+    // Label default is contextual: a bare `--check` must guard
+    // `production` (what the loader reads), not the `staging` push
+    // default — see SkillCli.resolveSyncLabel / spec §15 r1.17 D3.
+    const label = SkillCli.resolveSyncLabel(
+      typeof args.label === "string" && args.label ? args.label : undefined,
+      check,
+    )
 
     const exit = await runWithLayers(SkillCli.syncAssetGeneration({ label, check }))
     if (Exit.isFailure(exit)) {
