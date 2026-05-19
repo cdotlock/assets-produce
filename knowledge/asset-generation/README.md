@@ -45,10 +45,12 @@ green-screen pipeline; both chain `oss-put` as a mandatory final step for
 OSS-URL delivery parity. Four sub-step tools (`hole-fill`, `green-spill-clear`,
 `rgb-unspill`, `hybrid-to-webp`) are documented as optional chained repair /
 encoding steps inside those two bodies — they have no standalone skill body.
-The `detect-matting` CLI tool is CLI-only and has no skill body. **These two
-bodies are NOT yet added to `ASSET_GENERATION_SKILLS` (picker registration
-deferred / out of Phase-13 scope) — they are documented, not runtime-wired;**
-the loop is still wired to the placeholder generator and does not consume them
+The `detect-matting` CLI tool is CLI-only and has no skill body. **Both
+bodies are registered in `ASSET_GENERATION_SKILLS` (Phase 14, master spec
+§15 r1.14) — no AssetKind (absent from `DEFAULT_KIND_SKILL_MAP`), selected
+via `skill_hint` / picker only, the same status as `upscale-spec` /
+`outfit-anchor-spec` / `ep-sprite-spec`.** As with every body here, the
+loop is still wired to the placeholder generator and does not consume them
 at runtime yet.
 
 The `intent-to-skill` resolver only needs the skill **names**, which are
@@ -87,8 +89,8 @@ Until then the AssetService loop is wired to the **placeholder generator**
 | `sfx-spec.md` | sfx-spec | intent.kind == "sfx" |
 | `music-spec.md` | music-spec | intent.kind == "music" |
 | `upscale-spec.md` | upscale-spec | no AssetKind — selected via `skill_hint` / picker only (Phase 12 post-process body) |
-| `matting-spec.md` | matting-spec | not picker-wired — documented Phase-13 post-process body; registration deferred |
-| `cutout-spec.md` | cutout-spec | not picker-wired — documented Phase-13 post-process body; registration deferred |
+| `matting-spec.md` | matting-spec | no AssetKind — Phase-13 post-process body, registered Phase 14 (spec §15 r1.14); selected via `skill_hint` / picker only |
+| `cutout-spec.md` | cutout-spec | no AssetKind — Phase-13 post-process body, registered Phase 14 (spec §15 r1.14); selected via `skill_hint` / picker only |
 | `outfit-anchor-spec.md` | outfit-anchor-spec | no AssetKind — B1 NRBI Layer A.5; selected via `skill_hint` / picker only |
 | `ep-sprite-spec.md` | ep-sprite-spec | no AssetKind — B1 NRBI Layer E; selected via `skill_hint` / picker only |
 
