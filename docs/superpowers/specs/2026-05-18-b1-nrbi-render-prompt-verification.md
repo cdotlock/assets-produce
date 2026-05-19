@@ -75,7 +75,8 @@ The 2 failures:
    range, including this task's README sync) touches **no** snapshot / file /
    git source — only `nrbi-render-prompt` (Python + TS + tests + fixtures +
    docs), `intent-to-skill.ts`, `llm-generator.ts`, `registry.ts`, the four
-   `knowledge/asset-generation` bodies + README, and the two design/plan docs.
+   `knowledge/asset-generation` bodies + README, the two design/plan docs,
+   `tools/nrbi-render-prompt/README.md`, and this verification report.
    `grep -iE "snapshot|file/index|src/file|src/snapshot|src/git"` over the B1
    diff returns nothing. B1 cannot have changed the behavior of these suites.
 2. **Both pass 100% in isolation** at the exact same HEAD in this working tree
@@ -218,12 +219,15 @@ ticked against real code at HEAD and the real test output in §1.
    uses the same order, so the reviewer explicitly recommended LEAVE AS-IS.
    Recorded as known/accepted, not a B1 deviation.
 4. **README Phase-13 prose paragraph (out-of-scope follow-up note).** Lines
-   ~48–52 of the same README still say matting/cutout are "NOT yet added to
-   `ASSET_GENERATION_SKILLS`", which is now stale (they were registered in
-   Phase 14). This prose paragraph is a *separate logical unit* outside the
-   single authorized "fix stale doc list" edit, so it was intentionally **not**
-   modified in this task to keep the commit atomic and within authorized
-   scope. Recorded as a low-priority follow-up, not a B1 deviation.
+   ~49–52 **and the File-layout table cells for `matting-spec`/`cutout-spec`
+   (≈ L90–91, "registration deferred")** of the same README still say
+   matting/cutout are "NOT yet added to `ASSET_GENERATION_SKILLS`", which is now
+   stale (they were registered in Phase 14). Both the prose paragraph and those
+   two table cells are the same stale defect and must be fixed together;
+   together they form a *separate logical unit* outside the single authorized
+   "fix stale doc list" edit, so they were intentionally **not** modified in
+   this task to keep the commit atomic and within authorized scope. Recorded as
+   a low-priority follow-up, not a B1 deviation.
 
 ---
 
