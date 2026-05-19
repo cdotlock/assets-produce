@@ -14,13 +14,13 @@ Run from the assets-produce repository root (requires a local clone of moonshort
 ```sh
 rm -rf tools/mss-validate/moonshort-script
 mkdir -p tools/mss-validate/moonshort-script
-git -C /path/to/moonshort-script archive b36a407 -- go.mod go.sum cmd internal LICENSE \
+git -C /path/to/moonshort-script archive b36a407 -- go.mod go.sum cmd internal \
   | tar -x -C tools/mss-validate/moonshort-script
 ```
 
 No network access is required when a local clone is present.
 
-Note: upstream has no LICENSE file at b36a407 (the full top-level tree at that commit is `.gitignore MSS-SPEC.md Makefile README.md cmd docs go.mod go.sum internal skills testdata` — no LICENSE/COPYING). The `LICENSE` pathspec in the re-vendor command is therefore a deliberate silent no-op, retained for forward-compat if upstream later adds one. The vendored tree is 22 files (`go.mod`, `go.sum`, and the full `cmd/` + `internal/` Go source incl. tests); a future reader should not suspect an omission.
+Note: upstream has no LICENSE file at b36a407 (top-level tree at that commit: `.gitignore MSS-SPEC.md Makefile README.md cmd docs go.mod go.sum internal skills testdata`). The re-vendor command intentionally omits a `LICENSE` pathspec because `git archive` fatals (exit 128, zero output) on any unmatched pathspec — an absent path must be omitted, not relied on as a no-op. The vendored tree is 22 files; no omission should be suspected.
 
 ## Go directive
 
