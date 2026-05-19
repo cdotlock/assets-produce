@@ -52,14 +52,9 @@ import sys
 import tempfile
 from pathlib import Path
 
-# tools/mss-validate/mss_validate.py -> parents[2] == repo root
-REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_DIR = Path(__file__).resolve().parent
 VENDOR_DIR = TOOL_DIR / "moonshort-script"
-
-# Allow test override via env var (for drift-tamper test without modifying real tree)
-_MANIFEST_OVERRIDE = os.environ.get("_MSS_VALIDATE_MANIFEST_OVERRIDE")
-MANIFEST_PATH: Path = Path(_MANIFEST_OVERRIDE) if _MANIFEST_OVERRIDE else (TOOL_DIR / "FROZEN_MANIFEST.sha256")
+MANIFEST_PATH = TOOL_DIR / "FROZEN_MANIFEST.sha256"
 
 
 @functools.lru_cache(maxsize=1)
@@ -108,6 +103,9 @@ def _build_cache_bin() -> Path:
 
     Raises RuntimeError on go unavailability or build failure.
     """
+    # Re-assert drift here too: this fn is lru_cached + reused by
+    # _validate_with_binary; never build from a poisoned tree even if a caller
+    # skipped the pre-check. _recompute_manifest is lru_cached so this is free.
     drift_err = _check_drift()
     if drift_err:
         raise RuntimeError(drift_err)
@@ -183,14 +181,6 @@ def _emit_error(code: str, message: str) -> None:
 
 
 def _run_json_main(argv: list[str] | None = None) -> int:
-    # Re-read env override each call (needed for test isolation when called via importlib)
-    manifest_override = os.environ.get("_MSS_VALIDATE_MANIFEST_OVERRIDE")
-    if manifest_override:
-        global MANIFEST_PATH
-        MANIFEST_PATH = Path(manifest_override)
-        _recompute_manifest.cache_clear()
-        _build_cache_bin.cache_clear()
-
     parser = argparse.ArgumentParser(prog="mss-validate")
     parser.add_argument("--input", default="-")
     parser.add_argument("--mock", action="store_true")

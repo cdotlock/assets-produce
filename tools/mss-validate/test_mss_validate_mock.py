@@ -99,17 +99,20 @@ def test_mock_flag_cli_arg_with_sentinel():
 
 
 # ---------------------------------------------------------------------------
-# Test 3 — drift tamper via env override -> ATOMIC_TOOL_FAILED, exit 4
+# Test 3 — drift tamper, in-process (mirrors sibling test_sha_mismatch_raises)
 # ---------------------------------------------------------------------------
 
-def test_drift_guard_fires_on_tampered_expected_manifest(tmp_path):
+def test_drift_guard_fires_on_tampered_expected_manifest(monkeypatch, tmp_path):
     """Prove the drift guard fires WITHOUT touching the real vendored tree.
 
-    We point the bridge at a tampered manifest via an env override, so the
-    committed-side differs from the real tree. The real moonshort-script/**
-    and FROZEN_MANIFEST.sha256 are NEVER modified.
+    In-process: monkeypatch MANIFEST_PATH at a tampered expected-manifest file
+    (one sha flipped). _recompute_manifest scans the real, untouched
+    moonshort-script/** tree, so recompute != tampered-expected -> drift. The
+    real moonshort-script/** and FROZEN_MANIFEST.sha256 are NEVER modified.
     """
-    # Build a tampered version of the manifest (flip first char of first sha)
+    mod = _load_module()
+
+    # Build a tampered version of the manifest (flip first char of first sha).
     real_text = MANIFEST.read_text()
     first_line, rest = real_text.split("\n", 1)
     sha_part, path_part = first_line.split("  ", 1)
@@ -118,17 +121,27 @@ def test_drift_guard_fires_on_tampered_expected_manifest(tmp_path):
     tampered_path = tmp_path / "TAMPERED.sha256"
     tampered_path.write_text(tampered)
 
-    payload = json.dumps({"content": "some script"})
-    p = _run(payload, extra_env={"_MSS_VALIDATE_MANIFEST_OVERRIDE": str(tampered_path)})
+    monkeypatch.setattr(mod, "MANIFEST_PATH", tampered_path)
+    mod._recompute_manifest.cache_clear()
+    mod._build_cache_bin.cache_clear()
 
-    assert p.returncode != 0, f"drift must cause non-zero exit; got {p.returncode}; stdout={p.stdout!r}"
-    assert p.stdout.strip() == "", f"stdout must be empty on drift; got: {p.stdout!r}"
-    err = json.loads(p.stderr)
-    assert err["error"]["code"] == "ATOMIC_TOOL_FAILED"
-    assert "drift" in err["error"]["message"].lower()
+    drift_msg = mod._check_drift()
+    assert drift_msg is not None, "tampered expected-manifest must be detected as drift"
+    assert "drift" in drift_msg.lower()
 
-    # Verify the real committed tree and manifest are byte-unchanged
-    mod = _load_module()
+    # Defense-in-depth: the lru_cached build path must also refuse a poisoned tree.
+    try:
+        mod._build_cache_bin()
+        raised = False
+    except RuntimeError as e:
+        raised = "drift" in str(e).lower()
+    finally:
+        mod._recompute_manifest.cache_clear()
+        mod._build_cache_bin.cache_clear()
+    assert raised, "build must refuse to proceed on drift (never PASS from a poisoned tree)"
+
+    # Verify the real committed tree and manifest are byte-unchanged.
+    assert MANIFEST.read_bytes() == real_text.encode()
     mod._recompute_manifest.cache_clear()
     real_recomputed = mod._recompute_manifest()
     assert real_recomputed == MANIFEST.read_text(), "real vendored tree must still match committed manifest"
