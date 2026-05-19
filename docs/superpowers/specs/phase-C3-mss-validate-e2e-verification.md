@@ -2,7 +2,7 @@
 
 > Closes `docs/superpowers/specs/phase-C3-mss-validate-e2e-plan.md`. Executed via `superpowers:subagent-driven-development` (Tasks 1–6: fresh implementer + two-stage review per task; Task 7: controller-run acceptance; Task 8: this closeout).
 
-**Date:** 2026-05-19 · **Branch:** `claude/admiring-wilson-5d9f34` (worktree, concurrent with main's B1) · **HEAD:** `6eb9528` · **C3 range:** `e70624c..6eb9528` (18 commits)
+**Date:** 2026-05-19 · **Branch:** `claude/admiring-wilson-5d9f34` (worktree, concurrent with main's B1) · **HEAD (pre-closeout):** `6eb9528` · **C3 range:** `e70624c~1..140c7e7` (19 commits, inclusive; the 19th = this closeout `docs:` commit `140c7e7`, citable only post-hoc per the C2 `a95af1c` pre-self-commit convention)
 
 ---
 
@@ -18,7 +18,7 @@
 | Bridge hermetic pytest | `cd tools/mss-validate && python3 -m pytest -q` | **12 passed** |
 | Working tree | `git status --short` | clean |
 
-**Regression-transient note (transparent):** the *combined* `test/skill test/business test/tool` invocation (623 tests / 50 files / ~85 s) and a tight `--timeout 60000` produced **1 transient per-test timeout** ("test timed out after 60000ms"), not a logic failure. Isolation proved it environmental: the three suites run **separately** are each green at exactly their per-task counts (38/0, 194/0, 391/0), and `test/tool` re-run at `--timeout 120000` is **391/0**. Root cause = a subprocess-spawning tool test intermittently exceeding its *per-test* cap under combined-run load (same class as the recorded `opencode-test-tmpdir-leak` environmental-false-failure memory). No code regression; "zero regressions" holds with adequate timeout.
+**Regression-transient note (transparent):** the *combined* `test/skill test/business test/tool` invocation (623 tests / 50 files / ~85 s) and a tight `--timeout 60000` produced **1 transient per-test timeout** ("test timed out after 60000ms"), not a logic failure. Isolation proved it environmental: the three suites run **separately** are each green at exactly their per-task counts (38/0, 194/0, 391/0), and `test/tool` re-run at `--timeout 120000` is **391/0**. Root cause (pinned by the whole-phase closeout review) = `test/tool/bash.test.ts › "does not truncate small output"` — a **pre-existing environmental flake unrelated to C3** (`bash.test.ts`/`bash.ts` untouched by the C3 change set; passes in isolation, flakes only under combined-run per-test-timeout pressure), same class as the recorded `opencode-test-tmpdir-leak` environmental-false-failure memory. No code regression; "zero regressions" holds with adequate timeout.
 
 ---
 
@@ -53,7 +53,7 @@ Every code task (1–6): fresh implementer subagent → **spec-compliance review
 | 6 — compat golden + parity | `ee91c41`,`c905270`,`458dc79`,`6eb9528` | ✅ (tautology/provenance concern adjudicated: genuine cross-file pin) | ✅ after fix | Minor 1 misleading provenance comment (`458dc79`); Minor 2 ESM/CJS import (`6eb9528`); Minor 3 + cast accepted-as-is |
 | 7 — live e2e acceptance | (no code commits — controller-run) | controller-run acceptance demonstration (plan-designated; not a subagent code task) | n/a | §4 evidence |
 
-Plus `e70624c` (design §8.2 premise corrections) + `f8ea1bd` (C3 plan). **18 commits, all atomic, all on `origin`-bound `claude/admiring-wilson-5d9f34`.**
+Plus `e70624c` (design §8.2 premise corrections) + `f8ea1bd` (C3 plan) + `140c7e7` (this closeout report). **19 commits, all atomic, all on `origin`-bound `claude/admiring-wilson-5d9f34`.**
 
 ---
 
