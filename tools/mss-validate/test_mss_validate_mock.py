@@ -27,17 +27,13 @@ def _load_module():
     return mod
 
 
-def _run(stdin: str, args: list | None = None, extra_env: dict | None = None) -> subprocess.CompletedProcess:
+def _run(stdin: str, args: list | None = None) -> subprocess.CompletedProcess:
     argv = args if args is not None else ["--input", "-"]
-    env = os.environ.copy()
-    if extra_env:
-        env.update(extra_env)
     return subprocess.run(
         [sys.executable, str(BRIDGE), *argv],
         input=stdin,
         capture_output=True,
         text=True,
-        env=env,
     )
 
 
