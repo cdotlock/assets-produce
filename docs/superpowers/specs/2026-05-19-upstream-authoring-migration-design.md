@@ -254,6 +254,24 @@ Each phase follows the project workflow: write `docs/superpowers/specs/phase-CN-
 - moonshort-backend untouched. n2m: comment-only DEPRECATED, no deletion,
   push gated on ack.
 
+### 8.1 Design refinements recorded during C2 execution
+
+- **Orchestration-skill filename.** The skill is authored at
+  `knowledge/novel-to-mss/novel_to_mss/SKILL.md` — a per-skill-dir
+  `SKILL.md` with frontmatter `name: novel_to_mss`. This is required by C1's
+  filesystem discovery, which globs `**/SKILL.md`; §4.2's
+  `knowledge/novel-to-mss/novel_to_mss.md` was loose wording, not a semantic
+  change. No red-line or scope impact.
+- **C2 injected-FAIL acceptance interpretation.** The gate is knowledge, not a
+  production gate engine (§12 red line), so the §6 C2 / line-225 "injected-FAIL
+  proves the gate halts" acceptance is met *deterministically*: a TEST-ONLY
+  helper derives `{verdict → action}` by per-cell parsing of the body's
+  `## Gate contract` and asserts `FAIL → HALT`, `CONDITIONAL →
+  FIX_AND_REREVIEW`, `PASS → ADVANCE`, throwing if any verdict cell is
+  under-specified/unclassifiable (a mis-specified FAIL is a hard error, never a
+  silent advance). The *live behavioral* proof — a real driving agent halting
+  end-to-end — is deferred to C3's demo-book e2e. No red-line or scope change.
+
 ## 9. Worktree / git strategy
 
 - This track runs in worktree `claude/admiring-wilson-5d9f34`, branched from
