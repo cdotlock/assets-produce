@@ -1,0 +1,11 @@
+{
+  "character_aliases": {
+    "Novy": "nova",
+    "Sparrow": "nova",
+    "Kade": "reid"
+  },
+  "location_aliases": {
+    "Oakridge High": "school",
+    "Vega home": "nova_house"
+  }
+}

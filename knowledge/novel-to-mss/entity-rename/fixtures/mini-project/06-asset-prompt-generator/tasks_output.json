@@ -1,0 +1,12 @@
+{
+  "style_name": "test-style",
+  "book_slug": "mini-project",
+  "series_character_prompts": {
+    "alice": {
+      "prompt": "18yo Alice Marie Hart, swim captain at Willow Academy. Sparrow pendant visible at neck. Ben calls her 'Sparrow' because of this pendant."
+    },
+    "ben": {
+      "prompt": "18yo Ben Taylor. Visible sparrow tattoo on left forearm — matches Alice's pendant."
+    }
+  }
+}

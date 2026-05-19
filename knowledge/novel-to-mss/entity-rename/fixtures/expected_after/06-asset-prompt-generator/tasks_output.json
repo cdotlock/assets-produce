@@ -1,0 +1,12 @@
+{
+  "style_name": "test-style",
+  "book_slug": "mini-project",
+  "series_character_prompts": {
+    "nova": {
+      "prompt": "18yo Nova Celeste Vega, swim captain at Oakridge Academy. Sparrow pendant visible at neck. Reid calls her 'Sparrow' because of this pendant."
+    },
+    "reid": {
+      "prompt": "18yo Reid Kade. Visible sparrow tattoo on left forearm — matches Nova's pendant."
+    }
+  }
+}

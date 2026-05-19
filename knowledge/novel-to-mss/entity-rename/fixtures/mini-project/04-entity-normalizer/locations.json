@@ -1,0 +1,19 @@
+{
+  "locations": {
+    "school": {
+      "full_name": "Willow Academy",
+      "sub_locations": {
+        "school_quad": "Central quad",
+        "school_pool": "Swim pool"
+      },
+      "aliases": ["Willow High"]
+    },
+    "alice_house": {
+      "full_name": "Hart family home",
+      "sub_locations": {
+        "alice_house_kitchen": "Kitchen"
+      },
+      "aliases": ["Hart home"]
+    }
+  }
+}

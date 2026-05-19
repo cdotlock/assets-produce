@@ -1,0 +1,27 @@
+{
+  "characters": {
+    "nova": {
+      "full_name": "Nova Celeste Vega",
+      "role": "MC",
+      "aliases": [
+        "Novy",
+        "Sparrow"
+      ],
+      "bible_file": "mc-bible-nova.md"
+    },
+    "reid": {
+      "full_name": "Reid Kade",
+      "role": "LI",
+      "aliases": [
+        "Kade"
+      ],
+      "bible_file": "li-bible-reid.md"
+    },
+    "mrs_hart": {
+      "full_name": "Mrs. Vega",
+      "role": "supporting",
+      "aliases": [],
+      "relation": "Nova's mother"
+    }
+  }
+}

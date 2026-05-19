@@ -1,0 +1,23 @@
+{
+  "locations": {
+    "school": {
+      "full_name": "Oakridge Academy",
+      "sub_locations": {
+        "school_quad": "Central quad",
+        "school_pool": "Swim pool"
+      },
+      "aliases": [
+        "Oakridge High"
+      ]
+    },
+    "nova_house": {
+      "full_name": "Vega family home",
+      "sub_locations": {
+        "nova_house_kitchen": "Kitchen"
+      },
+      "aliases": [
+        "Vega home"
+      ]
+    }
+  }
+}
