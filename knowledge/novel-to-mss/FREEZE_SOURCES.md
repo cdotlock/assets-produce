@@ -1,6 +1,6 @@
 # Freeze sources (C1)
 n2m HEAD at freeze: 8049ac772f7350ea593519fbeb891ccaee488c9c
-frozen: 2026-05-19T01:53:59Z
+frozen: 2026-05-19T01:58:11Z
 
 - novel-evaluator  <=  $N2M/skills/novel-evaluator/
 - character-architect  <=  $N2M/skills/character-architect/

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # C1 one-shot verbatim freeze of n2m authoring skills into knowledge/novel-to-mss/.
-# Idempotent: re-running reproduces identical output + manifest.
+# Frozen skill corpus + manifest are deterministic; FREEZE_SOURCES.md records freeze time and is intentionally excluded from the manifest.
 set -euo pipefail
 
 N2M="${N2M:-/Users/august/MobAI/novels-to-moonscript}"
@@ -39,7 +39,7 @@ n2m_sha="$(git -C "$N2M" rev-parse HEAD 2>/dev/null || echo unknown)"
 } > "$DEST/FREEZE_SOURCES.md"
 
 # Deterministic manifest (sorted, repo-relative paths)
-( cd "$DEST" && find . -type f ! -name FREEZE_MANIFEST.sha256 -print0 \
+( cd "$DEST" && find . -type f ! -name FREEZE_MANIFEST.sha256 ! -name FREEZE_SOURCES.md -print0 \
   | LC_ALL=C sort -z \
   | xargs -0 shasum -a 256 \
   | sed "s|  \./|  |" > FREEZE_MANIFEST.sha256 )
