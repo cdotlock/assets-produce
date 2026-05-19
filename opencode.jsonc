@@ -8,5 +8,8 @@
         "baseURL": "https://api.deepseek.com"
       }
     }
+  },
+  "skills": {
+    "paths": ["knowledge/novel-to-mss"]
   }
 }
