@@ -3,11 +3,13 @@
 //    transactional version-bump (one Asset row per (project_id, key, version))
 //    instead of reimplementing it.
 //  - assetServiceSingleton injects the real LLM-driven generator
-//    (createLlmGenerator, Phase 14 / spec §15 row 1.14): it loads the
-//    picked skill body, runs a generic tool-calling loop over that
-//    skill's allowlisted atomic tools, and surfaces the resulting OSS
-//    url. It lazily builds the AssetService so the HTTP mount is cheap
-//    until first use.
+//    (createLlmGenerator, Phase 14 / spec §15 row 1.14) wired with the
+//    Langfuse-`production`-first skill loader (spec §15 r1.16 / design
+//    D1): it loads the picked skill body from Langfuse with a
+//    git-canonical local fallback, runs a generic tool-calling loop over
+//    that skill's allowlisted atomic tools, and surfaces the resulting
+//    OSS url. It lazily builds the AssetService so the HTTP mount is
+//    cheap until first use.
 //  - placeholderGenerator is the retired Phase 8 deterministic stub. It
 //    is kept exported (not injected) for offline `agent serve`
 //    smoke-tests and its own unit test; production no longer uses it.
@@ -20,6 +22,7 @@ import { lazy } from "@/util/lazy"
 import { Service as AssetSvc, defaultLayer as assetLayer } from "@/business/asset/asset"
 import { AssetService } from "./asset-service"
 import { createLlmGenerator } from "./llm-generator"
+import { createLangfuseSkillLoader } from "./langfuse-skill-loader"
 import { createLangfuseTracer } from "./tracer"
 import { loadAssetAuthFromEnv } from "./http/auth"
 import { buildAssetServiceApp } from "./http"
@@ -89,7 +92,12 @@ export const placeholderGenerator: AssetGenerator = {
 export const assetServiceSingleton = lazy(
   () =>
     new AssetService({
-      generator: createLlmGenerator(),
+      // Langfuse-`production`-first skill loader with git-canonical local
+      // fallback (spec §15 r1.16 / design D1). Langfuse unreachable or
+      // missing creds → local body, job never hard-fails. The function
+      // default of createLlmGenerator stays local-only so hermetic unit
+      // tests never touch Langfuse; production opts in here.
+      generator: createLlmGenerator({ loadSkill: createLangfuseSkillLoader() }),
       writer: defaultAssetWriter,
       // Falls back to nullTracer if LANGFUSE_PUBLIC_KEY / SECRET_KEY are
       // not set (dev / CI without LF credentials still completes jobs).
