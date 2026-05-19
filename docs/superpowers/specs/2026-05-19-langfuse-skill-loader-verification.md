@@ -2,8 +2,8 @@
 
 > 对 [`2026-05-19-langfuse-skill-loader-plan.md`](2026-05-19-langfuse-skill-loader-plan.md) 验收清单逐条核验。2026-05-19。
 > 治理：主 spec §15 r1.17。设计：[`2026-05-19-langfuse-skill-loader-design.md`](2026-05-19-langfuse-skill-loader-design.md)（D1–D8）。
-> 实现 commits（branch `claude/beautiful-feistel-d80d5f`，基于 `b216a7b`）：
-> `8ca8826` docs / `1de76cb` refactor(skill-source) / `a1d4fd1` feat(loader) / `d59c581` feat(sync) / `fac8f81` docs(S4) / 本报告。
+> 实现 commits（branch `claude/beautiful-feistel-d80d5f`，rebased onto origin/main `3191c3e`）：
+> `6799835` docs(decision+design+plan) / `c13ced0` refactor(skill-source) / `cd5a42d` feat(loader) / `0c811d8` feat(sync) / `5e39d03` docs(S4) / `c76455d` 本报告 / `a918145` docs(§15 1.16→1.17 collision fix)。
 
 ## 环境前提
 
@@ -24,19 +24,19 @@
   - S1 测试②：`--label production` + 空 allowlist body → `rejected-allowlist`，`createPrompt` 未被调用，整体非 ok（CLI 映射非零退出）。`staging` 不设闸（编辑暂存层）。
 - [x] **Phase 14 既有生成在 local==Langfuse 时行为不变（回归）**
   - `skill-source` 抽取为**行为保真**：`parseAllowlist`/`SkillInfeasibleError`/`LoadedSkill`/本地读 逐字搬迁，llm-generator 原样 re-export；新增 load-time drift guard 锁 `ATOMIC_TOOLS` 键 == 规范 id 列表。
-  - `bun test test/business/asset-service/`（15 文件 200 测试）：199 pass。唯一 fail = `ep-sprite-spec`（**预存 B1 缺体债，clean HEAD stash 复现，与本改动无关**，已 spawn 独立任务）。
-  - `tsgo --noEmit` 全包 exit 0。
+  - `bun test test/business/asset-service/`（15 文件 200 测试）：**200 pass / 0 fail**（post-rebase 重跑；早前唯一 fail `ep-sprite-spec` 系预存 B1 缺体债，已由 origin/main `659fbdb`「feat: add ep-sprite-spec skill body」上游补体解决，rebase 后转绿）。
+  - `tsgo --noEmit` 全包 exit 0（post-rebase 重验）。
 - [x] **§11.4 对外接口零变更核对**
   - 无新增/改动 AssetKind、REST 路由、DB schema、error code。`GenerationOutcome` 码集不变（坏 body 仍归 `GENERATION_REJECTED`）。loop / 原子工具 / `wire.ts` 注入形态（lazy AssetService，generator/writer/tracer 三字段）不变 —— 仅 generator 的 `loadSkill` 注入了 Langfuse-first 实现。
 - [x] **`.env.example`/README/CLAUDE.md 同步**（commit `fac8f81`）
   - `.env.example`：新增 `ASSETS_SKILL_LANGFUSE_TTL_MS=60000` + 无凭据降级注释；确认 `LANGFUSE_HOST/PROJECT/PUBLIC_KEY/SECRET_KEY` 在位。
   - 项目 `CLAUDE.md` Langfuse 节：§15 r1.17 加载模型、label 约定、promote 闸、`--check` 漂移哨兵 + 回灌纪律。
-  - `knowledge/asset-generation/README.md`：纠正过时 Phase-8 草稿（曾误称 loop 仍接 placeholder、只列 8/12 skill、称 matting/cutout 未注册）→ 现 Phase-14 + Langfuse-first 真实态；ep-sprite-spec 缺体显式标注。
-- [~] **bootstrap 完成：production label 齐 + 端到端通** —— **本环境不可执行（无凭据），转 runbook（见下）**。另：clean bootstrap 还被预存的 `ep-sprite-spec.md` 缺体阻塞（已独立 spawn 修复任务）。非本计划代码缺陷。
+  - `knowledge/asset-generation/README.md`：纠正过时 Phase-8 草稿（曾误称 loop 仍接 placeholder、只列 8/12 skill、称 matting/cutout 未注册）→ 现 Phase-14 + Langfuse-first 真实态（ep-sprite-spec 经上游 `659fbdb` 补体后按常规 B1 行登记，不再标缺体）。
+- [~] **bootstrap 完成：production label 齐 + 端到端通** —— **本环境不可执行（无凭据），转 runbook（见下）**。（早前的 `ep-sprite-spec.md` 缺体阻塞已由上游 `659fbdb` 解决，不再是前置。）
 
 ## S5 Bootstrap Runbook（凭据环境执行）
 
-前置：`ep-sprite-spec.md` 缺体任务完成（否则 `sync` 会对该条报 `missing-local`、整体非 0）。
+前置：无（早前的 `ep-sprite-spec.md` 缺体已由 origin/main `659fbdb` 上游补体，12 条 body 齐；`sync` 不再对该条报 `missing-local`）。
 
 1. 配 `LANGFUSE_PUBLIC_KEY`/`SECRET_KEY`（env 或 `.env`）。
 2. `agent skills sync asset-generation --label staging` —— 12 条本地 body 推 staging。
@@ -48,6 +48,6 @@
 
 ## 偏差与遗留
 
-- **`ep-sprite-spec.md` 缺体**：预存 B1 债（commit `fd30d52` 注册名、`b216a7b` 只补了 outfit-anchor 体）。clean HEAD 复现，**非本改动引入**。已通过 spawn 开独立修复任务；README 已标注。
+- **`ep-sprite-spec.md` 缺体（已解决）**：曾为预存 B1 债（`fd30d52` 注册名、`b216a7b` 仅补 outfit-anchor 体）；rebase onto origin/main 后由上游 `659fbdb`（feat: add ep-sprite-spec skill body）补体解决，12 条 body 齐、相关测试转绿。早前为此 spawn 的独立修复任务已冗余，可关闭。
 - **golden-asset 内容质量 eval**：D8 / §15 r1.17 开放后续项，本计划明确不覆盖，另起。
 - **production promote / 实时 bootstrap**：需凭据环境 + 人工 go-live 判断（D7 设计即如此），不在无凭据环境自动执行。

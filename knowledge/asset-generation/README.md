@@ -80,7 +80,7 @@ registered bodies drive real atomic tools end to end.
 | `matting-spec.md` | matting-spec | no AssetKind — `skill_hint` / picker only (Phase 13 body, registered Phase 14) |
 | `cutout-spec.md` | cutout-spec | no AssetKind — `skill_hint` / picker only (Phase 13 body, registered Phase 14) |
 | `outfit-anchor-spec.md` | outfit-anchor-spec | no AssetKind — `skill_hint` / picker only (B1 NRBI, spec §15 r1.15) |
-| `ep-sprite-spec.md` | ep-sprite-spec | no AssetKind — `skill_hint` / picker only (B1 NRBI; **body file missing on HEAD — see backlog**) |
+| `ep-sprite-spec.md` | ep-sprite-spec | no AssetKind — `skill_hint` / picker only (B1 NRBI, spec §15 r1.15) |
 
 ## Conventions
 
