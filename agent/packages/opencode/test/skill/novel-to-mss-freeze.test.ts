@@ -11,6 +11,7 @@ const EXPECTED = [
   "episode-writer","episode-writer-reviewer","arc-reviewer",
 ]
 
+// Frozen corpus is LF-only (rsync -a from a unix n2m repo). A CRLF source would silently mis-key (name -> "name\r"), a false-green — acceptable only because the freeze is verbatim from a unix origin.
 function frontmatter(md: string): Record<string,string> {
   const m = md.match(/^---\n([\s\S]*?)\n---/)
   if (!m) return {}
@@ -46,6 +47,7 @@ test("frozen corpus matches FREEZE_MANIFEST.sha256 (no drift)", () => {
   const lines = readFileSync(manifestPath, "utf8").split("\n").filter(Boolean)
   expect(lines.length).toBeGreaterThanOrEqual(14)
   for (const line of lines) {
+    // Format contract: scripts/c1-freeze-novel-to-mss.sh emits 'shasum -a 256' output sed-stripped of './' => <64hex><2 spaces><relpath>. If that script's hash tool/format changes, update these offsets.
     const sha = line.slice(0, 64)
     const rel = line.slice(66) // "<sha>  <relpath>"
     const abs = path.join(CORPUS, rel)
