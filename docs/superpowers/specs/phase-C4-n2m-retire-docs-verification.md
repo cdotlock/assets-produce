@@ -158,4 +158,4 @@ All five phases met their acceptance criteria. The upstream novel→`.mss` autho
 
 **n2m push status (honest):** The 10 upstream n2m authoring skills were retired (DEPRECATED header, comment-only, not deleted — D7) via commit `e2802bd`, pushed to **`AugustZAD/Dramatizer-MSS`** (the user's own namespace) — NOT the design-named `cdotlock/novels-to-moonscript` repo. This deviation from the design's assumed push target was surfaced to the user before any edit; the user explicitly chose to push to their own repo. The global git red line is satisfied (user's namespace + explicit chat ack). This is recorded here as an authorized scope clarification, not a gap.
 
-The C-track is complete. Merging to `main` is a separate, user-coordinated step (§5 above).
+The C-track is complete. Merging to `main` is a separate, user-coordinated step (§6 above).
