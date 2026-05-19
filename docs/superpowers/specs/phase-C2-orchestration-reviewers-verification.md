@@ -54,7 +54,7 @@ Confirmed from the frozen C1 bodies `knowledge/novel-to-mss/<name>/SKILL.md`. Th
 - `bun test test/skill test/business --timeout 30000` (opencode pkg) → **219 pass, 0 fail, 856 expect() calls, 19 files** — covers the C2 test file (`novel-to-mss-orchestration.test.ts` = discovery + structural + injected-FAIL, 12 tests) + all C1 tests + every pre-existing skill/business test = full C2 blast radius, **zero regressions**.
 - `bun run typecheck` (agent, all packages) → **4 successful, 4 total** (clean).
 - `git status --short` → clean working tree.
-- C2 diff `3789a0d..HEAD` → **6 files, 962 insertions, 0 deletions**: 1 knowledge body + 1 test file + 3 fixtures + 1 design-doc note. **ZERO `agent/.../src/**` production change** (verified: `git diff … -- 'agent/packages/opencode/src/**'` empty).
+- C2 implementation deliverable (stable subset, `3789a0d..e232e5d`) → **6 files, 962 insertions, 0 deletions**: 1 knowledge body `novel_to_mss/SKILL.md` (+263), 1 test file `novel-to-mss-orchestration.test.ts` (+510), 3 reviewer-verdict fixtures (+171: 57/62/52), 1 design-doc §8.1 note (+18). The phase is then closed by **`docs:`-only commits** — this verification report (`4d43de4`, +75) and its self-referential stat correction — which add no code/knowledge/fixture and no `src/` change. **ZERO `agent/packages/opencode/src/**` production change across the entire C2 range** (verified: `git diff 3789a0d..HEAD -- 'agent/packages/opencode/src/**'` empty). For an exact integer at any HEAD use `git diff 3789a0d..HEAD --numstat`.
 
 ---
 
