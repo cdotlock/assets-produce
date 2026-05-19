@@ -4,6 +4,8 @@ import * as dns from "dns/promises"
 import * as net from "net"
 import { Service as SkillService, type Scope } from "./skill"
 import { Service as LangfuseService } from "@/langfuse/langfuse"
+import { ASSET_GENERATION_SKILLS } from "@/business/asset-service/intent-to-skill"
+import { readLocalSkillBody, parseAllowlist } from "@/business/asset-service/skill-source"
 import { NamedError } from "@opencode-ai/core/util/error"
 import { z } from "zod"
 
@@ -347,6 +349,176 @@ export const showSkill = (name: string) =>
       body = prompt?.body
     }
     return { row, body }
+  })
+
+// ---------- skills sync asset-generation (D4 + D5, plan §S1) ----------
+//
+// asset-generation skill bodies are system-profile fixed constants
+// (ASSET_GENERATION_SKILLS) — NOT in the creator `skills` DB table. This
+// command pushes / parity-checks their git-canonical local bodies against
+// Langfuse. It deliberately does NOT touch SkillService.
+
+export type SyncSkillState =
+  | "pushed"
+  | "matched"
+  | "drift"
+  | "missing-local"
+  | "rejected-allowlist"
+  | "error"
+
+export interface SyncSkillStatus {
+  name: string
+  state: SyncSkillState
+  detail?: string
+  bytes?: number
+}
+
+export interface SyncAssetGenerationOpts {
+  /** Langfuse label to push/compare against: "staging" | "production". */
+  label: string
+  /** parity-check only — zero writes, non-ok on any drift (D3). */
+  check: boolean
+  /** Defaults to ASSET_GENERATION_SKILLS; injectable for hermetic tests. */
+  skills?: readonly string[]
+  /** Defaults to skill-source.readLocalSkillBody; injectable for tests. */
+  readBody?: (skill: string) => Promise<string>
+}
+
+export interface SyncAssetGenerationResult {
+  label: string
+  mode: "push" | "check"
+  /** false ⇒ caller must exit non-zero (drift / reject / error / missing). */
+  ok: boolean
+  statuses: SyncSkillStatus[]
+}
+
+const SYNC_LABELS = new Set(["staging", "production"])
+
+/**
+ * Push (or `--check`) every asset-generation skill body to Langfuse.
+ *
+ * - `--label production` runs the **promote gate (D5)**: a body whose
+ *   `parseAllowlist` yields 0 known tools is REFUSED (pointing production
+ *   at an infeasible body would break every creator of that kind). The
+ *   gate uses the EXACT parser the Phase-14 loop runs (skill-source).
+ * - Every skill is reported individually; one failure ⇒ overall non-ok.
+ *   Nothing is ever silently half-pushed.
+ * - Langfuse being unreachable surfaces as a readable per-skill error
+ *   (or, for missing creds, a layer-build failure the CLI formats) — it
+ *   never throws an unhandled crash.
+ */
+export const syncAssetGeneration = (
+  opts: SyncAssetGenerationOpts,
+): Effect.Effect<SyncAssetGenerationResult, SkillCliError, LangfuseService> =>
+  Effect.gen(function* () {
+    if (!SYNC_LABELS.has(opts.label)) {
+      return yield* Effect.fail(
+        new SkillCliError({
+          op: "sync",
+          message: `--label must be 'staging' or 'production' (got: ${opts.label})`,
+        }),
+      )
+    }
+
+    const skills = opts.skills ?? ASSET_GENERATION_SKILLS
+    const readBody = opts.readBody ?? readLocalSkillBody
+    const langfuse = yield* LangfuseService
+    const mode: "push" | "check" = opts.check ? "check" : "push"
+    const statuses: SyncSkillStatus[] = []
+    let ok = true
+
+    for (const name of skills) {
+      const key = promptKeyFor(name)
+
+      // ---- git-canonical local body ----
+      const bodyRes = yield* Effect.tryPromise({
+        try: () => readBody(name),
+        catch: (e) => new SkillCliError({ op: "sync.read", message: e instanceof Error ? e.message : String(e) }),
+      }).pipe(
+        Effect.match({
+          onFailure: (err: SkillCliError) => ({ _tag: "err" as const, message: err.message }),
+          onSuccess: (b: string) => ({ _tag: "ok" as const, body: b }),
+        }),
+      )
+      if (bodyRes._tag === "err") {
+        ok = false
+        statuses.push({ name, state: "missing-local", detail: bodyRes.message })
+        continue
+      }
+      const body = bodyRes.body
+      const bytes = Buffer.byteLength(body, "utf8")
+
+      // ---- parity-check: compare only, zero writes ----
+      if (mode === "check") {
+        const remote = yield* langfuse.getPrompt(key, { label: opts.label }).pipe(
+          Effect.match({
+            onFailure: (e: { message: string }) => ({ _tag: "err" as const, message: e.message }),
+            onSuccess: (p: { body: string }) => ({ _tag: "ok" as const, body: p.body }),
+          }),
+        )
+        if (remote._tag === "err") {
+          ok = false
+          statuses.push({
+            name,
+            state: "drift",
+            detail: `not retrievable at label '${opts.label}': ${remote.message}`,
+            bytes,
+          })
+          continue
+        }
+        if (remote.body === body) {
+          statuses.push({ name, state: "matched", bytes })
+        } else {
+          ok = false
+          statuses.push({
+            name,
+            state: "drift",
+            detail: `local ${bytes}B vs Langfuse ${Buffer.byteLength(remote.body, "utf8")}B`,
+            bytes,
+          })
+        }
+        continue
+      }
+
+      // ---- promote gate (D5) — production only ----
+      if (opts.label === "production") {
+        const allow = parseAllowlist(body)
+        if (allow.length === 0) {
+          ok = false
+          statuses.push({
+            name,
+            state: "rejected-allowlist",
+            detail:
+              `body parses to 0 known atomic tools — refusing to point ` +
+              `production at an infeasible body (it would reject every ` +
+              `creator of this kind). Fix the "## Atomic tools (allowed)" section.`,
+            bytes,
+          })
+          continue
+        }
+      }
+
+      // ---- push ----
+      const pushed = yield* langfuse
+        .createPrompt(key, body, {
+          label: opts.label,
+          commitMessage: `skills sync asset-generation ${name} (${opts.label})`,
+        })
+        .pipe(
+          Effect.match({
+            onFailure: (e: { message: string }) => ({ _tag: "err" as const, message: e.message }),
+            onSuccess: (p: { version: number }) => ({ _tag: "ok" as const, version: p.version }),
+          }),
+        )
+      if (pushed._tag === "err") {
+        ok = false
+        statuses.push({ name, state: "error", detail: pushed.message, bytes })
+      } else {
+        statuses.push({ name, state: "pushed", detail: `v${pushed.version}`, bytes })
+      }
+    }
+
+    return { label: opts.label, mode, ok, statuses }
   })
 
 export * as SkillCli from "./cli"

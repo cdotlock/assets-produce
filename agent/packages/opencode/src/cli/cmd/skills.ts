@@ -59,7 +59,7 @@ function pickSource(args: {
 
 export const SkillsCommand = cmd({
   command: "skills <command>",
-  describe: "manage skills (add/update/delete/list/enable/disable/show/export-schema)",
+  describe: "manage skills (add/update/delete/list/enable/disable/show/export-schema/sync)",
   builder: (yargs: Argv) =>
     yargs
       .command(SkillsAddCommand)
@@ -70,6 +70,7 @@ export const SkillsCommand = cmd({
       .command(SkillsDisableCommand)
       .command(SkillsShowCommand)
       .command(SkillsExportSchemaCommand)
+      .command(SkillsSyncCommand)
       .demandCommand(),
   async handler() {},
 })
@@ -473,5 +474,71 @@ export const SkillsExportSchemaCommand = cmd({
       },
     }
     writeOut(JSON.stringify(schema, null, 2))
+  },
+})
+
+const skillsSyncOptions: OptionDef[] = [
+  {
+    flag: "--label",
+    description: "Langfuse label to push/compare against",
+    extra: { choices: ["staging", "production"] as const, default: "staging" },
+  },
+  {
+    flag: "--check",
+    description: "parity-check only: compare git-canonical bodies vs Langfuse, zero writes, non-zero exit on drift",
+    type: "boolean",
+    extra: { default: false },
+  },
+]
+
+interface SkillsSyncArgs {
+  target: string
+  label: string
+  check: boolean
+}
+
+export const SkillsSyncCommand = cmd({
+  command: "sync <target>",
+  describe: "push or parity-check asset-generation skill bodies against Langfuse",
+  builder: (yargs: Argv) =>
+    toYargsBuilder<unknown, SkillsSyncArgs>(
+      yargs.positional("target", {
+        type: "string",
+        demandOption: true,
+        choices: ["asset-generation"] as const,
+        describe: "which skill set to sync (only 'asset-generation' today)",
+      }),
+      skillsSyncOptions,
+    ),
+  async handler(args) {
+    const label = String(args.label)
+    let check = Boolean(args.check)
+
+    // A non-check sync WRITES to Langfuse — honor global --dry-run by
+    // degrading to a parity-check (compare only, zero writes).
+    if (!check && getGlobalContext().dryRun) {
+      warnDryRunIgnored("skills sync (writing) — running as --check instead")
+      check = true
+    }
+
+    const exit = await runWithLayers(SkillCli.syncAssetGeneration({ label, check }))
+    if (Exit.isFailure(exit)) {
+      const { exitCode, message } = formatError(exit.cause)
+      UI.error(message)
+      process.exit(exitCode)
+    }
+    const res = exit.value
+    const wantJson = getGlobalContext().output === "json"
+    if (wantJson) {
+      writeOut(JSON.stringify(res, null, 2))
+    } else {
+      for (const s of res.statuses) {
+        writeOut(`${s.state}\t${s.name}${s.detail ? `\t${s.detail}` : ""}`)
+      }
+      writeOut(`\n${res.mode} label=${res.label} ok=${res.ok} (${res.statuses.length} skills)`)
+    }
+    // Drift / reject / per-skill error / missing-local ⇒ non-zero so this
+    // doubles as a CI parity sentinel (D3) and a fail-loud push.
+    if (!res.ok) process.exit(ExitCode.GENERAL)
   },
 })
