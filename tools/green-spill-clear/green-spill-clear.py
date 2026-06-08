@@ -19,7 +19,7 @@ was an in-place batch mutator (no output required per file). As an atomic single
 tool this implementation MUST produce an output, so a non-RGBA input is promoted to RGBA
 and written through to dst unchanged (same pixel data, new RGBA mode wrapping).
 
-Migrated 2026-05-16 from moonshort-backend/generate-upscale-matting/green_spill_clear.py.
+Migrated 2026-05-16 from lunaverse-backend/generate-upscale-matting/green_spill_clear.py.
 Backend batch (--paths, --workers, ThreadPoolExecutor) removed entirely.
 
 Usage (JSON entry, preferred):

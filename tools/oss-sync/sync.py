@@ -2,7 +2,7 @@
 """
 sync_to_oss.py — push final/*.webp to OSS under nrbi/<rel>.webp.
 
-Reads moonscripts/<slug>/assets/final/{series,ep_sprites}/*.webp and uploads
+Reads lunascripts/<slug>/assets/final/{series,ep_sprites}/*.webp and uploads
 to bucket OSS_BUCKET (mobai-file) with these key conventions:
 
     final/series/character_*.webp                → SKIP (reference-only, not in script)
@@ -239,7 +239,7 @@ def main() -> int:
     ap.add_argument("--plan-file", type=pathlib.Path, default=None,
                     help="Path to dedup_tasks_output.json (or render_todo.json) "
                          "for --strict audit. Defaults to "
-                         "moonscripts/<slug>/dedup_tasks_output.json.")
+                         "lunascripts/<slug>/dedup_tasks_output.json.")
     args = ap.parse_args()
 
     env_path = pathlib.Path(args.env_file)
@@ -250,14 +250,14 @@ def main() -> int:
     bucket_name = env["OSS_BUCKET"]
     endpoint = env["OSS_ENDPOINT"]
 
-    book_dir = BACKEND_ROOT / "moonscripts" / args.book_slug
+    book_dir = BACKEND_ROOT / "lunascripts" / args.book_slug
     final_root = book_dir / "assets" / "final"
     if not final_root.is_dir():
         return _exit(
             f"final/ not found: {final_root}\n"
-            "Hint: the book-slug-aware CLI is a moonshort-backend relic — this\n"
+            "Hint: the book-slug-aware CLI is a lunaverse-backend relic — this\n"
             "      file lives in assets-produce/tools/oss-sync/ now, where the\n"
-            "      moonscripts/<slug>/ layout does not exist. Use the JSON\n"
+            "      lunascripts/<slug>/ layout does not exist. Use the JSON\n"
             "      entry instead: --input <path-to-json> with {source_dir,\n"
             "      oss_prefix, dry_run?}."
         )
@@ -313,7 +313,7 @@ def main() -> int:
         return 1
 
     if args.strict:
-        slug_root = BACKEND_ROOT / "moonscripts" / args.book_slug
+        slug_root = BACKEND_ROOT / "lunascripts" / args.book_slug
         plan_path = args.plan_file or (slug_root / "dedup_tasks_output.json")
         if not plan_path.exists():
             print(f"✗ --strict: plan file not found: {plan_path}", file=sys.stderr)
@@ -350,8 +350,8 @@ def _exit(msg: str) -> int:
 
 # ---------- generic JSON entry (Phase 9) ------------------------------------
 #
-# The legacy `main()` above is tightly coupled to the moonshort-backend
-# `moonscripts/<slug>/assets/final/` layout. The JSON entry below offers a
+# The legacy `main()` above is tightly coupled to the lunaverse-backend
+# `lunascripts/<slug>/assets/final/` layout. The JSON entry below offers a
 # generic "scan source_dir → upload to oss_prefix" flow that any caller
 # (atomic tools are still discouraged here per design § 11; this is for
 # operator scripts) can drive without knowing the legacy directory layout.

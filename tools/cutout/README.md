@@ -15,7 +15,7 @@ Atomic tool: ONE input file -> ONE output file. No directory walking, no
 batch paths/ids, no worker pool, no backup tree, no REPO_ROOT discovery.
 
 > Migrated 2026-05-17 from
-> `moonshort-backend/generate-upscale-matting/cutout.py`.
+> `lunaverse-backend/generate-upscale-matting/cutout.py`.
 > Batch logic (`--root`, `--only`, `--workers`, `--force`, `--backup-to`,
 > the `series/character_*.png` + `ep_sprites/**` directory walk,
 > ThreadPoolExecutor) removed entirely. The atomic tool preserves the per-file

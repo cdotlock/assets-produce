@@ -16,7 +16,7 @@ You are producing **one image of one character**. The output should:
   iterations bump the version via `key`-collision on Asset.
 
 If the caller wants a scene with a character in it, route to
-`scene-bg-spec` or `shot-image-from-mss` instead — those skills know how
+`scene-bg-spec` or `shot-image-from-ls` instead — those skills know how
 to compose multiple characters and a background.
 
 ## Atomic tools (allowed)
@@ -95,7 +95,7 @@ The orchestrator writes the Asset row with `type="image"`,
 ## Boundary
 
 - Need a scene with character + background composed together →
-  `scene-bg-spec` if the background is the focus, `shot-image-from-mss`
+  `scene-bg-spec` if the background is the focus, `shot-image-from-ls`
   if it's a specific shot in a video / comic.
 - Need a CG (effect-heavy, particle / lighting beats) →
   `cg-render-spec`.

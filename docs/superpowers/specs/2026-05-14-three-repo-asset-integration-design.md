@@ -7,8 +7,8 @@
 **Master spec**: [`2026-04-29-assets-produce-spec.md`](2026-04-29-assets-produce-spec.md) § 15 行 1.10
 **Repos in scope**:
 - `cdotlock/assets-produce`（本仓库，opencode fork；用户维护）
-- `cdotlock/novels-to-moonscript`（MSS 剧本生成；用户维护）
-- `cdotlock/moonshort-backend`（小程序后端；**不是用户维护**，最小改动）
+- `cdotlock/novels-to-lunascript`（LS 剧本生成；用户维护）
+- `cdotlock/lunaverse-backend`（小程序后端；**不是用户维护**，最小改动）
 
 ---
 
@@ -24,13 +24,13 @@
 - WebUI 在 `web/`，creator profile
 - 没有对外提供 asset 生产的 HTTP API；外部 agent 只能直接 `bun ... agent <cmd>` 或读 OSS
 
-**novels-to-moonscript**（用户维护）：
+**novels-to-lunascript**（用户维护）：
 
-- 把小说切成 MSS（MoonShort Script）JSON
+- 把小说切成 LS（Lunascripts）JSON
 - 输出含 `asset_ref` 节点（指向角色立绘 / 场景背景 / CG / Cover），目前 `asset_ref.url` 大多是占位或空
 - 期待下游能根据 `asset_ref.id` / `asset_ref.name` 查到真实 OSS URL
 
-**moonshort-backend**（不是用户维护）：
+**lunaverse-backend**（不是用户维护）：
 
 - TypeScript / NestJS-ish，BullMQ outbox + Postgres
 - `app/upstream/agent-forge-client.ts`：interface `lookupAssets` / `createAsset` / `pollAsset`，目前两个 mode
@@ -44,8 +44,8 @@
 三个仓库之间**没有共享 library**，只通过三条窄通道连接：
 
 1. **共享 OSS bucket** — 所有真正的 asset binary（图、视频、CG webp）最终都在同一个阿里云 OSS。每个 repo 都有自己的 OSS client，凭据从 env 注入
-2. **MSS JSON 契约** — `novels-to-moonscript` 写出的 MSS（含 `asset_ref`）就是上游用来"点菜"的菜单；下游（assets-produce / backend）读这份 JSON，照菜单生成
-3. **HTTP upstream 客户端** — 当前只有 `moonshort-backend → agent-forge-client.ts`（throw 在 real mode），没人 → assets-produce
+2. **LS JSON 契约** — `novels-to-lunascript` 写出的 LS（含 `asset_ref`）就是上游用来"点菜"的菜单；下游（assets-produce / backend）读这份 JSON，照菜单生成
+3. **HTTP upstream 客户端** — 当前只有 `lunaverse-backend → agent-forge-client.ts`（throw 在 real mode），没人 → assets-produce
 
 ### 1.3 当前问题
 
@@ -53,7 +53,7 @@
 |---|---|
 | Agent Forge 还在 backend 接口里挂着 | `agent-forge-client.ts` real mode throw |
 | assets-produce 没有"对外服务"形态 | 外部进程进不来 |
-| MSS 的 `asset_ref` 是占位 | 没有"按 name 查 url"的查询面 |
+| LS 的 `asset_ref` 是占位 | 没有"按 name 查 url"的查询面 |
 | CG / sync-to-oss 在 backend 仓 | 与小说后端无关的图像生产逻辑塞错地方 |
 
 ---
@@ -62,19 +62,19 @@
 
 ### 2.1 目标
 
-1. assets-produce 对外提供**统一 asset 生产 + 检索面**：novels-to-moonscript 和 moonshort-backend 不再各自手搓
+1. assets-produce 对外提供**统一 asset 生产 + 检索面**：novels-to-lunascript 和 lunaverse-backend 不再各自手搓
 2. 接口形态**REST + MCP 双层**，agent-native：REST 给传统 HTTP 调用方，MCP 给 LLM agent 直接挂载
 3. 接口语义**意图驱动**（intent-based）而非过程化：调用方说"我要给 ep_3/character_a 出一张立绘，参考这堆图"，怎么编排（先 spec → 再生成 → 再抠图）是 assets-produce 内部 mini agent loop 的事
-4. moonshort-backend 改动**收敛在 client 层**：interface 不改，只换 `agent-forge-client.ts` 的 real mode 实现 → HTTP to assets-produce
-5. novels-to-moonscript 改动**收敛在写出端**：MSS `asset_ref` 增加新字段供下游精准查询，不强制重写整体
-6. CG / sync-to-oss / 抠图 / upscale 这种**纯素材生产工具**全部搬到 assets-produce 的 `tools/` 下，moonshort-backend 不再持有
+4. lunaverse-backend 改动**收敛在 client 层**：interface 不改，只换 `agent-forge-client.ts` 的 real mode 实现 → HTTP to assets-produce
+5. novels-to-lunascript 改动**收敛在写出端**：LS `asset_ref` 增加新字段供下游精准查询，不强制重写整体
+6. CG / sync-to-oss / 抠图 / upscale 这种**纯素材生产工具**全部搬到 assets-produce 的 `tools/` 下，lunaverse-backend 不再持有
 
 ### 2.2 非目标
 
-- 不改 MSS 整体 schema（只在 `asset_ref` 上加可选字段）
+- 不改 LS 整体 schema（只在 `asset_ref` 上加可选字段）
 - 不引入新的 message broker / event bus（OSS + HTTP poll 已够）
 - 不实现"自动重生 / 永远在线"的 daemon —— 调用方在自己侧管 retry
-- 不为 moonshort-backend 写"理想后端"，只让旧 client 接口跑得通
+- 不为 lunaverse-backend 写"理想后端"，只让旧 client 接口跑得通
 - 不在本设计内规划计费 / 多租户 / 配额
 - 不动 Agent Forge legacy 代码（已废弃，自生自灭）
 
@@ -84,10 +84,10 @@
 
 ```
                     +---------------------+
-                    |  novels-to-moonscript|
+                    |  novels-to-lunascript|
                     |  (Python)            |
                     +-----+----------+----+
-              MSS write   |          | asset.lookup (HTTP)
+              LS write   |          | asset.lookup (HTTP)
               (S3/local)  |          |
                           v          v
                      +-----------------+
@@ -98,7 +98,7 @@
                   write |         | read
                         |         |
 +-------------------+   |   +-----+---------------------+
-| moonshort-backend |   |   | assets-produce            |
+| lunaverse-backend |   |   | assets-produce            |
 | (TS, 不维护)      |   |   | (TS, opencode fork)        |
 |                   |   |   |                            |
 |  agent-forge-     +-->+-->| REST  /api/v1/assets/...   |
@@ -123,8 +123,8 @@
 
 | 方向 | 通道 | 协议 | 同步/异步 |
 |---|---|---|---|
-| novels-to-moonscript → assets-produce | `POST /api/v1/assets/lookup` | REST | 同步 |
-| moonshort-backend → assets-produce | `POST /api/v1/assets/create` + `GET /api/v1/assets/jobs/:id` | REST | 异步（poll） |
+| novels-to-lunascript → assets-produce | `POST /api/v1/assets/lookup` | REST | 同步 |
+| lunaverse-backend → assets-produce | `POST /api/v1/assets/create` + `GET /api/v1/assets/jobs/:id` | REST | 异步（poll） |
 | 任意 agent → assets-produce | MCP `assets.create` / `assets.lookup` / `assets.status` | MCP | 由 client 决定 |
 | 任意 → 任意 | OSS 直接 GET/PUT | S3 protocol | — |
 
@@ -163,7 +163,7 @@
     "atomic_tool_hint": "generate-image-nanobanana",
     "skill_hint": "character-portrait-spec"
   },
-  "client_request_id": "moonshort-backend:remix:42",
+  "client_request_id": "lunaverse-backend:remix:42",
   "callback_url": null
 }
 ```
@@ -273,12 +273,12 @@
 **语义**：
 
 - key-based lookup 是**精确匹配**（带或不带 version；不带 = 最新 current）
-- name-based lookup 是 fuzzy（先精确，找不到走 substring / 同义词；在本设计里走简单 substring，足够 novels-to-moonscript 用）
+- name-based lookup 是 fuzzy（先精确，找不到走 substring / 同义词；在本设计里走简单 substring，足够 novels-to-lunascript 用）
 - 每个 query 独立成功/失败，不整体 fail
 
 ### 4.4 `asset.catalog.since`
 
-**意图**："我（moonshort-backend）想周期性拉 catalog 增量，方便本地 cache"
+**意图**："我（lunaverse-backend）想周期性拉 catalog 增量，方便本地 cache"
 
 **REST**：`GET /api/v1/assets/catalog?project_id=...&since=...&limit=200`
 
@@ -297,7 +297,7 @@
 **语义**：
 
 - 单向拉取（pull），不推送
-- moonshort-backend 用这个做 incremental sync，把已知 asset 写进自己 db 当 cache
+- lunaverse-backend 用这个做 incremental sync，把已知 asset 写进自己 db 当 cache
 - 不暴露失败的 job / 内部 mini agent loop 细节
 
 ---
@@ -342,7 +342,7 @@ knowledge/asset-generation/
 ├── scene-bg-spec.md                  # 场景背景生成流程
 ├── cg-render-spec.md                 # CG 渲染（从 backend 迁来逻辑）
 ├── cover-spec.md                     # 封面生成
-└── shot-image-from-mss.md            # 从 MSS asset_ref 出图
+└── shot-image-from-ls.md            # 从 LS asset_ref 出图
 ```
 
 **红线**：skill body 仍按 master spec § 2 原则 4，Langfuse 是托管面；这里 `knowledge/asset-generation/` 只是本地源。上线前由用户决定何时 `assets-produce skills sync`。
@@ -432,7 +432,7 @@ cursor = `updated_at/id` 拼接。
 ### 5.5 Auth
 
 - 所有 REST 端点：`Authorization: Bearer <token>`，token 在 `.env` 配置（`ASSETS_API_TOKEN_*`，per-caller）
-- 不实现 multi-tenant；token → project_id allowlist（在 config 里写死，3 个 token：novels-to-moonscript / moonshort-backend / dev）
+- 不实现 multi-tenant；token → project_id allowlist（在 config 里写死，3 个 token：novels-to-lunascript / lunaverse-backend / dev）
 
 ### 5.6 MCP
 
@@ -447,26 +447,26 @@ opencode 已经有 MCP server skeleton（`agent/packages/opencode/src/server/mcp
 
 ---
 
-## 6. novels-to-moonscript 改动
+## 6. novels-to-lunascript 改动
 
 ### 6.1 保留（12 项）
 
-整个 MSS 生成核心、`asset_ref` 节点产出、剧本切分、章节规划 —— 一律不动。
+整个 LS 生成核心、`asset_ref` 节点产出、剧本切分、章节规划 —— 一律不动。
 
 ### 6.2 修改（5 项）
 
 | 文件 | 改什么 |
 |---|---|
-| MSS schema | `asset_ref` 增加可选字段：`{ "id": "...", "name": "...", "kind": "..." }`（向后兼容） |
+| LS schema | `asset_ref` 增加可选字段：`{ "id": "...", "name": "...", "kind": "..." }`（向后兼容） |
 | 配置 | `.env.example` 加 `ASSETS_PRODUCE_BASE_URL` / `ASSETS_PRODUCE_TOKEN` |
 | asset_ref 写出器 | 给每个 asset_ref 填 `kind` 和稳定的 `name`（如果用户已经填了 name 就用用户的） |
-| MSS 验证器 | 新增可选 step "asset_ref 解析"：调 assets-produce `asset.lookup`，把 url 填回（默认开关 off，CLI flag on） |
+| LS 验证器 | 新增可选 step "asset_ref 解析"：调 assets-produce `asset.lookup`，把 url 填回（默认开关 off，CLI flag on） |
 | README | 加"如何配 assets-produce 接入"小节 |
 
 ### 6.3 新增（1 项）
 
 ```
-novels-to-moonscript/
+novels-to-lunascript/
 └── src/clients/
     └── assets_produce_client.py    # 单文件 HTTP client；仅实现 lookup
 ```
@@ -479,7 +479,7 @@ novels-to-moonscript/
 
 ---
 
-## 7. moonshort-backend 改动
+## 7. lunaverse-backend 改动
 
 **铁律**：不是用户维护，最小改动。本设计**只改 client，不改 service / outbox / db schema / queue**。
 
@@ -496,7 +496,7 @@ novels-to-moonscript/
 |---|---|
 | `app/upstream/assets-produce-http.ts`（新）| 真正的 HTTP 调用代码；`agent-forge-client.ts` 在 `real` 分支引用它 |
 
-**改名建议**（不强求；moonshort-backend 不维护，能不改尽量不改）：
+**改名建议**（不强求；lunaverse-backend 不维护，能不改尽量不改）：
 
 - `agent-forge-client.ts` → 保留文件名（避免大规模 rename + import 修复，影响面失控）
 - 在文件顶 docstring 标注："agent-forge 已废弃；real mode 现连接 assets-produce"
@@ -515,11 +515,11 @@ novels-to-moonscript/
 
 ## 8. 三个数据流走一遍
 
-### 8.1 场景 A：novels-to-moonscript 写 MSS，下游 backend 触发生产
+### 8.1 场景 A：novels-to-lunascript 写 LS，下游 backend 触发生产
 
 ```
-1. novels-to-moonscript 跑 → 写出 MSS（含 asset_ref，但 url 是占位）
-2. 用户把 MSS 灌进 moonshort-backend
+1. novels-to-lunascript 跑 → 写出 LS（含 asset_ref，但 url 是占位）
+2. 用户把 LS 灌进 lunaverse-backend
 3. 用户在小程序点 "Remix Episode 3"
 4. backend assets-remix-service 收到 outbox 事件
 5. service.processAssetsRemixRequest()
@@ -547,16 +547,16 @@ assets-produce 侧：
 6'. getJob 直接读 db
 ```
 
-### 8.2 场景 B：novels-to-moonscript 验证阶段想填 url
+### 8.2 场景 B：novels-to-lunascript 验证阶段想填 url
 
 ```
-1. 用户在 novels-to-moonscript 跑 mss-verify --resolve-assets
+1. 用户在 novels-to-lunascript 跑 ls-verify --resolve-assets
 2. 脚本拉所有 asset_ref → 收集 keys
 3. assets_produce_client.lookup(keys)
    → HTTP POST assets-produce /api/v1/assets/lookup
    → 返回 results
 4. 把 url 填回 asset_ref.url（找不到的留空，warn 输出）
-5. 写出新 MSS
+5. 写出新 LS
 ```
 
 ### 8.3 场景 C：backend 想本地 cache catalog
@@ -593,8 +593,8 @@ assets-produce 对外暴露的 error code（response body `error.code`）：
 ### 9.2 重试
 
 - assets-produce 内部**不**重试 atomic tool 失败（一次性 fail，调用方决定）
-- moonshort-backend 已有 outbox + BullMQ retry，对 `INTERNAL` / `UPSTREAM_TIMEOUT` 走 backend 自己的重试策略
-- novels-to-moonscript 的 lookup 失败：脚本侧 print warn + 继续（asset url 留空）
+- lunaverse-backend 已有 outbox + BullMQ retry，对 `INTERNAL` / `UPSTREAM_TIMEOUT` 走 backend 自己的重试策略
+- novels-to-lunascript 的 lookup 失败：脚本侧 print warn + 继续（asset url 留空）
 
 ### 9.3 Langfuse
 
@@ -625,12 +625,12 @@ assets-produce 对外暴露的 error code（response body `error.code`）：
 ### 10.3 Contract（最关键）
 
 - assets-produce 暴露一份 OpenAPI spec（自动生成）
-- novels-to-moonscript / moonshort-backend 用 pact-style mock fixture（json 文件）验证 client 调用与 spec 一致
+- novels-to-lunascript / lunaverse-backend 用 pact-style mock fixture（json 文件）验证 client 调用与 spec 一致
 
 ### 10.4 E2E（可选，Phase 10 acceptance 不要求强制）
 
 - 起 assets-produce 真服务（profile=developer，stub atomic tools，real OSS bucket）
-- 起 moonshort-backend fixture，触发一次 remix → 跑通
+- 起 lunaverse-backend fixture，触发一次 remix → 跑通
 
 ---
 
@@ -640,7 +640,7 @@ assets-produce 对外暴露的 error code（response body `error.code`）：
 
 ### Phase 8 — Asset Service 对外 API
 
-**目标**：assets-produce 内 AssetService、4 个 REST 操作、MCP tools 跑通，**不接** novels-to-moonscript / moonshort-backend；纯本仓库自洽。
+**目标**：assets-produce 内 AssetService、4 个 REST 操作、MCP tools 跑通，**不接** novels-to-lunascript / lunaverse-backend；纯本仓库自洽。
 
 **范围**：
 
@@ -649,7 +649,7 @@ assets-produce 对外暴露的 error code（response body `error.code`）：
 - 复用既有 atomic tools / OSS put / skill 系统 / Langfuse
 - 新增 5 个 skill body 草稿到 `knowledge/asset-generation/`（**不**上传 Langfuse；本 phase 在测试中用 fixture skill）
 - 加 4 个 MCP tool 挂在已有 MCP server
-- `.env.example` 加 `ASSETS_API_TOKEN_NOVELS_TO_MOONSCRIPT` / `..._MOONSHORT_BACKEND` / `..._DEV`
+- `.env.example` 加 `ASSETS_API_TOKEN_NOVELS_TO_LUNASCRIPT` / `..._LUNAVERSE_BACKEND` / `..._DEV`
 - OpenAPI spec 自动生成（导出到 `docs/api/openapi.yaml`）
 - 单元 + integration test 跑过
 
@@ -674,7 +674,7 @@ assets-produce 对外暴露的 error code（response body `error.code`）：
 
 ### Phase 9 — Asset 工具迁移（CG / OSS-sync / upscale）
 
-**目标**：把 moonshort-backend `generate-upscale-matting/` 中**纯素材生产工具**搬到 assets-produce，使 assets-produce 的 mini agent loop 有完整的"CG 渲染 / 批量 upload / upscale"能力。
+**目标**：把 lunaverse-backend `generate-upscale-matting/` 中**纯素材生产工具**搬到 assets-produce，使 assets-produce 的 mini agent loop 有完整的"CG 渲染 / 批量 upload / upscale"能力。
 
 **范围**：
 
@@ -686,7 +686,7 @@ assets-produce 对外暴露的 error code（response body `error.code`）：
   - `cg-render`（包 cg_render.py）
   - `upscale-image`（包 upscale 工具）
 - Phase 8 已有的 `cg-render-spec.md` skill body 引用新 tool
-- moonshort-backend 内对应文件**保留**（暂不删除；只是 assets-produce 有了等价能力），并在 backend 端 README 加一行 "DEPRECATED: see assets-produce/tools/cg-render"
+- lunaverse-backend 内对应文件**保留**（暂不删除；只是 assets-produce 有了等价能力），并在 backend 端 README 加一行 "DEPRECATED: see assets-produce/tools/cg-render"
 - 在 OPS doc 加 "如何在 assets-produce 跑 cg-render-spec 出 CG"
 
 **不做**：
@@ -701,30 +701,30 @@ assets-produce 对外暴露的 error code（response body `error.code`）：
 2. assets-produce `tools/oss-sync` 能 dry-run 一个 fixture 目录
 3. 新 atomic tools 在 `agent tools list` 出现，schema 完整
 4. `cg-render-spec.md` skill 拉起 mini agent loop，能跑完 stub CG 生成（不调 real ZENMUX，用 stub）
-5. moonshort-backend 内对应文件加上 deprecated 注释
+5. lunaverse-backend 内对应文件加上 deprecated 注释
 6. phase-9 plan + verification report 齐
 7. commit + push 到 main
 
 ### Phase 10 — 三方接通
 
-**目标**：novels-to-moonscript 和 moonshort-backend 实际接通 assets-produce 对外 API。
+**目标**：novels-to-lunascript 和 lunaverse-backend 实际接通 assets-produce 对外 API。
 
 **范围**：
 
-- novels-to-moonscript：
+- novels-to-lunascript：
   - 新增 `src/clients/assets_produce_client.py`（lookup 实现 + bearer auth + retry/backoff）
-  - MSS schema `asset_ref` 加可选 id / name / kind 字段；schema validator 同步
-  - 新增可选 `mss-verify --resolve-assets` flag，跑 lookup 填 url
+  - LS schema `asset_ref` 加可选 id / name / kind 字段；schema validator 同步
+  - 新增可选 `ls-verify --resolve-assets` flag，跑 lookup 填 url
   - `.env.example` 加配置
   - 旧的占位写出器：标 deprecated（不删；用户保留兼容性）
-- moonshort-backend：
+- lunaverse-backend：
   - 新增 `app/upstream/assets-produce-http.ts`：实现 4 个操作的 fetch
   - 修改 `app/upstream/agent-forge-client.ts`：real mode 改 dispatch 到 `assets-produce-http.ts`，throw 删除
   - `.env.example` 加 `ASSETS_PRODUCE_BASE_URL` / `ASSETS_PRODUCE_TOKEN` / 仍保留 `ASSETS_REMIX_MODE`
   - 旧的 `assets-remix-service.ts` **接口不动**；只在错误透传上加一行（如有必要）
   - 加一份 README "切换 ASSETS_REMIX_MODE=real 接 assets-produce"
 - assets-produce：
-  - 注册三个 token（novels-to-moonscript / moonshort-backend / dev）
+  - 注册三个 token（novels-to-lunascript / lunaverse-backend / dev）
   - 部署侧 ops doc 写清 base url / token 怎么发
 - E2E（本地手动）：用户在本机跑通三仓 happy path（不入 CI）
 
@@ -738,9 +738,9 @@ assets-produce 对外暴露的 error code（response body `error.code`）：
 **验收**：
 
 1. assets-produce 单元 + integration 全过（Phase 8 + 9 + 10 总和）
-2. novels-to-moonscript `assets_produce_client.py` 单元测试覆盖 happy / 404 / 401 / 网络错
-3. moonshort-backend `assets-produce-http.ts` 单元测试覆盖 4 个操作 + 错误矩阵
-4. 用户本机跑通：MSS 生成 → backend remix → 调 assets-produce real → 拿到 url → 小程序看到图（一条 e2e）
+2. novels-to-lunascript `assets_produce_client.py` 单元测试覆盖 happy / 404 / 401 / 网络错
+3. lunaverse-backend `assets-produce-http.ts` 单元测试覆盖 4 个操作 + 错误矩阵
+4. 用户本机跑通：LS 生成 → backend remix → 调 assets-produce real → 拿到 url → 小程序看到图（一条 e2e）
 5. assets-produce 跑一周观察日志：mini agent loop 没失控（step 数 / token 消耗在配置 budget 内）
 6. phase-10 plan + verification report 齐
 7. commit + push 到所有 3 个 repo 的 main（backend push 需 backend 维护方同意 —— **手动 ack**）
@@ -759,7 +759,7 @@ Phase 8 → Phase 9 → Phase 10
 - Phase 9 把 backend 重要工具搬过来，让 Phase 10 真接通时 assets-produce 能力完整
 - Phase 10 接外部，影响面最大，最后做
 
-**并行机会**：Phase 9 与 Phase 10 的 novels-to-moonscript 改动可以并行（无依赖）。Phase 10 的 moonshort-backend 改动必须在 Phase 8 完成后开始（要有 real 端点可调）。
+**并行机会**：Phase 9 与 Phase 10 的 novels-to-lunascript 改动可以并行（无依赖）。Phase 10 的 lunaverse-backend 改动必须在 Phase 8 完成后开始（要有 real 端点可调）。
 
 ---
 
@@ -768,7 +768,7 @@ Phase 8 → Phase 9 → Phase 10
 | 风险 | 概率 | 影响 | 缓解 / 回退 |
 |---|---|---|---|
 | mini agent loop 失控（token 爆 / step 死循环） | 中 | 高 | step budget + token budget 兜底；超限 fail job；Langfuse 监控 |
-| moonshort-backend 维护方拒绝改 client | 低 | 中 | Phase 10 backend 改动单独 PR；用 feature flag `ASSETS_REMIX_MODE=real` 可关；不动则继续走 stub |
+| lunaverse-backend 维护方拒绝改 client | 低 | 中 | Phase 10 backend 改动单独 PR；用 feature flag `ASSETS_REMIX_MODE=real` 可关；不动则继续走 stub |
 | 跨仓 token 管理混乱 | 中 | 中 | token 在 assets-produce `.env` 注册；每仓只持有一份；rotate flow 写进 ops doc |
 | OSS bucket 跨仓权限冲突（assets-produce 写、其他读） | 低 | 中 | 在现有 bucket 用 path prefix 隔离（`assets-produce/...`）；权限策略 Phase 8 落实前打开 |
 
@@ -776,7 +776,7 @@ Phase 8 → Phase 9 → Phase 10
 
 - Phase 8 出问题 → 直接 revert，assets-produce 仍是 Phase 7 形态
 - Phase 9 出问题 → backend 内旧工具还在（没删），切回旧链路即可
-- Phase 10 出问题 → backend `ASSETS_REMIX_MODE` 切回 `stub`；novels-to-moonscript 不调 `--resolve-assets` 即可
+- Phase 10 出问题 → backend `ASSETS_REMIX_MODE` 切回 `stub`；novels-to-lunascript 不调 `--resolve-assets` 即可
 
 ---
 
@@ -827,18 +827,18 @@ docs/superpowers/specs/phase-10-...-verification.md          [Phase 10 verif]
 docs/superpowers/specs/2026-04-29-assets-produce-spec.md     [§ 15 + § 10 更新]
 ```
 
-### novels-to-moonscript（新增 / 修改）
+### novels-to-lunascript（新增 / 修改）
 
 ```
 src/clients/assets_produce_client.py                         [Phase 10 新增]
-src/mss/schema.<py|ts>                                        [Phase 10 改：asset_ref 加可选字段]
-src/mss/verifier.<py|ts>                                      [Phase 10 改：加 --resolve-assets]
+src/ls/schema.<py|ts>                                        [Phase 10 改：asset_ref 加可选字段]
+src/ls/verifier.<py|ts>                                      [Phase 10 改：加 --resolve-assets]
 .env.example                                                  [Phase 10 加 ASSETS_PRODUCE_* 变量]
 README.md                                                     [Phase 10 加接入说明]
 tests/clients/test_assets_produce_client.py                   [Phase 10 新增]
 ```
 
-### moonshort-backend（新增 / 修改 / 不删除）
+### lunaverse-backend（新增 / 修改 / 不删除）
 
 ```
 app/upstream/assets-produce-http.ts                          [Phase 10 新增]
@@ -857,12 +857,12 @@ generate-upscale-matting/_local_tools/sync_to_oss.py         [Phase 9 加 DEPREC
 
 | 术语 | 含义 |
 |---|---|
-| MSS | MoonShort Script，novels-to-moonscript 写出的剧本 JSON |
-| asset_ref | MSS JSON 节点，指向一个 asset（key/name 索引 + 可选 url） |
+| LS | Lunascripts，novels-to-lunascript 写出的剧本 JSON |
+| asset_ref | LS JSON 节点，指向一个 asset（key/name 索引 + 可选 url） |
 | asset | 实际 asset 行（DB Asset 表），含 key / version / url / kind |
 | atomic tool | opencode 工具表里的最小可执行单元，如 `generate-image-nanobanana` |
 | skill body | 描述"how to think"的 markdown（在 Langfuse 托管） |
 | mini agent loop | assets-produce 内由 LLM + skill body + atomic tools 组成的运行回路 |
 | catalog | Asset 表对外的增量视图 |
-| RemixAsset | moonshort-backend 自己的 db 行，记 backend 视角的一个 remix 产物 |
+| RemixAsset | lunaverse-backend 自己的 db 行，记 backend 视角的一个 remix 产物 |
 | AssetJob | assets-produce 自己的 db 行，记一次 createJob 调用 |

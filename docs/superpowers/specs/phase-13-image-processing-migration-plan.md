@@ -16,7 +16,7 @@
 | atomic tool 注册 | 能产视觉产物者注册原子工具，输出经 Phase 12 `oss-put` 拿 URL；判定/检测类（如 `detect_matting_failures`）不注册，仅离线 CLI | master spec §10；沿用 Phase 9 `oss-sync` 不挂逻辑 |
 | 工具样板 | atomic 外壳严格复刻 `generate-video-seedance.ts` + `.txt`；Python 入口照 Phase 9 `tools/README.md` 共用约定（JSON I/O + `--mock` + stdout JSON only） | 设计 §3「严格对等」 |
 | backend 文件处理 | 加 DEPRECATED 注释 + 单独 commit；**不删除** | 设计 §6；沿用 Phase 9 §1.6 体例 |
-| backend push | 跨 namespace（`cdotlock/moonshort-backend`），push **必须** backend 维护方明确 ack | 全局 CLAUDE.md push 政策；沿用 Phase 9/10 |
+| backend push | 跨 namespace（`cdotlock/lunaverse-backend`），push **必须** backend 维护方明确 ack | 全局 CLAUDE.md push 政策；沿用 Phase 9/10 |
 | AssetKind | **不新增**（迁入件是后处理/抠图，非独立 kind）；若调研发现独立 kind 必要 → 走 §15 修订再加，不擅自 | 设计 §6；红线（不偏离 spec） |
 | placeholderGenerator | **不碰**（经 REST API 仍 stub） | 设计 §2.2 选项 B |
 | 迁移顺序 | Step 1 调研定清单 → 先 matting（最复杂，建立 ML venv + mock 模板）→ 逐件复用模板 | 沿用 Phase 9「先打通最复杂件」 |
@@ -25,7 +25,7 @@
 
 ### 1.1 调研产物（执行前置，落 `docs/superpowers/specs/phase-13-survey.md`）
 
-- `moonshort-backend/generate-upscale-matting/` 全目录树
+- `lunaverse-backend/generate-upscale-matting/` 全目录树
 - 逐文件判定表：`迁 / 不迁`、`产视觉产物（注册原子工具）/ 检测判定（仅 CLI）/ 不迁（编排胶水）`、依赖、env
 - 候选清单（设计 §6 列出，待调研确认）：matting/MODNet、cutout、hole_fill、green_spill/rgb_unspill、detect_matting_failures、hybrid_to_webp
 - 各文件隐式 import 路径（`grep` 全 import，防 sys.path 相对引用迁移后断）
@@ -54,7 +54,7 @@
 
 ### 1.5 backend DEPRECATED 注释
 
-- `moonshort-backend/generate-upscale-matting/` 内被迁文件头部插入 DEPRECATED 注释 block（照 Phase 9 §1.6 文案：注明迁移目的地 `cdotlock/assets-produce/tools/<name>/`、保留仅作历史参考、删除权归 backend 维护方）
+- `lunaverse-backend/generate-upscale-matting/` 内被迁文件头部插入 DEPRECATED 注释 block（照 Phase 9 §1.6 文案：注明迁移目的地 `cdotlock/assets-produce/tools/<name>/`、保留仅作历史参考、删除权归 backend 维护方）
 - backend 单独 commit；message 说明迁移目的地
 - **本地 commit；push 必须 backend 维护方明确 ack**（沿用 Phase 9/10）
 
@@ -72,15 +72,15 @@
 预期输出：
 
 - `git status` 干净起点；`bun --cwd=agent run typecheck` / `test` 全过基线
-- `moonshort-backend/generate-upscale-matting/` 实际目录树
+- `lunaverse-backend/generate-upscale-matting/` 实际目录树
 - 逐文件判定表（迁/不迁 + 注册原子工具/仅 CLI/不迁 + 依赖 + env + 隐式 import）
 - backend Python 版本要求
 - 落 `docs/superpowers/specs/phase-13-survey.md`
 
 测试：
 
-- `find /Users/august/MobAI/moonshort-backend/generate-upscale-matting -maxdepth 3 -type f -name "*.py"`
-- `grep -rn "os.environ\|os.getenv\|^import \|^from " /Users/august/MobAI/moonshort-backend/generate-upscale-matting/`
+- `find /Users/august/MobAI/lunaverse-backend/generate-upscale-matting -maxdepth 3 -type f -name "*.py"`
+- `grep -rn "os.environ\|os.getenv\|^import \|^from " /Users/august/MobAI/lunaverse-backend/generate-upscale-matting/`
 - `phase-13-survey.md` 存在，每文件有明确判定
 
 ### Step 2 — matting 迁移（锚件，建立 ML venv + mock 模板）
@@ -159,12 +159,12 @@
 
 预期输出：
 
-- `moonshort-backend/generate-upscale-matting/` 内被迁文件加 DEPRECATED 注释 block
+- `lunaverse-backend/generate-upscale-matting/` 内被迁文件加 DEPRECATED 注释 block
 - backend 单独 commit；message：`chore(deprecated): mark image-processing tools as migrated to assets-produce/tools/`
 
 测试：
 
-- `grep -rl "DEPRECATED" /Users/august/MobAI/moonshort-backend/generate-upscale-matting/` 列出所有标记文件，与 §1.1 迁移清单一致
+- `grep -rl "DEPRECATED" /Users/august/MobAI/lunaverse-backend/generate-upscale-matting/` 列出所有标记文件，与 §1.1 迁移清单一致
 - 文件功能未变（仅加注释；Python 语法保持有效，`python -c "import ast; ast.parse(open(f).read())"` 通过）
 - backend 仓 `git diff --stat` 仅注释行变化
 - **backend push 本 phase 不做**，留待 backend 维护方 ack（沿用 Phase 9/10）
@@ -198,7 +198,7 @@
 4. `tools/README.md` + `SKILL.md` + `.env.example` + `ERRORS.md`
 5. verification report
 
-预期输出（moonshort-backend 仓，单独 commit；push 推迟）：
+预期输出（lunaverse-backend 仓，单独 commit；push 推迟）：
 
 6. DEPRECATED 注释 block（一次 commit）
 
@@ -223,7 +223,7 @@
 
 ## 4. Out-of-Scope（本 phase 不做）
 
-- 迁 `moonshort-backend/generate-upscale-matting/` 全部子目录（只迁 §1.1 判定为「纯素材生产件」的）
+- 迁 `lunaverse-backend/generate-upscale-matting/` 全部子目录（只迁 §1.1 判定为「纯素材生产件」的）
 - 真实删除 backend 内对应文件（删除权归 backend 维护方）
 - 把检测/判定/编排胶水类注册为原子工具
 - 碰 `placeholderGenerator` / asset-service 注入点（经 REST API 仍 stub）

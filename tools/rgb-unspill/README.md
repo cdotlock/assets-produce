@@ -12,7 +12,7 @@ Atomic tool: ONE input file -> ONE output file. No directory walking, no
 batch paths, no REPO_ROOT discovery.
 
 > Migrated 2026-05-16 from
-> `moonshort-backend/generate-upscale-matting/rgb_unspill.py`.
+> `lunaverse-backend/generate-upscale-matting/rgb_unspill.py`.
 > Batch logic (--root, --paths, --workers, --dry-run, ThreadPoolExecutor,
 > directory walk) removed entirely. Atomic tool preserves the per-file
 > unspill algorithm verbatim.

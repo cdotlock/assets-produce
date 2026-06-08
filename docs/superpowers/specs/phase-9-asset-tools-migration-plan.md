@@ -29,7 +29,7 @@ tools/
 ├── cg-render/
 │   ├── README.md
 │   ├── requirements.txt
-│   ├── render.py              # 从 moonshort-backend/generate-upscale-matting/cg_render.py 迁移
+│   ├── render.py              # 从 lunaverse-backend/generate-upscale-matting/cg_render.py 迁移
 │   ├── render-with-style.py   # 依赖文件（如原 backend 有）
 │   └── .gitignore             # 忽略 venv / 输出
 ├── oss-sync/
@@ -54,8 +54,8 @@ tools/
 
 #### 1.3.1 文件迁移
 
-- `moonshort-backend/generate-upscale-matting/cg_render.py` 内容迁到 `tools/cg-render/render.py`
-- `moonshort-backend/generate-upscale-matting/render-with-style.py` 同迁（若 backend 现存）
+- `lunaverse-backend/generate-upscale-matting/cg_render.py` 内容迁到 `tools/cg-render/render.py`
+- `lunaverse-backend/generate-upscale-matting/render-with-style.py` 同迁（若 backend 现存）
 - requirements.txt 列原 backend 实际依赖（参考 backend 仓 requirements 或脚本 import）
 - env：`ZENMUX_API_KEY`、`ZENMUX_BASE_URL`（默认 ZENMUX 官方）
 
@@ -92,7 +92,7 @@ tools/
 
 #### 1.4.1 文件迁移
 
-- `moonshort-backend/generate-upscale-matting/_local_tools/sync_to_oss.py` → `tools/oss-sync/sync.py`
+- `lunaverse-backend/generate-upscale-matting/_local_tools/sync_to_oss.py` → `tools/oss-sync/sync.py`
 - requirements.txt 列依赖（如 `oss2`）
 - env：`OSS_ACCESS_KEY_ID`、`OSS_ACCESS_KEY_SECRET`、`OSS_BUCKET`、`OSS_REGION`、`OSS_ENDPOINT`
 
@@ -130,15 +130,15 @@ tools/
 - 实现：拉到本地 → 调 python → 上传 → 返回 url
 - 注册到 opencode 工具表
 
-### 1.6 moonshort-backend 内对应文件 DEPRECATED 注释
+### 1.6 lunaverse-backend 内对应文件 DEPRECATED 注释
 
 设计 §11 Phase 9 acceptance #5：**只标 DEPRECATED 不删**。
 
 需要标记的文件（执行阶段以 backend 仓实际为准；以下是参考）：
 
-- `moonshort-backend/generate-upscale-matting/cg_render.py`
-- `moonshort-backend/generate-upscale-matting/render-with-style.py`（若存在）
-- `moonshort-backend/generate-upscale-matting/_local_tools/sync_to_oss.py`
+- `lunaverse-backend/generate-upscale-matting/cg_render.py`
+- `lunaverse-backend/generate-upscale-matting/render-with-style.py`（若存在）
+- `lunaverse-backend/generate-upscale-matting/_local_tools/sync_to_oss.py`
 - backend upscale 工具入口文件
 
 每个文件头部插入注释 block：
@@ -147,7 +147,7 @@ tools/
 # DEPRECATED 2026-05-14
 # This tool has been migrated to cdotlock/assets-produce/tools/<name>/.
 # Kept here only for historical reference; do not invoke from new code.
-# Removal is at the discretion of the moonshort-backend maintainer.
+# Removal is at the discretion of the lunaverse-backend maintainer.
 ```
 
 backend 单独 commit；commit message 说明迁移目的地。
@@ -170,15 +170,15 @@ backend 单独 commit；commit message 说明迁移目的地。
 
 预期输出：
 
-- 列 `moonshort-backend/generate-upscale-matting/` 实际目录树
+- 列 `lunaverse-backend/generate-upscale-matting/` 实际目录树
 - 确认三件工具实际文件名 / 入口 / 依赖
 - 记录每个工具的 env 依赖（grep `os.getenv` / `os.environ`）
 - 记录 backend 仓的 Python 版本要求（如有 `.python-version` / `setup.py` / `pyproject.toml`）
 
 测试：
 
-- `find /Users/august/MobAI/moonshort-backend/generate-upscale-matting -maxdepth 3 -type f -name "*.py"`
-- `grep -r "os.environ\|os.getenv" /Users/august/MobAI/moonshort-backend/generate-upscale-matting/`
+- `find /Users/august/MobAI/lunaverse-backend/generate-upscale-matting -maxdepth 3 -type f -name "*.py"`
+- `grep -r "os.environ\|os.getenv" /Users/august/MobAI/lunaverse-backend/generate-upscale-matting/`
 - 输出落到 plan-notes 文件 `docs/superpowers/specs/phase-9-survey.md`（plan 子文件，不入 spec 主目录）
 
 ### Step 2 — 顶层目录 `tools/` 与共用约定
@@ -286,12 +286,12 @@ backend 单独 commit；commit message 说明迁移目的地。
 
 预期输出：
 
-- 在 `moonshort-backend` repo 中改 3-4 个文件，加 DEPRECATED 注释 block
+- 在 `lunaverse-backend` repo 中改 3-4 个文件，加 DEPRECATED 注释 block
 - 单独 commit；message："chore(deprecated): mark CG/OSS-sync/upscale tools as deprecated (migrated to assets-produce/tools/)"
 
 测试：
 
-- `grep -l "DEPRECATED 2026-05-14" /Users/august/MobAI/moonshort-backend/generate-upscale-matting/` 列出所有标记文件
+- `grep -l "DEPRECATED 2026-05-14" /Users/august/MobAI/lunaverse-backend/generate-upscale-matting/` 列出所有标记文件
 - 文件功能未变（仅加注释；语法保持有效）
 - backend 仓内 `git diff --stat` 仅注释行变化
 
@@ -339,7 +339,7 @@ backend 单独 commit；commit message 说明迁移目的地。
 8. `.env.example` + SKILL.md + knowledge README 更新
 9. verification report
 
-预期输出（moonshort-backend 仓，单独 commit；push 推迟）：
+预期输出（lunaverse-backend 仓，单独 commit；push 推迟）：
 
 10. DEPRECATED 注释 block（4 个文件左右；一次 commit）
 
@@ -363,7 +363,7 @@ backend 单独 commit；commit message 说明迁移目的地。
 
 ## 4. Out-of-Scope（本 phase 不做）
 
-- 把 `moonshort-backend/generate-upscale-matting/` 其他子目录迁过来（只迁列出三件）
+- 把 `lunaverse-backend/generate-upscale-matting/` 其他子目录迁过来（只迁列出三件）
 - 真实删除 backend 内对应文件
 - 把 cg-render 替换 ZENMUX 为别的模型供应商
 - 让 oss-sync 注册为 atomic tool（设计明确不挂）
@@ -378,7 +378,7 @@ backend 单独 commit；commit message 说明迁移目的地。
 - [ ] 新 atomic tool 出现在 `agent tools list`：`cg-render`、`upscale-image`
 - [ ] `agent tools show cg-render` / `agent tools show upscale-image` 输出 schema 完整
 - [ ] `cg-render-spec.md` skill 拉起 mini agent loop（Phase 8 已落地的 runAssetGeneration）能跑完 stub CG 生成
-- [ ] moonshort-backend 内对应文件加 DEPRECATED 注释（本地 commit，未 push）
+- [ ] lunaverse-backend 内对应文件加 DEPRECATED 注释（本地 commit，未 push）
 - [ ] `bun --cwd=agent run typecheck` / `bun --cwd=agent run test` 全过
 - [ ] `phase-9-asset-tools-migration-verification.md` 完成
 - [ ] assets-produce 所有 atomic commit push 到 origin/main

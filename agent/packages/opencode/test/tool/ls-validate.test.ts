@@ -1,0 +1,240 @@
+import { afterEach, describe, expect, test } from "bun:test"
+import { Effect, Layer, ManagedRuntime, Schema } from "effect"
+import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
+import { Agent } from "@/agent/agent"
+import { Truncate } from "@/tool/truncate"
+import { ToolRegistry } from "@/tool/registry"
+import { makeLsValidateTool, Parameters } from "@/tool/asset/ls-validate"
+import type { PythonRunner } from "@/tool/asset/python-runner"
+import type { Tool } from "@/tool/tool"
+import { MessageID, SessionID } from "@/session/schema"
+import { Instance } from "../../src/project/instance"
+import { provideTmpdirInstance } from "../fixture/fixture"
+import { testEffect } from "../lib/effect"
+
+// ─── Schema exported from the wrapper (for case-9 parity test) ─────────────
+import { LsValidateResult } from "@/tool/asset/ls-validate"
+
+const runtime = ManagedRuntime.make(Layer.mergeAll(Truncate.defaultLayer, Agent.defaultLayer))
+
+// Minimal Tool.Context — mirrors nrbi-render-prompt.test.ts exactly.
+const ctx = (): Tool.Context => ({
+  sessionID: SessionID.descending(),
+  messageID: MessageID.ascending(),
+  abort: new AbortController().signal,
+  callID: "call_test",
+  agent: "build",
+  messages: [],
+  metadata() {
+    return Effect.void
+  },
+  ask() {
+    return Effect.void
+  },
+})
+
+// ─── Real bridge stdout samples (verbatim, verified by running the bridge with
+//     --mock on 2026-05-19):
+//   python3 tools/ls-validate/ls_validate.py --input - --mock \
+//     <<< '{"script_path":"/tmp/test.ls","mock":true}'
+//   → {"verdict": "PASS", "errors": [], "meta": {"atomic_tool": "ls-validate", "mock": true}}
+//
+//   python3 tools/ls-validate/ls_validate.py --input - --mock \
+//     <<< '{"script_path":"/tmp/__LS_MOCK_FAIL__","mock":true}'
+//   → {"verdict": "FAIL", "errors": ["mock: injected failure"],
+//      "raw": "mock: injected failure\n",
+//      "meta": {"atomic_tool": "ls-validate", "mock": true}}
+const REAL_PASS_STDOUT =
+  '{"verdict": "PASS", "errors": [], "meta": {"atomic_tool": "ls-validate", "mock": true}}'
+const REAL_FAIL_STDOUT =
+  '{"verdict": "FAIL", "errors": ["mock: injected failure"], "raw": "mock: injected failure\\n", "meta": {"atomic_tool": "ls-validate", "mock": true}}'
+
+// ─── Stub helpers ────────────────────────────────────────────────────────────
+const okPassStdout = REAL_PASS_STDOUT
+const okFailStdout = REAL_FAIL_STDOUT
+
+const stubRunner =
+  (o: { stdout?: string; stderr?: string; exitCode?: number } = {}): PythonRunner =>
+  async () => ({
+    stdout: o.stdout ?? okPassStdout,
+    stderr: o.stderr ?? "",
+    exitCode: o.exitCode ?? 0,
+  })
+
+async function buildExec(runner: PythonRunner = stubRunner()) {
+  const info = await runtime.runPromise(makeLsValidateTool({ runner }))
+  const def = await Effect.runPromise(info.init())
+  return def
+}
+
+// ─── Tests ───────────────────────────────────────────────────────────────────
+
+describe("ls-validate tool", () => {
+  // 1. Happy PASS: real-shape stdout (with meta) is decoded, metadata.error absent
+  test("happy PASS — real bridge stdout decoded; metadata.error absent", async () => {
+    const def = await buildExec(stubRunner({ stdout: okPassStdout }))
+    const out = await runtime.runPromise(
+      def.execute({ script_path: "/abs/path/ep01.ls" }, ctx()),
+    )
+    const meta = out.metadata as Record<string, unknown>
+    expect(meta.error).toBeUndefined()
+    expect(out.output).toContain("PASS")
+    expect(out.output).toContain('"verdict"')
+  })
+
+  // 2. FAIL verdict: real-shape stdout (with raw + meta) is a NORMAL result, NOT error
+  test("FAIL verdict — surfaced as normal result, metadata.error absent", async () => {
+    const def = await buildExec(stubRunner({ stdout: okFailStdout }))
+    const out = await runtime.runPromise(
+      def.execute({ script_path: "/abs/path/ep01.ls" }, ctx()),
+    )
+    const meta = out.metadata as Record<string, unknown>
+    // FAIL verdict is a successful judgement — metadata.error must be absent/falsy
+    expect(meta.error).toBeFalsy()
+    expect(out.output).toContain("FAIL")
+    expect(out.output).toContain('"verdict"')
+    // The output must contain the errors array
+    expect(out.output).toContain("errors")
+  })
+
+  // 3. dryRun: runner is NOT called
+  test("dryRun — runner is never called", async () => {
+    let callCount = 0
+    const def = await buildExec(async () => {
+      callCount++
+      return { stdout: "", stderr: "", exitCode: 0 }
+    })
+    const out = await runtime.runPromise(
+      def.execute({ script_path: "/abs/path/ep01.ls", dryRun: true }, ctx()),
+    )
+    expect(callCount).toBe(0)
+    expect((out.metadata as { dryRun?: boolean }).dryRun).toBe(true)
+  })
+
+  // 4. Non-zero exit → metadata.error: true
+  test("non-zero exit — metadata.error: true", async () => {
+    const def = await buildExec(
+      stubRunner({
+        exitCode: 4,
+        stderr: JSON.stringify({ error: { code: "ATOMIC_TOOL_FAILED", message: "drift" } }),
+      }),
+    )
+    const out = await runtime.runPromise(
+      def.execute({ script_path: "/abs/path/ep01.ls" }, ctx()),
+    )
+    expect((out.metadata as { error?: boolean }).error).toBe(true)
+  })
+
+  // 5. Malformed JSON stdout → metadata.error: true
+  test("malformed JSON stdout — metadata.error: true", async () => {
+    const def = await buildExec(stubRunner({ stdout: "not-valid-json{{" }))
+    const out = await runtime.runPromise(
+      def.execute({ script_path: "/abs/path/ep01.ls" }, ctx()),
+    )
+    expect((out.metadata as { error?: boolean }).error).toBe(true)
+  })
+
+  // 6. Valid JSON but wrong schema shape → Schema.decodeUnknownEffect rejects → metadata.error: true
+  test("valid JSON wrong shape — schema decode rejects, metadata.error: true (no bare cast)", async () => {
+    const def = await buildExec(
+      stubRunner({ stdout: JSON.stringify({ verdict: "MAYBE", errors: [] }) }),
+    )
+    const out = await runtime.runPromise(
+      def.execute({ script_path: "/abs/path/ep01.ls" }, ctx()),
+    )
+    expect((out.metadata as { error?: boolean }).error).toBe(true)
+  })
+
+  // 7. Parameters rejects empty and relative script_path; accepts absolute
+  test("Parameters rejects empty script_path", () => {
+    const decode = Schema.decodeUnknownEffect(Parameters)
+    const exit = Effect.runSyncExit(decode({ script_path: "" }))
+    expect(exit._tag).toBe("Failure")
+  })
+
+  test("Parameters rejects relative script_path", () => {
+    const decode = Schema.decodeUnknownEffect(Parameters)
+    const exit = Effect.runSyncExit(decode({ script_path: "relative/path.ls" }))
+    expect(exit._tag).toBe("Failure")
+  })
+
+  test("Parameters accepts absolute script_path", () => {
+    const decode = Schema.decodeUnknownEffect(Parameters)
+    const exit = Effect.runSyncExit(decode({ script_path: "/abs/path/ep01.ls" }))
+    expect(exit._tag).toBe("Success")
+  })
+
+  // 8. mock: true ⇒ --mock in extraArgs; absent when mock unset
+  test("mock: true — --mock added to extraArgs", async () => {
+    let receivedArgs: readonly string[] | undefined
+    const def = await buildExec(async (opts) => {
+      receivedArgs = opts.extraArgs
+      return { stdout: okPassStdout, stderr: "", exitCode: 0 }
+    })
+    await runtime.runPromise(
+      def.execute({ script_path: "/abs/path/ep01.ls", mock: true }, ctx()),
+    )
+    expect(receivedArgs).toContain("--mock")
+  })
+
+  test("mock absent — --mock NOT in extraArgs", async () => {
+    let receivedArgs: readonly string[] | undefined
+    const def = await buildExec(async (opts) => {
+      receivedArgs = opts.extraArgs
+      return { stdout: okPassStdout, stderr: "", exitCode: 0 }
+    })
+    await runtime.runPromise(
+      def.execute({ script_path: "/abs/path/ep01.ls" }, ctx()),
+    )
+    expect(receivedArgs).not.toContain("--mock")
+  })
+
+  // 9. Real-shape parity: Schema.decodeUnknownEffect(LsValidateResult) accepts BOTH
+  //    verbatim real bridge PASS and FAIL outputs (closes the meta integration risk).
+  //    These strings are verbatim bridge output captured on 2026-05-19 (see comment above).
+  test("real PASS stdout accepted by LsValidateResult schema (meta parity)", () => {
+    const parsed = JSON.parse(REAL_PASS_STDOUT)
+    const exit = Effect.runSyncExit(Schema.decodeUnknownEffect(LsValidateResult)(parsed))
+    expect(exit._tag).toBe("Success")
+    if (exit._tag === "Success") {
+      expect(exit.value.verdict).toBe("PASS")
+      expect(exit.value.errors).toEqual([])
+      expect(exit.value.meta?.atomic_tool).toBe("ls-validate")
+      expect(exit.value.meta?.mock).toBe(true)
+    }
+  })
+
+  test("real FAIL stdout accepted by LsValidateResult schema (meta+raw parity)", () => {
+    const parsed = JSON.parse(REAL_FAIL_STDOUT)
+    const exit = Effect.runSyncExit(Schema.decodeUnknownEffect(LsValidateResult)(parsed))
+    expect(exit._tag).toBe("Success")
+    if (exit._tag === "Success") {
+      expect(exit.value.verdict).toBe("FAIL")
+      expect(exit.value.errors).toContain("mock: injected failure")
+      expect(exit.value.raw).toBe("mock: injected failure\n")
+      expect(exit.value.meta?.atomic_tool).toBe("ls-validate")
+      expect(exit.value.meta?.mock).toBe(true)
+    }
+  })
+})
+
+// Mirrors nrbi-render-prompt.test.ts exactly: the real builtin-id enumeration
+// uses `ToolRegistry.Service` + `registry.ids()`. `ids()` = `[...builtin, ...custom].map(t => t.id)`,
+// and the registry needs an Instance context via `provideTmpdirInstance`.
+const registryIt = testEffect(Layer.mergeAll(ToolRegistry.defaultLayer, CrossSpawnSpawner.defaultLayer))
+
+afterEach(async () => {
+  await Instance.disposeAll()
+})
+
+describe("ls-validate registration", () => {
+  registryIt.live("ls-validate is registered as a builtin tool", () =>
+    provideTmpdirInstance(() =>
+      Effect.gen(function* () {
+        const registry = yield* ToolRegistry.Service
+        const ids = yield* registry.ids()
+        expect(ids).toContain("ls-validate")
+      }),
+    ),
+  )
+})

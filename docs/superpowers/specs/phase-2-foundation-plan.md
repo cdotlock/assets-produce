@@ -86,7 +86,7 @@ Phase 2 开始 (HEAD = 68437d9)
 | 检查 | 命令 | 用途 |
 |---|---|---|
 | 当前 HEAD | `git log -1 --oneline` | 起点 = `68437d9` |
-| `agent/packages/opencode/migration/` | `ls` | 看上游迁移文件,新迁移命名格式跟随上游(`YYYYMMDDhhmmss_<slug>`) |
+| `agent/packages/opencode/migration/` | `ls` | 看上游迁移文件,新迁移命名格式跟随上游(`YYYYMMDDhhmls_<slug>`) |
 | `agent/packages/opencode/drizzle.config.ts` | `cat` | 改 url(env 化) |
 | `agent/packages/opencode/src/storage/{db.bun.ts,db.node.ts,db.ts,schema.ts}` | 读 | 知 db 入口怎么加载 |
 | 已用的 cache control 代码 | `grep -n cacheControl agent/packages/opencode/src/provider/transform.ts` | 验证 prompt cache 已就绪 |
@@ -515,7 +515,7 @@ dispatch code-reviewer subagent reviewing Phase 2 commits 全集 vs plan + spec�
 - **业务 namespace**:`agent/packages/opencode/src/business/<entity>/`
 - **业务 DB 表名前缀**:`business_*`
 - **类型名前缀(避撞)**:`Business<Entity>Table` for opencode 已占的名字(只 Project 一个)
-- **migration 命名**:`<YYYYMMDDHHMMSS>_phase2_<slug>`
+- **migration 命名**:`<YYYYMMDDHHMLS>_phase2_<slug>`
 - **env 命名**:`AGENT_*`(我们的)、`OSS_*`、`LANGFUSE_*`、`ANTHROPIC_API_KEY`、`DEEPSEEK_*`
 - **CLI 命令**:kebab-case(`oss put` / `oss get` / `oss list`)
 - **service 文件**:`<entity>.ts`,导出 `<Entity>` namespace 含 `Service`、`defaultLayer`

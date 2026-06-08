@@ -5,7 +5,7 @@ image or short loop showing a magical / dynamic / climactic moment. Used
 for hero beats in short videos, comic key panels, or visual novel
 "event CGs".
 
-The cg-render pipeline originally lived in `moonshort-backend` (Python
+The cg-render pipeline originally lived in `lunaverse-backend` (Python
 `cg_render.py`). Phase 9 migrated it to `tools/cg-render/` and registered
 a thin TypeScript wrapper as the atomic tool
 [`cg-render`](../../agent/packages/opencode/src/tool/asset/cg-render.ts).
@@ -166,5 +166,5 @@ The orchestrator picks `Asset.type = "video"` when `asset_type` is
 - Just a character pose, no effect → `character-portrait-spec`.
 - Just a background, no character / effect → `scene-bg-spec`.
 - A specific shot in a video sequence with composited character +
-  background, no special CG effect → `shot-image-from-mss`.
+  background, no special CG effect → `shot-image-from-ls`.
 - Cover art with title text → `cover-spec`.

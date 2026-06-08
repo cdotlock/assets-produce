@@ -142,7 +142,7 @@ def collect_supporting_cast_visuals(supporting_md: str) -> dict[str, str]:
 
 
 def cmd_build(args, project_root: pathlib.Path) -> int:
-    bible_dir = project_root / f"moonscripts/{args.book}/02-character-architect"
+    bible_dir = project_root / f"lunascripts/{args.book}/02-character-architect"
 
     # Lock validation: every bible must be locked
     unlocked: list[str] = []
@@ -182,7 +182,7 @@ def cmd_build(args, project_root: pathlib.Path) -> int:
 
     tasks = build_anchor_tasks(declared, char_visuals)
 
-    out_dir = project_root / f"moonscripts/{args.book}/02.5-outfit-anchor"
+    out_dir = project_root / f"lunascripts/{args.book}/02.5-outfit-anchor"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "anchor_tasks.json"
     out_path.write_text(json.dumps({"outfit_anchors": tasks}, ensure_ascii=False, indent=2))

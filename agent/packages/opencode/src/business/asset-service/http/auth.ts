@@ -1,6 +1,6 @@
 // Asset Service Bearer auth — distinct from the JWT auth used by creator-
 // profile routes (server/guards.ts requireAuth). Three named tokens (per
-// design § 5.5): ntms (novels-to-moonscript), msb (moonshort-backend), dev.
+// design § 5.5): ntms (novels-to-lunascript), msb (lunaverse-backend), dev.
 //
 // Token config comes from env: ASSETS_API_TOKEN_<NAME> + ASSETS_API_PROJECTS_<NAME>.
 // Projects is a CSV of project ids; literal "*" means "any project".

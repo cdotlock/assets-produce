@@ -106,8 +106,8 @@ Recorded as **spec § 15 revision 1.11** (commit `a9df964`). Both the
 Phase 8 § scope item and acceptance #5 now carry `⚠ 1.11`.
 
 Net effect for Phase 8: the four REST endpoints already satisfy
-Phase 9 / Phase 10 caller needs (`moonshort-backend` and
-`novels-to-moonscript` both consume HTTP). MCP surface is a separate
+Phase 9 / Phase 10 caller needs (`lunaverse-backend` and
+`novels-to-lunascript` both consume HTTP). MCP surface is a separate
 future phase that will need to decide StreamableHTTP vs stdio
 transport + Bearer auth shim.
 
@@ -122,7 +122,7 @@ transport + Bearer auth shim.
 | `scene-bg-spec.md` | 90 | `scene-bg-spec` |
 | `cg-render-spec.md` | 112 | `cg-render-spec` |
 | `cover-spec.md` | 96 | `cover-spec` |
-| `shot-image-from-mss.md` | 137 | `shot-image-from-mss` |
+| `shot-image-from-ls.md` | 137 | `shot-image-from-ls` |
 
 All five skill bodies follow the same six-section structure (intent /
 atomic tools allowed / inputs / output shape / failure handling /

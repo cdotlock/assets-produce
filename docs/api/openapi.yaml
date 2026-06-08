@@ -6,7 +6,7 @@ info:
   description: |
     Public surface for Phase 8 of the assets-produce platform. Four
     operations — create, status, lookup, catalog — back the
-    novels-to-moonscript and moonshort-backend integrations and any
+    novels-to-lunascript and lunaverse-backend integrations and any
     future AI-native consumer.
 
     All endpoints are Bearer-token-gated. Tokens are configured via
@@ -67,7 +67,7 @@ paths:
                       ratio: "16:9"
                   preferences:
                     skill_hint: cg-render-spec
-                  client_request_id: moonshort-backend:remix:42
+                  client_request_id: lunaverse-backend:remix:42
       responses:
         '200':
           description: Queued (or existing duplicate when client_request_id collides)

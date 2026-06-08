@@ -11,7 +11,7 @@ Atomic tool: ONE input file -> ONE output file. No directory walking, no
 batch paths, no REPO_ROOT discovery.
 
 > Migrated 2026-05-16 from
-> `moonshort-backend/generate-upscale-matting/green_spill_clear.py`.
+> `lunaverse-backend/generate-upscale-matting/green_spill_clear.py`.
 > Batch logic (--paths, --workers, ThreadPoolExecutor) removed entirely.
 > Original is marked DEPRECATED there.
 

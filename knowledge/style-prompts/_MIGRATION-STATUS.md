@@ -1,11 +1,11 @@
 # style-prompts 迁移 — 状态(已完成,自维护)
 
-> 一句话:做 novels-to-moonscript 最终 demo(书 no-rules-in-bad-ideas)实际用的**那一整套
+> 一句话:做 novels-to-lunascript 最终 demo(书 no-rules-in-bad-ideas)实际用的**那一整套
 > prompt**,已完整、无损迁进本目录,本项目自维护,不再依赖远程 MCP / wangbo / n2m。
 
 ## 结论先行
 
-- **真源 = moonshort-backend `styles` 表的 YA_Impasto 家族 4 行**,不是 style-prompts MCP 的
+- **真源 = lunaverse-backend `styles` 表的 YA_Impasto 家族 4 行**,不是 style-prompts MCP 的
   korean-manga-style。MCP/korean-manga 只是 06 阶段的 appearance 脚手架,渲染期被
   `styles` 表 + `normalize_prompt_for_style` 覆盖,**决定成图的是 YA_Impasto**。
 - 装配链(三段)已逐段查清并冻结,详见同目录 `_PIPELINE-MANIFEST.md`。
@@ -14,11 +14,11 @@
 
 | 文件 | sha256 | 来源 |
 |---|---|---|
-| `styles.json` | `e8ef5442fe356866e4ccd54b672c56b4f7b508c73c40a8fa04312cf937bcf6f6` | moonshort-backend `generate-upscale-matting/_style_cache/styles.json`(渲染期主风格 cache,4 行 YA_Impasto*+update_character) |
-| `nrbi-anchor_tasks.json` | `0a4dc8d767700e4412f81c0ccd3ed0f1c1e0aa2f784edcd9b27418fe45bdc739` | n2m `moonscripts/no-rules-in-bad-ideas/02.5-outfit-anchor/anchor_tasks.json`(73 条 NRBI 实际 anchor prompt 全集) |
+| `styles.json` | `e8ef5442fe356866e4ccd54b672c56b4f7b508c73c40a8fa04312cf937bcf6f6` | lunaverse-backend `generate-upscale-matting/_style_cache/styles.json`(渲染期主风格 cache,4 行 YA_Impasto*+update_character) |
+| `nrbi-anchor_tasks.json` | `0a4dc8d767700e4412f81c0ccd3ed0f1c1e0aa2f784edcd9b27418fe45bdc739` | n2m `lunascripts/no-rules-in-bad-ideas/02.5-outfit-anchor/anchor_tasks.json`(73 条 NRBI 实际 anchor prompt 全集) |
 | `anchor_spec.py` | `e21e8200b26e5f75928d7bb7a308cb912d1128c3f69f11d11684261371df07f5` | n2m `skills/outfit-anchor-renderer/anchor_spec.py`(02.5 anchor prompt 模板) |
 | `green_screen.py` | `126e792936920609dfbaa79318c454abfb7a32e348d0a3bc9917983c4b196e60` | n2m `skills/asset-prompt-generator/green_screen.py`(06 阶段绿幕后缀) |
-| `render-with-style.py` | `35f55d9be989f208edf8ff59fb9fc95ba79bcfb6f680a1379ca2846272b53e06` | moonshort-backend `generate-upscale-matting/render-with-style.py`(渲染期硬编码强化/改写层) |
+| `render-with-style.py` | `35f55d9be989f208edf8ff59fb9fc95ba79bcfb6f680a1379ca2846272b53e06` | lunaverse-backend `generate-upscale-matting/render-with-style.py`(渲染期硬编码强化/改写层) |
 
 `_PIPELINE-MANIFEST.md` = 装配清单(每段 prompt 在哪、render-with-style.py 硬编码块 file:line、
 按资产类型的拼装顺序、4 条已知问题/分歧)。
@@ -61,4 +61,4 @@
 - **没有**把 prompt 接进 assets-produce 的 skill / 渲染代码(那是后续「B1 改造」的活,
   本次只做「无损搬运 + 装配清单」,即把 demo 用的那套 prompt 完整迁过来自持有)。
 - **没有** commit / push 任何东西。
-- **没有**改 moonshort-backend 任何文件(只读取 + 复制冻结)。
+- **没有**改 lunaverse-backend 任何文件(只读取 + 复制冻结)。

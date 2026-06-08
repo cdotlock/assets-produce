@@ -1,7 +1,7 @@
 # `tools/` — External asset-production utilities
 
 This directory holds Python tools migrated from
-`moonshort-backend/generate-upscale-matting/`. They sit outside the opencode
+`lunaverse-backend/generate-upscale-matting/`. They sit outside the opencode
 runtime intentionally: the originals stay Python because re-writing
 `render-with-style.py` (~74 KB of SSH-tunnel + PG + Google GenAI logic) in
 TypeScript would be a rewrite without a payoff. Wrapping is enough.

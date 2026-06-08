@@ -2,13 +2,13 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:subagent-driven-development. Steps use `- [ ]`.
 
-**Goal:** Author the `novel_to_mss` orchestration **knowledge body** (NOT code) that an agent (developer profile, `agent run`/chat) reads to walk the frozen C1 stage skills in n2m's documented order, dispatching reviewer sub-agents through opencode's **existing** `task` tool, with PASS/CONDITIONAL/FAIL gate semantics reproduced faithfully. Prove the gate halts on FAIL.
+**Goal:** Author the `novel_to_ls` orchestration **knowledge body** (NOT code) that an agent (developer profile, `agent run`/chat) reads to walk the frozen C1 stage skills in n2m's documented order, dispatching reviewer sub-agents through opencode's **existing** `task` tool, with PASS/CONDITIONAL/FAIL gate semantics reproduced faithfully. Prove the gate halts on FAIL.
 
 **Architecture (the load-bearing constraint):** Per design §4.2/§4.4 and §12 red line, sequencing + gate logic + loop-until-pass are **knowledge in the skill body**, not new `*-orchestration`/`*-workflow-service` code. Reviewer dispatch reuses opencode's existing `tool/task.ts` sub-agent tool — C2 writes **zero production orchestration code**. The only new artifacts are: (1) the orchestration skill body (markdown), (2) tests over that body + discovery. The "injected-FAIL test" is therefore a **deterministic gate-contract test**: extract the body's machine-checkable gate contract and prove that a `FAIL` reviewer verdict fixture maps to HALT (not advance), and `CONDITIONAL` maps to fix-and-re-review, `PASS` to advance — i.e., prove the *knowledge* encodes a correct, unambiguous gate. This respects the red line (the checker is test-only) while satisfying acceptance line 225.
 
-**Spec linkage:** design `2026-05-19-upstream-authoring-migration-design.md` §4.2/§4.4/§4.5/§6 (C2 row, acceptance line 225); master spec §15 r1.16. C1 delivered the discovery mechanism (`skills.paths` → `knowledge/novel-to-mss/<name>/SKILL.md`, filesystem-served, no Langfuse/DB) and the 11 frozen stage/reviewer skills + `AUTHORING_STAGE_DIRS` workspace helper.
+**Spec linkage:** design `2026-05-19-upstream-authoring-migration-design.md` §4.2/§4.4/§4.5/§6 (C2 row, acceptance line 225); master spec §15 r1.16. C1 delivered the discovery mechanism (`skills.paths` → `knowledge/novel-to-ls/<name>/SKILL.md`, filesystem-served, no Langfuse/DB) and the 11 frozen stage/reviewer skills + `AUTHORING_STAGE_DIRS` workspace helper.
 
-**Design refinement recorded (C2):** The orchestration skill is discovered by the same C1 mechanism, which globs `**/SKILL.md`. Therefore the body lives at `knowledge/novel-to-mss/novel_to_mss/SKILL.md` with frontmatter `name: novel_to_mss` (the design §4.2's `knowledge/novel-to-mss/novel_to_mss.md` was loose wording — the per-skill-dir `SKILL.md` form is required for discovery, consistent with C1). This refinement is logged in design §8 by Task 5.
+**Design refinement recorded (C2):** The orchestration skill is discovered by the same C1 mechanism, which globs `**/SKILL.md`. Therefore the body lives at `knowledge/novel-to-ls/novel_to_ls/SKILL.md` with frontmatter `name: novel_to_ls` (the design §4.2's `knowledge/novel-to-ls/novel_to_ls.md` was loose wording — the per-skill-dir `SKILL.md` form is required for discovery, consistent with C1). This refinement is logged in design §8 by Task 5.
 
 ---
 
@@ -24,7 +24,7 @@ novel full text
  → 4 entity-normalizer
  → [4.5 entity-rename           ⇄ rename-reviewer]        (optional branch)
  → 5 episode-writer             ⇄ episode-writer-reviewer + arc-reviewer (after full route arc)
- → .mss scripts
+ → .ls scripts
 ```
 
 Stage→skill→reviewer→`NN-stage` write dir mapping (frozen facts from C1 — authoritative):
@@ -38,7 +38,7 @@ Stage→skill→reviewer→`NN-stage` write dir mapping (frozen facts from C1 �
 | 4.5 (optional) | `entity-rename` | `rename-reviewer` | `04.5-entity-rename/` |
 | 5 | `episode-writer` (per route) | `episode-writer-reviewer`, then `arc-reviewer` after the full route arc | `05-episode-writer/scripts/` |
 
-`base = <workspace>/moonscripts/<book-slug>/` (the C1 `ensureNovelWorkspace` contract). `arc-reviewer` lives at `<base>/skills/arc-reviewer/`.
+`base = <workspace>/lunascripts/<book-slug>/` (the C1 `ensureNovelWorkspace` contract). `arc-reviewer` lives at `<base>/skills/arc-reviewer/`.
 
 Gate contract (faithful to n2m's reviewer skills, which emit PASS / CONDITIONAL / FAIL):
 - **PASS** → advance to the next stage.
@@ -49,10 +49,10 @@ Gate contract (faithful to n2m's reviewer skills, which emit PASS / CONDITIONAL 
 
 ## File Structure
 
-- Create: `knowledge/novel-to-mss/novel_to_mss/SKILL.md` (the orchestration knowledge body; frontmatter `name: novel_to_mss` + `description`)
-- Create: `agent/packages/opencode/test/skill/novel-to-mss-orchestration.test.ts` (discovery + gate-contract + injected-FAIL + reviewer-mapping tests)
-- Create: `agent/packages/opencode/test/fixture/novel-to-mss/reviewer-verdicts/{pass,conditional,fail}.md` (reviewer-output fixtures for the injected-verdict test)
-- Modify: `docs/superpowers/specs/2026-05-19-upstream-authoring-migration-design.md` (§8 record the `novel_to_mss/SKILL.md` filename refinement)
+- Create: `knowledge/novel-to-ls/novel_to_ls/SKILL.md` (the orchestration knowledge body; frontmatter `name: novel_to_ls` + `description`)
+- Create: `agent/packages/opencode/test/skill/novel-to-ls-orchestration.test.ts` (discovery + gate-contract + injected-FAIL + reviewer-mapping tests)
+- Create: `agent/packages/opencode/test/fixture/novel-to-ls/reviewer-verdicts/{pass,conditional,fail}.md` (reviewer-output fixtures for the injected-verdict test)
+- Modify: `docs/superpowers/specs/2026-05-19-upstream-authoring-migration-design.md` (§8 record the `novel_to_ls/SKILL.md` filename refinement)
 - Create: `docs/superpowers/specs/phase-C2-orchestration-reviewers-verification.md` (Task 6)
 
 Test runner: from `agent/packages/opencode` → `PATH=$HOME/.bun/bin:$PATH bun test <file> --timeout 30000`.
@@ -60,41 +60,41 @@ Test runner: from `agent/packages/opencode` → `PATH=$HOME/.bun/bin:$PATH bun t
 
 ---
 
-### Task 1: Author the `novel_to_mss` orchestration skill body
+### Task 1: Author the `novel_to_ls` orchestration skill body
 
-**Files:** Create `knowledge/novel-to-mss/novel_to_mss/SKILL.md`
+**Files:** Create `knowledge/novel-to-ls/novel_to_ls/SKILL.md`
 
 - [ ] **Step 1: Survey the exact n2m documented sequencing + each reviewer's verdict vocabulary**
-  Read (read-only) from `/Users/august/MobAI/novels-to-moonscript`: `README.md` (§工作流 pipeline block), `SKILLS-GUIDE.md`, `CLAUDE.md`, and the frozen `knowledge/novel-to-mss/{bible-reviewer,planner-reviewer,episode-writer-reviewer,rename-reviewer,arc-reviewer}/SKILL.md` to confirm the exact verdict tokens each reviewer emits (PASS/CONDITIONAL/FAIL — confirm exact spelling/casing per reviewer; some may use GO/NO-GO for `novel-evaluator`). Record the exact tokens; the gate contract in the body MUST use the reviewers' real vocabulary, not a paraphrase. Output: a short notes block appended to the verification report later (not a separate file).
+  Read (read-only) from `/Users/august/MobAI/novels-to-lunascript`: `README.md` (§工作流 pipeline block), `SKILLS-GUIDE.md`, `CLAUDE.md`, and the frozen `knowledge/novel-to-ls/{bible-reviewer,planner-reviewer,episode-writer-reviewer,rename-reviewer,arc-reviewer}/SKILL.md` to confirm the exact verdict tokens each reviewer emits (PASS/CONDITIONAL/FAIL — confirm exact spelling/casing per reviewer; some may use GO/NO-GO for `novel-evaluator`). Record the exact tokens; the gate contract in the body MUST use the reviewers' real vocabulary, not a paraphrase. Output: a short notes block appended to the verification report later (not a separate file).
 
-- [ ] **Step 2: Write `knowledge/novel-to-mss/novel_to_mss/SKILL.md`** with frontmatter:
+- [ ] **Step 2: Write `knowledge/novel-to-ls/novel_to_ls/SKILL.md`** with frontmatter:
   ```
   ---
-  name: novel_to_mss
-  description: Orchestrate the upstream novel→.mss authoring pipeline — walk the frozen stage skills (novel-evaluator → character-architect → entity-planner → entity-normalizer → [entity-rename] → episode-writer) in n2m's documented order, dispatching independent reviewer sub-agents at each gate with PASS/CONDITIONAL/FAIL semantics, writing each stage to the moonscripts/<book>/NN-stage/ contract.
+  name: novel_to_ls
+  description: Orchestrate the upstream novel→.ls authoring pipeline — walk the frozen stage skills (novel-evaluator → character-architect → entity-planner → entity-normalizer → [entity-rename] → episode-writer) in n2m's documented order, dispatching independent reviewer sub-agents at each gate with PASS/CONDITIONAL/FAIL semantics, writing each stage to the lunascripts/<book>/NN-stage/ contract.
   ---
   ```
   Body MUST contain these explicit, machine-checkable sections (Task 3/4 assert their presence/correctness):
   1. **`## Stage DAG`** — the ordered stage list above incl. the optional `[4.5 entity-rename]` branch and the per-LI-route fan-out at stage 3/5.
   2. **`## Gate contract`** — a table or list with one row per gated stage: `stage | producer skill | reviewer skill | PASS→ | CONDITIONAL→ | FAIL→`. The FAIL row MUST say halt+surface, never advance. CONDITIONAL MUST say producer-applies-fixes then same-reviewer-re-review loop. Use each reviewer's REAL verdict tokens (Step 1).
   3. **`## Reviewer dispatch`** — explicit instruction: spawn a **fresh-context** sub-agent via the existing `task` tool (name it exactly as opencode's subagent/task tool is invoked — confirm the tool name from `agent/packages/opencode/src/tool/task.ts` / the tool registry; reference it by that exact name), loaded with the reviewer skill body + the producer's just-written output + the relevant Bible/plan inputs. Faithful to n2m: "independent agent, full Evidence-Trail sweep, not sampling". NO new code — this is an instruction to the driving agent to use the existing tool.
-  4. **`## Workspace writes`** — the stage→`NN-stage/` dir mapping table above; reference the C1 `ensureNovelWorkspace`/`AUTHORING_STAGE_DIRS` contract (`<base>/moonscripts/<book-slug>/...`).
+  4. **`## Workspace writes`** — the stage→`NN-stage/` dir mapping table above; reference the C1 `ensureNovelWorkspace`/`AUTHORING_STAGE_DIRS` contract (`<base>/lunascripts/<book-slug>/...`).
   5. **`## Per-route fan-out`** — when/how to spawn per-LI-route sub-agents for `entity-planner`/`planner-reviewer`/per-route `episode-writer`, then `arc-reviewer` after a full route arc.
   6. **`## Halt & surface`** — on FAIL or unrecoverable error: stop, write the reviewer report to the stage dir, surface to operator; do not fabricate downstream stages.
   This is authored connective knowledge; it must NOT rewrite/duplicate the creative wording of the stage skills (it references them by `name`), and its stage order/gates must match n2m's documented pipeline (Step 1). Keep ≤ ~400 lines, focused.
 
 - [ ] **Step 3: Commit**
-  `git add knowledge/novel-to-mss/novel_to_mss && git commit -m "feat: author novel_to_mss orchestration skill body (C2)"`
+  `git add knowledge/novel-to-ls/novel_to_ls && git commit -m "feat: author novel_to_ls orchestration skill body (C2)"`
 
 ---
 
 ### Task 2: Discovery test — orchestration skill is loadable
 
-**Files:** Create `agent/packages/opencode/test/skill/novel-to-mss-orchestration.test.ts`
+**Files:** Create `agent/packages/opencode/test/skill/novel-to-ls-orchestration.test.ts`
 
-- [ ] **Step 1: Write failing test** — mirror C1's `novel-to-mss-discovery.test.ts` harness exactly (`testEffect(Layer.mergeAll(Skill.defaultLayer, CrossSpawnSpawner.defaultLayer)).pipe(provideInstance(REPO))`). Assert `novel_to_mss` appears in `Skill.Service.all()`, `location` is filesystem (NOT `langfuse://`) under `knowledge/novel-to-mss/novel_to_mss`, `content` non-empty, AND no `duplicate skill name` warning. Run: must FAIL before Task 1's body exists (if Task 1 already committed, this passes immediately — that is acceptable, it is a discovery guard; note it).
-- [ ] **Step 2: Run** `cd agent/packages/opencode && PATH=$HOME/.bun/bin:$PATH bun test test/skill/novel-to-mss-orchestration.test.ts --timeout 30000` → PASS (skill discovered, fs-served).
-- [ ] **Step 3: Commit** `git add agent/packages/opencode/test/skill/novel-to-mss-orchestration.test.ts && git commit -m "test: assert novel_to_mss orchestration skill is discoverable (C2)"`
+- [ ] **Step 1: Write failing test** — mirror C1's `novel-to-ls-discovery.test.ts` harness exactly (`testEffect(Layer.mergeAll(Skill.defaultLayer, CrossSpawnSpawner.defaultLayer)).pipe(provideInstance(REPO))`). Assert `novel_to_ls` appears in `Skill.Service.all()`, `location` is filesystem (NOT `langfuse://`) under `knowledge/novel-to-ls/novel_to_ls`, `content` non-empty, AND no `duplicate skill name` warning. Run: must FAIL before Task 1's body exists (if Task 1 already committed, this passes immediately — that is acceptable, it is a discovery guard; note it).
+- [ ] **Step 2: Run** `cd agent/packages/opencode && PATH=$HOME/.bun/bin:$PATH bun test test/skill/novel-to-ls-orchestration.test.ts --timeout 30000` → PASS (skill discovered, fs-served).
+- [ ] **Step 3: Commit** `git add agent/packages/opencode/test/skill/novel-to-ls-orchestration.test.ts && git commit -m "test: assert novel_to_ls orchestration skill is discoverable (C2)"`
 
 ---
 
@@ -102,14 +102,14 @@ Test runner: from `agent/packages/opencode` → `PATH=$HOME/.bun/bin:$PATH bun t
 
 **Files:** Modify the C2 test file (append).
 
-- [ ] **Step 1: Write failing tests** that read `knowledge/novel-to-mss/novel_to_mss/SKILL.md` raw and assert the knowledge is complete and correct:
+- [ ] **Step 1: Write failing tests** that read `knowledge/novel-to-ls/novel_to_ls/SKILL.md` raw and assert the knowledge is complete and correct:
   - the 6 required `## ` sections (Task 1 Step 2 list) are all present;
   - every gated stage from the authoritative mapping table (stages 2, 3, 4.5, 5 with reviewers `bible-reviewer`, `planner-reviewer`, `rename-reviewer`, `episode-writer-reviewer`+`arc-reviewer`) appears in the `## Gate contract` section, each referencing its correct reviewer skill `name`;
   - the Gate contract explicitly maps `FAIL`→halt/surface (assert the FAIL row contains a halt verb and does NOT contain "advance"/"next stage"), `CONDITIONAL`→producer-fix + same-reviewer re-review loop, `PASS`→advance;
   - stage 1 `novel-evaluator` GO/NO-GO and the optional `[4.5 entity-rename]` branch are documented;
   - every stage maps to its exact `NN-stage` dir from `AUTHORING_STAGE_DIRS` (import the C1 constant and assert each value appears in the `## Workspace writes` section).
 - [ ] **Step 2: Run** → PASS (fix the body in Task 1, not the test, if a section/mapping is genuinely missing — re-commit body fix as `fix:` then proceed).
-- [ ] **Step 3: Commit** `git commit -m "test: assert novel_to_mss body encodes full stage+gate contract (C2)"`
+- [ ] **Step 3: Commit** `git commit -m "test: assert novel_to_ls body encodes full stage+gate contract (C2)"`
 
 ---
 
@@ -117,14 +117,14 @@ Test runner: from `agent/packages/opencode` → `PATH=$HOME/.bun/bin:$PATH bun t
 
 **Files:** Create reviewer-verdict fixtures; append to the C2 test file.
 
-- [ ] **Step 1: Create fixtures** `agent/packages/opencode/test/fixture/novel-to-mss/reviewer-verdicts/{pass,conditional,fail}.md` — minimal realistic reviewer outputs using the REAL verdict tokens from Task 1 Step 1 (e.g. a `fail.md` whose verdict line is exactly what `bible-reviewer` emits for FAIL).
-- [ ] **Step 2: Write the injected-verdict test.** Implement a small TEST-ONLY pure helper *inside the test file* (NOT in `src/` — must not be production orchestration code) that encodes the gate rule **as documented by the orchestration body**: parse the `## Gate contract` from `novel_to_mss/SKILL.md` into `{verdict → action}` and apply it to each fixture. Assert:
+- [ ] **Step 1: Create fixtures** `agent/packages/opencode/test/fixture/novel-to-ls/reviewer-verdicts/{pass,conditional,fail}.md` — minimal realistic reviewer outputs using the REAL verdict tokens from Task 1 Step 1 (e.g. a `fail.md` whose verdict line is exactly what `bible-reviewer` emits for FAIL).
+- [ ] **Step 2: Write the injected-verdict test.** Implement a small TEST-ONLY pure helper *inside the test file* (NOT in `src/` — must not be production orchestration code) that encodes the gate rule **as documented by the orchestration body**: parse the `## Gate contract` from `novel_to_ls/SKILL.md` into `{verdict → action}` and apply it to each fixture. Assert:
   - `fail.md` verdict → action is HALT (pipeline does NOT advance; matches the body's FAIL row);
   - `conditional.md` → action is FIX_AND_REREVIEW (loop, same reviewer);
   - `pass.md` → action is ADVANCE.
   This proves the *knowledge* (the body's gate contract), when mechanically followed, halts on FAIL — without writing any production orchestration/dispatch code (red line intact). Document in a test comment that the runtime gate is enforced by the driving agent following this same body; the deterministic proof is the contract derivation here, and the live behavioral proof is C3's real demo-book e2e.
 - [ ] **Step 3: Run** → PASS (3 verdict cases). If the parser can't unambiguously derive actions from the body, that means the body's `## Gate contract` is under-specified — fix the BODY (Task 1) to be machine-unambiguous, not the test.
-- [ ] **Step 4: Commit** `git add agent/packages/opencode/test/fixture/novel-to-mss agent/packages/opencode/test/skill/novel-to-mss-orchestration.test.ts && git commit -m "test: prove novel_to_mss gate halts on injected FAIL verdict (C2)"`
+- [ ] **Step 4: Commit** `git add agent/packages/opencode/test/fixture/novel-to-ls agent/packages/opencode/test/skill/novel-to-ls-orchestration.test.ts && git commit -m "test: prove novel_to_ls gate halts on injected FAIL verdict (C2)"`
 
 ---
 
@@ -132,7 +132,7 @@ Test runner: from `agent/packages/opencode` → `PATH=$HOME/.bun/bin:$PATH bun t
 
 **Files:** Modify `docs/superpowers/specs/2026-05-19-upstream-authoring-migration-design.md`
 
-- [ ] **Step 1:** In §8 (or the C2 row context), add one line: the orchestration skill is `knowledge/novel-to-mss/novel_to_mss/SKILL.md` (per-skill-dir `SKILL.md`, frontmatter `name: novel_to_mss`) — required for the C1 `**/SKILL.md` discovery glob; §4.2's `novel_to_mss.md` was loose wording, no semantic change. Note the C2 injected-FAIL interpretation (deterministic gate-contract derivation test; live behavior proven by C3 e2e) so the design records the resolution.
+- [ ] **Step 1:** In §8 (or the C2 row context), add one line: the orchestration skill is `knowledge/novel-to-ls/novel_to_ls/SKILL.md` (per-skill-dir `SKILL.md`, frontmatter `name: novel_to_ls`) — required for the C1 `**/SKILL.md` discovery glob; §4.2's `novel_to_ls.md` was loose wording, no semantic change. Note the C2 injected-FAIL interpretation (deterministic gate-contract derivation test; live behavior proven by C3 e2e) so the design records the resolution.
 - [ ] **Step 2: Commit** `git commit -m "docs: record C2 orchestration-skill filename + gate-test refinement (§8)"`
 
 ---
@@ -152,7 +152,7 @@ Test runner: from `agent/packages/opencode` → `PATH=$HOME/.bun/bin:$PATH bun t
 
 **Red-line check (§12):** zero production `*-orchestration`/`*-coordination`/`*-workflow-service` code. Only a knowledge body + tests + a test-only gate-contract parser. Reviewer dispatch = existing `task` tool. ✓
 
-**Ambiguity resolved:** design §4.2 said `novel_to_mss.md`; discovery needs `<name>/SKILL.md` (C1 fact) → resolved to `novel_to_mss/SKILL.md`, recorded in §8 (Task 5). The "injected-FAIL test" with knowledge-only gates → resolved as a deterministic gate-contract derivation test + C3 live e2e, recorded (Task 5). Both are defensible readings of the approved design; flagged in the C2 verification report and design §8 for user awareness.
+**Ambiguity resolved:** design §4.2 said `novel_to_ls.md`; discovery needs `<name>/SKILL.md` (C1 fact) → resolved to `novel_to_ls/SKILL.md`, recorded in §8 (Task 5). The "injected-FAIL test" with knowledge-only gates → resolved as a deterministic gate-contract derivation test + C3 live e2e, recorded (Task 5). Both are defensible readings of the approved design; flagged in the C2 verification report and design §8 for user awareness.
 
 **Placeholder scan:** no TBD. Task 1 Step 1 (verdict-vocabulary survey) is a real read-only investigation step with a concrete output, not a placeholder. Reviewer/tool exact name is resolved by reading `tool/task.ts` in Task 1 §3 (concrete procedure, not hand-waving).
 

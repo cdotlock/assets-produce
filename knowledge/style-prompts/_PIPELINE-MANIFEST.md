@@ -1,6 +1,6 @@
 # NRBI 最终 demo —— 素材 prompt 完整装配清单
 
-> 这是「做 novels-to-moonscript 最终 demo（书：no-rules-in-bad-ideas）时实际用的那一整套
+> 这是「做 novels-to-lunascript 最终 demo（书：no-rules-in-bad-ideas）时实际用的那一整套
 > prompt」的完整、无损、自持有副本。`source-of-record/` 内全部 verbatim 冻结,sha256 见
 > `_MIGRATION-STATUS.md`。本清单说明每段 prompt 在哪、按什么顺序拼成最终打到图像模型的 prompt。
 
@@ -8,11 +8,11 @@
 
 | 文件 | 来源仓 | 是什么 |
 |---|---|---|
-| `styles.json` (4 行) | moonshort-backend `generate-upscale-matting/_style_cache/styles.json` | **渲染期主风格**。`style_config` PG `styles` 表的本地权威 cache。4 行:`YA_Impasto_character` / `YA_Impasto_scene` / `YA_Impasto_grid` / `update_character`,列 id,name,category,model(image-gpt),prompt,reference_urls,created_at |
-| `nrbi-anchor_tasks.json` (73 条) | n2m `moonscripts/no-rules-in-bad-ideas/02.5-outfit-anchor/anchor_tasks.json` | **NRBI demo 实际 anchor prompt 全集**。每条 = sprite_id/char_id/outfit_id/outfit_text/prompt/model/reference_image_source |
+| `styles.json` (4 行) | lunaverse-backend `generate-upscale-matting/_style_cache/styles.json` | **渲染期主风格**。`style_config` PG `styles` 表的本地权威 cache。4 行:`YA_Impasto_character` / `YA_Impasto_scene` / `YA_Impasto_grid` / `update_character`,列 id,name,category,model(image-gpt),prompt,reference_urls,created_at |
+| `nrbi-anchor_tasks.json` (73 条) | n2m `lunascripts/no-rules-in-bad-ideas/02.5-outfit-anchor/anchor_tasks.json` | **NRBI demo 实际 anchor prompt 全集**。每条 = sprite_id/char_id/outfit_id/outfit_text/prompt/model/reference_image_source |
 | `anchor_spec.py` | n2m `skills/outfit-anchor-renderer/anchor_spec.py` | 02.5 阶段从锁定 bible.canonical_wardrobe 生成上面 anchor_tasks 用的**硬编码 prompt 模板**(CHARACTER LOCK / OUTFIT verbatim / POSE LOCK / FRAMING / CONTRACT,绿幕 #00B140) |
 | `green_screen.py` | n2m `skills/asset-prompt-generator/green_screen.py` | 06 阶段给 character/sprite prompt 追加的 `GREEN_SCREEN_SUFFIX`(`[BACKGROUND CONTRACT — chromakey green]` 四条,#00FF00) |
-| `render-with-style.py` | moonshort-backend `generate-upscale-matting/render-with-style.py` | **渲染期硬编码强化/改写层**(详见下表 file:line) |
+| `render-with-style.py` | lunaverse-backend `generate-upscale-matting/render-with-style.py` | **渲染期硬编码强化/改写层**(详见下表 file:line) |
 
 `appearance-feeder-mcp-korean-manga/` = 之前查错表的 MCP `style_prompts`/korean-manga-style 8 条导出。
 **不是最终风格**,降级保留:它是 06 阶段产出 tasks_output.json `appearance` 文字的上游喂料,

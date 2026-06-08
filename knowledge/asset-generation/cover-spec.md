@@ -93,4 +93,4 @@ canonical cover, callers usually pass `key="cover/main"` and
 - Character alone, no cover styling → `character-portrait-spec`.
 - Scene background → `scene-bg-spec`.
 - Climactic in-story beat → `cg-render-spec`.
-- A specific shot in a video / comic → `shot-image-from-mss`.
+- A specific shot in a video / comic → `shot-image-from-ls`.

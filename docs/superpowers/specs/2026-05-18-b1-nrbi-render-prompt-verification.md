@@ -108,7 +108,7 @@ ticked against real code at HEAD and the real test output in §1.
 
 - [x] **§1 Goal** — deterministic atomic tool `nrbi-render-prompt` that
   byte-faithfully reproduces NRBI demo Phase-1 prompt assembly, fully
-  self-maintained (local `styles.json`, no PG/SSH/MCP, no moonshort-backend
+  self-maintained (local `styles.json`, no PG/SSH/MCP, no lunaverse-backend
   dependency). Verified: TS tool `src/tool/asset/nrbi-render-prompt.ts` +
   `tools/nrbi-render-prompt/render.py` shell the sha256-pinned frozen
   `render-with-style.py`; Step-1 (16/16) + Step-2 (60/60) green. _(Tasks 1–7)_
@@ -145,7 +145,7 @@ ticked against real code at HEAD and the real test output in §1.
 - [x] **§5 Skill bodies / registry / 5-layer DAG.** Verified at HEAD in
   `agent/packages/opencode/src/business/asset-service/intent-to-skill.ts`:
   `ASSET_GENERATION_SKILLS` = `character-portrait-spec`, `scene-bg-spec`,
-  `cg-render-spec`, `cover-spec`, `shot-image-from-mss`, `sfx-spec`,
+  `cg-render-spec`, `cover-spec`, `shot-image-from-ls`, `sfx-spec`,
   `music-spec`, `upscale-spec`, `matting-spec`, `cutout-spec`,
   **`outfit-anchor-spec`**, **`ep-sprite-spec`** (12 entries; the two B1 bodies
   appended at the end). Bodies present at `knowledge/asset-generation/{outfit-
@@ -181,7 +181,7 @@ ticked against real code at HEAD and the real test output in §1.
 - [x] **§8 Scope / non-goals.** Verified by the B1 diff: no full-book auto-DAG
   orchestrator, no style-image re-hosting, no new AssetKind, no Phase-2/3
   changes, no Phase-14 LLM-loop change, no `scene ep illustration` wiring, no
-  moonshort-backend change. All explicit non-goals respected.
+  lunaverse-backend change. All explicit non-goals respected.
 - [x] **§9 Spec governance.** Verified: main spec
   `2026-04-29-assets-produce-spec.md` §15 row **1.15** (line 802) records D1–D6
   and that §2 atomic-capability + skill-orchestration and §11.4 external
@@ -198,7 +198,7 @@ ticked against real code at HEAD and the real test output in §1.
    `ASSET_GENERATION_SKILLS` bulleted list (8 entries) that disagreed with its
    own File-layout table. Synced to mirror the **actual** registry array
    exactly — 12 entries in source order: `character-portrait-spec`,
-   `scene-bg-spec`, `cg-render-spec`, `cover-spec`, `shot-image-from-mss`,
+   `scene-bg-spec`, `cg-render-spec`, `cover-spec`, `shot-image-from-ls`,
    `sfx-spec`, `music-spec`, `upscale-spec`, `matting-spec`, `cutout-spec`,
    `outfit-anchor-spec`, `ep-sprite-spec`. Ground-truth note: `matting-spec` /
    `cutout-spec` **are** present in `ASSET_GENERATION_SKILLS` (registered in

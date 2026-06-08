@@ -6,7 +6,7 @@ render-with-style.py — 用 style_config 远端库里的「风格」渲染 ep1 
   1. SSH tunnel → style_config PG @ 8.133.3.63
   2. 拉 character series illustration + scene series illustration 的最新风格
   3. 用风格 prompt 模板（{{appearance}} or {{scene}}）+ 参考图 + 模型出图
-  4. 输出 → moonscripts/<slug>/assets/gen-upscale/{series,scene,ep_sprites/ep1}/
+  4. 输出 → lunascripts/<slug>/assets/gen-upscale/{series,scene,ep_sprites/ep1}/
 
 依赖：sshtunnel, 'psycopg[binary]', keyring, 'paramiko<4.0', google-genai
 
@@ -17,7 +17,7 @@ Usage:
 # This module has been migrated to cdotlock/assets-produce/tools/cg-render/
 # (kept alongside render.py — it's imported by it). Kept here only for
 # historical reference; do not invoke from new code. Removal is at the
-# discretion of the moonshort-backend maintainer.
+# discretion of the lunaverse-backend maintainer.
 from __future__ import annotations
 
 import argparse
@@ -57,8 +57,8 @@ except ImportError:  # pragma: no cover
     gt = None  # type: ignore[assignment]
 
 # ─── Constants ─────────────────────────────────────────────────────────
-# Canonical layout (2026-05): <backend>/moonscripts/<slug>/
-#   ├── tasks_output.json          ← upstream agent output (synced from Dramatizer-MSS)
+# Canonical layout (2026-05): <backend>/lunascripts/<slug>/
+#   ├── tasks_output.json          ← upstream agent output (synced from Dramatizer-LS)
 #   ├── characters.json            ← upstream
 #   ├── scripts/ep_*.md            ← upstream
 #   └── assets/
@@ -75,7 +75,7 @@ DEFAULT_BOOK_SLUG = "no-rules-in-bad-ideas"
 
 
 def book_paths(slug: str) -> dict[str, pathlib.Path]:
-    book_dir = BACKEND_ROOT / "moonscripts" / slug
+    book_dir = BACKEND_ROOT / "lunascripts" / slug
     assets = book_dir / "assets" / "gen-upscale"
     return {
         "book_dir":    book_dir,
@@ -97,7 +97,7 @@ def book_paths(slug: str) -> dict[str, pathlib.Path]:
         "out_sprites": assets / "ep_sprites",
     }
 
-# ep1 取自前面 mss compile 的 step 引用
+# ep1 取自前面 lsc compile 的 step 引用
 EP1_CHARS = ["selena", "diego", "luca", "weston", "xiomara", "mariana", "camila"]
 # scene 描述抽取自 tasks_output.json 中两个 parent grid 的【格 N】行（school + selena_house）
 EP1_SCENES: dict[str, str] = {
@@ -1429,7 +1429,7 @@ def main() -> int:
     global _CURRENT_STYLE_FAMILY
 
     ap = argparse.ArgumentParser(prog="render-with-style")
-    ap.add_argument("--book-slug", default=DEFAULT_BOOK_SLUG, help="moonscripts/<slug>/ folder name")
+    ap.add_argument("--book-slug", default=DEFAULT_BOOK_SLUG, help="lunascripts/<slug>/ folder name")
     ap.add_argument("--only", help="comma list of labels to render, e.g. 'char:selena,scene:school_hallway'")
     ap.add_argument("--overwrite", action="store_true")
     # NEW: local style cache (skip SSH+PG). Default to ./_style_cache/styles.json if present.

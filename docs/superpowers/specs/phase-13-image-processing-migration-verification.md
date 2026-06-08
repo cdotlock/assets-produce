@@ -179,7 +179,7 @@ Explicit grep of `agent/packages/opencode/src/tool/registry.ts` for `detect-matt
 
 Per the controller-owned Deviation A below (reproduced verbatim in the Deviations section):
 
-- `moonshort-backend/generate-upscale-matting/matting.py` — received a committed DEPRECATED block in local commit `202d2c6` on `cdotlock/moonshort-backend` branch `feat/cg-pipeline`. **NOT pushed** (cross-namespace; gated on explicit backend-maintainer ack).
+- `lunaverse-backend/generate-upscale-matting/matting.py` — received a committed DEPRECATED block in local commit `202d2c6` on `cdotlock/lunaverse-backend` branch `feat/cg-pipeline`. **NOT pushed** (cross-namespace; gated on explicit backend-maintainer ack).
 - The other 6 originals (`cutout.py`, `hole_fill.py`, `green_spill_clear.py`, `rgb_unspill.py`, `_local_tools/hybrid_to_webp.py`, `detect_matting_failures.py`) were never git-tracked (gitignored by `958535d`) and carry the DEPRECATED notice **on-disk only**.
 
 No backend files were deleted. Push is gated on backend-maintainer ack.
@@ -246,15 +246,15 @@ git status -b
 
 `origin/main` HEAD = `196f8cf` (22 Phase-13 commits from `a7eeecd`). `main … origin/main` = **0 / 0 in sync**.
 
-Backend push: local commit `202d2c6` on `cdotlock/moonshort-backend:feat/cg-pipeline`, **NOT pushed** — gated on backend-maintainer explicit ack per the cross-namespace push policy.
+Backend push: local commit `202d2c6` on `cdotlock/lunaverse-backend:feat/cg-pipeline`, **NOT pushed** — gated on backend-maintainer explicit ack per the cross-namespace push policy.
 
 ---
 
 ## Deviations & Decisions (honest record)
 
-**(A) Step-7 backend DEPRECATED is partial by design (Option A, user-decided).** Only `generate-upscale-matting/matting.py` received a committed DEPRECATED block — backend LOCAL commit `202d2c6` on `cdotlock/moonshort-backend` branch `feat/cg-pipeline`, **NOT pushed (cross-namespace; gated on explicit backend-maintainer ack)**. The other 6 migrated originals (`cutout.py`, `hole_fill.py`, `green_spill_clear.py`, `rgb_unspill.py`, `_local_tools/hybrid_to_webp.py`, `detect_matting_failures.py`) were **never git-tracked**: the backend maintainer added `generate-upscale-matting/` to `.gitignore` in commit `958535d` ("chore: remove binary assets and image scripts from git tracking"), and those 6 files were created on-disk *after* that rule, so they were never tracked — they were **not "removed by" `958535d`**. They carry the identical DEPRECATED notice **on-disk only**. The `202d2c6` commit message's phrasing "untracked — gitignored by 958535d" is state-correct but mechanism-imprecise; it is intentionally NOT amended (amending a sound commit is prohibited; this report is the precise-facts record for the maintainer's eventual ack review).
+**(A) Step-7 backend DEPRECATED is partial by design (Option A, user-decided).** Only `generate-upscale-matting/matting.py` received a committed DEPRECATED block — backend LOCAL commit `202d2c6` on `cdotlock/lunaverse-backend` branch `feat/cg-pipeline`, **NOT pushed (cross-namespace; gated on explicit backend-maintainer ack)**. The other 6 migrated originals (`cutout.py`, `hole_fill.py`, `green_spill_clear.py`, `rgb_unspill.py`, `_local_tools/hybrid_to_webp.py`, `detect_matting_failures.py`) were **never git-tracked**: the backend maintainer added `generate-upscale-matting/` to `.gitignore` in commit `958535d` ("chore: remove binary assets and image scripts from git tracking"), and those 6 files were created on-disk *after* that rule, so they were never tracked — they were **not "removed by" `958535d`**. They carry the identical DEPRECATED notice **on-disk only**. The `202d2c6` commit message's phrasing "untracked — gitignored by 958535d" is state-correct but mechanism-imprecise; it is intentionally NOT amended (amending a sound commit is prohibited; this report is the precise-facts record for the maintainer's eventual ack review).
 
-**(B) Backend commit authorship.** `202d2c6` was authored by the auto-configured local git identity `August <august@AugustdeMacBook.local>` (same identity as all assets-produce Phase-13 commits). No `git config`/`--amend --reset-author` was run (out of scope). The moonshort-backend maintainer controls authorship on any eventual upstream acceptance.
+**(B) Backend commit authorship.** `202d2c6` was authored by the auto-configured local git identity `August <august@AugustdeMacBook.local>` (same identity as all assets-produce Phase-13 commits). No `git config`/`--amend --reset-author` was run (out of scope). The lunaverse-backend maintainer controls authorship on any eventual upstream acceptance.
 
 **(C) Family-wide input-validation hardening = deliberately deferred to a follow-up chip, NOT a gap.** Two opus Stage-2 reviews flagged a non-blocking MINOR: malformed caller input (a non-string path field, or a binary file fed as the JSON payload) currently exits 1 INTERNAL instead of 2 INVALID_INPUT across the 7 tools' `_run_json_main` (the tools still correctly reject the input). Both reviews classified it non-blocking and recommended a SINGLE cross-tool pass. It is NOT required by §5. To avoid regression risk from re-touching 7 already-shipped/reviewed/pushed tools at phase closure, it was filed as a standalone spawn_task chip with a self-contained TDD brief. This is a disciplined deferral, not an outstanding defect.
 

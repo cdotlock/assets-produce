@@ -7,7 +7,7 @@ composite work (visual novel sprites, key-art overlays, character sticker
 packs, promo composites).
 
 The matting pipeline was ported in Phase 13 from
-`moonshort-backend/generate-upscale-matting/matting.py` (MODNet) to
+`lunaverse-backend/generate-upscale-matting/matting.py` (MODNet) to
 `tools/matting/matting.py`, with a thin TypeScript wrapper registered as the
 atomic tool [`matting`](../../agent/packages/opencode/src/tool/asset/matting.ts).
 The wrapper dispatches to `tools/matting/matting.py` via subprocess and

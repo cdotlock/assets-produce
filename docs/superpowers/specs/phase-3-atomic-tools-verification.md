@@ -248,7 +248,7 @@ docs/superpowers/specs/2026-04-29-assets-produce-spec.md  # § 15/1.6 修订
 | MF-1 | MUST | `extractUrlFromResult` / happyhorse `throw` 在 `Effect.gen` 中变成 defect，绕过 `.pipe(Effect.catch(...))` graceful 路径 | `extractUrlFromResult` 改返回 `Effect<string, FcCallError>`，调用处用 `yield*`；happyhorse 改用 `yield* Effect.fail(...)` |
 | MF-2 | MUST | `tools call` 中 schema decode 失败、tool execute defect 都被 `AppRuntime.runPromise` 转 promise rejection，`cli.fail` 打 "Unexpected error" | 改用 `runPromiseExit` + `exitToolError` 解 `Cause` 还原 graceful JSON envelope；exitCode=1 |
 | MF-3 | MUST | `UI.println` 写 stderr，`tools list/show/export-schema/call` 数据无法 pipe 到 stdout | 新增 `writeOut(text)` helper 直接走 `process.stdout.write`；保留 `UI.error` 给人类向 stderr |
-| MF-4 | MUST | `agent/opencode.jsonc` 只有 cwd 在 `agent/` 子目录时才生效，CI/repo-root 仍旧走全局 anthropic-path | 移到 repo root（`/Users/Clock/moonshort/assets-produce/opencode.jsonc`），删除 `agent/opencode.jsonc` |
+| MF-4 | MUST | `agent/opencode.jsonc` 只有 cwd 在 `agent/` 子目录时才生效，CI/repo-root 仍旧走全局 anthropic-path | 移到 repo root（`/Users/Clock/lunaverse/assets-produce/opencode.jsonc`），删除 `agent/opencode.jsonc` |
 | SF-1 | SHOULD | `referenceImageUrls` / `sourceVideoUrls` 没有 `maxItems(8)`，描述说 max 8 但 schema 不强制 | 全 5 个 image/video tool 加 `Schema.isMaxLength(8)` |
 | SF-2 | SHOULD | tool 不传 `Tool.Context.abort` 给 `callFc`，session cancel 不能中断 in-flight FC | 6 个 tool execute 改 `_ctx` → `ctx`，callFc 加 `signal: ctx.abort` |
 | SF-3 | SHOULD | `HttpsUrl` 正则 `^https?://` 允许 http://，SSRF 风险 | 改 `^https://`（去 `?`） |

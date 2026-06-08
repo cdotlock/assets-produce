@@ -53,7 +53,7 @@ on any drift or unreachable Langfuse.
 `ASSET_GENERATION_SKILLS` (12 entries; the loop only needs the names):
 
 - `character-portrait-spec`, `scene-bg-spec`, `cg-render-spec`,
-  `cover-spec`, `shot-image-from-mss`, `sfx-spec`, `music-spec`
+  `cover-spec`, `shot-image-from-ls`, `sfx-spec`, `music-spec`
 - `upscale-spec` (Phase 12 post-process — no AssetKind)
 - `matting-spec`, `cutout-spec` (Phase 13 bodies, **registered in
   Phase 14** per spec §15 r1.14 — reachable via skill_hint / picker)
@@ -73,7 +73,7 @@ registered bodies drive real atomic tools end to end.
 | `scene-bg-spec.md` | scene-bg-spec | intent.kind == "scene_bg" |
 | `cg-render-spec.md` | cg-render-spec | intent.kind == "cg" |
 | `cover-spec.md` | cover-spec | intent.kind == "cover" |
-| `shot-image-from-mss.md` | shot-image-from-mss | intent.kind == "shot_image" OR "shot_video" |
+| `shot-image-from-ls.md` | shot-image-from-ls | intent.kind == "shot_image" OR "shot_video" |
 | `sfx-spec.md` | sfx-spec | intent.kind == "sfx" |
 | `music-spec.md` | music-spec | intent.kind == "music" |
 | `upscale-spec.md` | upscale-spec | no AssetKind — `skill_hint` / picker only (Phase 12 post-process) |

@@ -158,7 +158,7 @@ optionally downloads the video and extracts the end frame.
 Default run directory:
 
 ```text
-<shot-dir>/runs/<YYYYMMDD-HHMMSS>/
+<shot-dir>/runs/<YYYYMMDD-HHMLS>/
 ```
 
 For:

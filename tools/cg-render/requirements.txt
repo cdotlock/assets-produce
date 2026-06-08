@@ -1,4 +1,4 @@
-# cg-render dependencies. Pinned to the versions moonshort-backend has been
+# cg-render dependencies. Pinned to the versions lunaverse-backend has been
 # running with — bumps are tracked in Phase 9 verification reports.
 #
 # Style-fetch + rendering (real mode only — `--mock` skips ALL of these):

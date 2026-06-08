@@ -6,7 +6,7 @@ holes where the alpha was zeroed. This tool detects interior alpha=0 components
 (NOT touching the image border) whose size falls in [min_size, max_size) and
 inpaints them using cv2 TELEA.
 
-Algorithm (faithful port of moonshort-backend/generate-upscale-matting/hole_fill.py):
+Algorithm (faithful port of lunaverse-backend/generate-upscale-matting/hole_fill.py):
   1. Load RGBA PNG.
   2. Build binary mask: alpha==0 AND interior (not border-connected) AND
      size in [min_size, max_size).
@@ -27,7 +27,7 @@ the algorithm helper function, NOT at module top. Combined with
 `from __future__ import annotations`, the module imports and `--mock` runs
 with NO cv2/scipy/numpy installed.
 
-Migrated 2026-05-16 from moonshort-backend/generate-upscale-matting/hole_fill.py.
+Migrated 2026-05-16 from lunaverse-backend/generate-upscale-matting/hole_fill.py.
 Backend batch (--paths, comma-split, in-place mutation) removed entirely; atomic
 tool operates on a single explicit input_path -> output_path pair.
 

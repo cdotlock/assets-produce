@@ -109,13 +109,13 @@ GLOBAL_OPTIONS 以顶层 `global_flags` sibling 暴露。
 ### 2.2 验收 #2 — 单二进制 ≤ 30MB + cold start ≤ 800ms（amended）
 
 ```bash
-$ bun --cwd /Users/Clock/moonshort/assets-produce/agent run build
+$ bun --cwd /Users/Clock/lunaverse/assets-produce/agent run build
 ✓ build 完成。size 2.17 MB  (target ≤ 30 MB)
-$ du -h /Users/Clock/moonshort/assets-produce/agent/packages/opencode/dist/agent.mjs
+$ du -h /Users/Clock/lunaverse/assets-produce/agent/packages/opencode/dist/agent.mjs
 2.2M
-$ bun /Users/Clock/moonshort/assets-produce/agent/dist/agent.mjs --version
+$ bun /Users/Clock/lunaverse/assets-produce/agent/dist/agent.mjs --version
 local
-$ bun /Users/Clock/moonshort/assets-produce/agent/dist/agent.mjs config export-schema | jq '.tools | length'
+$ bun /Users/Clock/lunaverse/assets-produce/agent/dist/agent.mjs config export-schema | jq '.tools | length'
 22
 $ hyperfine --warmup 0 --runs 5 'bun agent/dist/agent.mjs --version'
   Time (mean ± σ):  674 ms ± 122 ms
@@ -133,7 +133,7 @@ $ hyperfine --warmup 0 --runs 5 'bun agent/dist/agent.mjs --version'
 ### 2.3 验收 #3 — ERRORS.md 每错误场景都有匹配实现
 
 ```bash
-$ test -f /Users/Clock/moonshort/assets-produce/ERRORS.md && wc -l /Users/Clock/moonshort/assets-produce/ERRORS.md
+$ test -f /Users/Clock/lunaverse/assets-produce/ERRORS.md && wc -l /Users/Clock/lunaverse/assets-produce/ERRORS.md
 298
 
 $ bun --conditions=browser ./src/index.ts users add 2>/dev/null; echo "exit=$?"
@@ -161,7 +161,7 @@ ERRORS.md 包含：
 ### 2.4 验收 #4 — SKILL.md 可被另一 Claude Code session 直接读懂使用
 
 ```bash
-$ test -f /Users/Clock/moonshort/assets-produce/SKILL.md && wc -l /Users/Clock/moonshort/assets-produce/SKILL.md
+$ test -f /Users/Clock/lunaverse/assets-produce/SKILL.md && wc -l /Users/Clock/lunaverse/assets-produce/SKILL.md
 185
 ```
 

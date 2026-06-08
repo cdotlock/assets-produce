@@ -1,7 +1,7 @@
 """Layer B of CG pipeline — render one .webp per cg_task and upload to OSS.
 
 Consumes tasks_output.cg_tasks[] (produced by skills/asset-prompt-generator/cg_collector.py
-in novels-to-moonscript). Calls helpers from render-with-style.py to actually generate
+in novels-to-lunascript). Calls helpers from render-with-style.py to actually generate
 images. Uploads to nrbi/cg/<name>.webp.
 
 Phase 3 (video) is a render_mode dispatch — placeholder raises NotImplementedError.
@@ -17,7 +17,7 @@ import pathlib
 def _book_oss_prefix(slug: str) -> str:
     """Map a book slug to its OSS key prefix.
 
-    Matches the convention in novels-to-moonscript/dramatizer/build.py.
+    Matches the convention in novels-to-lunascript/dramatizer/build.py.
     """
     return {
         "no-rules-in-bad-ideas": "nrbi/",
@@ -28,7 +28,7 @@ def _book_oss_prefix(slug: str) -> str:
 def select_aspect_for_panel_count(n: int) -> str:
     """Map panel count → image aspect ratio string.
 
-    All CGs are 9:16 — MoonShort renders full-bleed on portrait mobile screens,
+    All CGs are 9:16 — Lunaverse renders full-bleed on portrait mobile screens,
     so a 1:1 single-panel or 1:2 two-panel wastes vertical real estate (top/
     bottom letterboxing). Keep the function for forward-compat / per-count
     tuning, but for now panel count only changes the in-image layout (set by

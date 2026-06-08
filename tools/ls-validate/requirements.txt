@@ -1,0 +1,3 @@
+# ls-validate depends ONLY on the Python 3 stdlib (hashlib, subprocess, json, tempfile, etc.).
+# The heavy work is delegated to the vendored Go binary (lunascripts@b36a407).
+# No external packages. Hermetic by design.

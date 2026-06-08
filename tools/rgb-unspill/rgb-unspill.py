@@ -23,7 +23,7 @@ where G exceeds both R and B the G channel is clamped down to max(R, B).
 Alpha and R/B are never modified, so the silhouette is unchanged. Output
 format follows the dst extension: `.png` -> PNG, `.webp` -> WebP q90 m4.
 
-Migrated 2026-05-16 from moonshort-backend/generate-upscale-matting/rgb_unspill.py.
+Migrated 2026-05-16 from lunaverse-backend/generate-upscale-matting/rgb_unspill.py.
 Backend batch (--root, --paths, --workers, --dry-run, ThreadPoolExecutor,
 directory walk, REPO_ROOT) removed entirely; atomic tool operates on a single
 explicit input_path -> output_path pair.

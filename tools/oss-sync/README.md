@@ -9,7 +9,7 @@ on remote presence (HEAD check), with optional dry-run.
 > when you need it.
 
 > Migrated 2026-05-15 from
-> `moonshort-backend/generate-upscale-matting/_local_tools/sync_to_oss.py`.
+> `lunaverse-backend/generate-upscale-matting/_local_tools/sync_to_oss.py`.
 > Original is marked DEPRECATED there.
 
 ## Setup
@@ -75,7 +75,7 @@ Dry-run mode reads none of these — safe to run anywhere.
 
 ## Legacy CLI
 
-The original `main()` (book-slug-aware moonshort-backend driver) lives in
+The original `main()` (book-slug-aware lunaverse-backend driver) lives in
 the same file. Trigger it by NOT passing `--input` or `--json`:
 
 ```bash

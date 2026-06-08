@@ -8,7 +8,7 @@ asset pipeline (single-image post-render upscale).
   local files first). Output is the same — atomic tool does NOT upload to
   OSS; let the next layer (asset-service generator) handle that.
 - Scale must be 2 or 4. Default model is `realesrgan-x4plus-anime` (good
-  fit for the YA Impasto digital-painting look used across moonshort
+  fit for the YA Impasto digital-painting look used across lunaverse
   productions).
 
 Use `mock: true` in tests / before the realesrgan-ncnn-vulkan binary is

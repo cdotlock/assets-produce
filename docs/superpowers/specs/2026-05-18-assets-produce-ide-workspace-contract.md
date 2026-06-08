@@ -1,7 +1,7 @@
-# assets-produce ↔ Moonshort IDE 工作区契约
+# assets-produce ↔ Lunaverse IDE 工作区契约
 
 > 设计文档（非 phase plan）。2026-05-18。
-> 背景：Moonshort IDE（同事做的 VS Code 套壳，将来由本人一并维护）通过打开一个本地工作区文件夹消费 assets-produce 产物。本文件定死「assets-produce 这边要保证什么，IDE 才能正确认素材」。其余（IDE 本身、Notion、跨机器）不在 assets-produce 职责内。
+> 背景：Lunaverse IDE（同事做的 VS Code 套壳，将来由本人一并维护）通过打开一个本地工作区文件夹消费 assets-produce 产物。本文件定死「assets-produce 这边要保证什么，IDE 才能正确认素材」。其余（IDE 本身、Notion、跨机器）不在 assets-produce 职责内。
 
 ---
 
@@ -23,8 +23,8 @@
 │   ├── music/<name>.<ext>
 │   └── sfx/<name>.<ext>
 ├── mapping.json             # 唯一契约：name+kind → 位置
-├── <script>.md              # MSS 剧本
-├── <script>_output.json     # MSS 编译产物
+├── <script>.md              # LS 剧本
+├── <script>_output.json     # LS 编译产物
 └── README.md
 ```
 
@@ -32,7 +32,7 @@
 
 ## 3. `mapping.json` 契约（命脉）
 
-IDE 与 MSS 解释器只认 `mapping.json`，不靠扫文件夹。基线 schema（与 MSS wiki `concepts/mss-format` 的 `assets.characters` 一致）：
+IDE 与 LS 解释器只认 `mapping.json`，不靠扫文件夹。基线 schema（与 LS wiki `concepts/ls-format` 的 `assets.characters` 一致）：
 
 ```jsonc
 {
@@ -52,7 +52,7 @@ IDE 与 MSS 解释器只认 `mapping.json`，不靠扫文件夹。基线 schema�
 
 1. **`mapping.json` 是唯一契约**：schema 定清楚、生成正确。文件夹只是字节放哪。
 2. **`assets/` 按 kind 分子目录（决策 B）**：给「用户手动上传素材」一个一眼就懂的入口。
-3. **任何新素材自动登记进 `mapping.json`**：agent 生成的、用户丢进 `characters/` 的，都必须自动写一条 mapping 条目。**这条是 make-or-break。** 漏了 = 文件在、IDE/MSS 看不见、编译期静默跳过或渲染期 404、整段戏丢失且不报错（MSS wiki 有真实 bug 史：`MRS. KING:` / `@mama_reyes` 类条目失配）。
+3. **任何新素材自动登记进 `mapping.json`**：agent 生成的、用户丢进 `characters/` 的，都必须自动写一条 mapping 条目。**这条是 make-or-break。** 漏了 = 文件在、IDE/LS 看不见、编译期静默跳过或渲染期 404、整段戏丢失且不报错（LS wiki 有真实 bug 史：`MRS. KING:` / `@mama_reyes` 类条目失配）。
 4. **取素材一律走 mapping 解析，`loc` 可本地路径可 OSS URL**：禁止写死「永远读 `./assets/*`」。守住此条 → 本地/远程同一套逻辑，未来上云零返工。
 
 ## 5. 明确不在 assets-produce 职责内（放心砍）
@@ -67,7 +67,7 @@ IDE 与 MSS 解释器只认 `mapping.json`，不靠扫文件夹。基线 schema�
 - [ ] 手动往 `assets/characters/<x>/` 丢一张图，确认被自动登记
 - [ ] 用 IDE 实际 mapping 读取器校 schema 字段
 - [ ] 抽一条 `loc` 改成 OSS URL，确认解析层照样能取到（验证规则 4）
-- [ ] MSS `@<char>` / `@bg` / `@music` / `@sfx` 引用全部能从 mapping 解析（零 orphan）
+- [ ] LS `@<char>` / `@bg` / `@music` / `@sfx` 引用全部能从 mapping 解析（零 orphan）
 
 ## 7. 关联与后续
 

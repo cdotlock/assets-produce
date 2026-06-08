@@ -68,7 +68,7 @@ make -C videoctl build
 用户确认“可以生成了”后，执行以下顺序。
 
 ```bash
-cd /Users/Clock/moonshort/assets-produce
+cd /Users/Clock/lunaverse/assets-produce
 test -x videoctl/bin/videoctl || make -C videoctl build
 
 PROMPT="video-agent-test/works/<novel_id>/episodes/ep_<N>/shots/<shot_id>/prompt.md"
@@ -118,7 +118,7 @@ videoctl/bin/videoctl run-shot "$PROMPT" --download --extract-end-frame
 每次 live submit 会写：
 
 ```text
-<shot-dir>/runs/<YYYYMMDD-HHMMSS>/
+<shot-dir>/runs/<YYYYMMDD-HHMLS>/
 ```
 
 常见文件：

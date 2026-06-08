@@ -6,7 +6,7 @@ image using numpy + Pillow HSV thresholding. No ML weights required. Used
 when the source image was shot against a green screen and the background
 removal must be fast, deterministic, and reproducible.
 
-The cutout pipeline originally lived in `moonshort-backend`
+The cutout pipeline originally lived in `lunaverse-backend`
 (`generate-upscale-matting/cutout.py`). Phase 13 migrated it to
 `tools/cutout/` and registered a thin TypeScript wrapper as the atomic tool
 [`cutout`](../../agent/packages/opencode/src/tool/asset/cutout.ts).

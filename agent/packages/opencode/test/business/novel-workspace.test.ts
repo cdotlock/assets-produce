@@ -19,7 +19,7 @@ test("ensureNovelWorkspace creates the n2m-compatible skeleton idempotently", ()
   const root = mkdtempSync(path.join(tmpdir(), "c1-ws-"))
   try {
     const ws = ensureNovelWorkspace(root, "no-rules-in-bad-ideas")
-    const base = path.join(root, "moonscripts", "no-rules-in-bad-ideas")
+    const base = path.join(root, "lunascripts", "no-rules-in-bad-ideas")
     expect(ws.base).toBe(base)
     for (const d of AUTHORING_STAGE_DIRS) expect(existsSync(path.join(base, d))).toBe(true)
     expect(existsSync(path.join(base, "skills", "arc-reviewer"))).toBe(true)

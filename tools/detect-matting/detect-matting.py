@@ -20,7 +20,7 @@ CLI-ONLY: this tool is intentionally NOT registered as an atomic tool and
 has no TypeScript shell in agent/packages/opencode/src/tool/asset/. It is
 invoked directly from the shell or by operator scripts.
 
-Faithful port of moonshort-backend/generate-upscale-matting/detect_matting_failures.py.
+Faithful port of lunaverse-backend/generate-upscale-matting/detect_matting_failures.py.
 Backend batch (--root, --only, dir-walk, collect_targets) removed entirely;
 atomic tool operates on a single explicit input PNG -> single JSON report.
 

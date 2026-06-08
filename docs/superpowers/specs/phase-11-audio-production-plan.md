@@ -19,7 +19,7 @@
 | SFX 抽离来源（survey 落定）| n2m `skills/sfx-normalizer/elevenlabs_generator.py::ElevenLabsGenerator.generate()` L139–167（`POST /v1/sound-generation`，`xi-api-key`，同步 mp3 字节）| phase-11-survey.md Block B |
 | OSS 上传（survey 落定）| `OSS.Service` 的 `put(key,body)→PutResult.url`；content-type 由 key 后缀 `.mp3` 推断（无 content-type 入参）；`yield* OSS.Service` + `OSS.defaultLayer` | phase-11-survey.md Block A |
 | 测试命令（survey 落定）| `PATH=$HOME/.bun/bin:$PATH bun --cwd=agent/packages/opencode run test`（根 `agent` test 脚本被 guard 成 exit 1）| phase-11-survey.md Baseline |
-| ElevenLabs 抽离边界 | 只移植 novels-to-moonscript 的「声效合成 HTTP 调用」；**不**带其归类/语义映射 | 设计 §2.2 / §9.2；禁 import n2m |
+| ElevenLabs 抽离边界 | 只移植 novels-to-lunascript 的「声效合成 HTTP 调用」；**不**带其归类/语义映射 | 设计 §2.2 / §9.2；禁 import n2m |
 | AssetKind 扩展 | `types.ts` 的 `AssetKind` union + `ASSET_KINDS` 元组追加 `"music"` `"sfx"` | 设计 §4.3；asset-service `z.enum(ASSET_KINDS)` 自动收口，API 层零改 |
 | AssetType | 不改类型；music/sfx 经 `defaultAssetTypeForKind()` → 已有的 `"audio"` | 设计 §3；`AssetType` union 已含 audio |
 | skill body | `knowledge/asset-generation/` 新增 `music-spec.md` / `sfx-spec.md`（6 段式）| 设计 §4.3；本地自包含，不上 Langfuse |
@@ -31,7 +31,7 @@
 
 ### 1.1 调研产物（执行前置，落 `docs/superpowers/specs/phase-11-survey.md`）
 
-- novels-to-moonscript 内 ElevenLabs 声效合成调用实际位置 / 函数 / 入参 / env（grep 现场清单），明确「只移植合成 HTTP 调用、不拖归类」的抽离边界
+- novels-to-lunascript 内 ElevenLabs 声效合成调用实际位置 / 函数 / 入参 / env（grep 现场清单），明确「只移植合成 HTTP 调用、不拖归类」的抽离边界
 - Suno 官方 API 实际 endpoint / 鉴权形态 / 返回结构（同步字节 vs 临时 URL vs 异步 job poll）
 - Phase 2 OSS 服务（`src/oss/oss.ts`）对外 Effect 接口签名（上传方法名、content-type 入参、返回 URL 形态）
 
@@ -84,7 +84,7 @@
 预期输出：
 
 - `git status` 干净起点；`bun --cwd=agent run typecheck` / `bun --cwd=agent run test` 全过基线记录
-- novels-to-moonscript ElevenLabs 声效合成调用实际文件 / 函数 / 入参 / env 清单 + 抽离边界
+- novels-to-lunascript ElevenLabs 声效合成调用实际文件 / 函数 / 入参 / env 清单 + 抽离边界
 - Suno API endpoint / 鉴权 / 返回结构确认（官方文档或 dev 试调）
 - `src/oss/oss.ts` 对外接口签名记录
 - 落 `docs/superpowers/specs/phase-11-survey.md`
@@ -246,7 +246,7 @@
 - 碰 `placeholderGenerator` / asset-service 注入的 `deps.generator`（经 REST API 仍 stub，与视频一致）
 - **选定 / 接入任何 Suno 第三方网关**（§15 行 1.13；music 留确定性占位，真实接入延后为开放项，待用户后续决定走新 §15 修订）
 - 接真编排循环（Phase 8 旧债，另起独立项目）
-- 迁 n2m 聚类 / 归类 / 语义映射；改 novels-to-moonscript 本身
+- 迁 n2m 聚类 / 归类 / 语义映射；改 novels-to-lunascript 本身
 - Phase 12 的 `oss-put`（音频工具内联调 OSS 服务，不依赖 Phase 12）
 - 引入共享 npm/pip 包；要求 CI E2E
 

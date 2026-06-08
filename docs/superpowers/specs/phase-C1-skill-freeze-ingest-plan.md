@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax.
 
-**Goal:** Byte-freeze novels-to-moonscript's 11 in-scope authoring skills (+ companions) into `knowledge/novel-to-mss/`, wire opencode filesystem skill discovery to them with zero Langfuse/DB, and add a novel-project on-disk workspace helper that reproduces n2m's `NN-stage` directory contract.
+**Goal:** Byte-freeze novels-to-lunascript's 11 in-scope authoring skills (+ companions) into `knowledge/novel-to-ls/`, wire opencode filesystem skill discovery to them with zero Langfuse/DB, and add a novel-project on-disk workspace helper that reproduces n2m's `NN-stage` directory contract.
 
-**Architecture:** Verbatim corpus freeze (mirror n2m `skills/` tree so intra-corpus relative refs like `../episode-writer/mss-spec.md` stay valid) guarded by a committed SHA256 manifest drift test; registration via `config.skills.paths` (codebase-confirmed local-discovery path, not the managed-CLI/Langfuse path); a pure-ish `ensureNovelWorkspace` helper with the n2m stage names frozen as constants.
+**Architecture:** Verbatim corpus freeze (mirror n2m `skills/` tree so intra-corpus relative refs like `../episode-writer/ls-spec.md` stay valid) guarded by a committed SHA256 manifest drift test; registration via `config.skills.paths` (codebase-confirmed local-discovery path, not the managed-CLI/Langfuse path); a pure-ish `ensureNovelWorkspace` helper with the n2m stage names frozen as constants.
 
 **Tech Stack:** TypeScript (Effect, bun:test), opencode skill discovery (`agent/packages/opencode/src/skill/index.ts`), opencode config (`opencode.jsonc` + `config/skills.ts`), bash for the one-shot freeze.
 
@@ -14,40 +14,40 @@
 
 ## Source Inventory (frozen facts from C0 survey — authoritative)
 
-n2m repo root: `/Users/august/MobAI/novels-to-moonscript` (`$N2M`).
+n2m repo root: `/Users/august/MobAI/novels-to-lunascript` (`$N2M`).
 
 10 global skills under `$N2M/skills/<name>/` + 1 project-scoped:
 
 | # | name (frontmatter, kebab) | source dir | notable companions |
 |---|---|---|---|
 | 1 | `novel-evaluator` | `$N2M/skills/novel-evaluator/` | SKILL.md (~17KB); no code companions |
-| 2 | `character-architect` | `$N2M/skills/character-architect/` | SKILL.md (~29KB); refs `../episode-writer/mss-spec.md` |
+| 2 | `character-architect` | `$N2M/skills/character-architect/` | SKILL.md (~29KB); refs `../episode-writer/ls-spec.md` |
 | 3 | `bible-reviewer` | `$N2M/skills/bible-reviewer/` | SKILL.md (~12KB) |
-| 4 | `entity-planner` | `$N2M/skills/entity-planner/` | SKILL.md (~19KB); refs `../episode-writer/mss-spec.md` |
+| 4 | `entity-planner` | `$N2M/skills/entity-planner/` | SKILL.md (~19KB); refs `../episode-writer/ls-spec.md` |
 | 5 | `planner-reviewer` | `$N2M/skills/planner-reviewer/` | SKILL.md (~15KB) |
 | 6 | `entity-normalizer` | `$N2M/skills/entity-normalizer/` | SKILL.md (~9.4KB); `scripts/validate_normalizer.py`, `scripts/regenerate_alias_map.py`, `tests/test_*.py`×3 |
 | 7 | `entity-rename` | `$N2M/skills/entity-rename/` | SKILL.md (~19KB); `scripts/apply_rename.py`, `scan_tokens.py`, `validate_rename.py`, `validate_map_schema.py`, `README.md`, `fixtures/` |
 | 8 | `rename-reviewer` | `$N2M/skills/rename-reviewer/` | SKILL.md (~3.7KB); `README.md` |
-| 9 | `episode-writer` | `$N2M/skills/episode-writer/` | SKILL.md (~56KB); `mss-spec.md` (~49KB), `scripts/look_audit.py`, `check_narrator_pov.py`, `audit_bg_refs.py`, `cleanup_dead_looks.py`, `tests/test_audit_bg_refs.py` |
+| 9 | `episode-writer` | `$N2M/skills/episode-writer/` | SKILL.md (~56KB); `ls-spec.md` (~49KB), `scripts/look_audit.py`, `check_narrator_pov.py`, `audit_bg_refs.py`, `cleanup_dead_looks.py`, `tests/test_audit_bg_refs.py` |
 | 10 | `episode-writer-reviewer` | `$N2M/skills/episode-writer-reviewer/` | SKILL.md (~13KB) |
-| 11 | `arc-reviewer` | `$N2M/moonscripts/no-rules-in-bad-ideas/skills/arc-reviewer/` | SKILL.md (~13KB, 321 lines); only copy in repo |
+| 11 | `arc-reviewer` | `$N2M/lunascripts/no-rules-in-bad-ideas/skills/arc-reviewer/` | SKILL.md (~13KB, 321 lines); only copy in repo |
 
 **Exclude from freeze (build artifacts):** `.pytest_cache/`, `.backups/`, `__pycache__/`, `.DS_Store`, `.git`, `*.pyc`.
 
 n2m authoring-stage on-disk dir contract (demo book), authoring stages only:
-`01-novel-evaluator/`, `02-character-architect/`, `03-entity-planner/`, `04-entity-normalizer/`, `04.5-entity-rename/`, `05-episode-writer/scripts/`, plus loose `signal_checklist.md` and `skills/arc-reviewer/`. (Out of scope, NOT created by the helper: `02.5-outfit-anchor/`, `05.5-music-normalizer/`, `05.5c-sfx-normalizer/`, `06-asset-prompt-generator/`, `mss-build/`.)
+`01-novel-evaluator/`, `02-character-architect/`, `03-entity-planner/`, `04-entity-normalizer/`, `04.5-entity-rename/`, `05-episode-writer/scripts/`, plus loose `signal_checklist.md` and `skills/arc-reviewer/`. (Out of scope, NOT created by the helper: `02.5-outfit-anchor/`, `05.5-music-normalizer/`, `05.5c-sfx-normalizer/`, `06-asset-prompt-generator/`, `ls-build/`.)
 
 ## File Structure
 
-- Create: `knowledge/novel-to-mss/<name>/…` (11 verbatim skill dirs, mirrors n2m `skills/` tree so `../episode-writer/mss-spec.md` relative refs resolve within the corpus)
-- Create: `knowledge/novel-to-mss/FREEZE_MANIFEST.sha256` (path→sha256, the golden)
-- Create: `knowledge/novel-to-mss/FREEZE_SOURCES.md` (records exact n2m source paths + n2m git SHA at freeze, for provenance)
-- Create: `scripts/c1-freeze-novel-to-mss.sh` (one-shot deterministic freeze + manifest generator; idempotent)
+- Create: `knowledge/novel-to-ls/<name>/…` (11 verbatim skill dirs, mirrors n2m `skills/` tree so `../episode-writer/ls-spec.md` relative refs resolve within the corpus)
+- Create: `knowledge/novel-to-ls/FREEZE_MANIFEST.sha256` (path→sha256, the golden)
+- Create: `knowledge/novel-to-ls/FREEZE_SOURCES.md` (records exact n2m source paths + n2m git SHA at freeze, for provenance)
+- Create: `scripts/c1-freeze-novel-to-ls.sh` (one-shot deterministic freeze + manifest generator; idempotent)
 - Modify: the authoritative opencode config (`opencode.jsonc` at repo root OR `agent/.opencode/opencode.jsonc` — Task 4 Step 1 determines which) — add `skills.paths`
 - Create: `agent/packages/opencode/src/business/novel/workspace.ts` (stage-name constants + `ensureNovelWorkspace`)
 - Create: `agent/packages/opencode/test/business/novel-workspace.test.ts`
-- Create: `agent/packages/opencode/test/skill/novel-to-mss-freeze.test.ts` (manifest drift + frontmatter validity)
-- Create: `agent/packages/opencode/test/skill/novel-to-mss-discovery.test.ts` (discovery sees 11, fs-served, no langfuse, no dup)
+- Create: `agent/packages/opencode/test/skill/novel-to-ls-freeze.test.ts` (manifest drift + frontmatter validity)
+- Create: `agent/packages/opencode/test/skill/novel-to-ls-discovery.test.ts` (discovery sees 11, fs-served, no langfuse, no dup)
 - Create: `docs/superpowers/specs/phase-C1-skill-freeze-ingest-verification.md` (Task 6)
 
 Test command (bun lives in `~/.bun/bin` per env): `PATH=$HOME/.bun/bin:$PATH bun test --timeout 30000` run with `--cwd agent/packages/opencode` or from that dir.
@@ -57,19 +57,19 @@ Test command (bun lives in `~/.bun/bin` per env): `PATH=$HOME/.bun/bin:$PATH bun
 ### Task 1: Freeze script (deterministic copy + manifest)
 
 **Files:**
-- Create: `scripts/c1-freeze-novel-to-mss.sh`
+- Create: `scripts/c1-freeze-novel-to-ls.sh`
 
 - [ ] **Step 1: Write the freeze script**
 
 ```bash
 #!/usr/bin/env bash
-# C1 one-shot verbatim freeze of n2m authoring skills into knowledge/novel-to-mss/.
+# C1 one-shot verbatim freeze of n2m authoring skills into knowledge/novel-to-ls/.
 # Frozen skill corpus + manifest are deterministic; FREEZE_SOURCES.md records freeze time and is intentionally excluded from the manifest.
 set -euo pipefail
 
-N2M="${N2M:-/Users/august/MobAI/novels-to-moonscript}"
+N2M="${N2M:-/Users/august/MobAI/novels-to-lunascript}"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-DEST="$REPO_ROOT/knowledge/novel-to-mss"
+DEST="$REPO_ROOT/knowledge/novel-to-ls"
 
 GLOBAL_SKILLS=(novel-evaluator character-architect bible-reviewer entity-planner \
   planner-reviewer entity-normalizer entity-rename rename-reviewer \
@@ -87,7 +87,7 @@ for s in "${GLOBAL_SKILLS[@]}"; do
   rsync -a "${EXCLUDES[@]}" "$src/" "$DEST/$s/"
 done
 
-arc_src="$N2M/moonscripts/no-rules-in-bad-ideas/skills/arc-reviewer"
+arc_src="$N2M/lunascripts/no-rules-in-bad-ideas/skills/arc-reviewer"
 [ -d "$arc_src" ] || { echo "MISSING arc-reviewer: $arc_src" >&2; exit 3; }
 rsync -a "${EXCLUDES[@]}" "$arc_src/" "$DEST/arc-reviewer/"
 
@@ -99,7 +99,7 @@ n2m_sha="$(git -C "$N2M" rev-parse HEAD 2>/dev/null || echo unknown)"
   echo "frozen: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo
   for s in "${GLOBAL_SKILLS[@]}"; do echo "- $s  <=  \$N2M/skills/$s/"; done
-  echo "- arc-reviewer  <=  \$N2M/moonscripts/no-rules-in-bad-ideas/skills/arc-reviewer/"
+  echo "- arc-reviewer  <=  \$N2M/lunascripts/no-rules-in-bad-ideas/skills/arc-reviewer/"
 } > "$DEST/FREEZE_SOURCES.md"
 
 # Deterministic manifest (sorted, repo-relative paths; excludes self + volatile provenance)
@@ -113,8 +113,8 @@ echo "FROZEN: $(grep -c . "$DEST/FREEZE_MANIFEST.sha256") files"
 
 - [ ] **Step 2: Make executable + run it**
 
-Run: `chmod +x scripts/c1-freeze-novel-to-mss.sh && ./scripts/c1-freeze-novel-to-mss.sh`
-Expected: prints `FROZEN: <N> files` (N ≥ 14: 11 SKILL.md + episode-writer/mss-spec.md + the .py companions + READMEs); exit 0. If `MISSING …` → stop, investigate the n2m path before proceeding.
+Run: `chmod +x scripts/c1-freeze-novel-to-ls.sh && ./scripts/c1-freeze-novel-to-ls.sh`
+Expected: prints `FROZEN: <N> files` (N ≥ 14: 11 SKILL.md + episode-writer/ls-spec.md + the .py companions + READMEs); exit 0. If `MISSING …` → stop, investigate the n2m path before proceeding.
 
 - [ ] **Step 3: Manual byte-equality spot check vs n2m (one-time freeze verification)**
 
@@ -122,18 +122,18 @@ Run:
 ```bash
 diff -r --exclude=.pytest_cache --exclude=.backups --exclude=__pycache__ \
   --exclude=.DS_Store --exclude='*.pyc' \
-  /Users/august/MobAI/novels-to-moonscript/skills/episode-writer \
-  knowledge/novel-to-mss/episode-writer
-diff <(sed -n '1,5p' knowledge/novel-to-mss/novel-evaluator/SKILL.md) \
-     <(sed -n '1,5p' /Users/august/MobAI/novels-to-moonscript/skills/novel-evaluator/SKILL.md)
+  /Users/august/MobAI/novels-to-lunascript/skills/episode-writer \
+  knowledge/novel-to-ls/episode-writer
+diff <(sed -n '1,5p' knowledge/novel-to-ls/novel-evaluator/SKILL.md) \
+     <(sed -n '1,5p' /Users/august/MobAI/novels-to-lunascript/skills/novel-evaluator/SKILL.md)
 ```
 Expected: no output from `diff -r` (byte-identical); frontmatter heads identical. This is the one-time human-confirmed verbatim guarantee; the manifest test (Task 3) guards drift thereafter.
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add scripts/c1-freeze-novel-to-mss.sh knowledge/novel-to-mss
-git commit -m "feat: freeze n2m authoring skill corpus into knowledge/novel-to-mss (C1)"
+git add scripts/c1-freeze-novel-to-ls.sh knowledge/novel-to-ls
+git commit -m "feat: freeze n2m authoring skill corpus into knowledge/novel-to-ls (C1)"
 ```
 
 ---
@@ -143,7 +143,7 @@ git commit -m "feat: freeze n2m authoring skill corpus into knowledge/novel-to-m
 opencode discovery drops any SKILL.md whose frontmatter lacks `name` or `description` (`skill/index.ts:98` `z.object({name,description}).safeParse`). Verify every frozen SKILL.md satisfies this.
 
 **Files:**
-- Create: `agent/packages/opencode/test/skill/novel-to-mss-freeze.test.ts`
+- Create: `agent/packages/opencode/test/skill/novel-to-ls-freeze.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -153,7 +153,7 @@ import { readdirSync, readFileSync, existsSync } from "fs"
 import path from "path"
 
 const REPO = path.resolve(import.meta.dir, "../../../../..")
-const CORPUS = path.join(REPO, "knowledge/novel-to-mss")
+const CORPUS = path.join(REPO, "knowledge/novel-to-ls")
 const EXPECTED = [
   "novel-evaluator","character-architect","bible-reviewer","entity-planner",
   "planner-reviewer","entity-normalizer","entity-rename","rename-reviewer",
@@ -192,14 +192,14 @@ test("every frozen SKILL.md has name + description frontmatter", () => {
 
 - [ ] **Step 2: Run it (passes if Task 1 freeze is correct)**
 
-Run: `cd agent/packages/opencode && PATH=$HOME/.bun/bin:$PATH bun test test/skill/novel-to-mss-freeze.test.ts --timeout 30000`
+Run: `cd agent/packages/opencode && PATH=$HOME/.bun/bin:$PATH bun test test/skill/novel-to-ls-freeze.test.ts --timeout 30000`
 Expected: both tests PASS. If a SKILL.md lacks `description`, that is a real finding — record it in the verification report and add a sidecar note; do NOT edit the frozen body (verbatim rule). Resolution for a missing-frontmatter skill is escalated, not patched.
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add agent/packages/opencode/test/skill/novel-to-mss-freeze.test.ts
-git commit -m "test: assert frozen novel-to-mss corpus shape + frontmatter (C1)"
+git add agent/packages/opencode/test/skill/novel-to-ls-freeze.test.ts
+git commit -m "test: assert frozen novel-to-ls corpus shape + frontmatter (C1)"
 ```
 
 ---
@@ -207,7 +207,7 @@ git commit -m "test: assert frozen novel-to-mss corpus shape + frontmatter (C1)"
 ### Task 3: Manifest drift test (the golden guard)
 
 **Files:**
-- Modify: `agent/packages/opencode/test/skill/novel-to-mss-freeze.test.ts` (append)
+- Modify: `agent/packages/opencode/test/skill/novel-to-ls-freeze.test.ts` (append)
 
 - [ ] **Step 1: Write the failing test (append)**
 
@@ -232,14 +232,14 @@ test("frozen corpus matches FREEZE_MANIFEST.sha256 (no drift)", () => {
 
 - [ ] **Step 2: Run it**
 
-Run: `cd agent/packages/opencode && PATH=$HOME/.bun/bin:$PATH bun test test/skill/novel-to-mss-freeze.test.ts --timeout 30000`
+Run: `cd agent/packages/opencode && PATH=$HOME/.bun/bin:$PATH bun test test/skill/novel-to-ls-freeze.test.ts --timeout 30000`
 Expected: PASS (manifest from Task 1 Step 2 matches on-disk bytes).
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add agent/packages/opencode/test/skill/novel-to-mss-freeze.test.ts
-git commit -m "test: add FREEZE_MANIFEST drift guard for novel-to-mss (C1)"
+git add agent/packages/opencode/test/skill/novel-to-ls-freeze.test.ts
+git commit -m "test: add FREEZE_MANIFEST drift guard for novel-to-ls (C1)"
 ```
 
 ---
@@ -248,7 +248,7 @@ git commit -m "test: add FREEZE_MANIFEST drift guard for novel-to-mss (C1)"
 
 **Files:**
 - Modify: authoritative opencode config (determined in Step 1)
-- Create: `agent/packages/opencode/test/skill/novel-to-mss-discovery.test.ts`
+- Create: `agent/packages/opencode/test/skill/novel-to-ls-discovery.test.ts`
 
 - [ ] **Step 1: Determine the authoritative config + add skills.paths**
 
@@ -264,10 +264,10 @@ Decision rule: discovery (`skill/index.ts:179-188`) resolves a relative `skills.
 {
   "$schema": "https://opencode.ai/config.json",
   "provider": { "deepseek": { "npm": "@ai-sdk/openai-compatible", "name": "DeepSeek (OpenAI-compatible)", "options": { "baseURL": "https://api.deepseek.com" } } },
-  "skills": { "paths": ["knowledge/novel-to-mss"] }
+  "skills": { "paths": ["knowledge/novel-to-ls"] }
 }
 ```
-If Step 3 proves the runtime `directory` is `agent/` (not repo root), instead use an absolute-from-root or the `agent/.opencode/opencode.jsonc` with path `"../../knowledge/novel-to-mss"` and re-run Step 3. Record the chosen file + rationale in the verification report.
+If Step 3 proves the runtime `directory` is `agent/` (not repo root), instead use an absolute-from-root or the `agent/.opencode/opencode.jsonc` with path `"../../knowledge/novel-to-ls"` and re-run Step 3. Record the chosen file + rationale in the verification report.
 
 - [ ] **Step 2: Write the failing discovery test**
 
@@ -284,7 +284,7 @@ const EXPECTED = [
   "episode-writer","episode-writer-reviewer","arc-reviewer",
 ]
 
-test("opencode discovery sees all 11 novel-to-mss skills, filesystem-served", async () => {
+test("opencode discovery sees all 11 novel-to-ls skills, filesystem-served", async () => {
   const list = await Effect.runPromise(
     Effect.provide(
       Effect.gen(function* () {
@@ -299,9 +299,9 @@ test("opencode discovery sees all 11 novel-to-mss skills, filesystem-served", as
   for (const name of EXPECTED) {
     const info = byName.get(name)
     expect(info, `discovery missing skill: ${name}`).toBeTruthy()
-    // filesystem-served (NOT langfuse://) and points into knowledge/novel-to-mss
+    // filesystem-served (NOT langfuse://) and points into knowledge/novel-to-ls
     expect(String(info.location).startsWith("langfuse://")).toBe(false)
-    expect(String(info.location)).toContain(path.join("knowledge","novel-to-mss",name))
+    expect(String(info.location)).toContain(path.join("knowledge","novel-to-ls",name))
     expect(typeof info.content).toBe("string")
     expect(info.content.length).toBeGreaterThan(0)
   }
@@ -312,19 +312,19 @@ test("opencode discovery sees all 11 novel-to-mss skills, filesystem-served", as
 
 - [ ] **Step 3: Run it**
 
-Run: `cd agent/packages/opencode && PATH=$HOME/.bun/bin:$PATH bun test test/skill/novel-to-mss-discovery.test.ts --timeout 30000`
-Expected: PASS — all 11 names discovered, every `location` is a filesystem path under `knowledge/novel-to-mss/<name>` (no `langfuse://`), `content` non-empty. If FAIL because `directory` ≠ repo root, fix the config per Step 1's fallback and re-run.
+Run: `cd agent/packages/opencode && PATH=$HOME/.bun/bin:$PATH bun test test/skill/novel-to-ls-discovery.test.ts --timeout 30000`
+Expected: PASS — all 11 names discovered, every `location` is a filesystem path under `knowledge/novel-to-ls/<name>` (no `langfuse://`), `content` non-empty. If FAIL because `directory` ≠ repo root, fix the config per Step 1's fallback and re-run.
 
 - [ ] **Step 4: Assert no duplicate-name collision**
 
-Run: `cd agent/packages/opencode && PATH=$HOME/.bun/bin:$PATH bun test test/skill/novel-to-mss-discovery.test.ts --timeout 30000 2>&1 | grep -i "duplicate skill name" && echo "COLLISION" || echo "no collision"`
+Run: `cd agent/packages/opencode && PATH=$HOME/.bun/bin:$PATH bun test test/skill/novel-to-ls-discovery.test.ts --timeout 30000 2>&1 | grep -i "duplicate skill name" && echo "COLLISION" || echo "no collision"`
 Expected: prints `no collision`. If `COLLISION`, a frozen name clashes with an existing assets-produce skill — record in verification; resolution (namespacing) is escalated, not silently renamed (verbatim rule).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add opencode.jsonc agent/packages/opencode/test/skill/novel-to-mss-discovery.test.ts
-git commit -m "feat: wire skills.paths to novel-to-mss corpus + discovery test (C1)"
+git add opencode.jsonc agent/packages/opencode/test/skill/novel-to-ls-discovery.test.ts
+git commit -m "feat: wire skills.paths to novel-to-ls corpus + discovery test (C1)"
 ```
 
 ---
@@ -361,7 +361,7 @@ test("ensureNovelWorkspace creates the n2m-compatible skeleton idempotently", ()
   const root = mkdtempSync(path.join(tmpdir(), "c1-ws-"))
   try {
     const ws = ensureNovelWorkspace(root, "no-rules-in-bad-ideas")
-    const base = path.join(root, "moonscripts", "no-rules-in-bad-ideas")
+    const base = path.join(root, "lunascripts", "no-rules-in-bad-ideas")
     expect(ws.base).toBe(base)
     for (const d of AUTHORING_STAGE_DIRS) expect(existsSync(path.join(base, d))).toBe(true)
     expect(existsSync(path.join(base, "skills", "arc-reviewer"))).toBe(true)
@@ -388,8 +388,8 @@ import { mkdirSync } from "fs"
 import path from "path"
 
 /** n2m authoring-stage on-disk contract (verbatim from the demo book; the
- *  downstream-compat surface — do not reorder/rename). Post-MSS stages
- *  (02.5/05.5/06/mss-build) are intentionally excluded: out of C-track scope. */
+ *  downstream-compat surface — do not reorder/rename). Post-LS stages
+ *  (02.5/05.5/06/ls-build) are intentionally excluded: out of C-track scope. */
 export const AUTHORING_STAGE_DIRS = [
   "01-novel-evaluator",
   "02-character-architect",
@@ -408,7 +408,7 @@ export interface NovelWorkspace {
 
 export function ensureNovelWorkspace(root: string, slug: string): NovelWorkspace {
   if (!SLUG_RE.test(slug)) throw new Error(`invalid book slug: ${JSON.stringify(slug)}`)
-  const base = path.join(root, "moonscripts", slug)
+  const base = path.join(root, "lunascripts", slug)
   for (const d of AUTHORING_STAGE_DIRS) mkdirSync(path.join(base, d), { recursive: true })
   mkdirSync(path.join(base, "skills", "arc-reviewer"), { recursive: true })
   return { base, stage: (name) => path.join(base, name) }

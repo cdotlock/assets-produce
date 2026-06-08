@@ -21,7 +21,7 @@ Why a dedicated encoder (vs running to-final.py):
   already cleaned by edge_decontaminate, so we skip the extra inline unspill
   — do NOT re-apply G := max(R,B) here.
 
-Migrated 2026-05-16 from the moonshort-backend generate-upscale-matting
+Migrated 2026-05-16 from the lunaverse-backend generate-upscale-matting
 helper. Backend path-walking / per-title-slug / batch logic removed entirely.
 
 Usage (JSON entry, preferred):

@@ -681,7 +681,7 @@ export const Zls: Info = {
       bin = path.join(Global.Path.bin, "zls" + (platform === "win32" ? ".exe" : ""))
 
       if (!(await Filesystem.exists(bin))) {
-        log.error("Failed to extract zls binary")
+        log.error("Failed to extract zlsc binary")
         return
       }
 
@@ -1726,7 +1726,7 @@ export const TerraformLS: Info = {
       bin = path.join(Global.Path.bin, "terraform-ls" + (platform === "win32" ? ".exe" : ""))
 
       if (!(await Filesystem.exists(bin))) {
-        log.error("Failed to extract terraform-ls binary")
+        log.error("Failed to extract terraform-lsc binary")
         return
       }
 

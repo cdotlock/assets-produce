@@ -11,7 +11,7 @@ asset-generation skill body 的正本来源：本地-only → Langfuse `producti
 
 - Langfuse 客户端已具 `getPrompt(name,{label?,version?})` / `createPrompt(name,body,{label?})`，默认 label `production`（`src/langfuse/langfuse.ts`）。**无需新建客户端能力。**
 - 注入缝已存在：`llm-generator.ts` `LlmGeneratorOverrides.loadSkill`（默认 `defaultLoadSkill` 读本地文件）。改加载源 = 替换/包装这一处，**不动 loop、不动 `createLlmGenerator` 其余、不动 `wire.ts` 注入形态**。
-- asset-generation 集 = `intent-to-skill.ts` 的 `ASSET_GENERATION_SKILLS` const（11+：character-portrait-spec / scene-bg-spec / cg-render-spec / cover-spec / shot-image-from-mss / sfx-spec / music-spec / upscale-spec / matting-spec / cutout-spec / outfit-anchor-spec / ep-sprite-spec）。
+- asset-generation 集 = `intent-to-skill.ts` 的 `ASSET_GENERATION_SKILLS` const（11+：character-portrait-spec / scene-bg-spec / cg-render-spec / cover-spec / shot-image-from-ls / sfx-spec / music-spec / upscale-spec / matting-spec / cutout-spec / outfit-anchor-spec / ep-sprite-spec）。
 - `agent skills` CLI 现有子命令：add/update/delete/list/enable/disable/show/export-schema（`cli/cmd/skills.ts`）。**无 `sync asset-generation`** —— 须新建（与 README「future phase」一致）。
 - `promptKeyFor(name)`（`business/skill/cli.ts`）= `skill_<name>` 规范键，复用。
 

@@ -2,8 +2,8 @@ import { mkdirSync } from "fs"
 import path from "path"
 
 /** n2m authoring-stage on-disk contract (verbatim from the demo book; the
- *  downstream-compat surface — do not reorder/rename). Post-MSS stages
- *  (02.5/05.5/06/mss-build) are intentionally excluded: out of C-track scope. */
+ *  downstream-compat surface — do not reorder/rename). Post-LS stages
+ *  (02.5/05.5/06/ls-build) are intentionally excluded: out of C-track scope. */
 export const AUTHORING_STAGE_DIRS = [
   "01-novel-evaluator",
   "02-character-architect",
@@ -22,7 +22,7 @@ export interface NovelWorkspace {
 
 export function ensureNovelWorkspace(root: string, slug: string): NovelWorkspace {
   if (!SLUG_RE.test(slug)) throw new Error(`invalid book slug: ${JSON.stringify(slug)}`)
-  const base = path.join(root, "moonscripts", slug)
+  const base = path.join(root, "lunascripts", slug)
   for (const d of AUTHORING_STAGE_DIRS) mkdirSync(path.join(base, d), { recursive: true })
   mkdirSync(path.join(base, "skills", "arc-reviewer"), { recursive: true })
   return { base, stage: (name) => path.join(base, name) }

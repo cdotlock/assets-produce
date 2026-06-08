@@ -18,7 +18,7 @@ export const ASSET_GENERATION_SKILLS = [
   "scene-bg-spec",
   "cg-render-spec",
   "cover-spec",
-  "shot-image-from-mss",
+  "shot-image-from-ls",
   "sfx-spec",
   "music-spec",
   // Phase 12 post-process body — reachable via skill_hint / picker only;
@@ -51,8 +51,8 @@ export const DEFAULT_KIND_SKILL_MAP: Record<AssetKind, AssetGenerationSkill> = {
   scene_bg: "scene-bg-spec",
   cg: "cg-render-spec",
   cover: "cover-spec",
-  shot_image: "shot-image-from-mss",
-  shot_video: "shot-image-from-mss",
+  shot_image: "shot-image-from-ls",
+  shot_video: "shot-image-from-ls",
   sfx: "sfx-spec",
   music: "music-spec",
 }

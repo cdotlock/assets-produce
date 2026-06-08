@@ -12,11 +12,11 @@
 Wire the migrated NRBI prompt corpus into assets-produce's real generation path
 as a **deterministic atomic tool** that byte-faithfully reproduces NRBI demo
 Phase-1 prompt assembly, fully self-maintained (local `styles.json`, no remote
-PG / SSH / MCP, no moonshort-backend dependency).
+PG / SSH / MCP, no lunaverse-backend dependency).
 
 ## 2. Background — the NRBI "v10" standard pipeline
 
-Authoritative process doc: `moonshort-backend/.claude/skills/generate-asset/SKILL.md`
+Authoritative process doc: `lunaverse-backend/.claude/skills/generate-asset/SKILL.md`
 (read-only reference; NOT modified by B1). NRBI art production = **3 phases**:
 
 | Phase | What | assets-produce status |
@@ -26,7 +26,7 @@ Authoritative process doc: `moonshort-backend/.claude/skills/generate-asset/SKIL
 | Phase 3 matte+deliver | "V10" = MODNet + 4-step post-process → WebP Q90; scene = opaque copy | ✅ Phase 13 matting/cutout + `oss-put` (Phase 12) |
 
 "v10" specifically names the **Phase-3 image post-processing** standard
-(`moonshort-backend/generate-upscale-matting/matting.py` `V10_*` constants),
+(`lunaverse-backend/generate-upscale-matting/matting.py` `V10_*` constants),
 already ported into assets-produce Phase 13 (`tools/matting/matting.py`,
 `GREEN_SCREEN_RGB=(0,255,0)` = `#00FF00`). Therefore the green-screen hex is
 **not an open question**: B1 reproduces `render-with-style.py`'s post-rewrite
@@ -238,7 +238,7 @@ docs; main-spec §15 r1.15 entry.
 - Touching Phase 2/3 (upscale / matting / oss-put already shipped)
 - Changing the Phase-14 LLM loop (drop-a-body-and-register only)
 - `scene ep illustration` category (canonical doc = "not wired yet"; keep so)
-- Any change to moonshort-backend (read-only; frozen copy already migrated)
+- Any change to lunaverse-backend (read-only; frozen copy already migrated)
 
 **RISKS & mitigants:**
 - *Dependency on a DEPRECATED-marked frozen script* → it is a sha256-pinned

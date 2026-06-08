@@ -78,7 +78,7 @@ The `OSS.Service` requirement is satisfied by providing `OSS.defaultLayer` (a.k.
 
 ## Block (B) — n2m ElevenLabs sound-effect synthesis: extraction boundary
 
-n2m repo: `/Users/august/MobAI/novels-to-moonscript` (READ-ONLY, unmodified).
+n2m repo: `/Users/august/MobAI/novels-to-lunascript` (READ-ONLY, unmodified).
 
 ### Locator grep (verification artifact)
 
@@ -87,7 +87,7 @@ synthesis lives in **`skills/sfx-normalizer/elevenlabs_generator.py`**; API-key 
 
 ### PORT THIS — the minimal synthesis HTTP call
 
-**File:** `/Users/august/MobAI/novels-to-moonscript/skills/sfx-normalizer/elevenlabs_generator.py`
+**File:** `/Users/august/MobAI/novels-to-lunascript/skills/sfx-normalizer/elevenlabs_generator.py`
 **Function:** `ElevenLabsGenerator.generate()` (lines 107–188) — specifically the **HTTP request construction + single-shot success path** (lines 139–167). Helper `build_prompt()` (lines 41–52) is trivially portable. The `_default_http` (lines 102–105) is the raw `requests.post(url, headers=headers, json=body, timeout=60)` call to replicate in TS `fetch`.
 
 Exact synthesis call (lines 139–167, the bytes-returning core to port):
@@ -125,8 +125,8 @@ The following are MoonScript-pipeline-specific and **MUST NOT** come into the at
 |---|---|
 | `skills/sfx-normalizer/llm_clusterer.py` | LLM semantic clustering of `@sfx` names into buckets — Phase-1 normalization, pipeline-specific. |
 | `skills/sfx-normalizer/normalize_orchestrator.py`, `generate_orchestrator.py` | Batch orchestration over `sfx_buckets.json`, cost-cap loop, "skip if already generated" — pipeline state mgmt. **Note: `generate_orchestrator.py` is named `*_orchestrator` — exactly the kind of orchestration the assets-produce red-line forbids. Do not port it.** |
-| `context_collector.py`, `report_writer.py` | Scans `moonscripts/<slug>/05-episode-writer/scripts/*.md`, writes `normalize_report.md` / `generate_report.md` — MoonScript repo layout coupling. |
-| `__main__.py` slug/CLI/`sfx_buckets.json`/`config.yaml` (`sfx.generator.*`) plumbing | Reads project YAML config, slug-scoped paths, rewrites `sfx_buckets.json` with `generated.file` — MSS compile-time URL substitution. |
+| `context_collector.py`, `report_writer.py` | Scans `lunascripts/<slug>/05-episode-writer/scripts/*.md`, writes `normalize_report.md` / `generate_report.md` — MoonScript repo layout coupling. |
+| `__main__.py` slug/CLI/`sfx_buckets.json`/`config.yaml` (`sfx.generator.*`) plumbing | Reads project YAML config, slug-scoped paths, rewrites `sfx_buckets.json` with `generated.file` — LS compile-time URL substitution. |
 | Bucket abstraction (`bucket["description"]`, `bucket["duration_s"]`, `prompt_override_suffix`) | The atomic tool takes a **direct prompt + params**, not a bucket dict. |
 | `GenResult` / `Status` enum, `estimate_cost()`, cost-cap accumulation | Cost accounting + pipeline reporting — not part of the atomic synthesis call. |
 | Retry loop (lines 154–188), `FAILED_SILENT`/moderation classification | Optional to port. A single attempt + fold-error-into-result satisfies the atomic-tool contract. The implementer MAY add a thin retry, but n2m's 5-status taxonomy and silent-detection are reporting concerns; keep any retry minimal and out of the result schema. |

@@ -7,7 +7,7 @@
 **Master spec**: [`2026-04-29-assets-produce-spec.md`](2026-04-29-assets-produce-spec.md) § 15 行 1.12
 **Repos in scope**:
 - `cdotlock/assets-produce`（本仓库，opencode fork；用户维护）
-- `cdotlock/novels-to-moonscript`（MSS 剧本生成；用户维护 —— 仅作为 SFX 合成代码的**来源**，本设计不改它）
+- `cdotlock/novels-to-lunascript`（LS 剧本生成；用户维护 —— 仅作为 SFX 合成代码的**来源**，本设计不改它）
 
 ---
 
@@ -33,10 +33,10 @@
 
 ### 1.2 缺口
 
-- **音频**：assets-produce 无任何音频生产能力（`AssetKind` 仅 6 个视觉类型；`tool/` 下无音频工具）。音效真生成器在 `novels-to-moonscript`（ElevenLabs 声效 API，生产级带测试，但与其 MoonScript 归类管线耦合）；音乐无生成器（n2m 仅做名字归类 + 替换人工 mp3 的 URL）。
+- **音频**：assets-produce 无任何音频生产能力（`AssetKind` 仅 6 个视觉类型；`tool/` 下无音频工具）。音效真生成器在 `novels-to-lunascript`（ElevenLabs 声效 API，生产级带测试，但与其 MoonScript 归类管线耦合）；音乐无生成器（n2m 仅做名字归类 + 替换人工 mp3 的 URL）。
 - **CG 渲染 / upscale**（Phase 9 已迁 `tools/`，已是原子工具）：输出**本地文件路径**，非 OSS URL（`cg-render.ts:218 output: localPath`），与视频工具的 OSS URL 输出不对等。
 - **单文件 oss-put 原子工具**：不存在（`registry.ts` 搜 `oss` 无原子工具）。OSS 仅做到 Phase 2 的服务层 + CLI 层（`cli/cmd/oss.ts`），未到原子工具层。
-- **图片处理大套**（matting/MODNet、cutout、hole_fill、spill、格式转 webp，10+ 文件，重 torch/MODNet 依赖）：仍在 `moonshort-backend/generate-upscale-matting/`，未迁。
+- **图片处理大套**（matting/MODNet、cutout、hole_fill、spill、格式转 webp，10+ 文件，重 torch/MODNet 依赖）：仍在 `lunaverse-backend/generate-upscale-matting/`，未迁。
 
 ---
 
@@ -51,7 +51,7 @@
 - **不碰** `placeholderGenerator` / asset-service 注入的 `deps.generator`。新能力经 CLI/Session 能真跑（如 Phase 4 视频），经 REST API 返回 stub —— **与视频现状完全一致**。
 - **不做**真编排循环（把真 agent-loop 接进 asset-service）—— 这是 Phase 8 旧债，明确另起独立项目，不在 11/12/13 范围。
 - **不迁** n2m 的聚类 / 归类 / 语义映射 —— 留在 n2m；assets-produce 只做"素材生产"。
-- **不改** `novels-to-moonscript`：仅把其 ElevenLabs **合成调用**作为参考移植进 assets-produce，不改 n2m 本身。
+- **不改** `novels-to-lunascript`：仅把其 ElevenLabs **合成调用**作为参考移植进 assets-produce，不改 n2m 本身。
 - 不引入共享 npm/pip 包；不要求 CI E2E（用户本机一条 e2e 即验收，沿用 Phase 10 惯例）。
 
 ---
@@ -115,7 +115,7 @@ Suno / ElevenLabs 返回音频字节或临时链接，**不是 OSS URL**。视�
 
 ## 6. Phase 13 — 图片处理大套迁移（勾勒，进入时展开为 plan）
 
-- `moonshort-backend/generate-upscale-matting/` 那套（matting/MODNet、cutout、hole_fill、green_spill/rgb_unspill、detect_matting_failures、hybrid_to_webp 等）→ Phase 9 式 Python 原子工具（`tools/<name>/` + JSON I/O 约定 + `--mock` + `python-runner.ts` 桥）。
+- `lunaverse-backend/generate-upscale-matting/` 那套（matting/MODNet、cutout、hole_fill、green_spill/rgb_unspill、detect_matting_failures、hybrid_to_webp 等）→ Phase 9 式 Python 原子工具（`tools/<name>/` + JSON I/O 约定 + `--mock` + `python-runner.ts` 桥）。
 - 能产视觉产物的注册为原子工具，输出经 Phase 12 的 `oss-put` 拿 URL。
 - backend 对应文件加 DEPRECATED 注释（不删，删交 backend 维护方；沿用 Phase 9 惯例，跨 namespace push 需 backend 维护方 ack）。
 - 重 ML 依赖（torch/MODNet）、每工具独立 venv、mock 模式为重点风险，进入 Phase 13 时按本章展开。

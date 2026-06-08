@@ -533,7 +533,7 @@ envelope from the CLI: every non-2xx response is
 status pulled from
 [`ASSET_SERVICE_ERROR_HTTP`](agent/packages/opencode/src/business/asset-service/errors.ts).
 This is **not** the CLI exit-code matrix above — Asset Service callers
-are external HTTP clients (novels-to-moonscript, moonshort-backend), not
+are external HTTP clients (novels-to-lunascript, lunaverse-backend), not
 shell processes.
 
 The enum is the AssetServiceErrorCode union defined in

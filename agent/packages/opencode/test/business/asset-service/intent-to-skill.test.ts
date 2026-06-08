@@ -60,11 +60,11 @@ describe("intentToSkill — default kind map", () => {
   test("cover → cover-spec", async () => {
     expect(await intentToSkill({ intent: intent({ kind: "cover" }) })).toBe("cover-spec")
   })
-  test("shot_image → shot-image-from-mss", async () => {
-    expect(await intentToSkill({ intent: intent({ kind: "shot_image" }) })).toBe("shot-image-from-mss")
+  test("shot_image → shot-image-from-ls", async () => {
+    expect(await intentToSkill({ intent: intent({ kind: "shot_image" }) })).toBe("shot-image-from-ls")
   })
-  test("shot_video routes through shot-image-from-mss (Phase 8 reuses the shot skill)", async () => {
-    expect(await intentToSkill({ intent: intent({ kind: "shot_video" }) })).toBe("shot-image-from-mss")
+  test("shot_video routes through shot-image-from-ls (Phase 8 reuses the shot skill)", async () => {
+    expect(await intentToSkill({ intent: intent({ kind: "shot_video" }) })).toBe("shot-image-from-ls")
   })
   test("sfx → sfx-spec (Phase 11 audio kind)", async () => {
     expect(await intentToSkill({ intent: intent({ kind: "sfx" }) })).toBe("sfx-spec")
@@ -179,7 +179,7 @@ describe("intentToSkill — sanity asserts on internal tables", () => {
       "scene-bg-spec",
       "cg-render-spec",
       "cover-spec",
-      "shot-image-from-mss",
+      "shot-image-from-ls",
       "sfx-spec",
       "music-spec",
       "upscale-spec",

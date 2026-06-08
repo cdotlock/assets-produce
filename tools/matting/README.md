@@ -5,7 +5,7 @@ Produces an RGBA PNG/WebP from a green-screen source image using the v10
 production pipeline (MODNet ∩ chromakey + connected-component filtering).
 
 > Migrated 2026-05-16 from
-> `moonshort-backend/generate-upscale-matting/matting.py`. Original is
+> `lunaverse-backend/generate-upscale-matting/matting.py`. Original is
 > marked DEPRECATED there.
 
 ## Setup

@@ -24,7 +24,7 @@
 
 **命令**:
 ```
-cd /Users/Clock/moonshort/assets-produce/agent && bun --cwd packages/opencode test --timeout 30000
+cd /Users/Clock/lunaverse/assets-produce/agent && bun --cwd packages/opencode test --timeout 30000
 ```
 
 **结果**:
@@ -46,7 +46,7 @@ Ran 2039 tests across 155 files. [287.95s]
 
 **命令**:
 ```
-cd /Users/Clock/moonshort/assets-produce/agent && bun --cwd packages/core test
+cd /Users/Clock/lunaverse/assets-produce/agent && bun --cwd packages/core test
 ```
 
 **结果**:`80 pass / 0 fail / 12.47s`(全绿)

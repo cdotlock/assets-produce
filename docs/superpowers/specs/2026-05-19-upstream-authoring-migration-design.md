@@ -1,26 +1,26 @@
-# C-Track — Upstream Authoring Migration (novel → .mss) — Design
+# C-Track — Upstream Authoring Migration (novel → .ls) — Design
 
 > **Status:** approved design (brainstorming complete). Next: writing-plans.
 > **Spec linkage:** main spec `2026-04-29-assets-produce-spec.md` §15 revision **r1.16**.
-> **⚠ Merge-time §15 reconcile (2026-05-19, post-C4, design §9):** when the C-track branch was merged into `main`, `main` had independently consumed §15 **r1.16** (Claude 主脑→`mob-ai` 网关) and **r1.17** (asset-generation Langfuse skill-loader). Per the append-only §15 rule the C-track entry was renumbered **r1.16 → §15 r1.18** and appended after r1.17 (the master-spec §15 table is authoritative). Per the user-approved minimal reconcile (Option A), this design doc, the C0–C4 phase plans/verifications, the `knowledge/novel-to-mss/` indices, and the n2m `DEPRECATED` headers retain the original **"r1.16"** wording as historical records — read every C-track "§15 r1.16" reference as "**the C-track entry = master-spec §15 r1.18**".
+> **⚠ Merge-time §15 reconcile (2026-05-19, post-C4, design §9):** when the C-track branch was merged into `main`, `main` had independently consumed §15 **r1.16** (Claude 主脑→`mob-ai` 网关) and **r1.17** (asset-generation Langfuse skill-loader). Per the append-only §15 rule the C-track entry was renumbered **r1.16 → §15 r1.18** and appended after r1.17 (the master-spec §15 table is authoritative). Per the user-approved minimal reconcile (Option A), this design doc, the C0–C4 phase plans/verifications, the `knowledge/novel-to-ls/` indices, and the n2m `DEPRECATED` headers retain the original **"r1.16"** wording as historical records — read every C-track "§15 r1.16" reference as "**the C-track entry = master-spec §15 r1.18**".
 > **New track, not a single phase** — decomposed into phases **C0–C4**.
-> **Source repo:** `cdotlock/novels-to-moonscript` (local `/Users/august/MobAI/novels-to-moonscript`).
+> **Source repo:** `cdotlock/novels-to-lunascript` (local `/Users/august/MobAI/novels-to-lunascript`).
 
 ---
 
 ## 1. Goal (one sentence)
 
-Migrate novels-to-moonscript's **upstream authoring pipeline** — everything from
-"selecting a novel" to "producing the `.mss` script" — into assets-produce as
+Migrate novels-to-lunascript's **upstream authoring pipeline** — everything from
+"selecting a novel" to "producing the `.ls` script" — into assets-produce as
 **verbatim-frozen skill bodies driven by one top-level orchestration skill**
 (zero hardcoded pipeline code), making assets-produce the sole authoritative
-novel→MSS entry while n2m's upstream retires.
+novel→LS entry while n2m's upstream retires.
 
 ## 2. Background
 
 ### 2.1 What n2m's upstream is
 
-n2m's novel→MSS authoring pipeline is **already skill-based**: each stage is a
+n2m's novel→LS authoring pipeline is **already skill-based**: each stage is a
 `SKILL.md` playbook run by the user via Claude Code slash commands; stage order
 lives in documentation (README / SKILLS-GUIDE / CLAUDE.md), **not in code**;
 there is no DAG engine or orchestration service. Independent reviewer agents
@@ -44,7 +44,7 @@ entity-normalizer            → characters.json / locations.json / alias_map.js
    ↓
 episode-writer       ⇄  episode-writer-reviewer  ⇄  arc-reviewer (per-book)
    ↓
-.mss scripts                 ← TRACK OUTPUT (stop here)
+.ls scripts                 ← TRACK OUTPUT (stop here)
 ```
 
 ### 2.2 Why migrate, and what stays in n2m
@@ -52,41 +52,41 @@ episode-writer       ⇄  episode-writer-reviewer  ⇄  arc-reviewer (per-book)
 assets-produce has, to date, migrated only the **downstream** (image / video /
 audio / CG / upscale / matting / NRBI render-prompt — Phases 8–14, B1). The
 **upstream authoring half** has never been migrated. The user wants
-assets-produce to own novel→MSS end-to-end.
+assets-produce to own novel→LS end-to-end.
 
-**Hard constraint:** scope stops at `.mss`. n2m's post-MSS downstream
+**Hard constraint:** scope stops at `.ls`. n2m's post-LS downstream
 (`asset-prompt-generator`, `asset-reviewer`, `music-normalizer`,
 `sfx-normalizer`, `outfit-anchor-renderer`, `wardrobe-consolidator`, the entire
 `dramatizer/` post-production) is **NOT migrated** and continues to run in n2m.
 Therefore assets-produce's produced artifacts **must remain byte-compatible
 with n2m's un-migrated downstream's on-disk contract** (the
-`moonscripts/<book>/NN-stage/` numbered-directory layout). Compatibility is a
+`lunascripts/<book>/NN-stage/` numbered-directory layout). Compatibility is a
 constraint, not an option.
 
 ## 3. Decisions locked in brainstorming
 
 | # | Decision | Value |
 |---|---|---|
-| D1 | Scope | **Authoring half only** — `novel-evaluator` → … → `episode-writer`/reviewers, output `.mss`. Downstream / visual / normalizer / dramatizer stages explicitly out. |
-| D2 | Content fidelity | **Verbatim freeze** — n2m `SKILL.md` bodies copied byte-identical into `knowledge/novel-to-mss/`. Creative wording is the quality core; zero rewrite, zero drift (B1 D1 precedent for the *content*). |
-| D3 | Driver | **Top-level `novel_to_mss` orchestration skill + agent-driven.** Agent (developer profile, CLI/chat) reads it and drives stage-by-stage. Zero pipeline code. (Rejected: reuse Phase-14 asset-service loop — wrong contract; rejected: per-stage CLI verbs as primary driver.) |
+| D1 | Scope | **Authoring half only** — `novel-evaluator` → … → `episode-writer`/reviewers, output `.ls`. Downstream / visual / normalizer / dramatizer stages explicitly out. |
+| D2 | Content fidelity | **Verbatim freeze** — n2m `SKILL.md` bodies copied byte-identical into `knowledge/novel-to-ls/`. Creative wording is the quality core; zero rewrite, zero drift (B1 D1 precedent for the *content*). |
+| D3 | Driver | **Top-level `novel_to_ls` orchestration skill + agent-driven.** Agent (developer profile, CLI/chat) reads it and drives stage-by-stage. Zero pipeline code. (Rejected: reuse Phase-14 asset-service loop — wrong contract; rejected: per-stage CLI verbs as primary driver.) |
 | D4 | Registration surface | Register into the **general skill system** (spec §5 Skill table + `skill <name>` tool + system-prompt description injection). **NOT** `ASSET_GENERATION_SKILLS` (Phase-14 downstream picker) — this is not asset generation. Side effect: near-zero code overlap with the concurrent B1 task. |
-| D5 | Artifact source-of-truth | **On-disk `moonscripts/<book>/NN-stage/` layout is canonical/authoritative.** assets-produce writes that layout directly. `Asset` table = optional index only. Simplest, zero downstream-compat risk. |
-| D6 | MSS validation | **Freeze n2m's MSS validator into a `mss-validate` atomic tool** (B1 / `cg-render` frozen-subprocess pattern). Pipeline self-checks `.mss` without depending on n2m. |
-| D7 | n2m upstream fate | **Retire.** n2m's 10 upstream authoring skills get a `DEPRECATED` header comment pointing to assets-produce. **Not deleted** (Phase 9/13 precedent; deletion left to user). Push to `cdotlock/novels-to-moonscript` **requires explicit user ack** per global git policy. |
+| D5 | Artifact source-of-truth | **On-disk `lunascripts/<book>/NN-stage/` layout is canonical/authoritative.** assets-produce writes that layout directly. `Asset` table = optional index only. Simplest, zero downstream-compat risk. |
+| D6 | LS validation | **Freeze n2m's LS validator into a `ls-validate` atomic tool** (B1 / `cg-render` frozen-subprocess pattern). Pipeline self-checks `.ls` without depending on n2m. |
+| D7 | n2m upstream fate | **Retire.** n2m's 10 upstream authoring skills get a `DEPRECATED` header comment pointing to assets-produce. **Not deleted** (Phase 9/13 precedent; deletion left to user). Push to `cdotlock/novels-to-lunascript` **requires explicit user ack** per global git policy. |
 | D8 | Reviewer mechanism | **Faithfully reproduce n2m's independent-reviewer gate** using opencode's existing `tool/task.ts` subagent dispatch — fresh-context sub-agent per review, gate semantics (PASS / CONDITIONAL-with-fixes / FAIL) preserved verbatim. No new dispatch code. |
 
 ## 4. Architecture
 
-### 4.1 Frozen skill corpus — `knowledge/novel-to-mss/`
+### 4.1 Frozen skill corpus — `knowledge/novel-to-ls/`
 
 New local-self-contained directory (parallel to `knowledge/asset-generation/`,
 `knowledge/novel-to-video/`, `knowledge/style-prompts/`; CLAUDE.md local-source
 principle). Each in-scope n2m skill is copied **byte-identical** into a
-per-skill subdirectory: `knowledge/novel-to-mss/<name>/SKILL.md` (the `SKILL.md`
+per-skill subdirectory: `knowledge/novel-to-ls/<name>/SKILL.md` (the `SKILL.md`
 filename + its YAML frontmatter `name:`/`description:` are preserved verbatim —
 opencode skill discovery requires both frontmatter keys, see §4.3). Every
-companion file the SKILL.md depends on (`scripts/*.py`, `mss-spec.md`,
+companion file the SKILL.md depends on (`scripts/*.py`, `ls-spec.md`,
 templates, tests, `README.md`) is frozen alongside under the same per-skill
 dir, path-faithfully. Langfuse upload is **not** in this track (CLAUDE.md: only
 on explicit user request).
@@ -105,11 +105,11 @@ In-scope frozen skills (10 global + 1 project-scoped):
 | `rename-reviewer` | reviewer | `skills/rename-reviewer/SKILL.md` |
 | `episode-writer` | producer | `skills/episode-writer/SKILL.md` |
 | `episode-writer-reviewer` | reviewer | `skills/episode-writer-reviewer/SKILL.md` |
-| `arc-reviewer` | reviewer (per-book) | n2m project-scoped `moonscripts/<book>/skills/arc-reviewer/`. **Freeze the demo book `no-rules-in-bad-ideas` copy as the reference template** into `knowledge/novel-to-mss/arc-reviewer.md`; C1 survey must confirm whether the body is book-invariant (if book-specific parts exist, they are parameterized in the orchestration skill, not the frozen body). Invoked per-book after a full route arc passes. |
+| `arc-reviewer` | reviewer (per-book) | n2m project-scoped `lunascripts/<book>/skills/arc-reviewer/`. **Freeze the demo book `no-rules-in-bad-ideas` copy as the reference template** into `knowledge/novel-to-ls/arc-reviewer.md`; C1 survey must confirm whether the body is book-invariant (if book-specific parts exist, they are parameterized in the orchestration skill, not the frozen body). Invoked per-book after a full route arc passes. |
 
-### 4.2 Orchestration skill — `novel_to_mss`
+### 4.2 Orchestration skill — `novel_to_ls`
 
-One frozen/authored knowledge body (`knowledge/novel-to-mss/novel_to_mss.md`),
+One frozen/authored knowledge body (`knowledge/novel-to-ls/novel_to_ls.md`),
 **not code**. It documents, exactly mirroring n2m's documented sequencing:
 
 - the stage DAG above (including the optional `entity-rename` branch),
@@ -121,7 +121,7 @@ One frozen/authored knowledge body (`knowledge/novel-to-mss/novel_to_mss.md`),
 - where each stage writes (the `NN-stage/` directory contract, §4.5).
 
 The agent (CLI `agent run` / chat, developer profile) invokes
-`skill novel_to_mss`, then walks the stages, calling each stage skill and
+`skill novel_to_ls`, then walks the stages, calling each stage skill and
 dispatching reviewer sub-agents. **No `*-orchestration` / `*-workflow-service`
 code is written** (§12 red line). Sequencing is knowledge, exactly as in n2m.
 
@@ -141,10 +141,10 @@ Instead, registration uses opencode's **local filesystem skill discovery**
   `{ paths?: string[]; urls?: string[] }`) takes extra skill-folder paths.
   Discovery scans each with glob `**/SKILL.md`, resolving relative paths
   against the runtime project `directory`.
-- C1 adds `"skills": { "paths": ["knowledge/novel-to-mss"] }` to the loaded
+- C1 adds `"skills": { "paths": ["knowledge/novel-to-ls"] }` to the loaded
   opencode config (C1 verifies which file is authoritative — repo-root
   `opencode.jsonc` vs `agent/.opencode/opencode.jsonc`).
-- Each `knowledge/novel-to-mss/<name>/SKILL.md` is parsed for frontmatter
+- Each `knowledge/novel-to-ls/<name>/SKILL.md` is parsed for frontmatter
   `name`/`description` (`skill/index.ts:98`), served **directly from on-disk
   `info.content`** by `loadBody` (`skill/index.ts:302` — the non-`langfuse://`
   branch). No DB row, no Langfuse, no network.
@@ -176,7 +176,7 @@ orchestration skill (knowledge), not in new code.
   text is written into the project workspace as the stage-0 source, following
   n2m's existing convention.
 - Project workspace root mirrors n2m exactly:
-  `<workspace>/moonscripts/<book-slug>/` with numbered stage directories
+  `<workspace>/lunascripts/<book-slug>/` with numbered stage directories
   (`01-novel-evaluator/`, `02-character-architect/`, `03-entity-planner/`,
   `04-entity-normalizer/`, `04.5-entity-rename/`, `05-episode-writer/scripts/`,
   `signal_checklist.md`, `skills/arc-reviewer/`, …) — **byte-for-byte the layout
@@ -185,14 +185,14 @@ orchestration skill (knowledge), not in new code.
 - `Asset` table rows (type=`script`/`metadata`) **may** index produced files
   for WebUI/lookup, but the on-disk files are authoritative. No export step.
 
-### 4.6 `mss-validate` atomic tool (D6)
+### 4.6 `ls-validate` atomic tool (D6)
 
-n2m's MSS validator (`scripts/validate_scripts.sh` + its Go MSS parser) frozen
+n2m's LS validator (`scripts/validate_scripts.sh` + its Go LS parser) frozen
 as a Python/Go-subprocess atomic tool, identical pattern to `cg-render` /
 B1's `nrbi-render-prompt`: JSON I/O, `--mock`, `python-runner.ts`-style bridge,
 verbatim parser, no behavior change. Registered in the opencode tool registry
 (an atomic tool — not a skill, not in `ASSET_GENERATION_SKILLS`). The
-orchestration skill calls it as the `.mss` quality gate before declaring the
+orchestration skill calls it as the `.ls` quality gate before declaring the
 episode/route done.
 
 ## 5. Non-goals (explicit)
@@ -208,7 +208,7 @@ episode/route done.
   (§12 red line). Sequencing is knowledge.
 - ❌ No rewrite of creative skill wording (D2).
 - ❌ No Langfuse upload this track (local frozen bodies only).
-- ❌ No deletion of n2m files; no auto-push to `cdotlock/novels-to-moonscript`
+- ❌ No deletion of n2m files; no auto-push to `cdotlock/novels-to-lunascript`
   without user ack.
 - ❌ No automatic whole-book DAG runner / batch orchestrator beyond the
   agent-driven orchestration skill.
@@ -222,29 +222,29 @@ Each phase follows the project workflow: write `docs/superpowers/specs/phase-CN-
 | Phase | Goal | Key acceptance |
 |---|---|---|
 | **C0** | Design freeze | This design doc committed; master-spec §15 r1.16 added; user review-gate passed. |
-| **C1** | Freeze + register + ingestion model | n2m source survey (exact files, companion refs, exact `NN-stage` dir names) documented; 11 skill dirs byte-frozen into `knowledge/novel-to-mss/<name>/SKILL.md` (+ companions); `skills.paths` config wired; golden byte-equality tests vs n2m source; discovery asserts all 11 names visible via `Skill.Service.all()` with no duplicate-name warning, no Langfuse/DB row; `Project`(type=novel) + on-disk workspace layout helper (n2m `NN-stage` contract); ≥80% line cov on new glue code. |
-| **C2** | Orchestration + reviewers | `novel_to_mss` orchestration skill authored; reviewer sub-agent dispatch wired through `task.ts`; gate semantics (PASS/CONDITIONAL/FAIL, loop-until-pass) reproduced; injected-FAIL test proves the gate halts progression. |
-| **C3** | `mss-validate` + end-to-end | `mss-validate` atomic tool (frozen parser) in `agent tools list`, schema complete, mock + real fixture; full novel→MSS run on demo book `no-rules-in-bad-ideas` original novel; produced `.mss` passes `mss-validate`; produced workspace structurally matches n2m's existing `moonscripts/no-rules-in-bad-ideas/` (compat acceptance). |
+| **C1** | Freeze + register + ingestion model | n2m source survey (exact files, companion refs, exact `NN-stage` dir names) documented; 11 skill dirs byte-frozen into `knowledge/novel-to-ls/<name>/SKILL.md` (+ companions); `skills.paths` config wired; golden byte-equality tests vs n2m source; discovery asserts all 11 names visible via `Skill.Service.all()` with no duplicate-name warning, no Langfuse/DB row; `Project`(type=novel) + on-disk workspace layout helper (n2m `NN-stage` contract); ≥80% line cov on new glue code. |
+| **C2** | Orchestration + reviewers | `novel_to_ls` orchestration skill authored; reviewer sub-agent dispatch wired through `task.ts`; gate semantics (PASS/CONDITIONAL/FAIL, loop-until-pass) reproduced; injected-FAIL test proves the gate halts progression. |
+| **C3** | `ls-validate` + end-to-end | `ls-validate` atomic tool (frozen parser) in `agent tools list`, schema complete, mock + real fixture; full novel→LS run on demo book `no-rules-in-bad-ideas` original novel; produced `.ls` passes `ls-validate`; produced workspace structurally matches n2m's existing `lunascripts/no-rules-in-bad-ideas/` (compat acceptance). |
 | **C4** | n2m retirement + docs | DEPRECATED header on n2m's 10 upstream skills (single commit; push gated on user ack); assets-produce README / SKILL.md / knowledge index updated; track verification report. |
 
 ## 7. Testing & acceptance strategy
 
 - **Verbatim freeze:** golden byte-equality assertions — each
-  `knowledge/novel-to-mss/<name>.md` byte-identical to its n2m source (same as
+  `knowledge/novel-to-ls/<name>.md` byte-identical to its n2m source (same as
   B1's golden text assertions).
 - **End-to-end:** demo book `no-rules-in-bad-ideas` original novel → full
-  authoring pipeline → `.mss` passes `mss-validate`; output workspace
+  authoring pipeline → `.ls` passes `ls-validate`; output workspace
   structurally aligned with n2m's existing
-  `moonscripts/no-rules-in-bad-ideas/` (downstream-compat acceptance).
+  `lunascripts/no-rules-in-bad-ideas/` (downstream-compat acceptance).
 - **Reviewer gate:** synthetic FAIL fixture must block progression; synthetic
   CONDITIONAL must force a fix-and-re-review cycle.
 - **Coverage:** ≥80% line coverage on new glue code (ingestion helper,
-  `mss-validate` bridge, registration). Frozen prose is not code-covered.
+  `ls-validate` bridge, registration). Frozen prose is not code-covered.
 
 ## 8. Red-line / interface-stability compliance
 
 - §2 principle 1 (atomic capability + skill orchestration): satisfied —
-  sequencing is a knowledge body; the only new *code* is `mss-validate` (a
+  sequencing is a knowledge body; the only new *code* is `ls-validate` (a
   deterministic atomic tool) + thin ingestion/registration glue. No pipeline
   service.
 - §12 red lines: no `*-orchestration`/`*-workflow-service`; skill bodies live
@@ -252,16 +252,16 @@ Each phase follows the project workflow: write `docs/superpowers/specs/phase-CN-
   creator/developer profile confusion (these are `scope=system`).
 - §11.4 interface stability: no new `AssetKind`, no REST/DB/error-code/OpenAPI
   change; Phase-2/3 and the Phase-14 loop untouched (zero loop code change).
-- moonshort-backend untouched. n2m: comment-only DEPRECATED, no deletion,
+- lunaverse-backend untouched. n2m: comment-only DEPRECATED, no deletion,
   push gated on ack.
 
 ### 8.1 Design refinements recorded during C2 execution
 
 - **Orchestration-skill filename.** The skill is authored at
-  `knowledge/novel-to-mss/novel_to_mss/SKILL.md` — a per-skill-dir
-  `SKILL.md` with frontmatter `name: novel_to_mss`. This is required by C1's
+  `knowledge/novel-to-ls/novel_to_ls/SKILL.md` — a per-skill-dir
+  `SKILL.md` with frontmatter `name: novel_to_ls`. This is required by C1's
   filesystem discovery, which globs `**/SKILL.md`; §4.2's
-  `knowledge/novel-to-mss/novel_to_mss.md` was loose wording, not a semantic
+  `knowledge/novel-to-ls/novel_to_ls.md` was loose wording, not a semantic
   change. No red-line or scope impact.
 - **C2 injected-FAIL acceptance interpretation.** The gate is knowledge, not a
   production gate engine (§12 red line), so the §6 C2 / line-225 "injected-FAIL
@@ -275,56 +275,56 @@ Each phase follows the project workflow: write `docs/superpowers/specs/phase-CN-
 
 ### 8.2 Design refinements recorded during C3 planning
 
-- **D6 premise correction — the MSS validator is the upstream
-  `cdotlock/moonshort-script`, not "n2m's".** C3 survey + mob-wiki
-  (`entities/moonshort-script`) established that n2m contains **zero** Go
+- **D6 premise correction — the LS validator is the upstream
+  `cdotlock/lunascripts`, not "n2m's".** C3 survey + mob-wiki
+  (`entities/lunascripts`) established that n2m contains **zero** Go
   source; `scripts/validate_scripts.sh` clones the external canonical repo
-  `cdotlock/moonshort-script` (`./cmd/mss`) and builds it at runtime. That `mss`
+  `cdotlock/lunascripts` (`./cmd/lscc`) and builds it at runtime. That `ls`
   binary is a **platform-wide single source of truth** (validator ~98.9%
   coverage, 200+ tests, two audits; consumed by Dramatizer / Remix Executor /
-  the frontend player). D6's "freeze n2m's MSS validator" wording is corrected:
-  the artifact frozen is the **upstream `cdotlock/moonshort-script` Go source**,
+  the frontend player). D6's "freeze n2m's LS validator" wording is corrected:
+  the artifact frozen is the **upstream `cdotlock/lunascripts` Go source**,
   pinned to the project-convention commit **`@b36a407`** (n2m's
   `validate_scripts.sh` floats to upstream HEAD; assets-produce improves on it
   by pinning). D6's *intent* — reuse the real parser verbatim, no rewrite,
   assets-produce self-contained — is preserved exactly; only the source
   location is corrected. A Python re-implementation from the C1-frozen
-  `mss-spec.md` was explicitly **rejected** (user-confirmed): it would
+  `ls-spec.md` was explicitly **rejected** (user-confirmed): it would
   functionally duplicate a canonical heavily-tested tool, inevitably drift from
   ground truth (the spec is documentation; the Go binary is authority), and
   violate Research-&-Reuse + D2/D6 no-rewrite.
-- **`mss-validate` freeze form — vendored, sha256-pinned Go source
+- **`ls-validate` freeze form — vendored, sha256-pinned Go source
   (user-confirmed).** Per the established `cg-render` / `nrbi-render-prompt`
   frozen-subprocess pattern: the upstream Go source `@b36a407` is vendored into
-  `tools/mss-validate/`, sha256-pinned with a drift guard (nrbi's
+  `tools/ls-validate/`, sha256-pinned with a drift guard (nrbi's
   `FROZEN_SHA256` precedent), built once by the Python/subprocess bridge
   (Go 1.22+ is a *build-time* dependency only, exercised solely by the C3
   compat-golden real run), JSON I/O, `--mock`. **Registered in the opencode
   tool registry** (the 3 registry sites; per §4.6 the orchestration skill calls
   it, so — unlike `detect-matting` — it IS a registered atomic tool). All
   automated tests run `--mock` (CI needs no Go toolchain).
-- **`mss-validate` gate seam wired into the C2 orchestration body.** The
-  C2-authored `novel_to_mss/SKILL.md` stops at `.mss scripts` and does not yet
+- **`ls-validate` gate seam wired into the C2 orchestration body.** The
+  C2-authored `novel_to_ls/SKILL.md` stops at `.ls scripts` and does not yet
   reference the validator. C3 amends that **authored** body (authored, not
   C1-frozen — absent from `FREEZE_MANIFEST.sha256`, so editing is in-scope) to
-  add `mss-validate` as the per-episode `.mss` quality gate **after** stage-5
+  add `ls-validate` as the per-episode `.ls` quality gate **after** stage-5
   `episode-writer` writes `05-episode-writer/scripts/` and **before** that
   episode/route is declared FINAL — mirroring the C1-frozen
-  `episode-writer/SKILL.md` hard门槛 「每集 FINAL 之前必须 `mss compile` exit
+  `episode-writer/SKILL.md` hard门槛 「每集 FINAL 之前必须 `lsc compile` exit
   0」. This makes design §4.6 concrete (the design always intended the
-  orchestration skill to call mss-validate); the gate sits **at** the `.mss`
+  orchestration skill to call ls-validate); the gate sits **at** the `.ls`
   boundary (inside C-track scope), not past it.
 - **C3 e2e acceptance interpretation — compat-golden + minimal-live slice
-  (user-confirmed).** §6 C3 / §7 "full novel→MSS run on demo book original
+  (user-confirmed).** §6 C3 / §7 "full novel→LS run on demo book original
   novel" is discharged as: **(a) downstream-compat golden** — the C1 workspace
-  helper reproduces n2m's exact `moonscripts/no-rules-in-bad-ideas/`
+  helper reproduces n2m's exact `lunascripts/no-rules-in-bad-ideas/`
   `NN-stage` structure, and the demo book's **real existing** produced
-  `ep_*_final.md` scripts pass the frozen `mss-validate` (validator fidelity +
+  `ep_*_final.md` scripts pass the frozen `ls-validate` (validator fidelity +
   compat proven on real data, deterministic / reproducible); **(b) minimal live
   slice** — a tiny self-supplied public-domain / synthetic micro-novel really
   drives the orchestration through **one** episode with real reviewer `task`
-  dispatch and a real injected-FAIL halt, producing one real `.mss` that passes
-  `mss-validate` (discharges the C2→C3 live behavioural watch-item). The
+  dispatch and a real injected-FAIL halt, producing one real `.ls` that passes
+  `ls-validate` (discharges the C2→C3 live behavioural watch-item). The
   literal full-book-from-original-novel run is **infeasible from repo state**
   (n2m `.gitignore`s `novels/`; the source text is absent) and disproportionate
   (multi-hour 6-stage creative-LLM spend); recorded as a transparent,
@@ -342,7 +342,7 @@ Each phase follows the project workflow: write `docs/superpowers/specs/phase-CN-
 - Before merging to main: rebase onto latest main, reconcile §15 by appending,
   re-run tests.
 - Push to `cdotlock/assets-produce` (this repo): no per-push ask (memory-recorded
-  authorization). Push to `cdotlock/novels-to-moonscript` (C4 DEPRECATED):
+  authorization). Push to `cdotlock/novels-to-lunascript` (C4 DEPRECATED):
   **requires explicit user ack** (global git policy — non-user namespace).
 - The trunk-based deviation (feature worktree for this track, by explicit user
   request) is recorded in §15 r1.16.

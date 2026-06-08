@@ -16,7 +16,7 @@ tier-2 picker selection — the picker rejects any skill name not in that
 allowlist. It is not auto-selected from a `kind`; a caller asking to
 upscale an existing image selects it explicitly.
 
-The `upscale-image` pipeline originally lived in `moonshort-backend`
+The `upscale-image` pipeline originally lived in `lunaverse-backend`
 (Python `upscale.py`, Real-ESRGAN). Phase 9 migrated it to
 `tools/upscale/` and registered a thin TypeScript wrapper as the atomic
 tool
@@ -164,4 +164,4 @@ result is always a still image, never video. `name` follows
 - A standalone character pose / portrait → `character-portrait-spec`.
 - Cover / promo art with title text → `cover-spec`.
 - A specific shot composited from character + background →
-  `shot-image-from-mss`.
+  `shot-image-from-ls`.

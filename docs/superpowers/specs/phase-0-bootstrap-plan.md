@@ -65,7 +65,7 @@
 每步：**动作 → 预计输出 → 自检方法**。
 
 ### Step 1 — Pre-flight check
-- 动作：确认在 `/Users/Clock/moonshort/assets-produce`；确认 `git status` 仅有已知 untracked（db/、scripts/*.js、skills/）；确认 HEAD = `6f239ff`。
+- 动作：确认在 `/Users/Clock/lunaverse/assets-produce`；确认 `git status` 仅有已知 untracked（db/、scripts/*.js、skills/）；确认 HEAD = `6f239ff`。
 - 预计输出：无文件变化，仅命令打印。
 - 自检：`pwd` 命中目标；`git rev-parse HEAD` = `6f239ff`；`git status --short` 输出列表与开工提示一致。
 - 风险：若用户在 session 间动过文件，状态可能漂移 → 此时停下问。

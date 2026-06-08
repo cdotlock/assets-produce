@@ -7,7 +7,7 @@ then return a local file path. The opencode atomic tool
 wraps this script with a JSON schema, OSS download/upload, and tests.
 
 > Migrated 2026-05-15 from
-> `moonshort-backend/generate-upscale-matting/cg_render.py` +
+> `lunaverse-backend/generate-upscale-matting/cg_render.py` +
 > `render-with-style.py`. Originals are marked DEPRECATED there.
 
 ## Setup

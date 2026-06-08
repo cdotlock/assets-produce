@@ -12,8 +12,8 @@
 | bun | 1.3.14 |
 | Python | 3.9.6 |
 | assets-produce | `cdotlock/assets-produce@7725875` (main, post middleware-bypass fix) |
-| novels-to-moonscript | `AugustZAD/Dramatizer-MSS@b2eb443` (main, Phase 10 docs) |
-| moonshort-backend | local-only, `cdotlock/moonshort-backend@7b1a00e` (NOT pushed per policy) |
+| novels-to-lunascript | `AugustZAD/Dramatizer-LS@b2eb443` (main, Phase 10 docs) |
+| lunaverse-backend | local-only, `cdotlock/lunaverse-backend@7b1a00e` (NOT pushed per policy) |
 
 ## Setup
 
@@ -132,14 +132,14 @@ This validates the full n2m → assets-produce loop end-to-end:
 ## What this does NOT prove (deferred / out-of-scope)
 
 - **assets-produce create→ready path under a real LLM provider.** Unit-tested with stubbed runner; live dev env lacks credentials.
-- **moonshort-backend → assets-produce real-mode dispatch.** Backend's 45/45 unit tests (`__tests__/upstream/assets-produce-http.test.ts` + `agent-forge-client.test.ts`) cover this with mocked `fetch`. A full e2e would require spinning up backend's Postgres + Redis + BullMQ worker stack, which is out of scope for the "soft completion" path per plan §3 risk row.
+- **lunaverse-backend → assets-produce real-mode dispatch.** Backend's 45/45 unit tests (`__tests__/upstream/assets-produce-http.test.ts` + `agent-forge-client.test.ts`) cover this with mocked `fetch`. A full e2e would require spinning up backend's Postgres + Redis + BullMQ worker stack, which is out of scope for the "soft completion" path per plan §3 risk row.
 - **OSS write path.** No real CG/portrait/cover output was generated; the lookup-only flow doesn't need it.
 
 ## Acceptance map
 
 | Acceptance item | Status | Notes |
 |---|---|---|
-| One local e2e: MSS → backend remix → assets-produce real → URL → app | ⚠️ Partial — backend layer deferred to user-coordinated push window | n2m → assets-produce half is proven; backend layer covered by unit tests + local commit |
+| One local e2e: LS → backend remix → assets-produce real → URL → app | ⚠️ Partial — backend layer deferred to user-coordinated push window | n2m → assets-produce half is proven; backend layer covered by unit tests + local commit |
 | docs/ops/three-repo-token-flow.md ≥ 40 lines | ✅ | 158 lines |
 | OpenAPI parity with reality | ✅ | curl #3 + curl #4 envelopes match `envelope.ts` contract |
 

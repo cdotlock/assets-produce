@@ -2,7 +2,7 @@
 """
 upscale.py — Real-ESRGAN x4 → resize ÷2 in-place.
 
-Reads moonscripts/<slug>/assets/gen-upscale/{series,scene,ep_sprites/<ep>}/<id>.png
+Reads lunascripts/<slug>/assets/gen-upscale/{series,scene,ep_sprites/<ep>}/<id>.png
 and writes <id>_upscaled.png next to it (same dir, suffix added).
 
 Net effect: 1× source → 2× upscaled (~5 MB PNG @ 1882×3344) sitting in the
@@ -120,7 +120,7 @@ def collect_jobs(src_root: pathlib.Path, only: set[str] | None) -> list[tuple[st
 
 def main() -> int:
     ap = argparse.ArgumentParser(prog="upscale")
-    ap.add_argument("--book-slug", default=DEFAULT_BOOK_SLUG, help="moonscripts/<slug>/ folder name")
+    ap.add_argument("--book-slug", default=DEFAULT_BOOK_SLUG, help="lunascripts/<slug>/ folder name")
     ap.add_argument("--only", help=f"comma list of groups: {','.join(GROUPS)}")
     ap.add_argument("--overwrite", action="store_true")
     args = ap.parse_args()
@@ -130,13 +130,13 @@ def main() -> int:
     if not REALESRGAN_MODELS.is_dir():
         sys.exit(f"realesrgan models dir missing: {REALESRGAN_MODELS}")
 
-    book_dir = BACKEND_ROOT / "moonscripts" / args.book_slug
+    book_dir = BACKEND_ROOT / "lunascripts" / args.book_slug
     if not book_dir.is_dir():
         sys.exit(
             f"book dir not found: {book_dir}\n"
-            "Hint: the book-slug-aware CLI is a moonshort-backend relic — this\n"
+            "Hint: the book-slug-aware CLI is a lunaverse-backend relic — this\n"
             "      file lives in assets-produce/tools/upscale/ now, where the\n"
-            "      moonscripts/<slug>/ layout does not exist. Use the JSON\n"
+            "      lunascripts/<slug>/ layout does not exist. Use the JSON\n"
             "      entry instead: --input <path-to-json> or --mock for tests."
         )
     src_root = book_dir / "assets" / "gen-upscale"
@@ -173,8 +173,8 @@ def main() -> int:
 
 # ---------- generic JSON entry (Phase 9) ------------------------------------
 #
-# The legacy main() is tightly coupled to the moonshort-backend
-# moonscripts/<slug>/assets/gen-upscale/ layout. The JSON entry below is
+# The legacy main() is tightly coupled to the lunaverse-backend
+# lunascripts/<slug>/assets/gen-upscale/ layout. The JSON entry below is
 # single-file in / single-file out, which is what the cg-render-style
 # atomic-tool boundary expects.
 

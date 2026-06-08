@@ -18,7 +18,7 @@ Why MODNet:
     (200K @255 vs BiRefNet's 142K) and cleaner hair edges on illustration
     style after unmix+sharpen post-pass
 
-Migrated 2026-05-16 from moonshort-backend/generate-upscale-matting/matting.py.
+Migrated 2026-05-16 from lunaverse-backend/generate-upscale-matting/matting.py.
 Original marked DEPRECATED there.
 
 Install (one-time):
@@ -570,7 +570,7 @@ def main() -> int:
 # ─── generic JSON entry (Phase 13) ─────────────────────────────────────────
 #
 # The legacy main() is tightly coupled to the --src/--dst CLI convention used
-# in the moonshort-backend orchestrator. The JSON entry below is
+# in the lunaverse-backend orchestrator. The JSON entry below is
 # single-file in / single-file out, which is what the atomic-tool boundary
 # expects. This mirrors the Phase-9 pattern from tools/upscale/upscale.py.
 

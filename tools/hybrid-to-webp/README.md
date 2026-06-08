@@ -11,7 +11,7 @@ Atomic tool: ONE input file → ONE output file. No directory walking, no
 book-slug logic, no REPO_ROOT discovery.
 
 > Migrated 2026-05-16 from
-> `moonshort-backend/generate-upscale-matting/_local_tools/hybrid_to_webp.py`.
+> `lunaverse-backend/generate-upscale-matting/_local_tools/hybrid_to_webp.py`.
 > Path-walking / batch logic removed. Original is marked DEPRECATED there.
 
 ## Setup
@@ -92,7 +92,7 @@ encoder. This is expected — Pillow is this tool's only runtime dep anyway.
 ## Explicit single-file CLI (back-compat)
 
 A plain one-input → one-output CLI is also available (no JSON, no backend
-book-slug / `moonscripts` path logic — that batch coupling was removed in
+book-slug / `lunascripts` path logic — that batch coupling was removed in
 the Phase-13 migration). Trigger by passing both `--input` and `--output`
 (without `--mock` / `--json`):
 

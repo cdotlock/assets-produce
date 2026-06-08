@@ -5,7 +5,7 @@ Real-ESRGAN ×4 upscale → ÷2 resize → 2× output, in-place under
 Python side is a small driver. Net effect: 1× source → 2× sharpened PNG.
 
 > Migrated 2026-05-15 from
-> `moonshort-backend/generate-upscale-matting/upscale.py`. Original is
+> `lunaverse-backend/generate-upscale-matting/upscale.py`. Original is
 > marked DEPRECATED there.
 
 ## Setup
@@ -22,8 +22,8 @@ Real-ESRGAN binary + models (one-time, host-wide):
 ```bash
 mkdir -p ~/bin/realesrgan
 # Download realesrgan-ncnn-vulkan binary + models into ~/bin/realesrgan/
-# (See moonshort-backend/generate-upscale-matting/upscale.py for the exact
-# release artifact moonshort-backend has been pinning.)
+# (See lunaverse-backend/generate-upscale-matting/upscale.py for the exact
+# release artifact lunaverse-backend has been pinning.)
 ```
 
 ## Entry — JSON mode (preferred)
@@ -70,7 +70,7 @@ Skips realesrgan entirely and writes a 1×1 placeholder PNG at
 
 ## Legacy bulk CLI
 
-The original `main()` (book-slug-aware moonshort-backend driver) lives
+The original `main()` (book-slug-aware lunaverse-backend driver) lives
 above the JSON entry. Trigger by NOT passing `--input` / `--mock` /
 `--json`:
 

@@ -23,7 +23,7 @@ export const AssetTable = sqliteTable(
     // `title` stays a human display label (set by creator UI).
     title: text(),
     // `name` is the stable lookup-by-name target used by `POST /assets/lookup`
-    // and `asset_ref.name` in MSS payloads. Distinct from `title` so we can
+    // and `asset_ref.name` in LS payloads. Distinct from `title` so we can
     // store a slug-shaped identifier independent of the display label.
     name: text(),
     url: text(),

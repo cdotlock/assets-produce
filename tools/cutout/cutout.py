@@ -45,7 +45,7 @@ helper function, NOT at module top. Combined with
 NO numpy/Pillow installed (mock writes a stdlib-only 1x1 RGBA PNG). The backend
 cutout.py uses NO cv2/OpenCV -- numpy + Pillow only.
 
-Migrated 2026-05-17 from moonshort-backend/generate-upscale-matting/cutout.py.
+Migrated 2026-05-17 from lunaverse-backend/generate-upscale-matting/cutout.py.
 Backend batch (--root book-slug tree walk, --only ids, --workers pool,
 --force, --backup-to, ThreadPoolExecutor, REPO_ROOT) removed entirely; atomic
 tool operates on a single explicit input_path -> output_path pair.

@@ -125,7 +125,7 @@
 ### 1.8 Auth 中间件
 
 - 文件：`agent/packages/opencode/src/business/asset-service/auth.ts`
-- 读 `.env`：`ASSETS_API_TOKEN_NOVELS_TO_MOONSCRIPT` / `ASSETS_API_TOKEN_MOONSHORT_BACKEND` / `ASSETS_API_TOKEN_DEV`
+- 读 `.env`：`ASSETS_API_TOKEN_NOVELS_TO_LUNASCRIPT` / `ASSETS_API_TOKEN_LUNAVERSE_BACKEND` / `ASSETS_API_TOKEN_DEV`
 - 启动时构建 `token → { caller_id, allowed_project_ids[] }` 映射；映射写在 config（`agent/packages/opencode/src/config/asset-service.ts`），dev token 可访问所有项目，另两个写死 allowlist（暂用 placeholder project_id，可在 `.env.example` 注释里说明 Phase 10 时替换）
 - 中间件：
   - 缺 `Authorization` → 401 `UNAUTHENTICATED`
@@ -141,7 +141,7 @@
 - `scene-bg-spec.md`
 - `cg-render-spec.md`（Phase 9 会让它引用新 atomic tools；本 phase 仅占位 + 通用流程描述）
 - `cover-spec.md`
-- `shot-image-from-mss.md`
+- `shot-image-from-ls.md`
 
 每份 ≥ 30 行有内容（描述输入 / 期望输出 / 候选 atomic tools / 失败处理）。**不**上传 Langfuse；本 phase 测试用本地 fixture skill 加载器。
 
@@ -154,8 +154,8 @@
 ### 1.11 配置 / 文档
 
 - `.env.example` 新增条目（block 标 `# Phase 8 — Asset Service 对外 API`）：
-  - `ASSETS_API_TOKEN_NOVELS_TO_MOONSCRIPT=changeme`
-  - `ASSETS_API_TOKEN_MOONSHORT_BACKEND=changeme`
+  - `ASSETS_API_TOKEN_NOVELS_TO_LUNASCRIPT=changeme`
+  - `ASSETS_API_TOKEN_LUNAVERSE_BACKEND=changeme`
   - `ASSETS_API_TOKEN_DEV=changeme`
   - `ASSETS_SERVICE_MAX_STEPS_PER_JOB=30`
   - `ASSETS_SERVICE_MAX_TOKENS_PER_JOB=200000`
@@ -369,7 +369,7 @@
 ## 4. Out-of-Scope（本 phase 不做）
 
 - 调用真实图片 / 视频 / CG 生成（一律 stub）
-- 接 novels-to-moonscript 或 moonshort-backend（Phase 10）
+- 接 novels-to-lunascript 或 lunaverse-backend（Phase 10）
 - 把 5 份 skill body 上传 Langfuse（按用户明确指令再做）
 - callback_url 字段的真实回调（payload 接受但忽略）
 - 计量 / 计费 / 多租户 / 配额

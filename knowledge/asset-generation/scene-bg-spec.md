@@ -34,7 +34,7 @@ You are producing **one wide environment image**. The output should:
 - `oss-put` — upload the final image to OSS.
 
 **Do not** call `generate-video-*` here even if the spec mentions
-animation — that's `shot-image-from-mss`'s territory.
+animation — that's `shot-image-from-ls`'s territory.
 
 ## Inputs
 
@@ -90,7 +90,7 @@ Asset row written: `type="image"`, `kind="scene_bg"`,
 
 ## Boundary
 
-- Need a scene with a character _in_ it → `shot-image-from-mss`.
+- Need a scene with a character _in_ it → `shot-image-from-ls`.
 - Need a character standalone → `character-portrait-spec`.
 - Need a CG with magical / dynamic effects (lightning, magic circles) →
   `cg-render-spec`, even if the focus is environmental.

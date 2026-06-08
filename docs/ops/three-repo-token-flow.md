@@ -9,8 +9,8 @@
 ## 1. 名词约束
 
 - **assets-produce** — 本仓库；HTTP server 在 `agent serve`，默认 `:8001`。Asset 的 source-of-truth。
-- **novels-to-moonscript (n2m)** — 上游写小说 / MSS；本 Phase 只调 `POST /lookup`（不主动 create）。
-- **moonshort-backend** — 下游 BFF；4 个操作（create / status / lookup / catalog-since）全用。
+- **novels-to-lunascript (n2m)** — 上游写小说 / LS；本 Phase 只调 `POST /lookup`（不主动 create）。
+- **lunaverse-backend** — 下游 BFF；4 个操作（create / status / lookup / catalog-since）全用。
 - **project_id** — Asset 的租户隔离 key。命名约定（Phase 10 收口）：`<source>_<slug>`。
 
   - 来自小说的项目：`novel_silver_moon_manor` / `novel_no_rules_in_bad_ideas` 等
@@ -24,8 +24,8 @@ assets-produce 通过 env 注入 3 个 named token（见 `agent/packages/opencod
 
 | Token name (env suffix) | 持有方 | 用途 | 允许的 project_id（建议默认） |
 |---|---|---|---|
-| `NTMS` | novels-to-moonscript | `POST /lookup` 拉 URL 回填 mapping.json | `novel_*` 系列；CSV 或具体列表 |
-| `MSB` | moonshort-backend | 全部 4 个操作；agent-forge-client.real 切到这里 | `novel_*` 系列；与 NTMS 同范围 |
+| `NTMS` | novels-to-lunascript | `POST /lookup` 拉 URL 回填 mapping.json | `novel_*` 系列；CSV 或具体列表 |
+| `MSB` | lunaverse-backend | 全部 4 个操作；agent-forge-client.real 切到这里 | `novel_*` 系列；与 NTMS 同范围 |
 | `DEV` | 本机开发 / 集成测试 | 全部操作 | `*`（wildcard） |
 
 env 变量名固定：

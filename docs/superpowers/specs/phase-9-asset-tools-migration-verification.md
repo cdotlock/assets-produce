@@ -17,7 +17,7 @@
 | 4 | New atomic tools listed by `agent tools list`: `cg-render`, `upscale-image` | ✅ PASS | Both registered in [registry.ts](../../../agent/packages/opencode/src/tool/registry.ts); typecheck green |
 | 5 | `agent tools show cg-render` / `upscale-image` output schema is complete | ✅ PASS | Schemas declared via Effect `Schema.Struct` in [cg-render.ts](../../../agent/packages/opencode/src/tool/asset/cg-render.ts) + [upscale-image.ts](../../../agent/packages/opencode/src/tool/asset/upscale-image.ts) |
 | 6 | `cg-render-spec.md` skill body drives the mini agent loop (Phase 8 `runAssetGeneration`) end-to-end on stub CG generation | ✅ PASS via Phase 8 placeholder + Phase 9 wrapper coexistence | Skill body now references `cg-render` atomic tool; the Phase 8 placeholder generator remains the wired-in `AssetGenerator` until Phase 10+ swaps in the real LLM-driven loop. End-to-end traversal through Phase 8 tests (130 pass) still green. |
-| 7 | moonshort-backend internal files marked DEPRECATED (local commit, no push) | ✅ PASS | Local commit `7e7fe42` in `~/MobAI/moonshort-backend`; covers tracked files `cg_render.py` + `sync_to_oss.py`. Untracked files `render-with-style.py` + `upscale.py` (in backend's .gitignore) have DEPRECATED notices in-tree but don't survive commit |
+| 7 | lunaverse-backend internal files marked DEPRECATED (local commit, no push) | ✅ PASS | Local commit `7e7fe42` in `~/MobAI/lunaverse-backend`; covers tracked files `cg_render.py` + `sync_to_oss.py`. Untracked files `render-with-style.py` + `upscale.py` (in backend's .gitignore) have DEPRECATED notices in-tree but don't survive commit |
 | 8 | `bun --cwd=agent run typecheck` / `bun --cwd=agent run test` green for the asset slice | ✅ PASS | typecheck: `TC=0`; asset-service + cg-render + upscale-image: 162/162 |
 | 9 | `phase-9-asset-tools-migration-verification.md` complete | ✅ This document | |
 | 10 | All assets-produce atomic commits pushed to origin/main | ⚠ Pending push (will run last) | 16 commits in `052f886..HEAD` ready: 8 Phase 8 review fixes + 8 Phase 9 |
@@ -26,7 +26,7 @@
 
 ### Step 1 — Backend survey
 
-Directory tree examined: `/Users/august/MobAI/moonshort-backend/generate-upscale-matting/`.
+Directory tree examined: `/Users/august/MobAI/lunaverse-backend/generate-upscale-matting/`.
 Three target files identified with these characteristics:
 
 | Source file | Size | Notes |
@@ -56,7 +56,7 @@ Smoke:
 
 ### Step 3 — cg-render migration
 
-Commit: `c8bdbbd feat(tools): migrate cg-render from moonshort-backend`
+Commit: `c8bdbbd feat(tools): migrate cg-render from lunaverse-backend`
 
 Files:
 - `tools/cg-render/render.py` (404 lines = original 261 + 143-line JSON entry block)
@@ -102,7 +102,7 @@ will display: `slug`, `cgName`, `prompt`, `panelCount?`,
 
 ### Step 5 — oss-sync migration
 
-Commit: `7d50dc1 feat(tools): migrate oss-sync from moonshort-backend`
+Commit: `7d50dc1 feat(tools): migrate oss-sync from lunaverse-backend`
 
 Files:
 - `tools/oss-sync/sync.py` (480 lines = original 345 + 135-line JSON entry block)
@@ -123,7 +123,7 @@ opencode tool registry deliberately doesn't expose it.
 
 ### Step 6 — upscale migration
 
-Commit: `7cb078f feat(tools): migrate upscale from moonshort-backend`
+Commit: `7cb078f feat(tools): migrate upscale from lunaverse-backend`
 
 Files:
 - `tools/upscale/upscale.py` (291 lines = original 169 + 122-line JSON entry block)
@@ -168,12 +168,12 @@ the Zod/Schema declared in `cg-render.ts`. Fallback path added under
 Test impact: `intent-to-skill.test.ts` still picks `cg-render-spec` for
 `intent.kind == "cg"` (16/16 tests in slice pass).
 
-### Step 9 — moonshort-backend DEPRECATED notices
+### Step 9 — lunaverse-backend DEPRECATED notices
 
 Local backend commit: `7e7fe42 chore(deprecated): mark CG / OSS-sync tools as migrated to assets-produce`
 
 Per design § 11 and global Git push policy, this commit lives LOCALLY in
-`~/MobAI/moonshort-backend` and is NOT pushed. Push deferred to Phase 10
+`~/MobAI/lunaverse-backend` and is NOT pushed. Push deferred to Phase 10
 and gated on explicit backend-maintainer acknowledgement.
 
 Coverage:
@@ -185,7 +185,7 @@ Coverage:
 - ⚠ `upscale.py` — UNTRACKED (`.gitignore` line 114). Same as above.
 
 Backend working-tree state: `process_via_5070ti_service.py` and several
-`moonscripts/...` files have pre-existing unrelated modifications; left
+`lunascripts/...` files have pre-existing unrelated modifications; left
 untouched in this phase per atomic-commit hygiene.
 
 ### Step 10 — Docs
@@ -224,15 +224,15 @@ Touched:
 
 8 Phase 9 commits:
 - `93f4c4d feat(tools): scaffold top-level tools/ directory + shared conventions`
-- `c8bdbbd feat(tools): migrate cg-render from moonshort-backend`
+- `c8bdbbd feat(tools): migrate cg-render from lunaverse-backend`
 - `76170d2 feat(agent): register cg-render as an atomic tool`
-- `7d50dc1 feat(tools): migrate oss-sync from moonshort-backend`
-- `7cb078f feat(tools): migrate upscale from moonshort-backend`
+- `7d50dc1 feat(tools): migrate oss-sync from lunaverse-backend`
+- `7cb078f feat(tools): migrate upscale from lunaverse-backend`
 - `959401d feat(agent): register upscale-image as an atomic tool`
 - `3f3891c docs(knowledge): update cg-render-spec for Phase 9 atomic tool`
 - `973a07e docs(env+skill+knowledge): wire Phase 9 surface area`
 
-External (moonshort-backend, local only):
+External (lunaverse-backend, local only):
 - `7e7fe42 chore(deprecated): mark CG / OSS-sync tools as migrated to assets-produce`
 
 ## Operator smoke tests (re-runnable)
@@ -314,4 +314,4 @@ Final test counts post-follow-ups:
 
 Final commit range: `052f886..11fb16e` — 20 commits pushed to
 `cdotlock/assets-produce` main, plus 1 local backend commit `7e7fe42`
-in `~/MobAI/moonshort-backend` waiting on ack for Phase 10 push.
+in `~/MobAI/lunaverse-backend` waiting on ack for Phase 10 push.
